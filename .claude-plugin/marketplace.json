@@ -59,6 +59,13 @@
       "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "mental-models",
+      "source": "./plugins/mental-models",
+      "description": "Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
