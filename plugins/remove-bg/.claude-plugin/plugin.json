@@ -1,0 +1,10 @@
+{
+  "name": "remove-bg",
+  "description": "Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  },
+  "repository": "https://github.com/aiocean/claude-plugins",
+  "license": "MIT"
+}

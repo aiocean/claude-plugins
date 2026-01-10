@@ -18,32 +18,32 @@ Then install plugins:
 
 ## Available Plugins
 
-_No plugins yet. Add your first plugin to `plugins/` directory._
+| Plugin        | Description                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **remove-bg** | Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods. |
+| **worktree**  | Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup. |
 
-## Creating a Plugin
+## Plugin Details
 
-1. Create a directory in `plugins/`:
+### remove-bg
 
-```
-plugins/my-plugin/
-├── .claude-plugin/
-│   └── plugin.json
-├── commands/
-│   └── hello.md
-└── README.md
-```
+Remove image backgrounds using:
 
-2. Add `plugin.json`:
+- **Threshold method** (default): Fast, for mono/simple images
+- **rembg method** (`--rembg`): AI-based, for complex images
 
-```json
-{
-  "name": "my-plugin",
-  "description": "What it does",
-  "version": "1.0.0",
-  "author": { "name": "Your Name" }
-}
+```bash
+python3 ~/.claude/skills/remove-bg/remove_bg.py image.png
+python3 ~/.claude/skills/remove-bg/remove_bg.py image.jpg --rembg
 ```
 
-3. Register in `.claude-plugin/marketplace.json`
+### worktree
 
-4. Push changes
+Git worktree management scripts:
+
+- `worktree-create.sh` - Create new worktree with branch
+- `worktree-list.sh` - List all worktrees
+- `worktree-spotlight.sh` - Live sync changes to main repo
+- `worktree-merge.sh` - Merge worktree branch
+- `worktree-remove.sh` - Remove worktree and branch
+- `worktree-cleanup.sh` - Emergency cleanup
