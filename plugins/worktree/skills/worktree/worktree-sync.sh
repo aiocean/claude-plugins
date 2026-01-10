@@ -1,17 +1,15 @@
 #!/bin/bash
-# Bidirectional sync commits between worktree and parent branch
-# Usage: worktree-sync.sh [direction]
-#   direction: "push" | "pull" | "both" (default: both)
+# Sync worktree with parent branch using rebase + fast-forward
+# Usage: worktree-sync.sh
 #
-# push: Cherry-pick worktree commits to parent
-# pull: Rebase/merge parent commits into worktree
-# both: Pull first, then push
+# This keeps both branches at the same commits with same hashes.
+# Workflow:
+#   1. Rebase worktree onto parent (get latest + put your commits on top)
+#   2. Fast-forward parent to worktree (now both identical)
 #
 # Must be run from within a worktree directory
 
 set -e
-
-DIRECTION="${1:-both}"
 
 if ! git rev-parse --git-dir &> /dev/null; then
     echo "Error: Not in a git repository"
@@ -23,8 +21,6 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 
 # Find parent branch
 find_parent_branch() {
-    local current="$1"
-
     if git show-ref --verify --quiet refs/heads/main; then
         echo "main"
     elif git show-ref --verify --quiet refs/heads/master; then
@@ -34,7 +30,7 @@ find_parent_branch() {
     fi
 }
 
-PARENT_BRANCH=$(find_parent_branch "$CURRENT_BRANCH")
+PARENT_BRANCH=$(find_parent_branch)
 
 if [ -z "$PARENT_BRANCH" ] || [ "$CURRENT_BRANCH" = "$PARENT_BRANCH" ]; then
     echo "Error: Cannot sync - already on parent branch or no parent found"
@@ -49,11 +45,6 @@ if [ -z "$PARENT_WORKTREE" ]; then
     exit 1
 fi
 
-echo "Worktree:  $CURRENT_BRANCH @ $REPO_ROOT"
-echo "Parent:    $PARENT_BRANCH @ $PARENT_WORKTREE"
-echo "Direction: $DIRECTION"
-echo ""
-
 # Check for uncommitted changes
 check_clean() {
     local path="$1"
@@ -65,106 +56,74 @@ check_clean() {
     fi
 }
 
-# Get commits unique to a branch since merge-base
-get_unique_commits() {
-    local branch="$1"
-    local other="$2"
-    git log --oneline "$other".."$branch" 2>/dev/null
-}
+check_clean "$REPO_ROOT" "Worktree"
+check_clean "$PARENT_WORKTREE" "Parent"
 
-# Pull: get parent commits into worktree
-do_pull() {
-    echo "=== PULL: $PARENT_BRANCH → $CURRENT_BRANCH ==="
-
-    check_clean "$REPO_ROOT" "Worktree"
-
-    # Fetch latest
-    git fetch origin "$PARENT_BRANCH" 2>/dev/null || true
-
-    # Get commits to pull
-    local commits=$(get_unique_commits "$PARENT_BRANCH" "$CURRENT_BRANCH")
-
-    if [ -z "$commits" ]; then
-        echo "No new commits to pull from $PARENT_BRANCH"
-        return 0
-    fi
-
-    echo "Commits to pull:"
-    echo "$commits"
-    echo ""
-
-    # Rebase onto parent
-    if git rebase "$PARENT_BRANCH"; then
-        echo "Pull complete!"
-    else
-        echo "Rebase conflict. Resolve with:"
-        echo "  git rebase --continue  (after fixing conflicts)"
-        echo "  git rebase --abort     (to cancel)"
-        exit 1
-    fi
-}
-
-# Push: send worktree commits to parent
-do_push() {
-    echo "=== PUSH: $CURRENT_BRANCH → $PARENT_BRANCH ==="
-
-    check_clean "$REPO_ROOT" "Worktree"
-    check_clean "$PARENT_WORKTREE" "Parent"
-
-    # Get commits to push
-    local commits=$(get_unique_commits "$CURRENT_BRANCH" "$PARENT_BRANCH")
-
-    if [ -z "$commits" ]; then
-        echo "No new commits to push to $PARENT_BRANCH"
-        return 0
-    fi
-
-    echo "Commits to push:"
-    echo "$commits"
-    echo ""
-
-    # Get commit hashes (oldest first for cherry-pick)
-    local commit_hashes=$(git log --reverse --format="%H" "$PARENT_BRANCH".."$CURRENT_BRANCH")
-
-    # Cherry-pick to parent
-    cd "$PARENT_WORKTREE"
-
-    for hash in $commit_hashes; do
-        local msg=$(git log -1 --format="%s" "$hash")
-        echo "Cherry-picking: $msg"
-
-        if ! git cherry-pick "$hash"; then
-            echo ""
-            echo "Cherry-pick conflict for: $msg"
-            echo "Resolve in $PARENT_WORKTREE, then:"
-            echo "  git cherry-pick --continue"
-            echo "  git cherry-pick --abort (to cancel)"
-            exit 1
-        fi
-    done
-
-    cd "$REPO_ROOT"
-    echo "Push complete! Commits now in $PARENT_BRANCH"
-}
-
-case "$DIRECTION" in
-    pull)
-        do_pull
-        ;;
-    push)
-        do_push
-        ;;
-    both)
-        do_pull
-        echo ""
-        do_push
-        ;;
-    *)
-        echo "Error: Invalid direction '$DIRECTION'"
-        echo "Use: push | pull | both"
-        exit 1
-        ;;
-esac
-
+echo "Syncing: $CURRENT_BRANCH ↔ $PARENT_BRANCH"
+echo "Worktree: $REPO_ROOT"
+echo "Parent:   $PARENT_WORKTREE"
 echo ""
-echo "Sync complete!"
+
+# Check if there's anything to sync
+WORKTREE_AHEAD=$(git rev-list --count "$PARENT_BRANCH".."$CURRENT_BRANCH" 2>/dev/null || echo "0")
+PARENT_AHEAD=$(git rev-list --count "$CURRENT_BRANCH".."$PARENT_BRANCH" 2>/dev/null || echo "0")
+
+if [ "$WORKTREE_AHEAD" = "0" ] && [ "$PARENT_AHEAD" = "0" ]; then
+    echo "Already in sync!"
+    exit 0
+fi
+
+echo "Status: worktree +$WORKTREE_AHEAD commits, parent +$PARENT_AHEAD commits"
+echo ""
+
+# Step 1: Rebase worktree onto parent
+if [ "$PARENT_AHEAD" != "0" ]; then
+    echo "=== Step 1: Rebase onto $PARENT_BRANCH ==="
+    echo "Getting $PARENT_AHEAD commit(s) from parent..."
+
+    if ! git rebase "$PARENT_BRANCH"; then
+        echo ""
+        echo "Rebase conflict! Resolve conflicts, then:"
+        echo "  git rebase --continue"
+        echo "  git rebase --abort (to cancel)"
+        echo ""
+        echo "After resolving, run worktree-sync.sh again."
+        exit 1
+    fi
+    echo "Rebase complete!"
+    echo ""
+fi
+
+# Step 2: Fast-forward parent to worktree
+WORKTREE_AHEAD=$(git rev-list --count "$PARENT_BRANCH".."$CURRENT_BRANCH" 2>/dev/null || echo "0")
+
+if [ "$WORKTREE_AHEAD" != "0" ]; then
+    echo "=== Step 2: Fast-forward $PARENT_BRANCH ==="
+    echo "Pushing $WORKTREE_AHEAD commit(s) to parent..."
+
+    # Show commits being synced
+    git log --oneline "$PARENT_BRANCH".."$CURRENT_BRANCH"
+    echo ""
+
+    if ! git -C "$PARENT_WORKTREE" merge --ff-only "$CURRENT_BRANCH"; then
+        echo ""
+        echo "Fast-forward failed! This shouldn't happen after rebase."
+        echo "Try: git -C '$PARENT_WORKTREE' merge '$CURRENT_BRANCH'"
+        exit 1
+    fi
+    echo "Fast-forward complete!"
+    echo ""
+fi
+
+# Verify sync
+FINAL_WORKTREE=$(git rev-parse HEAD)
+FINAL_PARENT=$(git -C "$PARENT_WORKTREE" rev-parse HEAD)
+
+if [ "$FINAL_WORKTREE" = "$FINAL_PARENT" ]; then
+    echo "Sync complete!"
+    echo "Both branches at: $(git rev-parse --short HEAD)"
+else
+    echo "Warning: Branches not aligned"
+    echo "Worktree: $FINAL_WORKTREE"
+    echo "Parent:   $FINAL_PARENT"
+fi

@@ -1,6 +1,6 @@
 ---
 name: worktree
-description: Manage git worktrees for parallel development. Create worktrees, sync commits bidirectionally, preview with spotlight, merge branches, and cleanup. Use when user wants to work on multiple features simultaneously.
+description: Manage git worktrees for parallel development. Create worktrees, sync commits, preview with spotlight, and cleanup. Use when user wants to work on multiple features simultaneously or run parallel AI agents.
 triggers:
   - worktree
   - create worktree
@@ -20,16 +20,16 @@ You help users manage git worktrees for parallel development workflows.
 
 All scripts are in `~/.claude/skills/worktree/`:
 
-| Script                         | Purpose                                    |
-| ------------------------------ | ------------------------------------------ |
-| `worktree-create.sh`           | Create new worktree with branch            |
-| `worktree-list.sh`             | List all worktrees and their status        |
-| `worktree-sync.sh`             | Bidirectional commit sync (push/pull/both) |
-| `worktree-spotlight.sh`        | Live file sync for hot reload (temporary)  |
-| `worktree-spotlight-status.sh` | Check if spotlight is running              |
-| `worktree-merge.sh`            | Merge worktree branch to/from parent       |
-| `worktree-remove.sh`           | Remove worktree and delete branch          |
-| `worktree-cleanup.sh`          | Emergency cleanup after crash              |
+| Script                         | Purpose                              |
+| ------------------------------ | ------------------------------------ |
+| `worktree-create.sh`           | Create new worktree with branch      |
+| `worktree-list.sh`             | List all worktrees and their status  |
+| `worktree-sync.sh`             | Sync worktree ↔ main (rebase + ff)   |
+| `worktree-spotlight.sh`        | Live file sync for hot reload        |
+| `worktree-spotlight-status.sh` | Check if spotlight is running        |
+| `worktree-merge.sh`            | Merge worktree branch to/from parent |
+| `worktree-remove.sh`           | Remove worktree and delete branch    |
+| `worktree-cleanup.sh`          | Emergency cleanup after crash        |
 
 ## Workflow
 
@@ -48,22 +48,21 @@ worktree-create.sh experiment abc123      # from specific commit
 #   Branch: wtr-{name}          (e.g., wtr-feature-login)
 ```
 
-### 2. Sync (Bidirectional Commit Sync)
+### 2. Sync (Rebase + Fast-Forward)
 
-Sync commits between worktree and parent branch.
+Sync worktree with parent branch. Both end up at the same commit with same hash.
 
 ```bash
 # From within worktree directory
-~/.claude/skills/worktree/worktree-sync.sh [direction]
-
-# direction: "push" | "pull" | "both" (default: both)
+~/.claude/skills/worktree/worktree-sync.sh
 ```
 
-**Directions:**
+**How it works:**
 
-- `pull`: Rebase parent commits into worktree (get latest from main)
-- `push`: Cherry-pick worktree commits to parent (send your work to main)
-- `both`: Pull first, then push (full sync)
+1. **Rebase** worktree onto parent (get latest from main, put your commits on top)
+2. **Fast-forward** parent to worktree (now both identical)
+
+**Result:** Both branches at same commit, same hash. No duplicates.
 
 **Example workflow:**
 
@@ -71,14 +70,16 @@ Sync commits between worktree and parent branch.
 # In worktree: make changes, commit
 git add . && git commit -m "feat: new feature"
 
-# Sync commits to parent
-worktree-sync.sh push
-
-# Or get latest from parent
-worktree-sync.sh pull
-
-# Or do both
+# Sync with main
 worktree-sync.sh
+
+# Output:
+# Syncing: wtr-feature ↔ main
+# Status: worktree +2 commits, parent +1 commits
+# === Step 1: Rebase onto main ===
+# === Step 2: Fast-forward main ===
+# Sync complete!
+# Both branches at: abc1234
 ```
 
 ### 3. Spotlight (Temporary File Sync)
@@ -107,16 +108,7 @@ worktree-spotlight.sh ../myrepo--wtr-feature . node_modules dist .env
 
 **To stop:** Ctrl+C or `kill <PID>`. Cleanup is automatic.
 
-### 4. Merge
-
-```bash
-# From within the worktree directory
-~/.claude/skills/worktree/worktree-merge.sh [direction]
-
-# direction: "to-parent" (default) or "from-parent"
-```
-
-### 5. Remove Worktree
+### 4. Remove Worktree
 
 ```bash
 ~/.claude/skills/worktree/worktree-remove.sh <path_or_name>
@@ -128,12 +120,33 @@ worktree-remove.sh feature                 # by name (auto-resolves path)
 
 ## Common Scenarios
 
-### "I want to work on a feature and sync changes with main"
+### "Multiple AI agents working in parallel"
 
-1. Create worktree: `worktree-create.sh feature-x`
-2. Work in worktree, commit as usual
-3. Sync commits: `worktree-sync.sh` (pulls latest from main, pushes your commits)
-4. When done: `worktree-remove.sh feature-x`
+```bash
+# Agent A creates worktree
+worktree-create.sh agent-a-task
+
+# Agent B creates worktree
+worktree-create.sh agent-b-task
+
+# Both work and commit independently...
+
+# Agent A syncs first
+cd ../repo--wtr-agent-a-task
+worktree-sync.sh
+# main now has Agent A's commits
+
+# Agent B syncs (gets A's work + pushes B's work)
+cd ../repo--wtr-agent-b-task
+worktree-sync.sh
+# main now has both A and B's commits
+# Agent B's worktree also has A's commits
+
+# Agent A syncs again to get B's work
+cd ../repo--wtr-agent-a-task
+worktree-sync.sh
+# All three (main, worktree-a, worktree-b) now identical
+```
 
 ### "I want hot reload preview while working in worktree"
 
@@ -141,19 +154,14 @@ worktree-remove.sh feature                 # by name (auto-resolves path)
 2. Run spotlight: `worktree-spotlight.sh <worktree> . node_modules`
 3. Edit in worktree → changes appear in main for hot reload
 4. Stop spotlight → main restored clean
-5. Commit in worktree, then sync: `worktree-sync.sh push`
+5. Commit in worktree, then sync: `worktree-sync.sh`
 
-### "I need to get latest changes from main into my worktree"
+### "I want to work on a feature and sync with main"
 
-```bash
-worktree-sync.sh pull
-```
-
-### "I want to send my worktree commits to main"
-
-```bash
-worktree-sync.sh push
-```
+1. Create worktree: `worktree-create.sh feature-x`
+2. Work in worktree, commit as usual
+3. Sync anytime: `worktree-sync.sh`
+4. When done: `worktree-remove.sh feature-x`
 
 ## Error Recovery
 
@@ -165,11 +173,12 @@ worktree-cleanup.sh .
 
 ### "Sync has conflicts"
 
-Script will stop and show instructions. Resolve conflicts, then:
+Script will stop at rebase conflict. Resolve conflicts, then:
 
 ```bash
-git rebase --continue   # for pull conflicts
-git cherry-pick --continue  # for push conflicts
+git rebase --continue
+# Then run sync again
+worktree-sync.sh
 ```
 
 ## Key Points
@@ -177,12 +186,9 @@ git cherry-pick --continue  # for push conflicts
 - **Naming convention:** `wtr-` prefix for easy identification
   - Folder: `{repo}--wtr-{name}` (e.g., `myrepo--wtr-feature`)
   - Branch: `wtr-{name}` (e.g., `wtr-feature`)
-- **Sync = commit-based:** Actual git operations (cherry-pick, rebase)
+- **Sync keeps same hash:** Rebase + fast-forward = identical commits
+- **No duplicate commits:** Unlike cherry-pick, sync keeps history clean
+- **Parallel-friendly:** Multiple worktrees can sync independently
 - **Spotlight = file-based:** Temporary file copying for preview, no commits
-- **Sync is bidirectional:** Push your commits to parent, pull parent commits to you
-- **Spotlight is one-way:** Worktree → main only, restored on exit
 - **Always commit before sync:** Sync works with commits, not uncommitted changes
-- **Spotlight fallback:** Uses polling if fswatch not installed (`brew install fswatch` for better perf)
-- **Always clean before spotlight:** Main repo must have no uncommitted changes
-- **Graceful shutdown:** Ctrl+C, kill, or terminal close all trigger cleanup + final sync
-- **PID tracking:** Spotlight writes PID file to prevent double-run
+- **Spotlight fallback:** Uses polling if fswatch not installed (`brew install fswatch`)
