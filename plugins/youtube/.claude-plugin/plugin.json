@@ -1,0 +1,7 @@
+{
+  "name": "youtube",
+  "description": "Search YouTube and extract video transcripts using yt-dlp.",
+  "version": "1.0.0",
+  "author": { "name": "aiocean" },
+  "license": "MIT"
+}

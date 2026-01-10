@@ -1,0 +1,7 @@
+#!/bin/bash
+# Get video chapters/timestamps
+# Usage: yt-chapters "URL"
+
+url="$1"
+
+yt-dlp --dump-json "$url" 2>/dev/null | jq -r '.chapters[]? | "\(.start_time | floor)s - \(.title)"'

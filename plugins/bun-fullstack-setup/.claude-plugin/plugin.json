@@ -1,0 +1,7 @@
+{
+  "name": "bun-fullstack-setup",
+  "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
+  "version": "1.0.0",
+  "author": { "name": "aiocean" },
+  "license": "MIT"
+}

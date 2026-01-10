@@ -1,0 +1,11 @@
+#!/bin/bash
+# Extract links from video description
+# Usage: yt-links "URL" [--github]
+
+url="$1"
+
+if [[ "$2" == "--github" ]]; then
+    yt-dlp --dump-json "$url" 2>/dev/null | jq -r '.description' | grep -oE 'https?://[^ ]+' | grep -E 'github|gist|gitlab'
+else
+    yt-dlp --dump-json "$url" 2>/dev/null | jq -r '.description' | grep -oE 'https?://[^ ]+'
+fi

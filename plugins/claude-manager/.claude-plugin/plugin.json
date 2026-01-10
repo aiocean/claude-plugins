@@ -1,0 +1,7 @@
+{
+  "name": "claude-manager",
+  "description": "Enable/disable skills based on project context. Reduce skill clutter for specific project types.",
+  "version": "1.0.0",
+  "author": { "name": "aiocean" },
+  "license": "MIT"
+}

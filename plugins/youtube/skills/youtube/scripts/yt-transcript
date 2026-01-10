@@ -1,0 +1,33 @@
+#!/bin/bash
+# Get clean transcript from YouTube video
+# Usage: yt-transcript "URL" [lang] [output]
+
+url="$1"
+lang="${2:-en}"
+output="${3:-/tmp/transcript-clean.txt}"
+tmp_base="/tmp/yt-transcript-$$"
+
+yt-dlp --write-auto-sub --sub-lang "$lang" --skip-download -o "$tmp_base" "$url" 2>/dev/null
+
+vtt_file="${tmp_base}.${lang}.vtt"
+
+if [[ ! -f "$vtt_file" ]]; then
+    echo "Error: No subtitles found for language '$lang'" >&2
+    echo "Available languages:" >&2
+    yt-dlp --list-subs "$url" 2>/dev/null | head -20
+    exit 1
+fi
+
+# Clean VTT to plain text
+sed 's/<[^>]*>//g' "$vtt_file" | \
+    grep -v '^WEBVTT' | \
+    grep -v '^Kind:' | \
+    grep -v '^Language:' | \
+    grep -v '^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]' | \
+    grep -v 'align:start' | \
+    sed 's/^[[:space:]]*$//' | \
+    grep -v '^$' | \
+    awk '!seen[$0]++' > "$output"
+
+rm -f "$vtt_file"
+echo "$output"

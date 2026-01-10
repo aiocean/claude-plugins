@@ -1,0 +1,11 @@
+#!/bin/bash
+# Get video metadata
+# Usage: yt-meta "URL" [--full]
+
+url="$1"
+
+if [[ "$2" == "--full" ]]; then
+    yt-dlp --dump-json "$url" 2>/dev/null | jq '{title, channel, upload_date, duration_string, view_count, description, chapters}'
+else
+    yt-dlp --dump-json "$url" 2>/dev/null | jq '{title, channel, upload_date, duration_string, view_count}'
+fi

@@ -1,0 +1,13 @@
+#!/bin/bash
+# Get recent videos from a channel
+# Usage: yt-channel "@ChannelName" [count]
+
+channel="$1"
+count="${2:-10}"
+
+# Handle both @username and full URL
+if [[ "$channel" != http* ]]; then
+    channel="https://www.youtube.com/${channel}/videos"
+fi
+
+yt-dlp "$channel" --flat-playlist --playlist-end "$count" --print "%(title)s | %(duration_string)s | %(view_count)s views | %(url)s" 2>/dev/null

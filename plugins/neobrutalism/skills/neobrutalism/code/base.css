@@ -1,0 +1,324 @@
+/**
+ * Neobrutalism Base CSS
+ *
+ * Copy this file to your project and import it in your main CSS file.
+ * Requires: tailwindcss, tw-animate-css
+ *
+ * Setup:
+ * 1. Copy to: src/style.css or src/assets/base.css
+ * 2. Add fonts to index.html (see comments below)
+ * 3. Import in your main CSS: @import "./base.css"
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Global animation settings for smoother animations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@theme inline {
+  /* Spacing */
+  --spacing-boxShadowX: 4px;
+  --spacing-boxShadowY: 4px;
+  --spacing-reverseBoxShadowX: -4px;
+  --spacing-reverseBoxShadowY: -4px;
+
+  /* Touch targets (accessibility) */
+  --min-height-touch: 44px;
+  --min-width-touch: 44px;
+
+  /* Neobrutalism radii - sharp corners */
+  --radius-base: 0px;
+  --radius: 10px;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Neobrutalism fonts */
+  --font-sans:
+    'Public Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  --font-title: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+
+  /* Color mappings */
+  --color-background: var(--background);
+  --color-secondary-background: var(--secondary-background);
+  --color-foreground: var(--foreground);
+  --color-main: var(--main);
+  --color-main-foreground: var(--main-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Shadow */
+  --shadow-shadow: var(--shadow);
+
+  /* Font weights */
+  --font-weight-base: 500;
+  --font-weight-heading: 800;
+
+  /* Accordion animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--reka-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--reka-accordion-content-height); }
+    to { height: 0; }
+  }
+}
+
+:root {
+  /* Neobrutalism color palette */
+  --background: oklch(96.22% 0.0569 95.61);
+  --secondary-background: oklch(100% 0 0);
+  --foreground: oklch(0% 0 0);
+  --main-foreground: oklch(0% 0 0);
+  --main: oklch(84.08% 0.1725 84.2);
+  --border: oklch(0% 0 0);
+  --ring: oklch(0% 0 0);
+  --overlay: oklch(0% 0 0 / 0.8);
+  --shadow: 4px 4px 0px 0px var(--border);
+
+  /* Component colors */
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(0% 0 0);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(0% 0 0);
+  --primary: oklch(84.08% 0.1725 84.2);
+  --primary-foreground: oklch(0% 0 0);
+  --secondary: oklch(96.22% 0.0569 95.61);
+  --secondary-foreground: oklch(0% 0 0);
+  --muted: oklch(96.22% 0.0569 95.61);
+  --muted-foreground: oklch(0% 0 0);
+  --accent: oklch(84.08% 0.1725 84.2);
+  --accent-foreground: oklch(0% 0 0);
+  --destructive: oklch(60% 0.2 25);
+  --destructive-foreground: oklch(100% 0 0);
+  --input: oklch(100% 0 0);
+
+  /* Charts */
+  --chart-1: #ffbf00;
+  --chart-2: #0099ff;
+  --chart-3: #ff7a05;
+  --chart-4: #00d696;
+  --chart-5: #7a83ff;
+}
+
+/* Dark mode removed - neobrutalism is best in light mode with high contrast */
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    overflow-x: hidden;
+    font-family: var(--font-sans);
+    font-feature-settings: 'liga' 1, 'kern' 1;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-base);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-title);
+    font-weight: var(--font-weight-heading);
+  }
+
+  ::selection {
+    background-color: var(--main);
+    color: var(--main-foreground);
+  }
+
+  ::-moz-selection {
+    background-color: var(--main);
+    color: var(--main-foreground);
+  }
+}
+
+/* ============================================
+   NEOBRUTALISM SKETCHY DECORATIONS
+   ============================================ */
+
+/* Sketchy underline effect */
+.sketchy-underline {
+  position: relative;
+}
+
+.sketchy-underline::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: -4px;
+  height: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,4 Q5,2 10,4 T20,4 T30,4 T40,4 T50,4 T60,4 T70,4 T80,4 T90,4 T100,4' stroke='%23000' stroke-width='2' fill='none' /%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 100px 8px;
+  opacity: 0.8;
+}
+
+/* Sketchy circle decoration */
+.sketchy-circle {
+  position: relative;
+}
+
+.sketchy-circle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% + 16px);
+  height: calc(100% + 16px);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='45' stroke='%23000' stroke-width='2' fill='none' stroke-dasharray='2,3' /%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: -1;
+}
+
+/* Hand-drawn arrow decoration */
+.sketchy-arrow-right::after {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 12px;
+  margin-left: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg width='24' height='12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,6 L18,6 M15,2 L20,6 L15,10' stroke='%23000' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round' /%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Rough/sketchy border effect */
+.sketchy-border {
+  position: relative;
+  border: none !important;
+}
+
+.sketchy-border::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 3px solid var(--border);
+  pointer-events: none;
+  transform: rotate(-0.5deg);
+}
+
+/* Rough highlight effect */
+.sketchy-highlight {
+  position: relative;
+  z-index: 1;
+}
+
+.sketchy-highlight::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 20%;
+  bottom: 20%;
+  background-color: var(--main);
+  opacity: 0.3;
+  z-index: -1;
+  transform: rotate(-1deg);
+  border-radius: 2px;
+}
+
+/* ============================================
+   DOODLE BACKGROUND PATTERNS
+   ============================================ */
+
+/* Doodle stars pattern */
+.doodle-stars {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,20 L22,18 L24,20 L22,22 Z M80,80 L82,78 L84,80 L82,82 Z M50,10 L52,8 L54,10 L52,12 Z' fill='%23000' opacity='0.1' /%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 100px 100px;
+}
+
+/* Doodle dots pattern */
+.doodle-dots {
+  background-image: url("data:image/svg+xml,%3Csvg width='50' height='50' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='2' fill='%23000' opacity='0.15' /%3E%3Ccircle cx='40' cy='40' r='1.5' fill='%23000' opacity='0.15' /%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 50px 50px;
+}
+
+/* Doodle scribble pattern */
+.doodle-scribble {
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10,60 Q20,50 30,60 T50,60 M70,40 Q80,30 90,40 T110,40' stroke='%23000' stroke-width='1.5' fill='none' opacity='0.08' /%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 120px 120px;
+}
+
+/* Doodle dust pattern (fine grain texture) */
+.doodle-dust {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' fill='none'/%3E%3Ccircle cx='6' cy='4' r='0.6' fill='%23000' opacity='0.55' /%3E%3Ccircle cx='18' cy='8' r='0.4' fill='%23000' opacity='0.48' /%3E%3Ccircle cx='29' cy='6' r='0.5' fill='%23000' opacity='0.52' /%3E%3Ccircle cx='11' cy='18' r='0.35' fill='%23000' opacity='0.46' /%3E%3Ccircle cx='22' cy='21' r='0.55' fill='%23000' opacity='0.54' /%3E%3Ccircle cx='33' cy='19' r='0.3' fill='%23000' opacity='0.44' /%3E%3Ccircle cx='4' cy='29' r='0.45' fill='%23000' opacity='0.5' /%3E%3Ccircle cx='19' cy='33' r='0.65' fill='%23000' opacity='0.56' /%3E%3Ccircle cx='36' cy='31' r='0.4' fill='%23000' opacity='0.48' /%3E%3Ccircle cx='8' cy='14' r='0.5' fill='%23000' opacity='0.51' /%3E%3Ccircle cx='25' cy='11' r='0.35' fill='%23000' opacity='0.45' /%3E%3Ccircle cx='15' cy='24' r='0.4' fill='%23000' opacity='0.52' /%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 40px 40px;
+  background-attachment: local;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+/* Wiggle animation for playful feel */
+@keyframes sketchy-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1deg); }
+  75% { transform: rotate(1deg); }
+}
+
+.sketchy-wiggle:hover {
+  animation: sketchy-wiggle 0.3s ease-in-out;
+}

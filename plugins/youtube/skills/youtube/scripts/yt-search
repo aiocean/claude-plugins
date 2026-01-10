@@ -1,0 +1,16 @@
+#!/bin/bash
+# Search YouTube videos
+# Usage: yt-search "query" [count] [--date]
+
+query="$1"
+count="${2:-5}"
+sort_by_date=""
+
+if [[ "$3" == "--date" ]] || [[ "$2" == "--date" ]]; then
+    sort_by_date="date"
+    [[ "$2" == "--date" ]] && count=5
+fi
+
+prefix="ytsearch${sort_by_date}${count}"
+
+yt-dlp "${prefix}:${query}" -j 2>/dev/null | jq -r '[.title, .channel, (if .channel_is_verified then "✓" else "" end), .upload_date, .duration_string, .webpage_url] | join(" | ")'

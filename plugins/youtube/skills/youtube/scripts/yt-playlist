@@ -1,0 +1,18 @@
+#!/bin/bash
+# Get playlist info
+# Usage: yt-playlist "PLAYLIST_URL" [--duration]
+
+url="$1"
+
+if [[ "$2" == "--duration" ]]; then
+    # Show total duration
+    yt-dlp "$url" --flat-playlist -j 2>/dev/null | jq -s '
+        (map(.duration // 0) | add) as $total |
+        ($total / 3600 | floor) as $hours |
+        (($total % 3600) / 60 | floor) as $mins |
+        "\(length) videos | Total: \($hours)h \($mins)m"
+    '
+else
+    # List all videos
+    yt-dlp "$url" --flat-playlist --print "%(playlist_index)s. %(title)s | %(duration_string)s" 2>/dev/null
+fi

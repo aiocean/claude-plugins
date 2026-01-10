@@ -9,27 +9,56 @@
       "source": "./plugins/remove-bg",
       "description": "Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods.",
       "version": "1.0.0",
-      "author": {
-        "name": "aiocean"
-      }
+      "author": { "name": "aiocean" }
     },
     {
       "name": "worktree",
       "source": "./plugins/worktree",
       "description": "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup.",
       "version": "1.0.0",
-      "author": {
-        "name": "aiocean"
-      }
+      "author": { "name": "aiocean" }
     },
     {
       "name": "epub-packing",
       "source": "./plugins/epub-packing",
       "description": "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.",
       "version": "1.0.0",
-      "author": {
-        "name": "aiocean"
-      }
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "youtube",
+      "source": "./plugins/youtube",
+      "description": "Search YouTube and extract video transcripts using yt-dlp.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "gherkin-refine",
+      "source": "./plugins/gherkin-refine",
+      "description": "Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "claude-manager",
+      "source": "./plugins/claude-manager",
+      "description": "Enable/disable skills based on project context. Reduce skill clutter for specific project types.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "neobrutalism",
+      "source": "./plugins/neobrutalism",
+      "description": "Apply neobrutalism design patterns to web UI. Bold borders, hard shadows, vibrant colors.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "bun-fullstack-setup",
+      "source": "./plugins/bun-fullstack-setup",
+      "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
