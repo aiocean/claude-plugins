@@ -1,9 +1,12 @@
 #!/bin/bash
-# Spotlight: Live sync changes from worktree to main repo
+# Spotlight: Bidirectional live sync between worktree and main repo
 # Usage: worktree-spotlight.sh <worktree_path> <main_repo_path> [exclude_patterns...]
 #
-# This script watches the worktree for file changes and copies them to main repo.
-# On exit (SIGINT/SIGTERM), it restores main repo to clean state.
+# Syncs changes in both directions:
+#   - worktree → main: for hot reload preview
+#   - main → worktree: edits made in main sync back
+#
+# On exit: main repo restored clean, worktree keeps all changes
 #
 # Uses fswatch if available, falls back to polling (1s interval)
 
@@ -24,9 +27,11 @@ fi
 WORKTREE_PATH=$(cd "$WORKTREE_PATH" && pwd)
 MAIN_REPO_PATH=$(cd "$MAIN_REPO_PATH" && pwd)
 
-# PID file for tracking
-PID_FILE="/tmp/spotlight-$(echo "$MAIN_REPO_PATH" | md5 | cut -c1-8).pid"
-LOCK_FILE="/tmp/spotlight-$(echo "$MAIN_REPO_PATH" | md5 | cut -c1-8).lock"
+# Unique ID based on both paths
+SPOTLIGHT_ID=$(echo "$MAIN_REPO_PATH:$WORKTREE_PATH" | md5 | cut -c1-8)
+PID_FILE="/tmp/spotlight-$SPOTLIGHT_ID.pid"
+LOCK_FILE="/tmp/spotlight-$SPOTLIGHT_ID.lock"
+SYNC_LOCK="/tmp/spotlight-$SPOTLIGHT_ID.synclock"
 
 # Check if already running
 if [ -f "$PID_FILE" ]; then
@@ -34,162 +39,170 @@ if [ -f "$PID_FILE" ]; then
     if kill -0 "$OLD_PID" 2>/dev/null; then
         echo "Error: Spotlight already running for this repo (PID: $OLD_PID)"
         echo "Kill it first: kill $OLD_PID"
-        echo "Or run cleanup: worktree-cleanup.sh $MAIN_REPO_PATH"
         exit 1
     else
-        echo "Warning: Found stale PID file, cleaning up..."
-        rm -f "$PID_FILE" "$LOCK_FILE"
+        rm -f "$PID_FILE" "$LOCK_FILE" "$SYNC_LOCK"
     fi
 fi
 
 # Check main repo is clean
 if [ -n "$(git -C "$MAIN_REPO_PATH" status --porcelain)" ]; then
     echo "Error: Main repo has uncommitted changes."
-    echo ""
-    echo "Options:"
-    echo "  1. Commit or stash your changes first"
-    echo "  2. Run cleanup if this is leftover from crash: worktree-cleanup.sh $MAIN_REPO_PATH"
+    echo "Commit/stash first, or run: worktree-cleanup.sh $MAIN_REPO_PATH"
     exit 1
 fi
 
-# Write PID file
 echo $$ > "$PID_FILE"
 
-# Track synced files for cleanup
 SYNCED_FILES_LOG="/tmp/spotlight-synced-$$"
 touch "$SYNCED_FILES_LOG"
 
-# Function to check if path should be excluded
+# Prevent loops: track last sync
+LAST_SYNC_FILE=""
+LAST_SYNC_TIME=0
+
 should_exclude() {
     local rel_path="$1"
     [[ "$rel_path" == .git* ]] && return 0
+    [[ "$rel_path" == *.swp ]] && return 0
+    [[ "$rel_path" == *~ ]] && return 0
     for pattern in "${EXCLUDE_PATTERNS[@]}"; do
         [[ "$rel_path" == *"$pattern"* ]] && return 0
     done
     return 1
 }
 
-# Function to sync a single file
+# Sync file with loop prevention
 sync_file() {
     local rel_path="$1"
-    local src="$WORKTREE_PATH/$rel_path"
-    local dest="$MAIN_REPO_PATH/$rel_path"
+    local src_base="$2"
+    local dest_base="$3"
+    local label="$4"
 
     should_exclude "$rel_path" && return
+
+    local src="$src_base/$rel_path"
+    local dest="$dest_base/$rel_path"
+
+    # Skip if files are identical
+    if [ -f "$src" ] && [ -f "$dest" ]; then
+        cmp -s "$src" "$dest" && return
+    fi
+
+    # Prevent sync loop: skip if we just synced this file
+    local now=$(date +%s)
+    if [ "$rel_path" = "$LAST_SYNC_FILE" ] && [ $((now - LAST_SYNC_TIME)) -lt 2 ]; then
+        return
+    fi
 
     if [ -f "$src" ]; then
         mkdir -p "$(dirname "$dest")"
         cp "$src" "$dest"
-        echo "$rel_path" >> "$SYNCED_FILES_LOG"
-        echo "[sync] $rel_path"
-    elif [ -f "$dest" ]; then
+        echo "[$label] $rel_path"
+        [ "$label" = "w→m" ] && echo "$rel_path" >> "$SYNCED_FILES_LOG"
+    elif [ ! -f "$src" ] && [ -f "$dest" ]; then
         rm "$dest"
-        echo "[delete] $rel_path"
+        echo "[del:$label] $rel_path"
     fi
+
+    LAST_SYNC_FILE="$rel_path"
+    LAST_SYNC_TIME=$now
 }
 
-# Full sync: copy all changed/untracked files
-do_full_sync() {
-    cd "$WORKTREE_PATH"
+sync_w2m() { sync_file "$1" "$WORKTREE_PATH" "$MAIN_REPO_PATH" "w→m"; }
+sync_m2w() { sync_file "$1" "$MAIN_REPO_PATH" "$WORKTREE_PATH" "m→w"; }
 
-    # Changed files
-    git diff --name-only HEAD 2>/dev/null | while read -r file; do
-        [ -n "$file" ] && sync_file "$file"
-    done
-
-    # Untracked files
-    git ls-files --others --exclude-standard 2>/dev/null | while read -r file; do
-        [ -n "$file" ] && sync_file "$file"
-    done
+get_changed_files() {
+    local repo="$1"
+    cd "$repo"
+    { git diff --name-only HEAD 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null; } | sort -u
 }
 
-# Cleanup: restore main repo to clean state
+do_initial_sync() {
+    get_changed_files "$WORKTREE_PATH" | while read -r f; do [ -n "$f" ] && sync_w2m "$f"; done
+}
+
 cleanup() {
-    local exit_code=$?
-
     echo ""
-    echo "Deactivating spotlight..."
+    echo "Stopping spotlight..."
 
+    # Final sync: main → worktree
+    echo "Syncing main → worktree..."
+    get_changed_files "$MAIN_REPO_PATH" | while read -r f; do [ -n "$f" ] && sync_m2w "$f"; done
+
+    # Restore main
     cd "$MAIN_REPO_PATH"
-
-    # Restore all tracked files
     git checkout HEAD -- . 2>/dev/null || true
-
-    # Clean untracked files
     git clean -fd 2>/dev/null || true
 
-    # Remove temp/pid files
-    rm -f "$SYNCED_FILES_LOG" "$PID_FILE" "$LOCK_FILE"
-    rm -f /tmp/spotlight-state-$$ /tmp/spotlight-current-$$ 2>/dev/null || true
+    rm -f "$SYNCED_FILES_LOG" "$PID_FILE" "$LOCK_FILE" "$SYNC_LOCK"
+    rm -f /tmp/spotlight-*-$$ 2>/dev/null || true
 
-    echo "Main repo restored to clean state."
-    exit $exit_code
+    echo "Main repo: restored clean"
+    echo "Worktree:  changes preserved at $WORKTREE_PATH"
 }
 
-# Set up signal handlers - catch everything
 trap cleanup EXIT
-trap 'exit 130' INT      # Ctrl+C
-trap 'exit 143' TERM     # kill
-trap 'exit 131' QUIT     # Ctrl+\
-trap 'exit 129' HUP      # terminal closed
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
-echo "Starting spotlight sync..."
+echo "Bidirectional spotlight"
 echo "  Worktree: $WORKTREE_PATH"
-echo "  Main repo: $MAIN_REPO_PATH"
+echo "  Main:     $MAIN_REPO_PATH"
 echo "  Excludes: ${EXCLUDE_PATTERNS[*]:-none}"
-echo "  PID: $$"
-echo "  PID file: $PID_FILE"
+echo "  PID:      $$"
 echo ""
-echo "To stop: Ctrl+C, or: kill $$"
-echo ""
-
-# Initial sync
-echo "Initial sync..."
-do_full_sync
-echo "Initial sync complete."
+echo "Sync: worktree ↔ main (bidirectional)"
+echo "Exit: Ctrl+C or kill $$"
 echo ""
 
-# Check for fswatch
+do_initial_sync
+echo ""
+
 if command -v fswatch &> /dev/null; then
     echo "Watching with fswatch..."
-    FSWATCH_EXCLUDES=("--exclude" ".git")
-    for pattern in "${EXCLUDE_PATTERNS[@]}"; do
-        FSWATCH_EXCLUDES+=("--exclude" "$pattern")
-    done
 
-    fswatch -r "${FSWATCH_EXCLUDES[@]}" "$WORKTREE_PATH" | while read -r changed_file; do
-        rel_path="${changed_file#$WORKTREE_PATH/}"
-        sync_file "$rel_path"
+    EXCLUDES=("--exclude" ".git" "--exclude" ".swp" "--exclude" "~")
+    for p in "${EXCLUDE_PATTERNS[@]}"; do EXCLUDES+=("--exclude" "$p"); done
+
+    # Watch both, prefix with source identifier
+    {
+        fswatch -r "${EXCLUDES[@]}" "$WORKTREE_PATH" | sed 's/^/W:/' &
+        fswatch -r "${EXCLUDES[@]}" "$MAIN_REPO_PATH" | sed 's/^/M:/' &
+        wait
+    } | while read -r event; do
+        src="${event:0:1}"
+        file="${event:2}"
+        if [ "$src" = "W" ]; then
+            rel="${file#$WORKTREE_PATH/}"
+            [ "$rel" != "$file" ] && sync_w2m "$rel"
+        elif [ "$src" = "M" ]; then
+            rel="${file#$MAIN_REPO_PATH/}"
+            [ "$rel" != "$file" ] && sync_m2w "$rel"
+        fi
     done
 else
-    echo "Watching with polling (1s interval)..."
-    echo "(Install fswatch for better performance: brew install fswatch)"
-    echo ""
+    echo "Polling mode (1s)..."
 
-    # Store initial state
-    LAST_STATE="/tmp/spotlight-state-$$"
+    STATE_W="/tmp/spotlight-sw-$$"
+    STATE_M="/tmp/spotlight-sm-$$"
 
-    get_file_state() {
-        cd "$WORKTREE_PATH"
-        {
-            git diff --name-only HEAD 2>/dev/null
-            git ls-files --others --exclude-standard 2>/dev/null
-        } | sort | uniq
-    }
-
-    get_file_state > "$LAST_STATE"
+    get_changed_files "$WORKTREE_PATH" > "$STATE_W"
+    get_changed_files "$MAIN_REPO_PATH" > "$STATE_M"
 
     while true; do
         sleep 1
 
-        CURRENT_STATE="/tmp/spotlight-current-$$"
-        get_file_state > "$CURRENT_STATE"
+        # worktree → main
+        CUR_W="/tmp/spotlight-cw-$$"
+        get_changed_files "$WORKTREE_PATH" > "$CUR_W"
+        comm -13 "$STATE_W" "$CUR_W" | while read -r f; do [ -n "$f" ] && sync_w2m "$f"; done
+        mv "$CUR_W" "$STATE_W"
 
-        # Find changed files
-        diff "$LAST_STATE" "$CURRENT_STATE" 2>/dev/null | grep "^[<>]" | sed 's/^[<>] //' | sort | uniq | while read -r file; do
-            [ -n "$file" ] && sync_file "$file"
-        done
-
-        mv "$CURRENT_STATE" "$LAST_STATE"
+        # main → worktree
+        CUR_M="/tmp/spotlight-cm-$$"
+        get_changed_files "$MAIN_REPO_PATH" > "$CUR_M"
+        comm -13 "$STATE_M" "$CUR_M" | while read -r f; do [ -n "$f" ] && sync_m2w "$f"; done
+        mv "$CUR_M" "$STATE_M"
     done
 fi
