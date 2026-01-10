@@ -1,0 +1,7 @@
+{
+  "name": "mental-models",
+  "description": "Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.",
+  "version": "1.0.0",
+  "author": { "name": "aiocean" },
+  "license": "MIT"
+}
