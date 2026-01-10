@@ -21,6 +21,15 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "epub-packing",
+      "source": "./plugins/epub-packing",
+      "description": "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }

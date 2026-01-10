@@ -1,0 +1,10 @@
+{
+  "name": "epub-packing",
+  "description": "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  },
+  "repository": "https://github.com/aiocean/claude-plugins",
+  "license": "MIT"
+}

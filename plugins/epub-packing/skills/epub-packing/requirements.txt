@@ -1,0 +1,16 @@
+# EPUB Generator Dependencies
+
+# EPUB creation library
+EbookLib>=0.18
+
+# Markdown to HTML conversion
+markdown>=3.4.0
+
+# Image manipulation for cover generation
+Pillow>=10.0.0
+
+# String slugification for filenames
+python-slugify>=8.0.0
+
+# HTML to Markdown conversion
+markitdown>=0.0.1

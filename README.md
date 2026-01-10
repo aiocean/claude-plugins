@@ -18,10 +18,11 @@ Then install plugins:
 
 ## Available Plugins
 
-| Plugin        | Description                                                                                                             |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **remove-bg** | Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods. |
-| **worktree**  | Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup. |
+| Plugin           | Description                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **remove-bg**    | Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods. |
+| **worktree**     | Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup. |
+| **epub-packing** | Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.                         |
 
 ## Plugin Details
 
@@ -47,3 +48,16 @@ Git worktree management scripts:
 - `worktree-merge.sh` - Merge worktree branch
 - `worktree-remove.sh` - Remove worktree and branch
 - `worktree-cleanup.sh` - Emergency cleanup
+
+### epub-packing
+
+Generate EPUB ebooks from Markdown:
+
+- Multi-chapter support
+- Auto-generated neo-brutalism covers
+- 7 color schemes
+- YAML frontmatter metadata
+
+```bash
+python3 generate_epub.py --input doc.md --output book.epub --title "My Book" --author "Author"
+```
