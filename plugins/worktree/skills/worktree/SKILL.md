@@ -19,15 +19,15 @@ You help users manage git worktrees for parallel development workflows.
 
 All scripts are in `~/.claude/skills/worktree/`:
 
-| Script                         | Purpose                              |
-| ------------------------------ | ------------------------------------ |
-| `worktree-create.sh`           | Create new worktree with branch      |
-| `worktree-list.sh`             | List all worktrees and their status  |
-| `worktree-spotlight.sh`        | Live sync changes to main repo       |
-| `worktree-spotlight-status.sh` | Check if spotlight is running        |
-| `worktree-merge.sh`            | Merge worktree branch to/from parent |
-| `worktree-remove.sh`           | Remove worktree and delete branch    |
-| `worktree-cleanup.sh`          | Emergency cleanup after crash        |
+| Script                         | Purpose                                   |
+| ------------------------------ | ----------------------------------------- |
+| `worktree-create.sh`           | Create new worktree with branch           |
+| `worktree-list.sh`             | List all worktrees and their status       |
+| `worktree-spotlight.sh`        | Bidirectional live sync (worktree ↔ main) |
+| `worktree-spotlight-status.sh` | Check if spotlight is running             |
+| `worktree-merge.sh`            | Merge worktree branch to/from parent      |
+| `worktree-remove.sh`           | Remove worktree and delete branch         |
+| `worktree-cleanup.sh`          | Emergency cleanup after crash             |
 
 ## Workflow
 
@@ -45,9 +45,9 @@ worktree-create.sh experiment abc123      # from specific commit
 
 **Output:** Path to new worktree. User should `cd` to that path in a new terminal.
 
-### 2. Spotlight (Live Sync)
+### 2. Spotlight (Bidirectional Live Sync)
 
-When user wants to preview worktree changes in main repo (e.g., for hot reload):
+Preview worktree changes in main repo with hot reload. Edits in main sync back to worktree.
 
 ```bash
 # Run in background from MAIN repo
@@ -57,14 +57,19 @@ When user wants to preview worktree changes in main repo (e.g., for hot reload):
 worktree-spotlight.sh ../myrepo--feature . node_modules dist .env
 ```
 
+**How it works:**
+
+- **worktree → main:** Changes in worktree sync to main for hot reload preview
+- **main → worktree:** Edits made in main (e.g., via IDE) sync back to worktree
+- **On exit:** Main repo restored clean, worktree keeps ALL changes (both directions)
+
 **Important:**
 
-- Run this script in background using Bash tool with `run_in_background: true`
-- Script syncs all file changes from worktree → main repo in real-time
-- On kill (Ctrl+C or SIGTERM), script automatically restores main repo to clean state
-- Main repo must be clean before activating
+- Run with `run_in_background: true`
+- Main repo must be clean before starting
+- Loop prevention: identical files and rapid re-syncs are skipped
 
-**To deactivate:** Kill the background process. Script handles cleanup automatically.
+**To stop:** Ctrl+C or `kill <PID>`. Cleanup is automatic.
 
 ### 3. Merge
 
@@ -105,8 +110,10 @@ Removes worktree directory and deletes the branch.
 
 1. Ensure main repo is clean (commit/stash changes)
 2. Run spotlight in background: `worktree-spotlight.sh <worktree> . node_modules`
-3. Changes sync live to main repo
-4. When done, kill the spotlight process (cleanup is automatic)
+3. Changes sync bidirectionally:
+   - Worktree edits appear in main (hot reload works)
+   - Main edits sync back to worktree (nothing lost)
+4. When done, kill spotlight. Main restored clean, worktree has all changes.
 
 ### "I'm done with this feature, merge it back"
 
@@ -150,10 +157,12 @@ worktree-cleanup.sh .
 
 ## Key Points
 
+- **Bidirectional sync:** Spotlight syncs worktree ↔ main in both directions
+- **No work lost:** On exit, main is restored clean but worktree keeps all changes from both sides
+- **Loop prevention:** Identical files skipped, rapid re-syncs debounced
 - **Naming convention:** Worktrees created as `{repo}--{name}` in parent directory
-- **Spotlight fallback:** Uses polling if fswatch not installed (install for better perf: `brew install fswatch`)
+- **Spotlight fallback:** Uses polling if fswatch not installed (`brew install fswatch` for better perf)
 - **Always clean before spotlight:** Main repo must have no uncommitted changes
-- **Graceful shutdown:** Ctrl+C, kill, or terminal close all trigger cleanup
-- **PID tracking:** Spotlight writes PID file to prevent double-run and enable status check
+- **Graceful shutdown:** Ctrl+C, kill, or terminal close all trigger cleanup + final sync
+- **PID tracking:** Spotlight writes PID file to prevent double-run
 - **Merge handles conflicts gracefully:** Aborts and reports, doesn't leave mess
-- **Branch deleted with worktree:** `worktree-remove.sh` cleans up both
