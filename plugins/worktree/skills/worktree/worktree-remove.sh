@@ -16,14 +16,20 @@ if [ -z "$TARGET" ]; then
 fi
 
 # Resolve target to worktree path
+REPO_ROOT=$(git rev-parse --show-toplevel)
+REPO_NAME=$(basename "$REPO_ROOT")
+PARENT_DIR=$(dirname "$REPO_ROOT")
+SHORT_NAME=""
+
 if [ -d "$TARGET" ]; then
     WORKTREE_PATH=$(cd "$TARGET" && pwd)
+    # Extract short name from folder: {repo}--wtr-{name} -> {name}
+    FOLDER_NAME=$(basename "$WORKTREE_PATH")
+    SHORT_NAME="${FOLDER_NAME#*--wtr-}"
 else
-    # Try to find by name pattern
-    REPO_ROOT=$(git rev-parse --show-toplevel)
-    REPO_NAME=$(basename "$REPO_ROOT")
-    PARENT_DIR=$(dirname "$REPO_ROOT")
-    WORKTREE_PATH="$PARENT_DIR/${REPO_NAME}--${TARGET}"
+    SHORT_NAME="$TARGET"
+    # Folder: {repo}--wtr-{name}
+    WORKTREE_PATH="$PARENT_DIR/${REPO_NAME}--wtr-${TARGET}"
 
     if [ ! -d "$WORKTREE_PATH" ]; then
         echo "Error: Cannot find worktree '$TARGET'"
@@ -32,8 +38,8 @@ else
     fi
 fi
 
-# Get branch name before removal
-BRANCH_NAME=$(git -C "$WORKTREE_PATH" branch --show-current 2>/dev/null || echo "")
+# Branch: wtr-{name}
+BRANCH_NAME="wtr-${SHORT_NAME}"
 
 # Check for uncommitted changes
 if [ "$FORCE" != "--force" ]; then

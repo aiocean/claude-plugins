@@ -41,6 +41,10 @@ All scripts are in `~/.claude/skills/worktree/`:
 worktree-create.sh feature-login          # from HEAD
 worktree-create.sh hotfix-bug main        # from main branch
 worktree-create.sh experiment abc123      # from specific commit
+
+# Creates:
+#   Folder: {repo}--wtr-{name}  (e.g., myrepo--wtr-feature-login)
+#   Branch: wtr-{name}          (e.g., wtr-feature-login)
 ```
 
 **Output:** Path to new worktree. User should `cd` to that path in a new terminal.
@@ -54,7 +58,7 @@ When user wants to preview worktree changes in main repo (e.g., for hot reload):
 ~/.claude/skills/worktree/worktree-spotlight.sh <worktree_path> . [excludes...]
 
 # Example:
-worktree-spotlight.sh ../myrepo--feature . node_modules dist .env
+worktree-spotlight.sh ../myrepo--wtr-feature . node_modules dist .env
 ```
 
 **Important:**
@@ -87,8 +91,8 @@ worktree-spotlight.sh ../myrepo--feature . node_modules dist .env
 ~/.claude/skills/worktree/worktree-remove.sh <path_or_name>
 
 # Examples:
-worktree-remove.sh ../myrepo--feature    # by path
-worktree-remove.sh feature               # by name (auto-resolves path)
+worktree-remove.sh ../myrepo--wtr-feature  # by path
+worktree-remove.sh feature                 # by name (auto-resolves path)
 ```
 
 Removes worktree directory and deletes the branch.
@@ -150,7 +154,9 @@ worktree-cleanup.sh .
 
 ## Key Points
 
-- **Naming convention:** Worktrees created as `{repo}--{name}` in parent directory
+- **Naming convention:** `wtr-` prefix for easy identification
+  - Folder: `{repo}--wtr-{name}` (e.g., `myrepo--wtr-feature`)
+  - Branch: `wtr-{name}` (e.g., `wtr-feature`)
 - **Spotlight fallback:** Uses polling if fswatch not installed (install for better perf: `brew install fswatch`)
 - **Always clean before spotlight:** Main repo must have no uncommitted changes
 - **Graceful shutdown:** Ctrl+C, kill, or terminal close all trigger cleanup

@@ -21,8 +21,11 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 REPO_NAME=$(basename "$REPO_ROOT")
 PARENT_DIR=$(dirname "$REPO_ROOT")
 
-# Worktree path: sibling to main repo
-WORKTREE_PATH="$PARENT_DIR/${REPO_NAME}--${NAME}"
+# Naming convention: wtr- prefix for easy identification
+# Folder: {repo}--wtr-{name}
+# Branch: wtr-{name}
+WORKTREE_PATH="$PARENT_DIR/${REPO_NAME}--wtr-${NAME}"
+BRANCH_NAME="wtr-${NAME}"
 
 # Check if already exists
 if [ -d "$WORKTREE_PATH" ]; then
@@ -34,20 +37,18 @@ fi
 git worktree prune
 
 # Check if branch already exists
-if git show-ref --verify --quiet "refs/heads/$NAME"; then
-    # Branch exists, checkout
-    echo "Branch '$NAME' exists, checking out..."
-    git worktree add "$WORKTREE_PATH" "$NAME"
+if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
+    echo "Branch '$BRANCH_NAME' exists, checking out..."
+    git worktree add "$WORKTREE_PATH" "$BRANCH_NAME"
 else
-    # Create new branch from source ref
-    echo "Creating new branch '$NAME' from '$SOURCE_REF'..."
-    git worktree add -b "$NAME" "$WORKTREE_PATH" "$SOURCE_REF"
+    echo "Creating new branch '$BRANCH_NAME' from '$SOURCE_REF'..."
+    git worktree add -b "$BRANCH_NAME" "$WORKTREE_PATH" "$SOURCE_REF"
 fi
 
 echo ""
 echo "Worktree created successfully!"
 echo "Path: $WORKTREE_PATH"
-echo "Branch: $NAME"
+echo "Branch: $BRANCH_NAME"
 echo ""
 echo "To start working:"
 echo "  cd $WORKTREE_PATH"
