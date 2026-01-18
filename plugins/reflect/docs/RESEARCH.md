@@ -293,6 +293,6 @@ reflect/
 
 ## Session Context
 
-Research được thực hiện trong session ngày 2026-01-18, project `/Users/username/.claude/skills/reflect`.
+Research được thực hiện trong session ngày 2026-01-18.
 
 Cloned repos vẫn còn tại `/tmp/reflect-research/` (có thể bị xóa sau reboot).
