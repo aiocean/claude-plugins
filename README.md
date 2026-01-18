@@ -10,17 +10,15 @@ Add this marketplace:
 /plugin marketplace add aiocean/claude-plugins
 ```
 
-Then install plugins:
-
-```bash
-/plugin install <plugin-name>@aiocean-plugins
-```
-
 ## Available Plugins
 
 ### worktree
 
 Manage git worktrees for parallel development. Perfect for running multiple AI agents simultaneously on separate branches.
+
+```bash
+/plugin install worktree@aiocean-plugins
+```
 
 **Features:**
 
@@ -43,6 +41,10 @@ Manage git worktrees for parallel development. Perfect for running multiple AI a
 
 Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.
 
+```bash
+/plugin install mental-models@aiocean-plugins
+```
+
 **Volumes:**
 
 - Volume 1: General Thinking (first principles, inversion, second-order thinking, etc.)
@@ -53,6 +55,10 @@ Comprehensive mental models framework from The Great Mental Models series. 50+ m
 ### reflect
 
 Turn transient learnings into permanent improvements. Analyze Claude Code sessions to extract reusable knowledge.
+
+```bash
+/plugin install reflect@aiocean-plugins
+```
 
 **Extracts:**
 
@@ -71,10 +77,16 @@ Turn transient learnings into permanent improvements. Analyze Claude Code sessio
 
 Remove background from images and trim transparent edges.
 
+```bash
+/plugin install remove-bg@aiocean-plugins
+```
+
 **Methods:**
 
 - Threshold method (default) - Fast, for mono/simple images
 - rembg method (`--rembg`) - AI-based, for complex images
+
+**Usage:**
 
 ```bash
 python3 ~/.claude/skills/remove-bg/remove_bg.py image.png
@@ -85,12 +97,18 @@ python3 ~/.claude/skills/remove-bg/remove_bg.py image.jpg --rembg
 
 Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.
 
+```bash
+/plugin install epub-packing@aiocean-plugins
+```
+
 **Features:**
 
 - Multi-chapter support
 - Auto-generated neo-brutalism covers
 - 7 color schemes
 - YAML frontmatter metadata
+
+**Usage:**
 
 ```bash
 python3 generate_epub.py --input doc.md --output book.epub --title "My Book" --author "Author"
@@ -99,6 +117,10 @@ python3 generate_epub.py --input doc.md --output book.epub --title "My Book" --a
 ### youtube
 
 Search YouTube and extract video transcripts using yt-dlp.
+
+```bash
+/plugin install youtube@aiocean-plugins
+```
 
 **Features:**
 
@@ -110,6 +132,10 @@ Search YouTube and extract video transcripts using yt-dlp.
 
 Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation.
 
+```bash
+/plugin install gherkin-refine@aiocean-plugins
+```
+
 **Use when:**
 
 - User requests are unclear or have multiple interpretations
@@ -120,32 +146,49 @@ Refines ambiguous user requests into structured Gherkin format (Given/When/Then)
 
 Enable/disable skills based on project context. Reduce skill clutter for specific project types.
 
-**Use when:**
+```bash
+/plugin install claude-manager@aiocean-plugins
+```
 
-- Working on frontend-only projects (disable backend skills)
-- Want to reduce token usage from irrelevant skills
-- Need to focus Claude on specific domain
+**Presets:**
+
+- `minimal` - Core skills only
+- `frontend` - Core + frontend-design, neobrutalism
+- `backend` - Core + pm2-dev, bun-fullstack-setup, cloudflare
+- `ai` - Core + agent-sdk, mental-models, triumvirate
+- `all` - Everything enabled
 
 ### neobrutalism
 
 Apply neobrutalism design patterns to web UI.
 
-**Style characteristics:**
+```bash
+/plugin install neobrutalism@aiocean-plugins
+```
 
-- Bold black borders
-- Hard drop shadows
-- Vibrant colors
-- Raw, bold typography
+**The 6 Rules:**
+
+1. Thick black borders (2-4px solid #000)
+2. Hard shadows (`4px 4px 0 #000`, never blur)
+3. Sharp corners (0px border-radius)
+4. Vibrant colors (2-3 accent colors max)
+5. Bold typography (weights 700-900)
+6. No gradients (solid colors only)
 
 ### bun-fullstack-setup
 
 Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.
 
+```bash
+/plugin install bun-fullstack-setup@aiocean-plugins
+```
+
 **Features:**
 
-- Single port for API + static files
+- Single port for API + static files in production
 - Vite dev server proxy configuration
-- Production build setup
+- PM2 ecosystem config for development
+- Multi-stage Docker build
 
 ## License
 
