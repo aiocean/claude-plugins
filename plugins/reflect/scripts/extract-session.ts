@@ -13,7 +13,46 @@
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from "fs";
-import { join, basename } from "path";
+import { join, basename, resolve } from "path";
+
+const PROJECTS_DIR = join(process.env.HOME || "", ".claude", "projects");
+
+/**
+ * Convert a real filesystem path to Claude Code session folder path
+ * e.g., /Users/username/projects/myapp → ~/.claude/projects/-Users-username-projects-myapp
+ */
+function resolveSessionFolder(inputPath: string): string {
+  const absolutePath = resolve(inputPath);
+
+  // If already a session folder path (inside ~/.claude/projects/), use directly
+  if (absolutePath.startsWith(PROJECTS_DIR)) {
+    return absolutePath;
+  }
+
+  // Convert project path to session folder name
+  const folderName = absolutePath
+    .replace(/\/\./g, "--") // /. → --
+    .replace(/\//g, "-"); // / → -
+
+  const sessionFolder = join(PROJECTS_DIR, folderName);
+
+  // Check if session folder exists
+  if (existsSync(sessionFolder)) {
+    return sessionFolder;
+  }
+
+  // Try partial match for subdirectories
+  if (existsSync(PROJECTS_DIR)) {
+    const folders = readdirSync(PROJECTS_DIR);
+    const match = folders.find((f) => folderName.startsWith(f) || f.startsWith(folderName));
+    if (match) {
+      return join(PROJECTS_DIR, match);
+    }
+  }
+
+  // Return original path if no session folder found (might be direct session folder)
+  return absolutePath;
+}
 
 interface ToolCall {
   id: string;
@@ -547,13 +586,18 @@ Options:
   process.exit(1);
 }
 
-if (!existsSync(target)) {
+// Resolve target to session folder (handles both project paths and session folder paths)
+const resolvedTarget = resolveSessionFolder(target);
+
+if (!existsSync(resolvedTarget)) {
   console.error("Path not found:", target);
+  console.error("Resolved to:", resolvedTarget);
+  console.error("\nMake sure you have Claude Code sessions for this project.");
   process.exit(1);
 }
 
-const stat = statSync(target);
-const files = stat.isDirectory() ? getSessionFiles(target, limit) : [target];
+const stat = statSync(resolvedTarget);
+const files = stat.isDirectory() ? getSessionFiles(resolvedTarget, limit) : [resolvedTarget];
 
 const sessions: Session[] = [];
 

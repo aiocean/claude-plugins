@@ -17,6 +17,8 @@ description: Evaluate and learn from Claude Code sessions to extract reusable kn
 
 ## Quick Start
 
+Run from the skill directory (`~/.claude/skills/reflect/` or wherever installed):
+
 ```bash
 # Extract last 5 sessions with diary summary
 bun run scripts/extract-session.ts <project-path> --last 5 --diary
@@ -62,63 +64,53 @@ Output includes:
 
 ### Phase 3: Analyze (AI does this)
 
-Read the extracted sessions. For each session:
+Read the extracted sessions holistically. Let AI identify what matters - don't use keyword detection or bias towards "corrections".
 
-**A. Check Rule Violations (Critical)**
+**Core Question**: What knowledge from these sessions is **reusable** and can **evolve**?
+
+**A. Check Rule Violations**
 
 Compare session with existing CLAUDE.md rules:
 
 - Was any existing rule violated?
 - If yes → **Strengthen the rule first** (don't add new)
-  - Move rule higher in priority
-  - Add emphasis (bold, IMPORTANT)
-  - Make it more explicit
-  - Add specific examples
 
-**B. Identify Corrections (High Value)**
+**B. Find Friction Points**
 
-Look for user saying:
+Detect patterns where user repeatedly has to:
 
-- "no", "not that", "I meant"
-- Rephrasing or contradicting Claude
-- In thinking blocks: wrong assumptions
+- Remind AI of something every session
+- Manually do something AI should handle
+- Correct the same type of mistake
+- Explain the same context again
 
-Extract:
+Ask: What would make this friction disappear?
 
-- What Claude assumed → What user wanted
-- Why the assumption was wrong
-- How to prevent it
+**C. Discover Preferences**
 
-**C. Find Friction Points (Medium Value)**
+Patterns the user consistently shows across sessions:
 
-Signs of communication breakdown:
+- Tools/skills they always use or request
+- Approaches they consistently prefer
+- Implicit expectations made explicit through repetition
 
-- Repeated requests
-- User having to explain multiple times
-- Frustration signals
-- Clarification loops
+Only worth capturing if it appears **multiple times** across sessions.
 
-Ask: Why did this happen? How to prevent?
+**D. Extract Reusable Knowledge**
 
-**D. Discover Preferences (High Value)**
+AI should freely identify knowledge that:
 
-Consistent patterns the user shows:
+- **Repeats across sessions** - patterns, not one-off incidents
+- **Can evolve** - builds upon existing knowledge
+- **Is generalizable** - applies beyond this specific context
 
-- Language preferences (Vietnamese/English)
-- Tool preferences (bun over npm)
-- Code style preferences
-- Level of detail wanted
-- Implicit rules made explicit
+Skip:
 
-**E. Note Successes (Reference Value)**
+- Context-specific corrections (already handled in the moment)
+- One-time fixes (no reuse value)
+- Things already obvious or in docs
 
-What worked smoothly:
-
-- Tasks completed without corrections
-- Patterns that should be reinforced
-- Effective use of skills/agents
-
-**F. Evaluate Skill Candidates (Selective)**
+**E. Evaluate Skill Candidates (Selective)**
 
 Criteria for extracting a skill:
 
@@ -146,50 +138,41 @@ Present findings in structured format:
 
 Analyzed [N] sessions from [date range]
 
-### Critical: Rule Violations
-
-[If any existing rules were violated]
+### Rule Violations (if any)
 
 - **Rule**: [existing rule text]
-- **Violation**: [what happened]
-- **Action**: Strengthen rule → [proposed new text]
-
-### Corrections Found
-
-1. **Assumption**: Claude thought X
-   **Reality**: User wanted Y
-   **Evidence**: "[quote from session]"
-   **Proposed rule**: [specific, actionable rule]
+- **What happened**: [brief description]
+- **Action**: Strengthen → [proposed new text]
 
 ### Friction Points
 
-1. **Issue**: [description]
-   **Evidence**: "[quote]"
-   **Cause**: [why it happened]
+1. **Pattern**: [what user repeatedly has to do]
+   **Frequency**: [how often across sessions]
+   **Solution**: [what would eliminate this friction]
 
-### Preferences Discovered
+### Preferences
 
-1. **Preference**: [what user prefers]
-   **Evidence**: "[quote showing pattern]"
-   **Frequency**: [how often observed]
+1. **Preference**: [what user consistently does/requests]
+   **Evidence**: [sessions where this appeared]
+
+### Reusable Knowledge
+
+1. **Knowledge**: [what was learned]
+   **Why reusable**: [how it applies beyond this session]
 
 ### Skill Candidates
 
-1. **Discovery**: [what was learned]
-   **Problem solved**: [description]
-   **Worth creating skill?**: [Yes/No + reasoning]
-   **Trigger conditions**: [error messages, symptoms]
+1. **Problem**: [what problem this solves]
+   **Trigger**: [when to use]
+   **Worth creating?**: [Yes/No + reasoning]
 
 ### Proposed Changes
 
 #### CLAUDE.md Updates
 
-[For each proposed change]
-
-**Change**: [add/modify/strengthen] rule
-**Text**: [exact rule text to add]
-**Evidence**: [session quote]
-**Prevents**: [what problem]
+**Change**: [add/modify/strengthen]
+**Text**: [exact text]
+**Rationale**: [why this helps future sessions]
 
 #### New Skills
 
@@ -339,8 +322,10 @@ date: [YYYY-MM-DD]
 
 ## Memory Directory
 
+Located in the skill's `memory/` folder:
+
 ```
-~/.claude/skills/reflect/memory/
+memory/
 ├── diary/              # Reflection summaries
 ├── reflections/        # Session-specific notes
 └── processed.json      # Tracking analyzed sessions
@@ -384,8 +369,8 @@ date: [YYYY-MM-DD]
 
 1. **Start small**: Analyze 3-5 sessions first
 2. **Read thinking blocks**: They reveal assumptions
-3. **Focus on corrections**: Highest learning value
-4. **Be specific**: "Use Vietnamese for this user" > "Be flexible with language"
+3. **Focus on reusability**: Knowledge that applies beyond this session
+4. **Be specific**: "Always use bun instead of npm" > "Be flexible with tools"
 5. **Strengthen first**: Violated rule? Make it stronger, don't add new
 6. **Delta updates**: Change only what's needed, preserve structure
 7. **Track progress**: Use todo list throughout
