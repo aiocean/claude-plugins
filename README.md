@@ -50,6 +50,23 @@ Comprehensive mental models framework from The Great Mental Models series. 50+ m
 - Volume 3: Systems & Mathematics (feedback loops, compounding, power laws, etc.)
 - Volume 4: Economics & Art (scarcity, incentives, narrative, etc.)
 
+### reflect
+
+Turn transient learnings into permanent improvements. Analyze Claude Code sessions to extract reusable knowledge.
+
+**Extracts:**
+
+- Corrections → CLAUDE.md rules (behavioral patterns)
+- Preferences → CLAUDE.md rules (how user likes to work)
+- Technical discoveries → new skills (reusable knowledge)
+
+**Principles:**
+
+- AI-first analysis (not regex patterns)
+- Strengthen violated rules before adding new ones
+- Quality gates for skill extraction
+- Processed tracking to avoid re-analysis
+
 ### remove-bg
 
 Remove background from images and trim transparent edges.
