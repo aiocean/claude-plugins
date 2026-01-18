@@ -4,8 +4,6 @@ A collection of Claude Code plugins by aiocean.
 
 ## Installation
 
-Add this marketplace:
-
 ```bash
 /plugin marketplace add aiocean/claude-plugins
 ```
@@ -14,181 +12,83 @@ Add this marketplace:
 
 ### worktree
 
-Manage git worktrees for parallel development. Perfect for running multiple AI agents simultaneously on separate branches.
+Work on multiple features simultaneously without branch switching. Run parallel AI agents on separate codebases.
 
 ```bash
 /plugin install worktree@aiocean-plugins
 ```
 
-**Features:**
-
-- Create worktrees with `wtr-` prefix naming convention
-- Sync commits between worktree and main using rebase + fast-forward (keeps same commit hash)
-- Spotlight mode for hot reload preview (temporary file sync)
-- Merge and cleanup utilities
-
-**Scripts:**
-
-- `worktree-create.sh` - Create new worktree with branch
-- `worktree-sync.sh` - Sync worktree ↔ main (rebase + ff)
-- `worktree-spotlight.sh` - Live file sync for hot reload
-- `worktree-list.sh` - List all worktrees and status
-- `worktree-merge.sh` - Merge worktree branch
-- `worktree-remove.sh` - Remove worktree and branch
-- `worktree-cleanup.sh` - Emergency cleanup
-
 ### mental-models
 
-Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.
+Make better decisions with 50+ thinking frameworks. First principles, inversion, second-order thinking, feedback loops, and more.
 
 ```bash
 /plugin install mental-models@aiocean-plugins
 ```
 
-**Volumes:**
-
-- Volume 1: General Thinking (first principles, inversion, second-order thinking, etc.)
-- Volume 2: Physics, Chemistry & Biology (leverage, activation energy, natural selection, etc.)
-- Volume 3: Systems & Mathematics (feedback loops, compounding, power laws, etc.)
-- Volume 4: Economics & Art (scarcity, incentives, narrative, etc.)
-
 ### reflect
 
-Turn transient learnings into permanent improvements. Analyze Claude Code sessions to extract reusable knowledge.
+Turn your Claude Code sessions into permanent improvements. Automatically extract learnings and update CLAUDE.md rules.
 
 ```bash
 /plugin install reflect@aiocean-plugins
 ```
 
-**Extracts:**
-
-- Corrections → CLAUDE.md rules (behavioral patterns)
-- Preferences → CLAUDE.md rules (how user likes to work)
-- Technical discoveries → new skills (reusable knowledge)
-
-**Principles:**
-
-- AI-first analysis (not regex patterns)
-- Strengthen violated rules before adding new ones
-- Quality gates for skill extraction
-- Processed tracking to avoid re-analysis
-
 ### remove-bg
 
-Remove background from images and trim transparent edges.
+Remove backgrounds from images instantly. Works with logos, photos, and complex images.
 
 ```bash
 /plugin install remove-bg@aiocean-plugins
 ```
 
-**Methods:**
-
-- Threshold method (default) - Fast, for mono/simple images
-- rembg method (`--rembg`) - AI-based, for complex images
-
-**Usage:**
-
-```bash
-python3 ~/.claude/skills/remove-bg/remove_bg.py image.png
-python3 ~/.claude/skills/remove-bg/remove_bg.py image.jpg --rembg
-```
-
 ### epub-packing
 
-Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.
+Convert Markdown to professional EPUB ebooks with auto-generated covers. Perfect for documentation, articles, or books.
 
 ```bash
 /plugin install epub-packing@aiocean-plugins
 ```
 
-**Features:**
-
-- Multi-chapter support
-- Auto-generated neo-brutalism covers
-- 7 color schemes
-- YAML frontmatter metadata
-
-**Usage:**
-
-```bash
-python3 generate_epub.py --input doc.md --output book.epub --title "My Book" --author "Author"
-```
-
 ### youtube
 
-Search YouTube and extract video transcripts using yt-dlp.
+Search YouTube and get video transcripts. Summarize videos, extract tutorials, research topics without watching.
 
 ```bash
 /plugin install youtube@aiocean-plugins
 ```
 
-**Features:**
-
-- Search YouTube videos
-- Extract transcripts/subtitles
-- Support for multiple languages
-
 ### gherkin-refine
 
-Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation.
+Clarify ambiguous requests before coding. Converts vague requirements into clear Given/When/Then scenarios.
 
 ```bash
 /plugin install gherkin-refine@aiocean-plugins
 ```
 
-**Use when:**
-
-- User requests are unclear or have multiple interpretations
-- Need to confirm understanding before coding
-- Want structured acceptance criteria
-
 ### claude-manager
 
-Enable/disable skills based on project context. Reduce skill clutter for specific project types.
+Reduce skill clutter by enabling only relevant skills. Presets for frontend, backend, AI, and data projects.
 
 ```bash
 /plugin install claude-manager@aiocean-plugins
 ```
 
-**Presets:**
-
-- `minimal` - Core skills only
-- `frontend` - Core + frontend-design, neobrutalism
-- `backend` - Core + pm2-dev, bun-fullstack-setup, cloudflare
-- `ai` - Core + agent-sdk, mental-models, triumvirate
-- `all` - Everything enabled
-
 ### neobrutalism
 
-Apply neobrutalism design patterns to web UI.
+Build striking web UIs with bold borders, hard shadows, and vibrant colors. Complete design system included.
 
 ```bash
 /plugin install neobrutalism@aiocean-plugins
 ```
 
-**The 6 Rules:**
-
-1. Thick black borders (2-4px solid #000)
-2. Hard shadows (`4px 4px 0 #000`, never blur)
-3. Sharp corners (0px border-radius)
-4. Vibrant colors (2-3 accent colors max)
-5. Bold typography (weights 700-900)
-6. No gradients (solid colors only)
-
 ### bun-fullstack-setup
 
-Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.
+Ship fullstack Bun apps fast. Single port for API + frontend, ready for Docker deployment.
 
 ```bash
 /plugin install bun-fullstack-setup@aiocean-plugins
 ```
-
-**Features:**
-
-- Single port for API + static files in production
-- Vite dev server proxy configuration
-- PM2 ecosystem config for development
-- Multi-stage Docker build
 
 ## License
 
