@@ -1,12 +1,6 @@
 ---
 name: reflect
-description: |
-  Evaluate and learn from Claude Code sessions to extract reusable knowledge.
-  Use when: (1) reviewing past sessions for mistakes/preferences, (2) after completing
-  significant tasks with non-obvious solutions, (3) discovering debugging techniques
-  or workarounds, (4) user says "reflect", "what did we learn", or "save this knowledge".
-  Outputs: CLAUDE.md updates (behavioral patterns) or new SKILL.md files (technical knowledge).
-  Always confirms with user before creating or modifying any files.
+description: Evaluate and learn from Claude Code sessions to extract reusable knowledge. Use when reviewing past sessions, after completing significant tasks, discovering debugging techniques, or user says reflect, what did we learn, save this knowledge. Outputs CLAUDE.md updates or new skills.
 ---
 
 # Reflect

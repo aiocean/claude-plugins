@@ -1,6 +1,6 @@
 ---
 name: epub-packing
-description: Generate professional EPUB ebooks from Markdown files with auto-generated covers and embedded images. Use when creating ebooks, converting Markdown to EPUB, or packaging web articles for offline reading on e-readers.
+description: Generate professional EPUB ebooks from Markdown files with auto-generated covers and embedded images. Use when creating ebooks, converting Markdown to EPUB, packaging web articles for offline reading, or user mentions epub, ebook, e-reader, kindle.
 ---
 
 # EPUB Generator Skill
@@ -24,6 +24,7 @@ python3 generate_epub.py \
 ```
 
 The tool will:
+
 - Convert Markdown to EPUB-compatible HTML
 - Auto-generate table of contents from H1 headings
 - Create a professional neo-brutalism cover
@@ -72,6 +73,7 @@ python3 generate_epub.py \
 ```
 
 Note:
+
 - `download_html_to_md.py` produces raw markdown that needs cleanup before EPUB generation
 - Images are automatically downloaded and embedded in the EPUB - no internet needed to read
 
@@ -110,6 +112,7 @@ Using seed: Same seed = same random color every time (useful for series consiste
 By default, the table of contents (NCX file) is auto-generated from your chapter files. For advanced control, you can provide a custom NCX file.
 
 **When to use custom NCX:**
+
 - You need custom chapter ordering that differs from file order
 - You want nested sub-chapters (multi-level TOC)
 - You need precise control over chapter IDs and metadata
@@ -145,12 +148,14 @@ By default, the table of contents (NCX file) is auto-generated from your chapter
 ```
 
 **NCX Requirements:**
+
 - `dtb:uid` must contain a valid UUID (generate with `python3 -c "import uuid; print(uuid.uuid4())"`)
 - `playOrder` must be sequential: 1, 2, 3, 4...
 - Chapter filenames must match pattern: `chapter_01.xhtml`, `chapter_02.xhtml`, etc.
 - Each `navPoint id` must be unique
 
 **Use custom NCX:**
+
 ```bash
 python3 generate_epub.py \
   --input ch01.md ch02.md ch03.md \
@@ -167,6 +172,7 @@ The tool will validate your NCX and warn you about any issues.
 ### All Available Parameters
 
 **EPUB Generation:**
+
 ```bash
 python3 generate_epub.py \
   --input file1.md file2.md        # Input Markdown files
@@ -183,6 +189,7 @@ python3 generate_epub.py \
 ```
 
 **Cover-Only Generation:**
+
 ```bash
 python3 generate_epub.py \
   --cover-only \
@@ -196,6 +203,7 @@ python3 generate_epub.py \
 ```
 
 **Standalone Cover Generator:**
+
 ```bash
 python3 generate_cover.py \
   --title "Book Title" \
@@ -227,6 +235,7 @@ The tool supports comprehensive Markdown features:
 - **YAML frontmatter:** Automatically stripped
 
 **Frontmatter metadata extraction:**
+
 ```yaml
 ---
 title: My Book Title
@@ -301,4 +310,3 @@ Error: Input file not found: chapter-01.md
 4. **Consistent naming:** Use `chapter-01.md`, `chapter-02.md` for easy ordering
 5. **Test on e-readers:** Open generated EPUBs in calibre or Apple Books to verify
 6. **Use seeds for series:** Same seed = consistent branding across book series
-

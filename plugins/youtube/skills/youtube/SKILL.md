@@ -1,7 +1,8 @@
 ---
 name: youtube
-description: Search YouTube and extract video transcripts using yt-dlp. Use when user mentions YouTube, video search, transcript, subtitles, captions, or provides youtube.com/youtu.be URLs.
+description: Search YouTube and extract video transcripts using yt-dlp. Use when user mentions YouTube, video search, transcript, subtitles, captions, summarize video, or provides youtube.com/youtu.be URLs.
 ---
+
 # YouTube
 
 Scripts location: `~/.claude/skills/youtube/scripts/`
@@ -10,15 +11,15 @@ Call scripts with full path: `~/.claude/skills/youtube/scripts/yt-search "query"
 
 ## Scripts
 
-| Script | Usage | Description |
-|--------|-------|-------------|
-| `yt-search` | `yt-search "query" [N] [--date]` | Search N videos (default 5), --date sorts by date |
+| Script          | Usage                                 | Description                                                   |
+| --------------- | ------------------------------------- | ------------------------------------------------------------- |
+| `yt-search`     | `yt-search "query" [N] [--date]`      | Search N videos (default 5), --date sorts by date             |
 | `yt-transcript` | `yt-transcript "URL" [lang] [output]` | Get clean transcript (default: en, /tmp/transcript-clean.txt) |
-| `yt-meta` | `yt-meta "URL" [--full]` | Get metadata, --full includes description/chapters |
-| `yt-channel` | `yt-channel "@Name" [N]` | Get N recent videos from channel |
-| `yt-playlist` | `yt-playlist "URL" [--duration]` | List videos, --duration shows total time |
-| `yt-chapters` | `yt-chapters "URL"` | Get video chapters/timestamps |
-| `yt-links` | `yt-links "URL" [--github]` | Extract links from description |
+| `yt-meta`       | `yt-meta "URL" [--full]`              | Get metadata, --full includes description/chapters            |
+| `yt-channel`    | `yt-channel "@Name" [N]`              | Get N recent videos from channel                              |
+| `yt-playlist`   | `yt-playlist "URL" [--duration]`      | List videos, --duration shows total time                      |
+| `yt-chapters`   | `yt-chapters "URL"`                   | Get video chapters/timestamps                                 |
+| `yt-links`      | `yt-links "URL" [--github]`           | Extract links from description                                |
 
 ## Quick Examples
 
@@ -88,8 +89,8 @@ yt-transcript "URL"
 
 ## Errors
 
-| Error | Fix |
-|-------|-----|
+| Error                     | Fix                              |
+| ------------------------- | -------------------------------- |
 | No subtitles for language | Script shows available languages |
-| Private video | Not accessible |
-| Age-restricted | Sign-in required |
+| Private video             | Not accessible                   |
+| Age-restricted            | Sign-in required                 |

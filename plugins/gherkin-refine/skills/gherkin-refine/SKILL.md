@@ -1,6 +1,6 @@
 ---
 name: gherkin-refine
-description: Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation. Use when user requests are unclear, have multiple interpretations, or when Claude needs to confirm understanding of requirements.
+description: Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation. Use when requests are unclear, have multiple interpretations, need requirement confirmation, or user mentions gherkin, BDD, acceptance criteria.
 ---
 
 # gherkin-refine
@@ -46,6 +46,7 @@ Feature: [What user wants to achieve]
 **User says:** "Add a button to delete users"
 
 **Refine as:**
+
 ```gherkin
 Feature: User deletion
 
@@ -69,6 +70,7 @@ Then ask: "Does this match what you need? Any scenarios I should add or modify?"
 **User says:** "Make the search faster"
 
 **Refine as:**
+
 ```gherkin
 Feature: Search performance improvement
 

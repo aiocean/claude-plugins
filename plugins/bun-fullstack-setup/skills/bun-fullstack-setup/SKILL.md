@@ -1,6 +1,6 @@
 ---
 name: bun-fullstack-setup
-description: Setup Bun server serving both API and static frontend on single port. Use when creating fullstack apps, setting up monorepo with frontend/backend, configuring Docker for Bun projects, or when user mentions "single port", "Bun server", "Vite proxy".
+description: Setup Bun server serving both API and static frontend on single port. Use when creating fullstack apps, setting up monorepo, configuring Docker for Bun, or user mentions single port, Bun server, Vite proxy, fullstack Bun.
 ---
 
 # Bun Fullstack Setup
@@ -26,28 +26,32 @@ Create `config.ts` - validates required env vars at startup, fails fast if missi
 ```typescript
 // pkgs/server/config.ts
 function required(name: string): string {
-  const value = process.env[name]
+  const value = process.env[name];
   if (!value) {
-    console.error(`❌ Missing required environment variable: ${name}`)
-    process.exit(1)
+    console.error(`❌ Missing required environment variable: ${name}`);
+    process.exit(1);
   }
-  return value
+  return value;
 }
 
 export const config = {
   // Required - app fails if missing
-  dataDir: required('DATA_DIR'),
+  dataDir: required("DATA_DIR"),
 
   // Optional with defaults
-  port: parseInt(process.env.PORT || '3000', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  port: parseInt(process.env.PORT || "3000", 10),
+  nodeEnv: process.env.NODE_ENV || "development",
 
-  get isDev() { return this.nodeEnv === 'development' },
-  get isProd() { return this.nodeEnv === 'production' }
-}
+  get isDev() {
+    return this.nodeEnv === "development";
+  },
+  get isProd() {
+    return this.nodeEnv === "production";
+  },
+};
 
-console.log(`📁 DATA_DIR: ${config.dataDir}`)
-console.log(`🔌 PORT: ${config.port}`)
+console.log(`📁 DATA_DIR: ${config.dataDir}`);
+console.log(`🔌 PORT: ${config.port}`);
 ```
 
 **Key principle**: Import config first in index.ts to validate before anything else runs.
@@ -56,95 +60,96 @@ console.log(`🔌 PORT: ${config.port}`)
 
 ```typescript
 // pkgs/server/index.ts
-import { config } from './config'  // Validate env first!
-import { serve, file } from 'bun'
-import { join } from 'path'
+import { config } from "./config"; // Validate env first!
+import { serve, file } from "bun";
+import { join } from "path";
 
-const STATIC_DIR = join(import.meta.dir, '../webapp/dist')
+const STATIC_DIR = join(import.meta.dir, "../webapp/dist");
 
 serve({
   port: config.port,
   routes: {
     // API routes
-    '/api/items': () => listItems(),
-    '/api/items/:id': req => getItem(req.params.id),
+    "/api/items": () => listItems(),
+    "/api/items/:id": (req) => getItem(req.params.id),
     // ... more routes
   },
 
   async fetch(req) {
     // Production: serve static files for non-API routes
     if (config.isProd) {
-      const url = new URL(req.url)
-      let pathname = url.pathname
+      const url = new URL(req.url);
+      let pathname = url.pathname;
 
       // SPA: serve index.html for routes without extension
-      if (pathname === '/' || !pathname.includes('.')) {
-        pathname = '/index.html'
+      if (pathname === "/" || !pathname.includes(".")) {
+        pathname = "/index.html";
       }
 
-      const f = file(join(STATIC_DIR, pathname))
-      if (await f.exists()) return new Response(f)
+      const f = file(join(STATIC_DIR, pathname));
+      if (await f.exists()) return new Response(f);
 
       // Fallback to index.html for SPA routing
-      return new Response(file(join(STATIC_DIR, 'index.html')))
+      return new Response(file(join(STATIC_DIR, "index.html")));
     }
 
-    return new Response('Not found', { status: 404 })
-  }
-})
+    return new Response("Not found", { status: 404 });
+  },
+});
 
-console.log(`🚀 Server running at http://localhost:${config.port}`)
-if (config.isProd) console.log(`📦 Serving static files from ${STATIC_DIR}`)
+console.log(`🚀 Server running at http://localhost:${config.port}`);
+if (config.isProd) console.log(`📦 Serving static files from ${STATIC_DIR}`);
 ```
 
 ## 3. Vite Proxy (Development)
 
 ```typescript
 // pkgs/webapp/vite.config.ts
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 
 export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': 'http://localhost:3001'
-    }
-  }
-})
+      "/api": "http://localhost:3001",
+    },
+  },
+});
 ```
 
 ## 4. PM2 Config (Development)
 
 ```javascript
 // ecosystem.config.cjs
-const { join } = require('path')
+const { join } = require("path");
 
 module.exports = {
   apps: [
     {
-      name: 'webapp',
-      cwd: './pkgs/webapp',
-      script: 'bunx',
-      args: 'vite',
+      name: "webapp",
+      cwd: "./pkgs/webapp",
+      script: "bunx",
+      args: "vite",
     },
     {
-      name: 'server',
-      cwd: './pkgs/server',
-      script: 'bun',
-      args: '--watch index.ts',
+      name: "server",
+      cwd: "./pkgs/server",
+      script: "bun",
+      args: "--watch index.ts",
       env: {
-        NODE_ENV: 'development',
-        PORT: '3001',
-        DATA_DIR: join(__dirname, 'data'),
+        NODE_ENV: "development",
+        PORT: "3001",
+        DATA_DIR: join(__dirname, "data"),
       },
     },
   ],
-}
+};
 ```
 
 ## 5. Docker Setup
 
 **Dockerfile** (multi-stage build):
+
 ```dockerfile
 # Stage 1: Build frontend
 FROM oven/bun:1 AS frontend-builder
@@ -179,6 +184,7 @@ CMD ["./docker-entrypoint.sh"]
 ```
 
 **docker-entrypoint.sh** (simple, single server):
+
 ```bash
 #!/bin/bash
 set -e
@@ -187,6 +193,7 @@ exec bun run index.ts
 ```
 
 **docker-compose.yml**:
+
 ```yaml
 services:
   app:
