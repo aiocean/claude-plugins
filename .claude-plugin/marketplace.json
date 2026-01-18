@@ -66,6 +66,13 @@
       "description": "Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "reflect",
+      "source": "./plugins/reflect",
+      "description": "Learn from Claude Code sessions to extract reusable knowledge. Analyzes corrections, preferences, and technical discoveries to build CLAUDE.md rules and new skills.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
