@@ -18,16 +18,16 @@ Then it helps you codify these learnings into:
 
 ## Installation
 
+First, add the marketplace (if not already added):
+
 ```bash
-# Clone to user skills directory
-git clone https://github.com/anthropics/claude-plugins.git /tmp/claude-plugins
-cp -r /tmp/claude-plugins/plugins/reflect ~/.claude/skills/reflect
+/plugin marketplace add aiocean/claude-plugins
 ```
 
-Or add to your project:
+Then install the plugin:
 
 ```bash
-cp -r /tmp/claude-plugins/plugins/reflect .claude/skills/reflect
+/plugin install reflect@aiocean-plugins
 ```
 
 ## Usage
@@ -82,8 +82,7 @@ reflect/
 ├── SKILL.md              # Main skill definition
 ├── README.md             # This file
 ├── docs/
-│   ├── RESEARCH.md       # Research & design decisions
-│   └── IMPLEMENTATION_PLAN.md
+│   └── RESEARCH.md       # Research & design decisions
 ├── scripts/
 │   ├── extract-session.ts    # Session extraction
 │   ├── get-project-path.ts   # Path utilities
