@@ -78,6 +78,14 @@ Build web interfaces that stand out. While everyone else uses the same boring ro
 /plugin install neobrutalism@aiocean-plugins
 ```
 
+## golangci-lint
+
+Stop linting your entire codebase when you only changed 10 lines. This skill teaches golangci-lint to focus on what matters - your changes. Use `--new` for unstaged changes, `--new-from-merge-base=main` for PR reviews. Handles the annoying v2 config migration (yes, `typecheck` and `gosimple` are gone). Includes common `//nolint` patterns for when you know better than the linter. Faster feedback, cleaner PRs.
+
+```bash
+/plugin install golangci-lint@aiocean-plugins
+```
+
 ## bun-fullstack-setup
 
 Ship fullstack applications with Bun the right way. Single port serves both your API and static frontend in production - no nginx configuration needed. Vite proxy handles development with hot reload. Environment validation catches missing config at startup, not runtime. PM2 config for local development. Multi-stage Docker build for lean production images. Stop copy-pasting boilerplate from Stack Overflow - get a proven setup that just works.
