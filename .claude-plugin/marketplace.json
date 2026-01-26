@@ -73,6 +73,13 @@
       "description": "Learn from Claude Code sessions to extract reusable knowledge. Analyzes corrections, preferences, and technical discoveries to build CLAUDE.md rules and new skills.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "golangci-lint",
+      "source": "./plugins/golangci-lint",
+      "description": "Efficient Go linting with golangci-lint. Lint only changed code, fix v2 config issues, handle common warnings.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
