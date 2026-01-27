@@ -1,0 +1,7 @@
+{
+  "name": "monitoring",
+  "description": "Monitoring, observability, alerting, and SLI/SLO/SLA frameworks. Based on Google SRE, Brendan Gregg's USE method, and industry best practices.",
+  "version": "1.0.0",
+  "author": { "name": "aiocean" },
+  "license": "MIT"
+}
