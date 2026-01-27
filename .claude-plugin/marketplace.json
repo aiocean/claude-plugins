@@ -80,6 +80,13 @@
       "description": "Efficient Go linting with golangci-lint. Lint only changed code, fix v2 config issues, handle common warnings.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "monitoring",
+      "source": "./plugins/monitoring",
+      "description": "Monitoring, observability, alerting, and SLI/SLO/SLA frameworks. Based on Google SRE, Brendan Gregg's USE method, and industry best practices.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
