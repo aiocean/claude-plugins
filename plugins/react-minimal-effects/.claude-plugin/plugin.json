@@ -1,0 +1,7 @@
+{
+  "name": "react-minimal-effects",
+  "description": "Minimize useEffect in React 19. Covers React Compiler, new hooks, and proper patterns.",
+  "version": "3.0.0",
+  "author": { "name": "aiocean" },
+  "license": "MIT"
+}
