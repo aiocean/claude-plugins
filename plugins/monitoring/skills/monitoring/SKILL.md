@@ -13,10 +13,12 @@ description: Monitoring, observability, alerting, and SRE practices. Use when de
 |----------|-----------|---------|
 | Are users happy? | RED or Golden Signals | [Frameworks](./reference/frameworks.md) |
 | Is this machine healthy? | USE Method | [Frameworks](./reference/frameworks.md) |
-| Where is the bottleneck? | USE Method | [Frameworks](./reference/frameworks.md) |
+| Where is the bottleneck? | USE Method + Profiling | [Profiling](./reference/application-profiling.md) |
 | What should our SLO measure? | Golden Signals | [SLI/SLO/SLA](./reference/slo-framework.md) |
 | How do I set up alerts? | SLO-based with burn rates | [Alerting](./reference/alerting.md) |
 | Monitoring vs Observability? | Depends on system complexity | [Observability](./reference/observability.md) |
+| How much capacity do we need? | Growth projection | [Capacity Planning](./reference/capacity-planning.md) |
+| Can we handle this load? | Load/stress testing | [Performance Testing](./reference/performance-testing.md) |
 
 ## The Three Core Frameworks
 
@@ -105,6 +107,9 @@ For **every service**:
 - [SLI/SLO/SLA & Error Budgets](./reference/slo-framework.md) - Complete reliability framework
 - [Monitoring vs Observability](./reference/observability.md) - When to use which
 - [Alerting & On-Call](./reference/alerting.md) - Sustainable alerting practices
+- [Performance Testing](./reference/performance-testing.md) - Load, stress, spike, soak testing with k6, Artillery, Locust
+- [Application Profiling](./reference/application-profiling.md) - CPU, memory, I/O profiling for Node.js, Python, Go, Java
+- [Capacity Planning](./reference/capacity-planning.md) - Growth projection, scaling strategies, auto-scaling config
 
 ## Sources
 
