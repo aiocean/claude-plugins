@@ -8,6 +8,30 @@ description: Comprehensive mental models framework with 50+ models. Use when fac
 > "The quality of our thinking is largely influenced by our mental models."
 > — Shane Parrish
 
+## List Available Models
+
+Use the script to browse and search models:
+
+```bash
+# List all 54 models grouped by volume
+~/.claude/skills/mental-models/scripts/list-models.sh
+
+# Filter by volume (1-4)
+~/.claude/skills/mental-models/scripts/list-models.sh --volume 1
+
+# Search by keyword
+~/.claude/skills/mental-models/scripts/list-models.sh --search "thinking"
+
+# Quick count
+~/.claude/skills/mental-models/scripts/list-models.sh --count
+```
+
+**Volumes:**
+- Volume 1: General Thinking (First Principles, Inversion, etc.)
+- Volume 2: Physics, Chemistry & Biology (Leverage, Catalysts, etc.)
+- Volume 3: Systems & Mathematics (Feedback Loops, Compounding, etc.)
+- Volume 4: Economics & Art (Incentives, Opportunity Cost, etc.)
+
 ## Quick Model Selector
 
 ### By Problem Type
