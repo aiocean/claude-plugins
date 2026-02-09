@@ -87,6 +87,13 @@
       "description": "Monitoring, observability, alerting, and SLI/SLO/SLA frameworks. Based on Google SRE, Brendan Gregg's USE method, and industry best practices.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "ios-device-debug",
+      "source": "./plugins/ios-device-debug",
+      "description": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
