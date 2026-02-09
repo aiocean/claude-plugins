@@ -1,6 +1,6 @@
 ---
 name: ios-device-debug
-description: This skill should be used when the user asks to "debug on device", "deploy to iPhone", "get crash logs", "check device logs", "install on device", "run on phone", "pull crash report", "analyze crash", "why is my app crashing", "syslog", "device logs", or when debugging iOS app crashes on physical devices. Covers the full workflow from build, install, launch, log capture, crash report extraction, and crash analysis.
+description: This skill should be used when the user asks to "debug on device", "deploy to iPhone", "get crash logs", "check device logs", "install on device", "run on phone", "pull crash report", "analyze crash", "why is my app crashing", "syslog", "device logs", "take screenshot", "capture screenshot", "screenshot from device", "device screenshot", or when debugging iOS app crashes on physical devices. Covers the full workflow from build, install, launch, log capture, screenshot capture, crash report extraction, and crash analysis.
 version: 1.0.0
 ---
 
@@ -15,7 +15,8 @@ All scripts are in the skill directory. Reference them relative to the plugin ro
 Required tools (check before starting):
 - **Xcode** with command line tools (`xcode-select --install`)
 - **libimobiledevice**: `brew install libimobiledevice` (provides `idevicesyslog`, `idevicecrashreport`)
-- **Python 3**: for crash report parsing
+- **pymobiledevice3**: `pip3 install pymobiledevice3` (required for screenshots on iOS 17+)
+- **Python 3**: for crash report parsing and pymobiledevice3
 - Physical iOS device connected via USB or WiFi
 
 ## Workflow Overview
@@ -38,6 +39,7 @@ The debug workflow follows this sequence:
 | `scripts/launch-and-log.sh` | Launch app, capture syslog, check for crashes |
 | `scripts/pull-crash-reports.sh` | Pull .ips crash reports from device |
 | `scripts/analyze-crash.sh` | Parse .ips file into human-readable analysis |
+| `scripts/screenshot.sh` | Capture screenshot from device (iOS 17+ compatible) |
 
 ## Step-by-Step Debug Process
 
@@ -54,6 +56,44 @@ xcrun devicectl list devices
 ```
 
 The xcodebuild ID (e.g., `00008140-...`) is used for building and installing. The devicectl UUID is different. Always verify which ID a command expects.
+
+### Capture Screenshot
+
+On iOS 17+, `idevicescreenshot` and the deprecated `pymobiledevice3 developer screenshot` API both fail. Use the DVT screenshot method via pymobiledevice3 tunnel instead.
+
+**Prerequisites:**
+
+1. Install pymobiledevice3: `pip3 install pymobiledevice3`
+2. Start tunneld (requires sudo, run once in background):
+   ```bash
+   sudo python3 -m pymobiledevice3 remote tunneld -p tcp
+   ```
+3. Developer image must be mounted (usually already done if Xcode has connected to the device):
+   ```bash
+   python3 -m pymobiledevice3 mounter auto-mount
+   ```
+
+**Capture screenshot:**
+
+```bash
+# Using the script (recommended)
+bash scripts/screenshot.sh /tmp/device_screenshot.png
+
+# Manual command
+python3 -m pymobiledevice3 developer dvt screenshot --tunnel "" /tmp/device_screenshot.png
+```
+
+The `--tunnel ""` flag auto-discovers the device through the running tunneld service.
+
+**What does NOT work on iOS 17+:**
+
+| Method | Status | Error |
+|--------|--------|-------|
+| `idevicescreenshot` | FAILS | "Could not start screenshotr service: Invalid service" |
+| `pymobiledevice3 developer screenshot` | FAILS | "InvalidServiceError" (deprecated API) |
+| `pymobiledevice3 developer screenshot --tunnel ""` | FAILS | deprecated API, same error through tunnel |
+| `xcrun devicectl` | N/A | No screenshot subcommand exists |
+| `pymobiledevice3 developer dvt screenshot --tunnel ""` | WORKS | DVT API through tunneld |
 
 ### 2. Build & Install
 
@@ -146,6 +186,7 @@ The analyze script outputs: exception type, signal, faulting thread, stack trace
 ## Common Pitfalls
 
 - **Wrong device ID**: `xcodebuild` and `devicectl` use DIFFERENT IDs. Do not mix them.
+- **Screenshot on iOS 17+**: `idevicescreenshot` and the deprecated pymobiledevice3 screenshot API do NOT work. You MUST use `pymobiledevice3 developer dvt screenshot --tunnel ""`. Requires tunneld running with `sudo python3 -m pymobiledevice3 remote tunneld -p tcp`.
 - **Syslog disconnects**: `idevicesyslog` can disconnect. Always verify logs were captured (check file size).
 - **Benign CoreMotion warning**: `Error reading com.apple.CoreMotion.plist` is a system log, not an app error.
 - **Swift 6 actor isolation**: `dispatch_assert_queue_fail` in stack = closure running on wrong queue for `@MainActor` class. Fix with `@Sendable` annotation.
