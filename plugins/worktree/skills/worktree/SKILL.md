@@ -172,6 +172,34 @@ git rebase --continue
 worktree-sync.sh
 ```
 
+## Worktrees + Agent Teams
+
+When using **Agent Teams** (experimental, requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), combine worktrees with agent teams for maximum parallel safety.
+
+**Pattern: Each teammate gets their own worktree**
+
+```bash
+# Lead creates worktrees for each teammate
+worktree-create.sh teammate-frontend
+worktree-create.sh teammate-backend
+worktree-create.sh teammate-tests
+
+# Each teammate works in their own worktree (no file conflicts)
+# Teammate messages via SendMessage when ready to sync
+# Lead coordinates sync order to avoid conflicts
+```
+
+**Why:** Agent teams let multiple Claude instances work in parallel. Worktrees give each instance an isolated filesystem. Combined = true parallel development without merge conflicts.
+
+**Sync strategy with teams:**
+1. Teammates work and commit independently in their worktrees
+2. When a teammate finishes, they message the lead
+3. Lead runs `worktree-sync.sh` in order (first-done-first-synced)
+4. Later teammates get earlier teammates' work when they sync
+5. All worktrees converge to the same history
+
+**When NOT to combine:** If tasks are small and touch different files anyway, agent teams alone (without worktrees) work fine. Use worktrees when there's ANY risk of file overlap.
+
 ## Key Points
 
 - **Naming convention:** `wtr-` prefix for easy identification
