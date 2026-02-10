@@ -94,6 +94,30 @@ Ship fullstack applications with Bun the right way. Single port serves both your
 /plugin install bun-fullstack-setup@aiocean-plugins
 ```
 
+## monitoring
+
+Build reliable systems that tell you when something is wrong before your users do. Comprehensive monitoring frameworks based on Google SRE, Brendan Gregg's USE method, and RED method. Define meaningful SLIs, set realistic SLOs, and create alerts that actually matter. Covers infrastructure monitoring, application performance, capacity planning, and incident response. Stop flying blind in production.
+
+```bash
+/plugin install monitoring@aiocean-plugins
+```
+
+## ios-device-debug
+
+Debug iOS apps on real hardware from your terminal. Build, install, and launch apps on physical devices. Capture live device logs filtered by your app. Pull crash reports and analyze symbolicated stack traces. Take screenshots on iOS 17+ devices. No more hunting through Xcode's device organizer - everything you need is one command away.
+
+```bash
+/plugin install ios-device-debug@aiocean-plugins
+```
+
+## codebase-oracle
+
+Understand any codebase fast. Creates an agent team that analyzes your project in parallel - multiple teammates reading code, tracing dependencies, and mapping architecture simultaneously. Three modes: Full Map generates a complete `CODEBASE_MAP.md` with architecture diagrams, hub files, and navigation guides. Investigate answers targeted questions with evidence-based confidence tracking. Impact tells you exactly what breaks before you change something. Works on codebases of any size.
+
+```bash
+/plugin install codebase-oracle@aiocean-plugins
+```
+
 ## License
 
 MIT
