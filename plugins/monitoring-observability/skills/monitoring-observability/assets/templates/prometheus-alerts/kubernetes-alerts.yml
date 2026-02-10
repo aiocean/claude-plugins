@@ -1,0 +1,293 @@
+---
+# Prometheus Alert Rules for Kubernetes
+# Covers pods, nodes, deployments, and resource usage
+
+groups:
+  - name: kubernetes_pods
+    interval: 30s
+    rules:
+      # Pod crash looping
+      - alert: PodCrashLooping
+        expr: |
+          rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Pod is crash looping - {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: |
+            Pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes.
+
+            Check pod logs:
+            kubectl logs -n {{ $labels.namespace }} {{ $labels.pod }} --previous
+          runbook_url: "https://runbooks.example.com/pod-crash-loop"
+
+      # Pod not ready
+      - alert: PodNotReady
+        expr: |
+          sum by (namespace, pod) (kube_pod_status_phase{phase!~"Running|Succeeded"}) > 0
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Pod not ready - {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: |
+            Pod {{ $labels.namespace }}/{{ $labels.pod }} is in {{ $labels.phase }} state for 10 minutes.
+
+            Investigate:
+            kubectl describe pod -n {{ $labels.namespace }} {{ $labels.pod }}
+          runbook_url: "https://runbooks.example.com/pod-not-ready"
+
+      # Pod OOMKilled
+      - alert: PodOOMKilled
+        expr: |
+          sum by (namespace, pod) (kube_pod_container_status_terminated_reason{reason="OOMKilled"}) > 0
+        for: 1m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Pod killed due to OOM - {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: |
+            Pod {{ $labels.namespace }}/{{ $labels.pod }} was killed due to out-of-memory.
+
+            Increase memory limits or investigate memory leak.
+          runbook_url: "https://runbooks.example.com/oom-killed"
+
+  - name: kubernetes_deployments
+    interval: 30s
+    rules:
+      # Deployment replica mismatch
+      - alert: DeploymentReplicasMismatch
+        expr: |
+          kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Deployment replicas mismatch - {{ $labels.namespace }}/{{ $labels.deployment }}"
+          description: |
+            Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has been running with
+            fewer replicas than desired for 15 minutes.
+
+            Desired: {{ $value }}
+            Available: Check deployment status
+          runbook_url: "https://runbooks.example.com/replica-mismatch"
+
+      # Deployment rollout stuck
+      - alert: DeploymentRolloutStuck
+        expr: |
+          kube_deployment_status_condition{condition="Progressing", status="false"} > 0
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Deployment rollout stuck - {{ $labels.namespace }}/{{ $labels.deployment }}"
+          description: |
+            Deployment {{ $labels.namespace }}/{{ $labels.deployment }} rollout is stuck.
+
+            Check rollout status:
+            kubectl rollout status deployment/{{ $labels.deployment }} -n {{ $labels.namespace }}
+          runbook_url: "https://runbooks.example.com/rollout-stuck"
+
+  - name: kubernetes_nodes
+    interval: 30s
+    rules:
+      # Node not ready
+      - alert: NodeNotReady
+        expr: |
+          kube_node_status_condition{condition="Ready",status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Node not ready - {{ $labels.node }}"
+          description: |
+            Node {{ $labels.node }} has been NotReady for 5 minutes.
+
+            This will affect pod scheduling and availability.
+
+            Check node status:
+            kubectl describe node {{ $labels.node }}
+          runbook_url: "https://runbooks.example.com/node-not-ready"
+
+      # Node memory pressure
+      - alert: NodeMemoryPressure
+        expr: |
+          kube_node_status_condition{condition="MemoryPressure",status="true"} == 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Node under memory pressure - {{ $labels.node }}"
+          description: |
+            Node {{ $labels.node }} is experiencing memory pressure.
+
+            Pods may be evicted. Consider scaling up or evicting low-priority pods.
+          runbook_url: "https://runbooks.example.com/memory-pressure"
+
+      # Node disk pressure
+      - alert: NodeDiskPressure
+        expr: |
+          kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Node under disk pressure - {{ $labels.node }}"
+          description: |
+            Node {{ $labels.node }} is experiencing disk pressure.
+
+            Clean up disk space or add capacity.
+          runbook_url: "https://runbooks.example.com/disk-pressure"
+
+      # Node high CPU
+      - alert: NodeHighCPU
+        expr: |
+          (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance)) * 100 > 80
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Node high CPU usage - {{ $labels.instance }}"
+          description: |
+            Node {{ $labels.instance }} CPU usage is {{ $value | humanize }}%.
+
+            Check for resource-intensive pods or scale cluster.
+          runbook_url: "https://runbooks.example.com/node-high-cpu"
+
+  - name: kubernetes_resources
+    interval: 30s
+    rules:
+      # Container CPU throttling
+      - alert: ContainerCPUThrottling
+        expr: |
+          rate(container_cpu_cfs_throttled_seconds_total[5m]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Container CPU throttling - {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: |
+            Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }}
+            is being CPU throttled.
+
+            CPU throttling rate: {{ $value | humanize }}
+
+            Consider increasing CPU limits.
+          runbook_url: "https://runbooks.example.com/cpu-throttling"
+
+      # Container memory usage high
+      - alert: ContainerMemoryUsageHigh
+        expr: |
+          (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Container memory usage high - {{ $labels.namespace }}/{{ $labels.pod }}"
+          description: |
+            Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }}
+            is using {{ $value | humanizePercentage }} of its memory limit.
+
+            Risk of OOMKill. Consider increasing memory limits.
+          runbook_url: "https://runbooks.example.com/high-memory"
+
+  - name: kubernetes_pv
+    interval: 30s
+    rules:
+      # PersistentVolume nearing full
+      - alert: PersistentVolumeFillingUp
+        expr: |
+          (kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes) < 0.15
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "PersistentVolume filling up - {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}"
+          description: |
+            PersistentVolume {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }}
+            is {{ $value | humanizePercentage }} full.
+
+            Available space is running low. Consider expanding volume.
+          runbook_url: "https://runbooks.example.com/pv-filling-up"
+
+      # PersistentVolume critically full
+      - alert: PersistentVolumeCriticallyFull
+        expr: |
+          (kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes) < 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "PersistentVolume critically full - {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}"
+          description: |
+            PersistentVolume {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }}
+            is {{ $value | humanizePercentage }} full.
+
+            Immediate action required to prevent application failures.
+          runbook_url: "https://runbooks.example.com/pv-critically-full"
+
+  - name: kubernetes_jobs
+    interval: 30s
+    rules:
+      # Job failed
+      - alert: JobFailed
+        expr: |
+          kube_job_status_failed > 0
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "Job failed - {{ $labels.namespace }}/{{ $labels.job_name }}"
+          description: |
+            Job {{ $labels.namespace }}/{{ $labels.job_name }} has failed.
+
+            Check job logs:
+            kubectl logs job/{{ $labels.job_name }} -n {{ $labels.namespace }}
+          runbook_url: "https://runbooks.example.com/job-failed"
+
+      # CronJob not running
+      - alert: CronJobNotRunning
+        expr: |
+          time() - kube_cronjob_status_last_schedule_time > 3600
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          component: kubernetes
+        annotations:
+          summary: "CronJob not running - {{ $labels.namespace }}/{{ $labels.cronjob }}"
+          description: |
+            CronJob {{ $labels.namespace}}/{{ $labels.cronjob }} hasn't run in over an hour.
+
+            Check CronJob status:
+            kubectl describe cronjob {{ $labels.cronjob }} -n {{ $labels.namespace }}
+          runbook_url: "https://runbooks.example.com/cronjob-not-running"

@@ -82,9 +82,9 @@
       "author": { "name": "aiocean" }
     },
     {
-      "name": "monitoring",
-      "source": "./plugins/monitoring",
-      "description": "Monitoring, observability, alerting, and SLI/SLO/SLA frameworks. Based on Google SRE, Brendan Gregg's USE method, and industry best practices.",
+      "name": "monitoring-observability",
+      "source": "./plugins/monitoring-observability",
+      "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
     },
