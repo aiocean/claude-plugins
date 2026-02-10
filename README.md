@@ -94,12 +94,12 @@ Ship fullstack applications with Bun the right way. Single port serves both your
 /plugin install bun-fullstack-setup@aiocean-plugins
 ```
 
-## monitoring
+## monitoring-observability
 
-Build reliable systems that tell you when something is wrong before your users do. Comprehensive monitoring frameworks based on Google SRE, Brendan Gregg's USE method, and RED method. Define meaningful SLIs, set realistic SLOs, and create alerts that actually matter. Covers infrastructure monitoring, application performance, capacity planning, and incident response. Stop flying blind in production.
+Build reliable systems that tell you when something is wrong before your users do. Comprehensive monitoring and observability skill covering metrics design (Golden Signals, RED/USE methods), distributed tracing with OpenTelemetry, alerting best practices, SLOs/SLIs/error budgets, dashboard design, log aggregation, and tool selection. Includes 7 automation scripts for metrics analysis, alert quality checking, SLO calculation, log analysis, dashboard generation, health check validation, and Datadog cost analysis. Production-ready templates for Prometheus alerts, OpenTelemetry collector config, and incident runbooks.
 
 ```bash
-/plugin install monitoring@aiocean-plugins
+/plugin install monitoring-observability@aiocean-plugins
 ```
 
 ## ios-device-debug

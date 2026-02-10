@@ -1,0 +1,227 @@
+# OpenTelemetry Collector Configuration
+# Receives metrics, logs, and traces and exports to various backends
+
+receivers:
+  # OTLP receiver (standard OpenTelemetry protocol)
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Prometheus receiver (scrape Prometheus endpoints)
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['localhost:8888']
+
+  # Host metrics (CPU, memory, disk, network)
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      network:
+      filesystem:
+      load:
+
+  # Kubernetes receiver (cluster metrics)
+  k8s_cluster:
+    auth_type: serviceAccount
+    node_conditions_to_report: [Ready, MemoryPressure, DiskPressure]
+    distribution: kubernetes
+
+  # Zipkin receiver (legacy tracing)
+  zipkin:
+    endpoint: 0.0.0.0:9411
+
+processors:
+  # Batch processor (improves performance)
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Memory limiter (prevent OOM)
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Resource processor (add resource attributes)
+  resource:
+    attributes:
+      - key: environment
+        value: production
+        action: insert
+      - key: cluster.name
+        value: prod-cluster
+        action: insert
+
+  # Attributes processor (modify span/metric attributes)
+  attributes:
+    actions:
+      - key: http.url
+        action: delete  # Remove potentially sensitive URLs
+      - key: db.statement
+        action: hash    # Hash SQL queries for privacy
+
+  # Filter processor (drop unwanted data)
+  filter:
+    metrics:
+      # Drop metrics matching criteria
+      exclude:
+        match_type: regexp
+        metric_names:
+          - ^go_.*      # Drop Go runtime metrics
+          - ^process_.* # Drop process metrics
+
+  # Tail sampling (intelligent trace sampling)
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 100
+    policies:
+      # Always sample errors
+      - name: error-policy
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+
+      # Sample slow traces
+      - name: latency-policy
+        type: latency
+        latency:
+          threshold_ms: 1000
+
+      # Sample 10% of others
+      - name: probabilistic-policy
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 10
+
+  # Span processor (modify spans)
+  span:
+    name:
+      to_attributes:
+        rules:
+          - ^\/api\/v1\/users\/(?P<user_id>.*)$
+      from_attributes:
+        - db.name
+        - http.method
+
+exporters:
+  # Prometheus exporter (expose metrics endpoint)
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: otel
+
+  # OTLP exporters (send to backends)
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  otlp/mimir:
+    endpoint: mimir:4317
+    tls:
+      insecure: true
+
+  # Loki exporter (for logs)
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      resource:
+        service.name: "service_name"
+        service.namespace: "service_namespace"
+      attributes:
+        level: "level"
+
+  # Jaeger exporter (alternative tracing backend)
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+
+  # Elasticsearch exporter (for logs)
+  elasticsearch:
+    endpoints:
+      - http://elasticsearch:9200
+    logs_index: otel-logs
+    traces_index: otel-traces
+
+  # CloudWatch exporter (AWS)
+  awscloudwatch:
+    region: us-east-1
+    namespace: MyApp
+    log_group_name: /aws/otel/logs
+    log_stream_name: otel-collector
+
+  # Datadog exporter
+  datadog:
+    api:
+      key: ${DD_API_KEY}
+      site: datadoghq.com
+
+  # File exporter (debugging)
+  file:
+    path: /tmp/otel-output.json
+
+  # Logging exporter (console output for debugging)
+  logging:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+extensions:
+  # Health check endpoint
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # Pprof endpoint (for profiling)
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # ZPages (internal diagnostics)
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp, zipkin]
+      processors: [memory_limiter, batch, tail_sampling, resource, span]
+      exporters: [otlp/tempo, jaeger, logging]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics, k8s_cluster]
+      processors: [memory_limiter, batch, filter, resource]
+      exporters: [otlp/mimir, prometheus, awscloudwatch]
+
+    # Logs pipeline
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [loki, elasticsearch, awscloudwatch]
+
+  # Telemetry (collector's own metrics)
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888
+
+# Notes:
+# 1. Replace ${DD_API_KEY} with actual API key or use environment variable
+# 2. Adjust endpoints to match your infrastructure
+# 3. Comment out exporters you don't use
+# 4. Adjust sampling rates based on your volume and needs
+# 5. Add TLS configuration for production deployments

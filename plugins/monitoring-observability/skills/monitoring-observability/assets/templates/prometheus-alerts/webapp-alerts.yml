@@ -1,0 +1,243 @@
+---
+# Prometheus Alert Rules for Web Applications
+# Based on SLO best practices and multi-window burn rate alerting
+
+groups:
+  - name: webapp_availability
+    interval: 30s
+    rules:
+      # Fast burn rate alert (1h window) - SLO: 99.9%
+      - alert: ErrorBudgetFastBurn
+        expr: |
+          (
+            sum(rate(http_requests_total{job="webapp",status=~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total{job="webapp"}[1h]))
+          ) > (14.4 * 0.001)
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+          component: webapp
+        annotations:
+          summary: "Fast error budget burn - {{ $labels.job }}"
+          description: |
+            Error rate is {{ $value | humanizePercentage }} over the last hour,
+            burning through error budget at 14.4x rate.
+
+            At this rate, the monthly error budget will be exhausted in 2 days.
+
+            Immediate investigation required.
+          runbook_url: "https://runbooks.example.com/error-budget-burn"
+          dashboard: "https://grafana.example.com/d/webapp"
+
+      # Slow burn rate alert (6h window)
+      - alert: ErrorBudgetSlowBurn
+        expr: |
+          (
+            sum(rate(http_requests_total{job="webapp",status=~"5.."}[6h]))
+            /
+            sum(rate(http_requests_total{job="webapp"}[6h]))
+          ) > (6 * 0.001)
+        for: 30m
+        labels:
+          severity: warning
+          team: backend
+          component: webapp
+        annotations:
+          summary: "Elevated error budget burn - {{ $labels.job }}"
+          description: |
+            Error rate is {{ $value | humanizePercentage }} over the last 6 hours,
+            burning through error budget at 6x rate.
+
+            Monitor closely and investigate if trend continues.
+          runbook_url: "https://runbooks.example.com/error-budget-burn"
+
+      # Service down alert
+      - alert: WebAppDown
+        expr: up{job="webapp"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+          component: webapp
+        annotations:
+          summary: "Web application is down - {{ $labels.instance }}"
+          description: |
+            Web application instance {{ $labels.instance }} has been down for 2 minutes.
+
+            Check service health and logs immediately.
+          runbook_url: "https://runbooks.example.com/service-down"
+
+  - name: webapp_latency
+    interval: 30s
+    rules:
+      # High latency (p95)
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="webapp"}[5m])) by (le)
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+          component: webapp
+        annotations:
+          summary: "High p95 latency - {{ $labels.job }}"
+          description: |
+            P95 request latency is {{ $value }}s, exceeding 500ms threshold.
+
+            This may impact user experience. Check for:
+            - Slow database queries
+            - External API issues
+            - Resource saturation
+          runbook_url: "https://runbooks.example.com/high-latency"
+          dashboard: "https://grafana.example.com/d/webapp-latency"
+
+      # Very high latency (p99)
+      - alert: HighLatencyP99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket{job="webapp"}[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+          component: webapp
+        annotations:
+          summary: "Critical latency degradation - {{ $labels.job }}"
+          description: |
+            P99 request latency is {{ $value }}s, exceeding 2s threshold.
+
+            Severe performance degradation detected.
+          runbook_url: "https://runbooks.example.com/high-latency"
+
+  - name: webapp_resources
+    interval: 30s
+    rules:
+      # High CPU
+      - alert: HighCPU
+        expr: |
+          rate(process_cpu_seconds_total{job="webapp"}[5m]) * 100 > 80
+        for: 15m
+        labels:
+          severity: warning
+          team: backend
+          component: webapp
+        annotations:
+          summary: "High CPU usage - {{ $labels.instance }}"
+          description: |
+            CPU usage is {{ $value | humanize }}% on {{ $labels.instance }}.
+
+            Consider scaling up or investigating CPU-intensive operations.
+          runbook_url: "https://runbooks.example.com/high-cpu"
+
+      # High memory
+      - alert: HighMemory
+        expr: |
+          (process_resident_memory_bytes{job="webapp"} / node_memory_MemTotal_bytes) * 100 > 80
+        for: 15m
+        labels:
+          severity: warning
+          team: backend
+          component: webapp
+        annotations:
+          summary: "High memory usage - {{ $labels.instance }}"
+          description: |
+            Memory usage is {{ $value | humanize }}% on {{ $labels.instance }}.
+
+            Check for memory leaks or consider scaling up.
+          runbook_url: "https://runbooks.example.com/high-memory"
+
+  - name: webapp_traffic
+    interval: 30s
+    rules:
+      # Traffic spike
+      - alert: TrafficSpike
+        expr: |
+          sum(rate(http_requests_total{job="webapp"}[5m]))
+          >
+          1.5 * sum(rate(http_requests_total{job="webapp"}[5m] offset 1h))
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+          component: webapp
+        annotations:
+          summary: "Traffic spike detected - {{ $labels.job }}"
+          description: |
+            Request rate increased by 50% compared to 1 hour ago.
+
+            Current: {{ $value | humanize }} req/s
+
+            This could be:
+            - Legitimate traffic increase
+            - DDoS attack
+            - Retry storm
+
+            Monitor closely and be ready to scale.
+          runbook_url: "https://runbooks.example.com/traffic-spike"
+
+      # Traffic drop (potential issue)
+      - alert: TrafficDrop
+        expr: |
+          sum(rate(http_requests_total{job="webapp"}[5m]))
+          <
+          0.5 * sum(rate(http_requests_total{job="webapp"}[5m] offset 1h))
+        for: 10m
+        labels:
+          severity: warning
+          team: backend
+          component: webapp
+        annotations:
+          summary: "Traffic drop detected - {{ $labels.job }}"
+          description: |
+            Request rate dropped by 50% compared to 1 hour ago.
+
+            This could indicate:
+            - Upstream service issue
+            - DNS problems
+            - Load balancer misconfiguration
+          runbook_url: "https://runbooks.example.com/traffic-drop"
+
+  - name: webapp_dependencies
+    interval: 30s
+    rules:
+      # Database connection pool exhaustion
+      - alert: DatabasePoolExhausted
+        expr: |
+          (db_connection_pool_active / db_connection_pool_max) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+          component: database
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: |
+            Connection pool is {{ $value | humanizePercentage }} full.
+
+            This will cause request failures. Immediate action required.
+          runbook_url: "https://runbooks.example.com/db-pool-exhausted"
+
+      # External API errors
+      - alert: ExternalAPIErrors
+        expr: |
+          sum(rate(external_api_requests_total{status=~"5.."}[5m])) by (api)
+          /
+          sum(rate(external_api_requests_total[5m])) by (api)
+          > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+          component: integration
+        annotations:
+          summary: "High error rate from external API - {{ $labels.api }}"
+          description: |
+            {{ $labels.api }} is returning errors at {{ $value | humanizePercentage }} rate.
+
+            Check API status page and consider enabling circuit breaker.
+          runbook_url: "https://runbooks.example.com/external-api-errors"
