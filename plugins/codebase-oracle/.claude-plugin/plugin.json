@@ -1,0 +1,8 @@
+{
+  "name": "codebase-oracle",
+  "description": "Universal codebase analysis: parallel subagent mapping, dependency/hub analysis, and evidence-based investigation. Maps architecture, traces dependencies, assesses change impact.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}
