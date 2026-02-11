@@ -1,7 +1,7 @@
 ---
 name: codebase-viz
 description: |
-  Interactive codebase visualization from architecture docs. Use when "visualize codebase", "codebase visualization", "interactive architecture", "architecture playground", "explore architecture visually", "shareable diagram", "codebase viz", "code map playground", or user wants to turn docs/ architecture output into interactive HTML or shareable Mermaid URLs. Works with codebase-oracle output or standalone.
+  Interactive codebase visualization from architecture docs. Use when "visualize codebase", "codebase visualization", "interactive architecture", "architecture playground", "explore architecture visually", "codebase viz", "code map playground", or user wants to turn docs/ architecture output into interactive HTML. Works with codebase-oracle output or standalone.
 ---
 
 # Codebase Viz
@@ -12,7 +12,6 @@ Turns architecture documentation into a multi-tab interactive documentation view
 
 - User has `docs/` from codebase-oracle and wants to **explore it visually**
 - User asks to **visualize** architecture, dependencies, data flow, or component relationships
-- User wants **shareable diagram links** for architecture documentation
 - User wants an **interactive playground** to explore and annotate codebase structure
 
 ## Input Sources (priority order)
@@ -20,15 +19,9 @@ Turns architecture documentation into a multi-tab interactive documentation view
 1. **codebase-oracle docs** — Read ALL docs: `docs/CODEBASE_MAP.md`, `docs/c4-architecture.md`, `docs/dependency-graph.md`, `docs/key-flows.md`, `docs/infrastructure.md`, `docs/product-requirements.md`, etc. Extract Mermaid diagrams, tables, structured data.
 2. **Direct analysis** — If no `docs/` exists, suggest running codebase-oracle first. If user wants to skip, do a lightweight scan: file tree, imports, key modules.
 
-## Output Modes
+## Output
 
-| Mode | Output | When |
-|------|--------|------|
-| **Playground** | Single interactive HTML file with 5 tabs | Default — full interactive exploration |
-| **Shareable** | Mimaid URLs for each diagram | User wants to share or embed diagrams |
-| **Both** | HTML + URLs | User asks for both, or "visualize everything" |
-
-Default: **Playground** unless user explicitly asks for shareable links.
+Single interactive HTML file with 5 tabs for full interactive exploration.
 
 ## Mode 1: Interactive Playground (Multi-Tab Documentation Viewer)
 
@@ -405,46 +398,6 @@ Open the HTML file in the browser:
 open <filename>.html
 ```
 
-## Mode 2: Shareable Mermaid URLs
-
-Extract each Mermaid diagram from the `docs/` files and generate a shareable mimaid URL.
-
-### Steps
-
-1. Read all `docs/*.md` files
-2. Extract every mermaid code block (between ` ```mermaid ` and ` ``` `)
-3. For each diagram, generate a mimaid URL:
-
-```bash
-bun -e "
-const LZString = require('lz-string');
-const code = \`<MERMAID_CODE>\`;
-console.log('https://mimaid.aiocean.dev/#' + LZString.compressToEncodedURIComponent(code));
-"
-```
-
-4. Present results as a table:
-
-```markdown
-| Document | Diagram | URL |
-|----------|---------|-----|
-| c4-architecture.md | System Context | [View](https://mimaid.aiocean.dev/#...) |
-| c4-architecture.md | Container | [View](https://mimaid.aiocean.dev/#...) |
-| dependency-graph.md | Module Dependencies | [View](https://mimaid.aiocean.dev/#...) |
-| key-flows.md | Auth Flow | [View](https://mimaid.aiocean.dev/#...) |
-| data-model.md | ERD | [View](https://mimaid.aiocean.dev/#...) |
-```
-
-### Mermaid Syntax Rules
-
-Follow Mermaid v11 syntax:
-
-- Use `flowchart` not `graph`
-- NO markdown in Mermaid: no `**bold**`, `*italic*`, `[links](url)`, `` `code` ``
-- Use v11 shape syntax: `A@{ shape: stadium, label: "Terminal" }`
-- Use `style` for emphasis: `style A fill:#ff6b6b,stroke:#c92a2a,color:#fff`
-- Available shapes: `rect`, `rounded`, `stadium`, `diamond`, `hex`, `cyl`, `doc`, `docs`, `delay`, `trap-t`, `trap-b`, `fork`, `cloud`, `odd`
-
 ## Workflow
 
 ### Step 1: Check for codebase-oracle output
@@ -456,13 +409,7 @@ ls docs/CODEBASE_MAP.md 2>/dev/null
 - **If exists**: Read ALL docs in `docs/`, extract data for all 5 tabs, proceed to visualization
 - **If not**: Tell user: "No architecture docs found. Run codebase-oracle first for best results, or I can do a lightweight scan." If user wants to proceed without oracle, do a quick file tree + import scan.
 
-### Step 2: Determine output mode
-
-- Default: Playground
-- If user mentions "share", "link", "URL", "embed": Shareable
-- If user mentions "everything", "all", "both": Both
-
-### Step 3: Extract architecture data
+### Step 2: Extract architecture data
 
 Read EVERY doc file and parse for ALL tabs:
 
@@ -474,20 +421,11 @@ Read EVERY doc file and parse for ALL tabs:
 6. Sequence diagrams → Flow cards
 7. Infrastructure tables → Environment variables, CI/CD info
 
-### Step 4: Generate output
+### Step 3: Generate output
 
-**Playground mode:**
 1. Map extracted data to ALL 5 tabs
 2. Generate single HTML file with tab navigation, architecture graph, and content sections
 3. Open in browser
-
-**Shareable mode:**
-1. Extract all Mermaid blocks
-2. Generate mimaid URLs for each
-3. Present the URL table
-
-**Both mode:**
-1. Do both of the above
 
 ## Collaboration with codebase-oracle
 
@@ -530,8 +468,6 @@ ALWAYS:
 - Use click-to-comment for user annotations
 - Generate prompt output that's useful as a standalone description
 - Open HTML files in browser after creation
-- Use Mermaid v11 syntax for shareable diagrams
-- Use LZ-String compression for mimaid URLs
 - Provide **actionable insights** in Dependencies tab: what changes are safe, what needs planning
 - Use `white-space: pre` for `.dir-tree` CSS (tree character alignment)
 - Ensure arrow markers in dependency graphs use `opacity: 1` and fill color `#888`
@@ -547,6 +483,5 @@ NEVER:
 - Use external CDN dependencies in playground HTML (except D3.js, Mermaid.js which are documented)
 - Skip extracting from codebase-oracle docs when they exist
 - Use markdown syntax inside Mermaid code blocks
-- Generate URLs without testing the Mermaid syntax validity
 - Leave tabs empty — if a doc file is missing, skip that tab or show a helpful message
 - Leave tabs empty — if a doc file is missing, skip that tab or show a helpful message
