@@ -1,0 +1,8 @@
+{
+  "name": "codebase-viz",
+  "description": "Interactive codebase visualization: takes codebase-oracle docs and turns them into explorable HTML playgrounds and shareable Mermaid diagram URLs.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}
