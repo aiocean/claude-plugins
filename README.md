@@ -118,6 +118,14 @@ Understand any codebase fast. Creates an agent team that analyzes your project i
 /plugin install codebase-oracle@aiocean-plugins
 ```
 
+## codebase-viz
+
+See your architecture, don't just read about it. Takes codebase-oracle's documentation and turns it into interactive HTML playgrounds - SVG canvas with clickable components, layer toggles, connection type filters, zoom/pan, and click-to-comment annotations. Also generates shareable Mermaid diagram URLs via mimaid for every diagram in your docs. Run oracle to analyze, then viz to explore visually. Works standalone too.
+
+```bash
+/plugin install codebase-viz@aiocean-plugins
+```
+
 ## License
 
 MIT
