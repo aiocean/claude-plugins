@@ -1,7 +1,7 @@
 {
   "name": "codebase-oracle",
-  "description": "Comprehensive architecture documentation: C4 diagrams, ERD, API maps, dependency graphs, and more. Uses specialized analyst teams to produce multi-document architecture docs with Mermaid diagrams.",
-  "version": "2.0.0",
+  "description": "Comprehensive codebase analysis and visualization: architecture documentation (C4 diagrams, ERD, API maps, dependency graphs) and interactive HTML playgrounds. Uses specialized analyst teams to produce multi-document docs with Mermaid diagrams.",
+  "version": "2.1.0",
   "author": {
     "name": "aiocean"
   }

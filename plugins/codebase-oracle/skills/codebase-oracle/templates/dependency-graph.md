@@ -5,11 +5,16 @@ This doc is filled by the structure-analyst.
 Maps module-level dependencies, identifies hubs, detects layer violations.
 
 Tools:
-- Grep to find all import/require/use statements in the codebase
-- Group imports by source module to build adjacency list
-- Count reverse references per file to identify hubs
-- LSP findReferences for precise hub detection
+- Tree-sitter import graph (from .tree-sitter-results.json): most accurate dependency data
+- Grep as fallback to find import/require/use statements
+- LSP findReferences for verification
 - Read files to determine layer assignment (presentation/business/data/infra)
+
+Tree-sitter data structure:
+- `import_graph.edges`: list of {from, to, import, line} - the dependency edges
+- `hubs`: list of {file, dependents} - files imported by many others
+- `files[PATH].imports`: imports for each file
+- `files[PATH].exports`: exports for each file
 -->
 
 ## Module Dependencies
@@ -19,12 +24,13 @@ Build a Mermaid flowchart showing how modules depend on each other.
 Group modules into subgraphs by layer.
 Highlight hub files with the `hub` class (red fill).
 
-Steps:
-1. Grep for import statements across all source files
-2. Group by directory/module to get module-level deps (not file-level)
-3. Assign each module to a layer
-4. Draw edges from importer → imported
-5. Mark hubs with :::hub
+Steps (use Tree-sitter data if available, fallback to Grep):
+1. Read `.tree-sitter-results.json` and use `import_graph.edges` for precise dependencies
+2. OR Grep for import statements across all source files as fallback
+3. Group by directory/module to get module-level deps (not file-level)
+4. Assign each module to a layer
+5. Draw edges from importer → imported
+6. Mark hubs with :::hub (use the `hubs` array from tree-sitter results)
 
 Flowchart syntax:
 ```
@@ -36,6 +42,8 @@ flowchart TD
     HubModule[Hub Name]:::hub
     classDef hub fill:#ff6b6b,stroke:#c92a2a,color:#fff
 ```
+
+Tree-sitter edge format: {"from": "src/utils.ts", "to": "src/types.ts", "import": "./types", "line": 5}
 -->
 
 ```mermaid
@@ -57,8 +65,13 @@ For each hub file (5+ dependents), document:
   - High: frequent changes OR many dependents
   - Critical: frequent changes AND many dependents
 
-Tool: Grep — for each candidate file, search for import references
-Tool: Bash — git log --oneline --since="6 months ago" <file> | wc -l (for stability)
+Tools (in order of preference):
+1. Tree-sitter: Use the `hubs` array from `.tree-sitter-results.json` - pre-calculated accurate counts
+2. LSP: findReferences for verification
+3. Grep: as fallback for import counting
+4. Bash: git log --oneline --since="6 months ago" <file> | wc -l (for stability)
+
+Hub data from Tree-sitter: [{"file": "src/utils.ts", "dependents": 12}, ...]
 -->
 
 | File | Dependents | Recent Changes (6mo) | Stability | Risk |

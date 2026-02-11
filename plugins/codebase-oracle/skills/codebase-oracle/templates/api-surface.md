@@ -4,7 +4,9 @@
 This doc is filled by the flow-analyst.
 Only generated when HTTP routes, gRPC services, GraphQL schemas, or CLI commands are found.
 
-Tools to use:
+Tools to use (prefer Tree-sitter, fallback to Grep):
+- Tree-sitter: Use `exports` and `functions` from .tree-sitter-results.json for accurate API discovery
+- Tree-sitter: Use `decorators` array to find framework annotations (@Get, @Controller, etc.)
 - Grep: find route definitions — "app\.(get|post|put|patch|delete)", "router\.", "@Get|@Post|@Put|@Delete", "HandleFunc", "r\.Method"
 - Grep: find middleware — "app\.use", "middleware", "@UseGuards", "@UseInterceptors"
 - Grep: find auth patterns — "authenticate", "authorize", "jwt", "bearer", "session"
@@ -12,6 +14,12 @@ Tools to use:
 - Read: each route file to extract endpoints
 - LSP documentSymbol: list all exported handlers in route files
 - LSP goToDefinition: trace handler → service → data layer
+
+Tree-sitter data for API discovery:
+- `files[PATH].exports`: exported functions, classes, constants
+- `files[PATH].functions`: all function/method definitions with line numbers
+- `files[PATH].decorators`: framework annotations (@Get, @Post, @Controller, etc.)
+- `files[PATH].classes`: class definitions (for controller classes)
 -->
 
 ## Endpoints
@@ -26,6 +34,13 @@ List every API endpoint. For each:
 
 Group by resource/domain if many endpoints.
 Use Read on each route file to get the full list.
+
+Tree-sitter discovery:
+- Check `decorators` array for framework route annotations (@Get, @Post, etc.)
+- Check `exports` for exported handler functions
+- Cross-reference `functions` with route patterns from Grep
+
+Tree-sitter decorator format: [{"name": "Get", "line": 15}, {"name": "Controller", "line": 12}, ...]
 -->
 
 ### REPLACE: Resource/Domain Group

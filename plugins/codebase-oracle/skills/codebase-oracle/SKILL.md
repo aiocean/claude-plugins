@@ -197,7 +197,29 @@ uv run ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/scan-codebase.py . -
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/scan-codebase.py . --format json
 ```
 
-**Step 3: Detect applicable docs**
+**Step 3: Static Analysis (Tree-sitter)**
+
+For enhanced accuracy, run the Tree-sitter analyzer on supported languages:
+
+```bash
+# Option 1: UV (preferred - auto-installs dependencies)
+uv run ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/tree-sitter-analyze.py . --format json > docs/.tree-sitter-results.json
+
+# Option 2: Direct execution (requires manual dependency install)
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/tree-sitter-analyze.py . --format json > docs/.tree-sitter-results.json
+```
+
+**What Tree-sitter provides:**
+- Precise import/dependency extraction (distinguishes imports from strings/comments)
+- Function/class/method discovery with exact line numbers
+- Call graph for dependency analysis
+- Export identification for API surface mapping
+
+**Supported languages:** Python, JavaScript, TypeScript, Go, Rust, Java, Ruby
+
+**Fallback:** If Tree-sitter fails or languages are unsupported, continue with regex-based analysis from the scanner output.
+
+**Step 4: Detect applicable docs**
 
 Analyze scan output using [Detection Rules](#detection-rules):
 
@@ -209,13 +231,13 @@ Analyze scan output using [Detection Rules](#detection-rules):
 
 ### Phase 2: Prepare Output Directory
 
-**Step 4: Create docs/ and determine template list**
+**Step 5: Create docs/ and determine template list**
 
 ```bash
 mkdir -p docs
 ```
 
-Determine which templates analysts should use as guides based on detection results from Step 3:
+Determine which templates analysts should use as guides based on detection results from Step 4:
 
 - **Always**: `CODEBASE_MAP.md`, `c4-architecture.md`, `key-flows.md`, `dependency-graph.md`
 - **Conditional**: `data-model.md` (if data model found), `api-surface.md` (if API found), `product-requirements.md` (if product evidence), `infrastructure.md` (if infra found)
@@ -266,11 +288,23 @@ Important:
 
 | Analyst | Templates to Fill | Key Tools |
 |---------|------------------|-----------|
-| structure-analyst | `c4-architecture.md`, `dependency-graph.md` | Grep (imports), LSP (references), Glob (file structure) |
-| data-analyst | `data-model.md` | Glob (model files), Read (schemas), LSP (hover for types) |
-| flow-analyst | `key-flows.md`, `api-surface.md` | Grep (routes), LSP (outgoingCalls, goToDefinition), Read (handlers) |
+| structure-analyst | `c4-architecture.md`, `dependency-graph.md` | Tree-sitter imports, Grep (imports), LSP (references), Glob (file structure) |
+| data-analyst | `data-model.md` | Tree-sitter class definitions, Glob (model files), Read (schemas), LSP (hover for types) |
+| flow-analyst | `key-flows.md`, `api-surface.md` | Tree-sitter exports/functions, Grep (routes), LSP (outgoingCalls, goToDefinition), Read (handlers) |
 | product-analyst | `product-requirements.md` | Read (README, tests), Grep (roles, permissions), Glob (UI files) |
 | infra-analyst | `infrastructure.md` | Read (Dockerfiles, CI configs), Grep (env vars, ports) |
+
+**Using Tree-sitter output:**
+
+If `docs/.tree-sitter-results.json` exists from Phase 1 Step 3, analysts should reference it for:
+- **structure-analyst**: Use `import_graph` and `hubs` for dependency analysis (more accurate than regex)
+- **flow-analyst**: Use `exports` and `functions` for API surface mapping
+- **data-analyst**: Use `classes` and `types` for entity discovery
+
+To load Tree-sitter results:
+```bash
+cat docs/.tree-sitter-results.json | python3 -c "import json,sys; data=json.load(sys.stdin); print(json.dumps(data['summary'], indent=2))"
+```
 
 **Step 7: Lead reviews and synthesizes**
 
@@ -429,10 +463,14 @@ For assessing change blast radius ("what breaks if I change X?", "impact of refa
 
 Hubs are files imported by many others — they're architectural linchpins.
 
-**Detection method:**
-- Use Grep to count how many files import each module
-- Files with 5+ importers = hub
-- Files with 10+ importers = critical hub
+**Detection methods (in order of accuracy):**
+1. **Tree-sitter import graph** (most accurate): Use `hubs` array from `.tree-sitter-results.json` - these are files with 3+ dependents based on AST-parsed imports
+2. **Grep import counting** (fallback): Count how many files import each module using regex patterns
+3. **LSP findReferences** (verification): Verify hub status by finding actual references
+
+**Hub thresholds:**
+- 5+ importers = hub
+- 10+ importers = critical hub
 
 **Hub analysis includes:**
 - What the hub provides (exports)
@@ -514,6 +552,12 @@ Load this reference when:
 
 **Scanner fails with dependency error:**
 Use `uv run` (preferred — handles dependencies automatically), or install manually: `pip install tiktoken`
+
+**Tree-sitter analyzer fails:**
+- Ensure UV is installed (handles all dependencies automatically): `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- Or install dependencies manually: `pip install tree-sitter tree-sitter-python tree-sitter-javascript tree-sitter-typescript tree-sitter-go tree-sitter-rust tree-sitter-java tree-sitter-ruby`
+- If a specific language fails, the analyzer continues with remaining languages
+- Tree-sitter is optional — if it fails, the skill falls back to regex-based analysis
 
 **Python not found:**
 Try `python3`, `python`, or use `uv run` which handles Python automatically.
