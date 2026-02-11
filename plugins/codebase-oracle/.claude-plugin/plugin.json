@@ -1,7 +1,7 @@
 {
   "name": "codebase-oracle",
-  "description": "Universal codebase analysis: parallel subagent mapping, dependency/hub analysis, and evidence-based investigation. Maps architecture, traces dependencies, assesses change impact.",
-  "version": "1.0.0",
+  "description": "Comprehensive architecture documentation: C4 diagrams, ERD, API maps, dependency graphs, and more. Uses specialized analyst teams to produce multi-document architecture docs with Mermaid diagrams.",
+  "version": "2.0.0",
   "author": {
     "name": "aiocean"
   }
