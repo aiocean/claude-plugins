@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MinimalMermaid — Architecture</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#0c0c0c;color:#d4d4d4;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* Top Bar */
+.topbar{display:flex;align-items:center;gap:0;background:#161616;border-bottom:1px solid #2a2a2a;flex-shrink:0;height:42px;padding:0 16px}
+.topbar-brand{font-size:13px;font-weight:600;color:#e5e5e5;margin-right:24px;white-space:nowrap}
+.topbar-brand span{color:#555;font-weight:400;margin-left:6px;font-size:11px}
+.tab-nav{display:flex;gap:0;height:100%}
+.tab-btn{padding:0 16px;font-size:12px;font-weight:500;color:#666;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;height:100%;display:flex;align-items:center}
+.tab-btn:hover{color:#999}
+.tab-btn.active{color:#e5e5e5;border-bottom-color:#3b82f6}
+
+/* Main */
+.main{flex:1;overflow:hidden;position:relative}
+.tab-panel{display:none;width:100%;height:100%;overflow:hidden}
+.tab-panel.active{display:flex}
+
+/* Scrollable content */
+.scroll-content{width:100%;height:100%;overflow-y:auto;padding:32px 40px 60px}
+.scroll-content::-webkit-scrollbar{width:6px}
+.scroll-content::-webkit-scrollbar-track{background:transparent}
+.scroll-content::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:3px}
+
+/* Section */
+.sec{margin-bottom:36px}
+.sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#555;margin-bottom:14px}
+
+/* Cards grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:16px}
+.card-title{font-size:13px;font-weight:600;color:#e5e5e5;margin-bottom:4px}
+.card-subtitle{font-size:11px;color:#555;margin-bottom:10px;font-family:'SF Mono',monospace}
+.card-body{font-size:12px;color:#888;line-height:1.5}
+
+/* Metrics */
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.metric{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:14px 16px}
+.metric-value{font-size:22px;font-weight:700;color:#e5e5e5;font-variant-numeric:tabular-nums}
+.metric-label{font-size:11px;color:#555;margin-top:2px}
+
+/* Badges */
+.badge-row{display:flex;flex-wrap:wrap;gap:6px}
+.badge{padding:4px 10px;font-size:11px;font-weight:500;border-radius:20px;border:1px solid #2a2a2a;color:#999;background:#1a1a1a}
+.badge.violet{border-color:#5b21b6;color:#a78bfa;background:#1c1528}
+.badge.blue{border-color:#1e40af;color:#60a5fa;background:#131c2e}
+.badge.green{border-color:#166534;color:#4ade80;background:#132013}
+.badge.pink{border-color:#9d174d;color:#f472b6;background:#1f1320}
+.badge.amber{border-color:#92400e;color:#fbbf24;background:#1f1a0f}
+.badge.gray{border-color:#374151;color:#94a3b8;background:#181818}
+
+/* Tables */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:8px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#555;border-bottom:1px solid #2a2a2a}
+.tbl td{padding:8px 12px;border-bottom:1px solid #1a1a1a;color:#999}
+.tbl tr:hover td{background:#161616}
+.tbl .hub-tag{display:inline-block;padding:1px 6px;font-size:9px;font-weight:700;border-radius:3px;background:#1c1528;color:#a78bfa;border:1px solid #5b21b6}
+.tbl .risk-low{color:#4ade80}
+.tbl .risk-med{color:#fbbf24}
+.tbl .risk-high{color:#ef4444}
+
+/* Flow cards */
+.flow-card{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:20px;margin-bottom:12px}
+.flow-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.flow-title{font-size:14px;font-weight:600;color:#e5e5e5}
+.flow-meta{font-size:11px;color:#555}
+.flow-desc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.flow-trigger,.flow-outcome{font-size:12px;color:#888;line-height:1.5}
+.flow-trigger strong,.flow-outcome strong{color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.flow-participants{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px}
+.flow-participant{padding:3px 8px;font-size:10px;border-radius:4px;background:#1a1a1a;border:1px solid #2a2a2a;color:#888;font-family:'SF Mono',monospace}
+.flow-steps{display:flex;flex-direction:column;gap:6px}
+.flow-step{display:flex;gap:10px;font-size:12px;color:#777;line-height:1.4}
+.flow-step-num{flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#555;background:#1a1a1a;border-radius:50%;border:1px solid #2a2a2a}
+
+/* Flow sections with Mermaid diagrams */
+.flow-section{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:20px;margin-bottom:16px}
+.flow-gherkin{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:#0c0c0c;border-radius:6px;border:1px solid #1a1a1a}
+.gherkin-label{padding:4px 10px;font-size:10px;font-weight:600;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
+.gherkin-label.gherkin-given{background:#1c1528;color:#a78bfa;border:1px solid #5b21b6}
+.gherkin-label.gherkin-when{background:#131c2e;color:#60a5fa;border:1px solid #1e40af}
+.gherkin-label.gherkin-then{background:#132013;color:#4ade80;border:1px solid #166534}
+.flow-gherkin span:not(.gherkin-label){font-size:11px;color:#888}
+.mermaid-flow{background:#0c0c0c;border:1px solid #1a1a1a;border-radius:8px;padding:16px;margin:0;overflow-x:auto;font-size:11px;line-height:1.4;color:#999;display:block}
+.mermaid-flow::-webkit-scrollbar{height:6px}
+.mermaid-flow::-webkit-scrollbar-track{background:transparent}
+.mermaid-flow::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:3px}
+
+/* Module cards */
+.mod-card{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.mod-header{display:flex;align-items:center;gap:8px}
+.mod-name{font-size:13px;font-weight:600;color:#e5e5e5}
+.mod-layer{padding:2px 7px;font-size:9px;font-weight:600;border-radius:3px}
+.mod-layer.core{background:#132013;color:#4ade80;border:1px solid #166534}
+.mod-layer.infra{background:#181818;color:#94a3b8;border:1px solid #374151}
+.mod-layer.client{background:#131c2e;color:#60a5fa;border:1px solid #1e40af}
+.mod-path{font-size:11px;color:#555;font-family:'SF Mono',monospace}
+.mod-desc{font-size:12px;color:#888;line-height:1.4}
+.mod-deps{font-size:11px;color:#555}
+.mod-deps span{color:#777}
+
+/* Conventions list */
+.conv-list{display:flex;flex-direction:column;gap:8px}
+.conv-item{display:flex;gap:12px;align-items:flex-start}
+.conv-dot{width:6px;height:6px;border-radius:50%;background:#3b82f6;flex-shrink:0;margin-top:6px}
+.conv-text{font-size:12px;color:#888;line-height:1.5}
+.conv-text strong{color:#ccc;font-weight:500}
+
+/* Gotchas */
+.gotcha-list{display:flex;flex-direction:column;gap:8px}
+.gotcha{display:flex;gap:10px;font-size:12px;color:#888;line-height:1.5;padding:10px 12px;background:#1a1209;border:1px solid #92400e33;border-radius:8px}
+.gotcha-icon{flex-shrink:0;color:#fbbf24;font-size:14px}
+
+/* Architecture tab */
+.arch-layout{display:flex;width:100%;height:100%}
+.arch-sidebar{width:260px;background:#161616;border-right:1px solid #2a2a2a;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.arch-section{padding:12px 14px;border-bottom:1px solid #2a2a2a}
+.arch-section-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#555;margin-bottom:8px}
+.arch-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.arch-canvas{flex:1;position:relative;overflow:hidden;background:#0c0c0c}
+.arch-prompt{height:140px;background:#161616;border-top:1px solid #2a2a2a;display:flex;flex-direction:column;flex-shrink:0}
+.arch-prompt-bar{padding:6px 14px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center}
+.arch-prompt-bar h3{font-size:11px;font-weight:600;color:#666}
+.arch-prompt-body{flex:1;padding:8px 14px;overflow-y:auto;font-family:'SF Mono',monospace;font-size:11px;line-height:1.5;color:#666;white-space:pre-wrap}
+
+/* Preset/toggle controls (reused) */
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.preset-btn{padding:5px 6px;font-size:10px;font-weight:500;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:5px;color:#888;cursor:pointer;transition:all .12s;text-align:center}
+.preset-btn:hover{background:#252525;color:#bbb}
+.preset-btn.active{background:#1a3a5c;border-color:#2563eb;color:#93c5fd}
+.toggle-row{display:flex;align-items:center;padding:4px 0;gap:7px;cursor:pointer}
+.toggle-row input[type=checkbox]{appearance:none;width:13px;height:13px;border:1.5px solid #444;border-radius:3px;cursor:pointer;flex-shrink:0;position:relative;transition:all .12s}
+.toggle-row input[type=checkbox]:checked{background:#2563eb;border-color:#2563eb}
+.toggle-row input[type=checkbox]:checked::after{content:'';position:absolute;left:3px;top:1px;width:4px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.toggle-row label{font-size:11px;color:#888;cursor:pointer;flex:1;display:flex;align-items:center;gap:7px;user-select:none}
+.color-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.conn-sample{width:16px;height:0;flex-shrink:0}
+.search-input{width:100%;padding:6px 8px;font-size:11px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:5px;color:#d4d4d4;outline:none}
+.search-input:focus{border-color:#2563eb}
+.search-input::placeholder{color:#444}
+
+/* Float controls */
+.float-controls{position:absolute;bottom:12px;left:12px;display:flex;gap:2px;background:#161616;padding:2px;border-radius:6px;border:1px solid #2a2a2a;z-index:10}
+.float-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;border-radius:4px;color:#777;font-size:13px;cursor:pointer;transition:all .12s}
+.float-btn:hover{background:#252525;color:#d4d4d4}
+.zoom-text{display:flex;align-items:center;padding:0 5px;font-size:10px;color:#555;font-variant-numeric:tabular-nums}
+
+.float-legend{position:absolute;bottom:12px;right:12px;background:#161616;padding:8px 10px;border-radius:6px;border:1px solid #2a2a2a;font-size:9px;z-index:10}
+.float-legend h4{font-size:8px;text-transform:uppercase;letter-spacing:.5px;color:#444;margin-bottom:4px}
+.legend-row{display:flex;align-items:center;gap:6px;padding:1px 0;color:#666}
+.legend-line{width:14px;height:0}
+
+/* Copy button */
+.copy-btn{padding:3px 8px;font-size:10px;font-weight:500;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:4px;color:#888;cursor:pointer;transition:all .12s}
+.copy-btn:hover{background:#252525;color:#d4d4d4}
+
+/* Comment section */
+.comment-card{padding:8px 10px;background:#1e1e1e;border-radius:5px;margin-bottom:4px;font-size:11px;border:1px solid #2a2a2a}
+.comment-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.comment-name{font-weight:600;color:#ccc;font-size:10px}
+.comment-del{background:none;border:none;color:#444;cursor:pointer;font-size:13px;transition:color .12s}
+.comment-del:hover{color:#ef4444}
+.comment-text{color:#777;font-size:10px;line-height:1.3}
+
+/* SVG arch nodes/edges */
+.node-group{cursor:pointer}
+.node-group .node-bg{transition:opacity .12s}
+.node-group:hover .node-bg{filter:brightness(1.3)}
+.node-group.dimmed{opacity:.08;pointer-events:none}
+.node-label{font-size:11px;font-weight:600;font-family:-apple-system,system-ui,sans-serif}
+.node-sublabel{font-size:8px;font-family:'SF Mono',monospace}
+.edge{fill:none;transition:opacity .15s}
+.edge.dimmed{opacity:.04}
+.layer-label{font-size:9px;font-weight:600;font-family:-apple-system,system-ui,sans-serif;letter-spacing:.5px;text-transform:uppercase}
+.hub-badge{font-size:7px;font-weight:700;font-family:-apple-system,system-ui,sans-serif}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.active{display:flex}
+.modal-box{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:10px;padding:18px;width:360px;max-width:90vw}
+.modal-box h3{font-size:13px;font-weight:600;color:#e5e5e5;margin-bottom:10px}
+.modal-box textarea{width:100%;height:70px;padding:8px;font-size:12px;font-family:inherit;background:#161616;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;resize:vertical;outline:none}
+.modal-box textarea:focus{border-color:#2563eb}
+.modal-actions{display:flex;gap:6px;margin-top:10px;justify-content:flex-end}
+.modal-btn{padding:6px 12px;font-size:11px;font-weight:500;border:none;border-radius:5px;cursor:pointer}
+.modal-btn.primary{background:#2563eb;color:#fff}
+.modal-btn.primary:hover{background:#1d4ed8}
+.modal-btn.secondary{background:#252525;color:#999}
+
+/* Directory tree */
+.dir-tree{font-family:'SF Mono',monospace;font-size:11px;color:#666;line-height:1.8;padding:12px 16px;background:#161616;border:1px solid #2a2a2a;border-radius:10px;white-space:pre}
+.dir-tree .dir{color:#60a5fa}
+.dir-tree .file{color:#888}
+.dir-tree .hub{color:#a78bfa;font-weight:600}
+
+/* Nav guide */
+.nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nav-card{padding:12px;background:#161616;border:1px solid #2a2a2a;border-radius:8px}
+.nav-task{font-size:12px;font-weight:500;color:#ccc;margin-bottom:6px}
+.nav-files{font-size:11px;color:#666;font-family:'SF Mono',monospace;line-height:1.6}
+
+/* Dependency graph */
+.dep-graph{height:450px;background:#111;border:1px solid #2a2a2a;border-radius:10px;overflow:hidden;position:relative}
+.dep-graph svg{width:100%;height:100%}
+.dep-node{cursor:pointer}
+.dep-node rect{transition:opacity .15s}
+.dep-node text{font-size:10px;font-family:-apple-system,system-ui,sans-serif}
+.dep-edge{fill:none;stroke:#525252;stroke-width:1.5;opacity:.4}
+.dep-legend{position:absolute;bottom:8px;right:8px;background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:6px 8px;font-size:9px;z-index:10}
+.dep-legend-row{display:flex;align-items:center;gap:5px;padding:1px 0;color:#666}
+.dep-legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* Impact Analysis */
+.impact-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.impact-stat{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:16px;text-align:center}
+.impact-value{font-size:18px;font-weight:700;color:#e5e5e5;margin-bottom:4px}
+.impact-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.impact-desc{font-size:12px;color:#888;line-height:1.4}
+
+/* Coupling Analysis */
+.coupling-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.coupling-card{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:16px}
+.coupling-card.good{border-left:3px solid #4ade80}
+.coupling-card.warn{border-left:3px solid #fbbf24}
+.coupling-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.coupling-status{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:50%;background:#132013;color:#4ade80}
+.coupling-card.warn .coupling-status{background:#1f1a0f;color:#fbbf24}
+.coupling-title{font-size:13px;font-weight:600;color:#e5e5e5}
+.coupling-body{display:flex;flex-direction:column;gap:6px}
+.coupling-metric{font-size:11px;color:#888}
+.coupling-label{color:#666;margin-right:4px}
+.coupling-desc{font-size:12px;color:#999;line-height:1.4;margin-top:4px}
+
+/* Health Score */
+.health-score{display:flex;align-items:center;gap:24px;background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:20px;margin-bottom:16px}
+.health-grade{width:80px;height:80px;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:700;color:#4ade80;background:#132013;border:2px solid #166534;border-radius:50%}
+.health-details{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.health-item{display:flex;justify-content:space-between;font-size:12px}
+.health-label{color:#666}
+.health-value.good{color:#4ade80}
+.health-value.warn{color:#fbbf24}
+
+.health-breakdown{background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:16px}
+.health-breakdown h4{font-size:12px;font-weight:600;color:#e5e5e5;margin-bottom:12px}
+.health-list{margin:0;padding-left:20px;list-style:none}
+.health-list li{font-size:12px;color:#888;line-height:1.6;margin-bottom:6px;position:relative}
+.health-list li::before{content:'•';position:absolute;left:-16px;color:#555}
+</style>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-brand">MinimalMermaid <span>50 files &middot; SPA</span></div>
+    <nav class="tab-nav" id="tab-nav">
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="architecture">Architecture</button>
+        <button class="tab-btn" data-tab="dependencies">Dependencies</button>
+        <button class="tab-btn" data-tab="flows">Flows</button>
+        <button class="tab-btn" data-tab="modules">Modules</button>
+    </nav>
+</div>
+
+<div class="main">
+
+<!-- ============ OVERVIEW TAB ============ -->
+<div class="tab-panel active" id="panel-overview">
+<div class="scroll-content">
+
+    <div class="sec">
+        <div class="sec-title">Tech Stack</div>
+        <div class="badge-row">
+            <span class="badge blue">TypeScript</span>
+            <span class="badge blue">Vite</span>
+            <span class="badge blue">Monaco Editor</span>
+            <span class="badge green">Mermaid.js v11</span>
+            <span class="badge violet">Vercel AI SDK</span>
+            <span class="badge pink">Y.js CRDT</span>
+            <span class="badge pink">Liveblocks</span>
+            <span class="badge gray">svg-pan-zoom</span>
+            <span class="badge gray">LZ-String</span>
+            <span class="badge amber">Cloudflare Pages</span>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Key Metrics</div>
+        <div class="metric-grid">
+            <div class="metric"><div class="metric-value">50</div><div class="metric-label">Source files</div></div>
+            <div class="metric"><div class="metric-value">3</div><div class="metric-label">Hub files</div></div>
+            <div class="metric"><div class="metric-value">5</div><div class="metric-label">Architecture layers</div></div>
+            <div class="metric"><div class="metric-value">3</div><div class="metric-label">AI providers</div></div>
+            <div class="metric"><div class="metric-value">6</div><div class="metric-label">Key flows</div></div>
+            <div class="metric"><div class="metric-value">0</div><div class="metric-label">Layer violations</div></div>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Hub Files</div>
+        <table class="tbl">
+            <thead><tr><th>File</th><th>Dependents</th><th>Stability</th><th>Risk</th><th>Role</th></tr></thead>
+            <tbody>
+                <tr><td>types.ts <span class="hub-tag">HUB</span></td><td>6 files</td><td>Stable</td><td class="risk-low">Low</td><td>TypeScript type definitions</td></tr>
+                <tr><td>events.ts <span class="hub-tag">HUB</span></td><td>4 files</td><td>Stable</td><td class="risk-med">Medium</td><td>Type-safe event bus (mitt)</td></tr>
+                <tr><td>config.ts <span class="hub-tag">HUB</span></td><td>3 files</td><td>Stable</td><td class="risk-low">Low</td><td>Configuration constants &amp; presets</td></tr>
+                <tr><td>utils.ts</td><td>3 files</td><td>Stable</td><td class="risk-low">Low</td><td>Compression, debounce, error parsing</td></tr>
+                <tr><td>main.ts</td><td>0 (entry)</td><td>Moderate</td><td class="risk-high">High</td><td>Application orchestrator</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Conventions</div>
+        <div class="conv-list">
+            <div class="conv-item"><div class="conv-dot"></div><div class="conv-text"><strong>Event-Driven Architecture</strong> — All components communicate via typed event bus. Use EventHelpers.safeEmit() and safeListen().</div></div>
+            <div class="conv-item"><div class="conv-dot"></div><div class="conv-text"><strong>Lazy Loading</strong> — Monaco Editor dynamically imported to reduce initial bundle size.</div></div>
+            <div class="conv-item"><div class="conv-dot"></div><div class="conv-text"><strong>Debounced Updates</strong> — Preview updates debounced 250ms to avoid excessive re-renders.</div></div>
+            <div class="conv-item"><div class="conv-dot"></div><div class="conv-text"><strong>State Compression</strong> — Diagram state compressed with LZ-String for URL sharing.</div></div>
+            <div class="conv-item"><div class="conv-dot"></div><div class="conv-text"><strong>LocalStorage Persistence</strong> — API keys and preferences stored client-side only.</div></div>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Gotchas</div>
+        <div class="gotcha-list">
+            <div class="gotcha"><span class="gotcha-icon">!</span>No Backend — All AI calls made directly from browser. API keys exposed in client storage.</div>
+            <div class="gotcha"><span class="gotcha-icon">!</span>Mermaid v11 Only — System prompt enforces v11 syntax. Older syntax will fail.</div>
+            <div class="gotcha"><span class="gotcha-icon">!</span>Dynamic Import — Monaco must be imported before any editor operations.</div>
+            <div class="gotcha"><span class="gotcha-icon">!</span>Liveblocks Optional — Collaboration only works if VITE_LIVEBLOCKS_PUBLIC_API_KEY is configured.</div>
+            <div class="gotcha"><span class="gotcha-icon">!</span>URL Hash Limits — Very large diagrams may exceed URL length limits.</div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ============ ARCHITECTURE TAB ============ -->
+<div class="tab-panel" id="panel-architecture">
+<div class="arch-layout">
+    <div class="arch-sidebar">
+        <div class="arch-section">
+            <div class="arch-section-title">Views</div>
+            <div class="preset-grid" id="arch-presets">
+                <button class="preset-btn active" data-preset="full-system">Full System</button>
+                <button class="preset-btn" data-preset="data-flow">Data Flow</button>
+                <button class="preset-btn" data-preset="dependencies">Dependencies</button>
+                <button class="preset-btn" data-preset="ai-flow">AI Pipeline</button>
+                <button class="preset-btn" data-preset="collab-flow">Collaboration</button>
+            </div>
+        </div>
+        <div class="arch-section">
+            <div class="arch-section-title">Layers</div>
+            <div id="arch-layers"></div>
+        </div>
+        <div class="arch-section">
+            <div class="arch-section-title">Connections</div>
+            <div id="arch-conns"></div>
+        </div>
+        <div class="arch-section">
+            <div class="arch-section-title">Search</div>
+            <input type="text" class="search-input" id="arch-search" placeholder="Filter components...">
+        </div>
+        <div class="arch-section" style="flex:1;overflow-y:auto">
+            <div class="arch-section-title">Annotations (<span id="comment-count">0</span>)</div>
+            <div id="comments-list"></div>
+        </div>
+    </div>
+    <div class="arch-main">
+        <div class="arch-canvas" id="arch-canvas-container">
+            <div class="float-controls">
+                <button class="float-btn" id="z-out">&minus;</button>
+                <span class="zoom-text" id="z-display">100%</span>
+                <button class="float-btn" id="z-in">+</button>
+                <button class="float-btn" id="z-fit">&#x2922;</button>
+            </div>
+            <div class="float-legend">
+                <h4>Connections</h4>
+                <div class="legend-row"><span class="legend-line" style="border-top:2px solid #3b82f6"></span>Data flow</div>
+                <div class="legend-row"><span class="legend-line" style="border-top:2px dashed #525252"></span>Dependency</div>
+                <div class="legend-row"><span class="legend-line" style="border-top:2px dotted #ef4444"></span>Event</div>
+                <div class="legend-row"><span class="legend-line" style="border-top:2px dashed #10b981"></span>Calls</div>
+            </div>
+        </div>
+        <div class="arch-prompt">
+            <div class="arch-prompt-bar">
+                <h3>Architecture Prompt</h3>
+                <button class="copy-btn" id="copy-prompt">Copy</button>
+            </div>
+            <div class="arch-prompt-body" id="prompt-output"></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ============ DEPENDENCIES TAB ============ -->
+<div class="tab-panel" id="panel-dependencies">
+<div class="scroll-content">
+
+    <div class="sec">
+        <div class="sec-title">Dependency Diagram</div>
+        <div class="dep-graph" id="dep-graph-container">
+            <div class="dep-legend">
+                <div class="dep-legend-row"><span class="dep-legend-dot" style="background:#60a5fa"></span>Client / UI</div>
+                <div class="dep-legend-row"><span class="dep-legend-dot" style="background:#4ade80"></span>Core Logic</div>
+                <div class="dep-legend-row"><span class="dep-legend-dot" style="background:#94a3b8"></span>Infrastructure</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Layer Architecture</div>
+        <div class="card-grid">
+            <div class="card" style="border-left:3px solid #60a5fa">
+                <div class="card-title">Presentation Layer</div>
+                <div class="card-body">main.ts, configMermaidLanguage.ts, skill-content.ts<br>Imports from Business Logic and Infrastructure. No reverse dependencies.</div>
+            </div>
+            <div class="card" style="border-left:3px solid #4ade80">
+                <div class="card-title">Business Logic Layer</div>
+                <div class="card-body">ai-handler.ts, collaboration.ts<br>Imports from Infrastructure only. Does NOT import from Presentation.</div>
+            </div>
+            <div class="card" style="border-left:3px solid #94a3b8">
+                <div class="card-title">Infrastructure Layer</div>
+                <div class="card-body">events.ts, config.ts, utils.ts, types.ts<br>No dependencies on upper layers. Clean foundation.</div>
+            </div>
+        </div>
+        <div style="margin-top:10px;padding:10px 14px;background:#132013;border:1px solid #166534;border-radius:8px;font-size:12px;color:#4ade80">No layer violations detected. Clean separation of concerns.</div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Hub Analysis</div>
+        <table class="tbl">
+            <thead><tr><th>File</th><th>Dependents</th><th>Direct Impact</th><th>Stability</th><th>Recommendation</th></tr></thead>
+            <tbody>
+                <tr><td>types.ts <span class="hub-tag">HUB</span></td><td>6 files</td><td>All files (transitive)</td><td>Stable</td><td>Changes require careful coordination but are infrequent</td></tr>
+                <tr><td>events.ts <span class="hub-tag">HUB</span></td><td>4 files</td><td>main, ai-handler, collab</td><td>Stable</td><td>Add new event types rather than modifying existing ones</td></tr>
+                <tr><td>config.ts</td><td>3 files</td><td>main, ai-handler</td><td>Stable</td><td>Read-only after init. Adding new values is safe</td></tr>
+                <tr><td>utils.ts</td><td>3 files</td><td>main, collab</td><td>Stable</td><td>Pure functions. Add new utilities, don't modify existing</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Blast Radius</div>
+        <div class="card-grid">
+            <div class="card" style="border-left:3px solid #ef4444">
+                <div class="card-title">main.ts (MermaidEditor)</div>
+                <div class="card-subtitle">Risk: HIGH</div>
+                <div class="card-body">Entry point, 0 internal importers but orchestrates everything. Changes here have maximum blast radius. Requires thorough testing.</div>
+            </div>
+            <div class="card" style="border-left:3px solid #a78bfa">
+                <div class="card-title">types.ts</div>
+                <div class="card-subtitle">Risk: Low but Wide</div>
+                <div class="card-body">6 direct dependents, all files transitively. Type changes affect entire codebase. Well-defined and stable.</div>
+            </div>
+            <div class="card" style="border-left:3px solid #fbbf24">
+                <div class="card-title">events.ts</div>
+                <div class="card-subtitle">Risk: Medium</div>
+                <div class="card-body">Central event bus for component communication. EventHelpers wrapper provides error handling.</div>
+            </div>
+            <div class="card" style="border-left:3px solid #4ade80">
+                <div class="card-title">ai-handler.ts</div>
+                <div class="card-subtitle">Risk: Low (isolated)</div>
+                <div class="card-body">Well-encapsulated. Changes primarily affect AI generation feature only.</div>
+            </div>
+            <div class="card" style="border-left:3px solid #4ade80">
+                <div class="card-title">collaboration.ts</div>
+                <div class="card-subtitle">Risk: Low (optional, lazy-loaded)</div>
+                <div class="card-body">Only affects users with ?room= parameter. Well-isolated from core functionality.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Import Graph</div>
+        <table class="tbl">
+            <thead><tr><th>Module</th><th>Imports</th><th>Imported By</th></tr></thead>
+            <tbody>
+                <tr><td>main.ts</td><td>types, config, utils, events, ai-handler, collaboration, configMermaidLanguage, skill-content, mermaid, monaco-editor</td><td>(entry point)</td></tr>
+                <tr><td>ai-handler.ts</td><td>config, types, events, @ai-sdk/*</td><td>main</td></tr>
+                <tr><td>collaboration.ts</td><td>utils, events, @liveblocks/*, yjs, y-monaco</td><td>main</td></tr>
+                <tr><td>events.ts</td><td>types, mitt</td><td>main, ai-handler, collaboration</td></tr>
+                <tr><td>config.ts</td><td>types</td><td>main, ai-handler</td></tr>
+                <tr><td>utils.ts</td><td>types, lz-string</td><td>main, collaboration</td></tr>
+                <tr><td>types.ts</td><td>(none)</td><td>main, config, events, ai-handler, collaboration, utils</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 1. Module Impact Analysis -->
+    <div class="sec">
+        <div class="sec-title">Change Impact Analysis</div>
+        <div class="impact-summary">
+            <div class="impact-stat">
+                <div class="impact-value">types.ts</div>
+                <div class="impact-label">Highest Impact</div>
+                <div class="impact-desc">6 files depend on this. Changes ripple through entire codebase.</div>
+            </div>
+            <div class="impact-stat">
+                <div class="impact-value">0</div>
+                <div class="impact-label">Circular Dependencies</div>
+                <div class="impact-desc">Clean acyclic graph. No modules depend on each other.</div>
+            </div>
+            <div class="impact-stat">
+                <div class="impact-value">3</div>
+                <div class="impact-label">Hub Files</div>
+                <div class="impact-desc">types.ts, events.ts, config.ts. Central coordination points.</div>
+            </div>
+        </div>
+        <table class="tbl">
+            <thead><tr><th>Module</th><th>Affected Files If Changed</th><th>Risk Level</th><th>Recommendation</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>types.ts <span class="hub-tag">HUB</span></td>
+                    <td><strong>6 files</strong> - main, config, events, ai-handler, collaboration, utils</td>
+                    <td class="risk-med">Medium</td>
+                    <td>Add new types rather than modifying existing ones</td>
+                </tr>
+                <tr>
+                    <td>events.ts <span class="hub-tag">HUB</span></td>
+                    <td><strong>4 files</strong> - main, ai-handler, collaboration (all event emitters)</td>
+                    <td class="risk-med">Medium</td>
+                    <td>Add new event types; use EventHelpers for safety</td>
+                </tr>
+                <tr>
+                    <td>main.ts</td>
+                    <td><strong>0 internal</strong> (entry point, but orchestrates everything)</td>
+                    <td class="risk-high">High</td>
+                    <td>Changes here affect app initialization flow</td>
+                </tr>
+                <tr>
+                    <td>config.ts</td>
+                    <td><strong>2 files</strong> - main, ai-handler</td>
+                    <td class="risk-low">Low</td>
+                    <td>Adding new config values is safe; modifying existing requires care</td>
+                </tr>
+                <tr>
+                    <td>ai-handler.ts</td>
+                    <td><strong>1 file</strong> - main only</td>
+                    <td class="risk-low">Low</td>
+                    <td>Well isolated. Changes only affect AI generation feature</td>
+                </tr>
+                <tr>
+                    <td>collaboration.ts</td>
+                    <td><strong>1 file</strong> - main only</td>
+                    <td class="risk-low">Low</td>
+                    <td>Optional feature (only with ?room=). Very safe to modify</td>
+                </tr>
+                <tr>
+                    <td>utils.ts</td>
+                    <td><strong>2 files</strong> - main, collaboration</td>
+                    <td class="risk-low">Low</td>
+                    <td>Pure functions. Add new utilities freely</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. Tight Coupling Warnings -->
+    <div class="sec">
+        <div class="sec-title">Coupling Analysis</div>
+        <div class="coupling-grid">
+            <div class="coupling-card good">
+                <div class="coupling-header">
+                    <span class="coupling-status">✓</span>
+                    <span class="coupling-title">Main Entry Point</span>
+                </div>
+                <div class="coupling-body">
+                    <div class="coupling-metric"><span class="coupling-label">Imports:</span> 6 modules</div>
+                    <div class="coupling-metric"><span class="coupling-label">Imported by:</span> 0 (entry)</div>
+                    <div class="coupling-desc">Acceptable for orchestrator. All imports are intentional.</div>
+                </div>
+            </div>
+
+            <div class="coupling-card good">
+                <div class="coupling-header">
+                    <span class="coupling-status">✓</span>
+                    <span class="coupling-title">Feature Modules</span>
+                </div>
+                <div class="coupling-body">
+                    <div class="coupling-metric"><span class="coupling-label">ai-handler.ts:</span> 3 imports</div>
+                    <div class="coupling-metric"><span class="coupling-label">collaboration.ts:</span> 3 imports</div>
+                    <div class="coupling-desc">Well isolated. Each only affects its own feature.</div>
+                </div>
+            </div>
+
+            <div class="coupling-card warn">
+                <div class="coupling-header">
+                    <span class="coupling-status">!</span>
+                    <span class="coupling-title">Hub Coupling</span>
+                </div>
+                <div class="coupling-body">
+                    <div class="coupling-metric"><span class="coupling-label">types.ts</span> used by 6 files</div>
+                    <div class="coupling-metric"><span class="coupling-label">events.ts</span> used by 4 files</div>
+                    <div class="coupling-desc">Monitor changes to hub files. High transitive impact.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Dependency Health Score -->
+    <div class="sec">
+        <div class="sec-title">Dependency Health</div>
+        <div class="health-score">
+            <div class="health-grade">A</div>
+            <div class="health-details">
+                <div class="health-item">
+                    <span class="health-label">Acyclic:</span>
+                    <span class="health-value good">No circular deps</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">Layered:</span>
+                    <span class="health-value good">Clean separation</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">Hubs:</span>
+                    <span class="health-value warn">3 hubs (monitor)</span>
+                </div>
+                <div class="health-item">
+                    <span class="health-label">Coupling:</span>
+                    <span class="health-value good">Loose coupling</span>
+                </div>
+            </div>
+        </div>
+        <div class="health-breakdown">
+            <h4>What This Means</h4>
+            <ul class="health-list">
+                <li><strong>Safe to modify:</strong> ai-handler.ts, collaboration.ts, utils.ts (low impact, well isolated)</li>
+                <li><strong>Plan changes for:</strong> types.ts, events.ts (hub files - coordinate with team)</li>
+                <li><strong>Test thoroughly:</strong> main.ts (orchestrator - affects entire initialization flow)</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ============ FLOWS TAB ============ -->
+<div class="tab-panel" id="panel-flows">
+<div class="scroll-content">
+
+    <!-- Flow 1: Application Initialization -->
+    <div class="flow-section">
+        <div class="flow-header">
+            <div class="flow-title">Application Initialization</div>
+            <div class="flow-meta">main.ts:85-102</div>
+        </div>
+        <div class="flow-gherkin">
+            <span class="gherkin-label gherkin-given">GIVEN</span> Browser loads index.html and imports main.ts
+        </div>
+        <pre class="mermaid-flow">flowchart LR
+    User[("User")] --> Load[("Browser loads main.ts")]
+
+    subgraph INIT ["Initialization Sequence"]
+        Load --> DOM["initializeDOM() - Cache element refs"]
+        DOM --> Monaco["setupEditor() - Lazy load Monaco"]
+        Monaco --> Handlers["setupHandlers() - Init AI & Collab"]
+        Handlers --> MermaidInit["initializeMermaid() - Configure renderer"]
+        MermaidInit --> Events["setupEventListeners() - Wire all listeners"]
+        Events --> Ready["Emit app:ready + Load URL state"]
+    end
+
+    subgraph COMPONENTS ["Components Initialized"]
+        MonacoComp["Monaco Editor"]
+        MermaidComp["mermaid.js"]
+        EventBus["EventBus"]
+        AIHandler["AIHandler"]
+        CollabHandler["CollabHandler"]
+    end
+
+    Ready --> DiagramReady[("Diagram Ready")]
+
+    style Init fill:#161616,stroke:#3b82f6,stroke-width:1px
+    style Ready fill:#1c1528,stroke:#a78bfa,stroke-width:2px
+    style DiagramReady fill:#132013,stroke:#4ade80,stroke-width:2px</pre>
+    </div>
+
+    <!-- Flow 2: AI Diagram Generation -->
+    <div class="flow-section">
+        <div class="flow-header">
+            <div class="flow-title">AI Diagram Generation</div>
+            <div class="flow-meta">ai-handler.ts:76-227</div>
+        </div>
+        <div class="flow-gherkin">
+            <span class="gherkin-label gherkin-when">WHEN</span> User enters prompt and presses Enter
+            <span class="gherkin-label gherkin-then">THEN</span> AI streams Mermaid code into editor
+        </div>
+        <pre class="mermaid-flow">flowchart LR
+    User[("User")] --> Submit[("ui:input:submit")]
+
+    Submit --> AIStart["AIHandler.handleSubmit()"]
+    AIStart --> Disable[("Editor Disabled")]
+
+    Disable --> Build["buildMessages() - Current code context"]
+    Build --> Stream["streamText() to AI Provider"]
+
+    Stream --> StreamLoop{Stream Loop}
+    StreamLoop -->|"Chunk"| Extract["Extract Mermaid code"]
+    Extract --> SetValue["editor.setValue()"]
+    SetValue --> Render["renderDiagram()"]
+    Render --> StreamLoop
+
+    StreamLoop -->|"Complete"| AIComplete["emit ai:complete"]
+    AIComplete --> Enable[("Editor Enabled")]
+    Enable --> Done[("Preview Updated")]
+
+    style Submit fill:#1c1528,stroke:#a78bfa,stroke-width:2px
+    style StreamLoop fill:#131c2e,stroke:#60a5fa,stroke-width:2px
+    style Done fill:#132013,stroke:#4ade80,stroke-width:2px</pre>
+    </div>
+
+    <!-- Flow 3: Diagram Preview Rendering -->
+    <div class="flow-section">
+        <div class="flow-header">
+            <div class="flow-title">Diagram Preview Rendering</div>
+            <div class="flow-meta">main.ts:491-575</div>
+        </div>
+        <div class="flow-gherkin">
+            <span class="gherkin-label gherkin-when">WHEN</span> Editor content changes (debounced 250ms)
+            <span class="gherkin-label gherkin-then">THEN</span> Mermaid diagram rendered to SVG with pan/zoom
+        </div>
+        <pre class="mermaid-flow">flowchart LR
+    Editor[("Monaco Editor")] --> Change["onDidChangeModelContent"]
+    Change -->|Debounce 250ms| Emit["emit editor:change"]
+
+    Emit --> RenderFunc["renderMermaidDiagram()"]
+    RenderFunc --> Parse["mermaid.parse()"]
+    Parse -->|Valid| CreateDiv["Create temp div"]
+    Parse -->|Invalid| HandleError["handleRenderError()"]
+
+    CreateDiv --> MermaidRender["mermaid.render(id, code)"]
+    MermaidRender --> GetSVG["Get SVG string"]
+    GetSVG --> Insert["Insert into preview pane"]
+    Insert --> PanZoom["svgPanZoom(svg, options)"]
+    PanZoom --> Emitted["emit diagram:rendered"]
+    Emitted --> UpdateHash["Update URL hash"]
+    UpdateHash --> Done[("SVG Displayed")]
+
+    style Change fill:#1c1528,stroke:#a78bfa,stroke-width:2px
+    style Parse fill:#131c2e,stroke:#60a5fa,stroke-width:2px
+    style HandleError fill:#1f1320,stroke:#f472b6,stroke-width:2px
+    style Done fill:#132013,stroke:#4ade80,stroke-width:2px</pre>
+    </div>
+
+    <!-- Flow 4: Real-Time Collaboration -->
+    <div class="flow-section">
+        <div class="flow-header">
+            <div class="flow-title">Real-Time Collaboration</div>
+            <div class="flow-meta">collaboration.ts:40-78</div>
+        </div>
+        <div class="flow-gherkin">
+            <span class="gherkin-label gherkin-given">GIVEN</span> URL contains ?room=roomId parameter
+            <span class="gherkin-label gherkin-then">THEN</span> Y.js CRDT syncs editor content bidirectionally
+        </div>
+        <pre class="mermaid-flow">flowchart LR
+    URL[("URL with ?room=")] --> Extract["Extract room param"]
+    Extract --> Emit[("emit collab:connect")]
+
+    Emit --> Client["createClient()"]
+    Client --> EnterRoom["client.enterRoom(roomId)"]
+
+    EnterRoom --> YDoc["new Y.Doc()"]
+    YDoc --> GetText["getText('monaco')"]
+    GetText --> Provider["new LiveblocksYjsProvider"]
+
+    Provider --> Awareness["Set awareness state"]
+    Awareness --> Binding["new MonacoBinding()"]
+
+    subgraph BIDIRECTIONAL ["Two-way Sync"]
+        EditorChange["Editor Change"] --> Yjs["Y.js CRDT"]
+        Yjs --> Liveblocks["Liveblocks Backend"]
+        Liveblocks --> RemoteUser["Remote User"]
+        RemoteUser --> Yjs
+        Yjs --> LocalEditor["Local Editor Update"]
+    end
+
+    Binding --> BIDIRECTIONAL
+    BIDIRECTIONAL --> Synced[("Synced")]
+
+    style Emit fill:#1c1528,stroke:#a78bfa,stroke-width:2px
+    style BIDIRECTIONAL fill:#131c2e,stroke:#60a5fa,stroke-width:1px
+    style Synced fill:#132013,stroke:#4ade80,stroke-width:2px</pre>
+    </div>
+
+    <!-- Flow 5: Error Handling with AI Fix -->
+    <div class="flow-section">
+        <div class="flow-header">
+            <div class="flow-title">Error Handling with AI Fix</div>
+            <div class="flow-meta">main.ts:580-1064</div>
+        </div>
+        <div class="flow-gherkin">
+            <span class="gherkin-label gherkin-when">WHEN</span> Mermaid parse fails during diagram rendering
+            <span class="gherkin-label gherkin-then">THEN</span> Error displayed with inline markers and "Fix with AI" button
+        </div>
+        <pre class="mermaid-flow">flowchart LR
+    MermaidParse["mermaid.parse()"] -->|throws| HandleError["handleRenderError()"]
+
+    HandleError --> ParseError["parseMermaidError()"]
+    ParseError --> ExtractLC["Extract line/column"]
+
+    ExtractLC --> Markers["setModelMarkers()"]
+    Markers --> Decorations["setDecorations()"]
+
+    Decorations --> ShowError["showError() overlay"]
+    ShowError --> FixButton["showFixWithAIOption()"]
+
+    FixButton -->|User clicks| BuildPrompt["Build fix prompt"]
+    BuildPrompt --> HandleSubmit["handleSubmit()"]
+    HandleSubmit --> AIStream["AI streams corrected code"]
+    AIStream --> NormalRender["Triggers normal render flow"]
+    NormalRender --> ErrorClear[("Error Clears")]
+
+    style HandleError fill:#1f1320,stroke:#f472b6,stroke-width:2px
+    style FixButton fill:#1c1528,stroke:#a78bfa,stroke-width:2px
+    style ErrorClear fill:#132013,stroke:#4ade80,stroke-width:2px</pre>
+    </div>
+
+    <!-- Flow 6: Share Link Generation -->
+    <div class="flow-section">
+        <div class="flow-header">
+            <div class="flow-title">Share Link Generation</div>
+            <div class="flow-meta">main.ts:1408-1499</div>
+        </div>
+        <div class="flow-gherkin">
+            <span class="gherkin-label gherkin-when">WHEN</span> User clicks Share button
+            <span class="gherkin-label gherkin-then">THEN</span> URL copied to clipboard
+        </div>
+        <pre class="mermaid-flow">flowchart LR
+    User[("User")] --> ClickShare[("Click Share")]
+    ClickShare --> ToggleModal["Toggle Modal"]
+
+    ToggleModal --> Choice{Choose Option}
+
+    Choice -->|"Copy Link"| CopyLink["writeText(location.href)"]
+    Choice -->|"Collaborate"| GenRoom["Generate random roomId"]
+    Choice -->|"Embed"| AppendHide["Append ?hideEditor"]
+
+    GenRoom --> AppendRoom["Append ?room= to URL"]
+    AppendRoom --> CopyCollab["writeText(collaboration URL)"]
+
+    AppendHide --> CopyEmbed["writeText(embed URL)"]
+    CopyLink --> Clipboard[("Copied to Clipboard")]
+    CopyCollab --> Clipboard
+    CopyEmbed --> Clipboard
+
+    style ClickShare fill:#1c1528,stroke:#a78bfa,stroke-width:2px
+    style Choice fill:#131c2e,stroke:#60a5fa,stroke-width:2px
+    style Clipboard fill:#132013,stroke:#4ade80,stroke-width:2px</pre>
+    </div>
+
+</div>
+</div>
+
+<!-- ============ MODULES TAB ============ -->
+<div class="tab-panel" id="panel-modules">
+<div class="scroll-content">
+
+    <div class="sec">
+        <div class="sec-title">Directory Structure</div>
+        <div class="dir-tree">
+<span class="dir">mimaid/</span>
+├── <span class="dir">src/</span>
+│   ├── <span class="hub">main.ts</span>              <span style="color:#555">Application orchestrator</span>
+│   ├── <span class="hub">ai-handler.ts</span>        <span style="color:#555">Multi-provider AI generation</span>
+│   ├── <span class="hub">collaboration.ts</span>     <span style="color:#555">Real-time collab (Y.js + Liveblocks)</span>
+│   ├── <span class="hub">events.ts</span>            <span style="color:#555">Type-safe event bus (mitt)</span>
+│   ├── <span class="file">config.ts</span>            <span style="color:#555">Configuration constants</span>
+│   ├── <span class="file">utils.ts</span>             <span style="color:#555">Debounce, compression, error parsing</span>
+│   ├── <span class="file">types.ts</span>             <span style="color:#555">TypeScript type definitions</span>
+│   ├── <span class="file">configMermaidLanguage.ts</span> <span style="color:#555">Monaco Mermaid language def</span>
+│   ├── <span class="file">skill-content.ts</span>     <span style="color:#555">Claude skill export</span>
+│   ├── <span class="file">style.css</span>            <span style="color:#555">Application styles</span>
+│   └── <span class="file">vite-env.d.ts</span>        <span style="color:#555">Vite environment types</span>
+├── <span class="dir">docs/</span>                 <span style="color:#555">Project documentation</span>
+├── <span class="dir">public/</span>               <span style="color:#555">Static assets</span>
+└── <span class="dir">.github/</span>              <span style="color:#555">CI/CD workflows</span>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Module Guide</div>
+        <div class="card-grid">
+            <div class="mod-card">
+                <div class="mod-header"><span class="mod-name">MermaidEditor</span><span class="mod-layer client">Presentation</span></div>
+                <div class="mod-path">src/main.ts — constructor() at line 85</div>
+                <div class="mod-desc">Application orchestrator. Coordinates Monaco, Mermaid.js, AI, Collaboration, and all UI interactions.</div>
+                <div class="mod-deps">Imports: <span>types, config, utils, events, ai-handler, collaboration, configMermaidLanguage, mermaid, monaco-editor</span></div>
+            </div>
+            <div class="mod-card">
+                <div class="mod-header"><span class="mod-name">AIHandler</span><span class="mod-layer core">Core</span></div>
+                <div class="mod-path">src/ai-handler.ts — handleSubmit()</div>
+                <div class="mod-desc">Multi-provider AI diagram generation via Vercel AI SDK. Supports Google Gemini, OpenAI, and Anthropic. Streaming responses with code extraction.</div>
+                <div class="mod-deps">Imports: <span>config, types, events, @ai-sdk/*</span></div>
+            </div>
+            <div class="mod-card">
+                <div class="mod-header"><span class="mod-name">CollaborationHandler</span><span class="mod-layer core">Core</span></div>
+                <div class="mod-path">src/collaboration.ts — setup()</div>
+                <div class="mod-desc">Real-time collaboration using Y.js CRDT and Liveblocks. Room-based sessions with cursor awareness and user presence.</div>
+                <div class="mod-deps">Imports: <span>utils, events, @liveblocks/*, yjs, y-monaco</span></div>
+            </div>
+            <div class="mod-card">
+                <div class="mod-header"><span class="mod-name">EventBus</span><span class="mod-layer infra">Infrastructure</span></div>
+                <div class="mod-path">src/events.ts — eventBus.emit() / .on()</div>
+                <div class="mod-desc">Type-safe event system for component communication using mitt. EventHelpers provides safeEmit() and safeListen() wrappers.</div>
+                <div class="mod-deps">Imports: <span>types, mitt</span></div>
+            </div>
+            <div class="mod-card">
+                <div class="mod-header"><span class="mod-name">Config</span><span class="mod-layer infra">Infrastructure</span></div>
+                <div class="mod-path">src/config.ts</div>
+                <div class="mod-desc">Configuration constants: AI model defaults, Mermaid config, zoom range, editor constraints, creation/modification presets.</div>
+                <div class="mod-deps">Imports: <span>types</span></div>
+            </div>
+            <div class="mod-card">
+                <div class="mod-header"><span class="mod-name">Utils</span><span class="mod-layer infra">Infrastructure</span></div>
+                <div class="mod-path">src/utils.ts</div>
+                <div class="mod-desc">Utility functions: debounce, LZ-String URL compression/decompression, Mermaid error parsing with line/column extraction.</div>
+                <div class="mod-deps">Imports: <span>types, lz-string</span></div>
+            </div>
+            <div class="mod-card">
+                <div class="mod-header"><span class="mod-name">Types</span><span class="mod-layer infra">Infrastructure</span></div>
+                <div class="mod-path">src/types.ts</div>
+                <div class="mod-desc">TypeScript type definitions shared across all modules. Foundation of the type system.</div>
+                <div class="mod-deps">Imports: <span>(none)</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Navigation Guide</div>
+        <div class="nav-grid">
+            <div class="nav-card"><div class="nav-task">Add new AI provider</div><div class="nav-files">src/ai-handler.ts<br>src/config.ts<br>src/types.ts</div></div>
+            <div class="nav-card"><div class="nav-task">Modify event types</div><div class="nav-files">src/events.ts (AppEvents type)</div></div>
+            <div class="nav-card"><div class="nav-task">Add new preset</div><div class="nav-files">src/config.ts (CREATION_PRESETS or MODIFICATION_PRESETS)</div></div>
+            <div class="nav-card"><div class="nav-task">Change Mermaid config</div><div class="nav-files">src/config.ts (MERMAID_CONFIG)</div></div>
+            <div class="nav-card"><div class="nav-task">Add collaboration feature</div><div class="nav-files">src/collaboration.ts</div></div>
+            <div class="nav-card"><div class="nav-task">Modify UI layout</div><div class="nav-files">src/main.ts<br>src/style.css<br>index.html</div></div>
+            <div class="nav-card"><div class="nav-task">Change export formats</div><div class="nav-files">index.html (export buttons)</div></div>
+        </div>
+    </div>
+
+    <div class="sec">
+        <div class="sec-title">Environment Variables</div>
+        <table class="tbl">
+            <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td style="font-family:'SF Mono',monospace;font-size:11px">VITE_LIVEBLOCKS_PUBLIC_API_KEY</td><td>No</td><td>Liveblocks API key for collaboration</td></tr>
+                <tr><td style="font-family:'SF Mono',monospace;font-size:11px">VITE_GOOGLE_AI_API_KEY</td><td>No</td><td>Fallback Google AI API key</td></tr>
+                <tr><td style="font-family:'SF Mono',monospace;font-size:11px">CLAUDE_CODE_OAUTH_TOKEN</td><td>CI only</td><td>OAuth token for GitHub Actions</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+</div><!-- /main -->
+
+<!-- Comment Modal -->
+<div class="modal-overlay" id="modal">
+    <div class="modal-box">
+        <h3 id="modal-title">Annotate</h3>
+        <textarea id="modal-text" placeholder="Add annotation..."></textarea>
+        <div class="modal-actions">
+            <button class="modal-btn secondary" id="modal-cancel">Cancel</button>
+            <button class="modal-btn primary" id="modal-save">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========= TAB SWITCHING =========
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+        // Initialize dep graph when switching to dependencies tab
+        if (btn.dataset.tab === 'dependencies' && !depGraphInitialized) initDepGraph();
+        // Render Mermaid diagrams when switching to flows tab
+        if (btn.dataset.tab === 'flows' && !mermaidFlowsInitialized) initMermaidFlows();
+    };
+});
+
+// ========= SHARED DATA =========
+const LAYERS = {
+    external: { label: 'External', color: '#a78bfa', bg: '#1c1528', y: 60 },
+    client:   { label: 'Client / UI', color: '#60a5fa', bg: '#131c2e', y: 230 },
+    core:     { label: 'Core Logic', color: '#4ade80', bg: '#132013', y: 400 },
+    infra:    { label: 'Infrastructure', color: '#94a3b8', bg: '#181818', y: 570 },
+    data:     { label: 'Data / Storage', color: '#f472b6', bg: '#1f1320', y: 740 }
+};
+const CSTYLES = {
+    'data-flow':  { color: '#3b82f6', dash: '',    w: 2 },
+    'dependency': { color: '#525252', dash: '6,4',  w: 1.5 },
+    'event':      { color: '#ef4444', dash: '3,4',  w: 1.5 },
+    'calls':      { color: '#10b981', dash: '8,4',  w: 1.5 }
+};
+const NODES = [
+    {id:'google_ai',label:'Google AI',path:'Gemini API',layer:'external'},
+    {id:'anthropic_api',label:'Anthropic',path:'Claude API',layer:'external'},
+    {id:'openai_api',label:'OpenAI',path:'GPT API',layer:'external'},
+    {id:'user',label:'User',path:'Browser',layer:'external'},
+    {id:'collaborator',label:'Collaborator',path:'WebSocket',layer:'external'},
+    {id:'liveblocks',label:'Liveblocks',path:'Collab backend',layer:'external'},
+    {id:'monaco',label:'Monaco Editor',path:'dynamic import',layer:'client'},
+    {id:'spa',label:'MinimalMermaid SPA',path:'index.html',layer:'client',hub:true},
+    {id:'mermaid_js',label:'Mermaid.js',path:'v11 renderer',layer:'client'},
+    {id:'preview',label:'Preview Pane',path:'SVG output',layer:'client'},
+    {id:'svg_panzoom',label:'svg-pan-zoom',path:'pan/zoom lib',layer:'client'},
+    {id:'ai_handler',label:'AIHandler',path:'ai-handler.ts',layer:'core'},
+    {id:'monaco_lang',label:'Monaco Language',path:'configMermaidLanguage.ts',layer:'core'},
+    {id:'main',label:'MermaidEditor',path:'main.ts',layer:'core',hub:true},
+    {id:'skill_content',label:'Skill Content',path:'skill-content.ts',layer:'core'},
+    {id:'collab',label:'CollabHandler',path:'collaboration.ts',layer:'core'},
+    {id:'config',label:'Config',path:'config.ts',layer:'infra'},
+    {id:'events',label:'EventBus',path:'events.ts',layer:'infra',hub:true},
+    {id:'utils',label:'Utils',path:'utils.ts',layer:'infra'},
+    {id:'types',label:'Types',path:'types.ts',layer:'infra',hub:true},
+    {id:'localstorage',label:'LocalStorage',path:'Browser API',layer:'data'},
+    {id:'url_hash',label:'URL Hash',path:'LZ-String',layer:'data'}
+];
+const EDGES = [
+    {from:'user',to:'spa',type:'data-flow',label:'Uses'},
+    {from:'collaborator',to:'spa',type:'data-flow',label:'Joins session'},
+    {from:'ai_handler',to:'google_ai',type:'data-flow',label:'streamText()'},
+    {from:'ai_handler',to:'openai_api',type:'data-flow',label:'streamText()'},
+    {from:'ai_handler',to:'anthropic_api',type:'data-flow',label:'streamText()'},
+    {from:'collab',to:'liveblocks',type:'data-flow',label:'WebSocket sync'},
+    {from:'mermaid_js',to:'preview',type:'data-flow',label:'SVG output'},
+    {from:'preview',to:'svg_panzoom',type:'data-flow',label:'Pan/zoom'},
+    {from:'utils',to:'url_hash',type:'data-flow',label:'Compress/decompress'},
+    {from:'utils',to:'localstorage',type:'data-flow',label:'Read/write'},
+    {from:'main',to:'monaco',type:'calls',label:'Manages editor'},
+    {from:'main',to:'mermaid_js',type:'calls',label:'Renders diagrams'},
+    {from:'main',to:'svg_panzoom',type:'calls',label:'Enables zoom'},
+    {from:'monaco_lang',to:'monaco',type:'calls',label:'Registers language'},
+    {from:'main',to:'ai_handler',type:'dependency'},
+    {from:'main',to:'collab',type:'dependency'},
+    {from:'main',to:'events',type:'dependency'},
+    {from:'main',to:'config',type:'dependency'},
+    {from:'main',to:'utils',type:'dependency'},
+    {from:'main',to:'types',type:'dependency'},
+    {from:'main',to:'monaco_lang',type:'dependency'},
+    {from:'main',to:'skill_content',type:'dependency'},
+    {from:'ai_handler',to:'events',type:'dependency'},
+    {from:'ai_handler',to:'config',type:'dependency'},
+    {from:'ai_handler',to:'types',type:'dependency'},
+    {from:'collab',to:'events',type:'dependency'},
+    {from:'collab',to:'utils',type:'dependency'},
+    {from:'config',to:'types',type:'dependency'},
+    {from:'events',to:'types',type:'dependency'},
+    {from:'utils',to:'types',type:'dependency'},
+    {from:'ai_handler',to:'events',type:'event',label:'ai:start/complete'},
+    {from:'collab',to:'events',type:'event',label:'collab:connect'},
+    {from:'monaco',to:'events',type:'event',label:'editor:change'}
+];
+
+// ========= ARCHITECTURE TAB — D3 Force Graph =========
+const archState = {
+    layers: Object.fromEntries(Object.keys(LAYERS).map(k=>[k,true])),
+    conns: Object.fromEntries(Object.keys(CSTYLES).map(k=>[k,true])),
+    comments: [],
+    search: '',
+    hovered: null
+};
+
+function nById(id){ return NODES.find(n=>n.id===id) }
+function connected(id){ const s=new Set(); EDGES.forEach(e=>{ if(e.from===id) s.add(e.to); if(e.to===id) s.add(e.from) }); return s }
+function nVisible(n){
+    if(!archState.layers[n.layer]) return false;
+    if(archState.search){ const q=archState.search.toLowerCase(); return n.label.toLowerCase().includes(q)||n.path.toLowerCase().includes(q) }
+    return true;
+}
+function eVisible(e){
+    if(!archState.conns[e.type]) return false;
+    const f=nById(e.from), t=nById(e.to);
+    return f&&t&&nVisible(f)&&nVisible(t);
+}
+
+// Give initial positions based on layer y and spread across x
+(function setInitialPositions(){
+    const layerNodes = {};
+    NODES.forEach(n => {
+        if(!layerNodes[n.layer]) layerNodes[n.layer] = [];
+        layerNodes[n.layer].push(n);
+    });
+    Object.entries(layerNodes).forEach(([layer, nodes]) => {
+        const l = LAYERS[layer];
+        const spacing = 1200 / (nodes.length + 1);
+        nodes.forEach((n, i) => {
+            n.x = 40 + spacing * (i + 1);
+            n.y = l.y;
+        });
+    });
+})();
+
+// Create D3 architecture graph
+(function initArchGraph(){
+    const container = document.getElementById('arch-canvas-container');
+    const width = 1280, height = 820;
+
+    const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .style('position', 'absolute')
+        .style('top', '0')
+        .style('left', '0');
+
+    // Defs for markers
+    const defs = svg.append('defs');
+    [['a-data','#3b82f6',.8],['a-dep','#525252',.6],['a-event','#ef4444',.7],['a-calls','#10b981',.7]].forEach(([id,fill,op]) => {
+        defs.append('marker').attr('id',id).attr('markerWidth',8).attr('markerHeight',6).attr('refX',7).attr('refY',3).attr('orient','auto')
+            .append('polygon').attr('points','0 0,8 3,0 6').attr('fill',fill).attr('opacity',1);
+    });
+    const markerIds = {'data-flow':'url(#a-data)','dependency':'url(#a-dep)','event':'url(#a-event)','calls':'url(#a-calls)'};
+
+    const zoomG = svg.append('g');
+    const gBands = zoomG.append('g');
+    const gEdges = zoomG.append('g');
+    const gNodes = zoomG.append('g');
+
+    // D3 zoom
+    const zoomBehavior = d3.zoom()
+        .scaleExtent([0.3, 4])
+        .on('zoom', (event) => {
+            zoomG.attr('transform', event.transform);
+            document.getElementById('z-display').textContent = Math.round(event.transform.k * 100) + '%';
+        });
+    svg.call(zoomBehavior);
+
+    // Zoom controls
+    document.getElementById('z-in').onclick = () => svg.transition().duration(200).call(zoomBehavior.scaleBy, 1.25);
+    document.getElementById('z-out').onclick = () => svg.transition().duration(200).call(zoomBehavior.scaleBy, 0.8);
+    document.getElementById('z-fit').onclick = () => svg.transition().duration(300).call(zoomBehavior.transform, d3.zoomIdentity);
+
+    // Force simulation
+    let simulation = null;
+
+    function buildSimulation(nodes, edges) {
+        if (simulation) simulation.stop();
+
+        const nodeMap = {};
+        nodes.forEach(n => nodeMap[n.id] = n);
+
+        const links = edges.map(e => ({ source: e.from, target: e.to, type: e.type, label: e.label }))
+            .filter(l => nodeMap[l.source] && nodeMap[l.target]);
+
+        simulation = d3.forceSimulation(nodes)
+            .force('link', d3.forceLink(links).id(d => d.id).distance(120).strength(0.3))
+            .force('charge', d3.forceManyBody().strength(-400))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('y', d3.forceY(d => LAYERS[d.layer].y).strength(0.3))
+            .force('collide', d3.forceCollide(90))
+            .alpha(0.8)
+            .on('tick', tickArch);
+
+        return { links };
+    }
+
+    // Persistent DOM refs for hover updates without re-render
+    let archNodeGroups = null;
+    let archEdgePaths = null;
+    let archEdgeLabels = null;
+    let currentLinks = null;
+    let currentNodes = null;
+
+    function buildArchDOM(nodes, edges, links) {
+        currentNodes = nodes;
+        currentLinks = links;
+
+        // Bands
+        gBands.selectAll('*').remove();
+        Object.entries(LAYERS).forEach(([k, l]) => {
+            if (!archState.layers[k]) return;
+            gBands.append('rect').attr('x', -2000).attr('y', l.y - 50).attr('width', 6000).attr('height', 100)
+                .attr('rx', 0).attr('fill', l.bg).attr('opacity', 0.4);
+            gBands.append('text').attr('x', 20).attr('y', l.y - 20).attr('fill', l.color).attr('opacity', 0.4)
+                .attr('class', 'layer-label').text(l.label);
+        });
+
+        // Edges
+        gEdges.selectAll('*').remove();
+        archEdgePaths = [];
+        archEdgeLabels = [];
+        links.forEach(link => {
+            const s = CSTYLES[link.type];
+            if (!s) return;
+            const path = gEdges.append('path')
+                .attr('class', 'edge')
+                .attr('stroke', s.color)
+                .attr('stroke-width', s.w)
+                .attr('stroke-dasharray', s.dash)
+                .attr('marker-end', markerIds[link.type])
+                .attr('opacity', 0.35)
+                .datum(link);
+            archEdgePaths.push(path);
+
+            // Label group (hidden by default)
+            const labelG = gEdges.append('g').attr('class', 'edge-label-group').style('display', 'none').datum(link);
+            labelG.append('rect').attr('rx', 3).attr('fill', '#0c0c0c').attr('opacity', 0.85);
+            labelG.append('text').attr('fill', s.color).attr('opacity', 0.8).attr('text-anchor', 'middle')
+                .attr('font-size', '8px').attr('font-family', '-apple-system,system-ui,sans-serif')
+                .text(link.label || '');
+            archEdgeLabels.push(labelG);
+        });
+
+        // Nodes
+        gNodes.selectAll('*').remove();
+        archNodeGroups = [];
+        nodes.forEach(n => {
+            const l = LAYERS[n.layer];
+            const w = n.hub ? 160 : 140, ht = n.hub ? 48 : 40;
+
+            const g = gNodes.append('g')
+                .attr('class', 'node-group')
+                .attr('data-id', n.id)
+                .datum(n);
+
+            g.append('rect')
+                .attr('class', 'node-bg')
+                .attr('x', -w/2).attr('y', -ht/2).attr('width', w).attr('height', ht).attr('rx', 8)
+                .attr('fill', l.bg).attr('stroke', l.color).attr('stroke-width', n.hub ? 2 : 1)
+                .attr('opacity', 0.9);
+
+            if (n.hub) {
+                g.append('text').attr('x', w/2 - 8).attr('y', -ht/2 + 11)
+                    .attr('fill', l.color).attr('opacity', 0.7).attr('text-anchor', 'end')
+                    .attr('class', 'hub-badge').text('HUB');
+            }
+
+            g.append('text').attr('x', 0).attr('y', n.path ? -3 : 2)
+                .attr('fill', l.color).attr('text-anchor', 'middle').attr('class', 'node-label')
+                .text(n.label);
+
+            if (n.path) {
+                g.append('text').attr('x', 0).attr('y', 10)
+                    .attr('fill', l.color).attr('opacity', 0.4).attr('text-anchor', 'middle')
+                    .attr('class', 'node-sublabel').text(n.path);
+            }
+
+            // Hover - just update visual state, don't re-render DOM
+            g.on('mouseenter', () => { archState.hovered = n.id; applyArchHover(); })
+             .on('mouseleave', () => { archState.hovered = null; applyArchHover(); })
+             .on('click', (event) => { event.stopPropagation(); openModal(n); });
+
+            // D3 drag
+            g.call(d3.drag()
+                .on('start', (event) => {
+                    if (!event.active) simulation.alphaTarget(0.1).restart();
+                    n.fx = n.x; n.fy = n.y;
+                })
+                .on('drag', (event) => {
+                    n.fx = event.x; n.fy = event.y;
+                })
+                .on('end', (event) => {
+                    if (!event.active) simulation.alphaTarget(0);
+                    n.fx = null; n.fy = null;
+                })
+            );
+
+            archNodeGroups.push(g);
+        });
+    }
+
+    // Update positions on each tick (no DOM rebuild)
+    function tickArch() {
+        if (!archEdgePaths || !archNodeGroups) return;
+        archEdgePaths.forEach(path => {
+            const link = path.datum();
+            const src = typeof link.source === 'object' ? link.source : nById(link.source);
+            const tgt = typeof link.target === 'object' ? link.target : nById(link.target);
+            if (!src || !tgt) return;
+            const dx = tgt.x - src.x, dy = tgt.y - src.y;
+            const d = Math.sqrt(dx*dx + dy*dy), c = Math.min(d * 0.3, 80);
+            let pathD;
+            if (Math.abs(dy) > Math.abs(dx) * 0.5) {
+                pathD = `M${src.x},${src.y}C${src.x},${src.y+c} ${tgt.x},${tgt.y-c} ${tgt.x},${tgt.y}`;
+            } else {
+                pathD = `M${src.x},${src.y}C${src.x+dx*0.4},${src.y} ${tgt.x-dx*0.4},${tgt.y} ${tgt.x},${tgt.y}`;
+            }
+            path.attr('d', pathD);
+        });
+        archEdgeLabels.forEach(labelG => {
+            const link = labelG.datum();
+            const src = typeof link.source === 'object' ? link.source : nById(link.source);
+            const tgt = typeof link.target === 'object' ? link.target : nById(link.target);
+            if (!src || !tgt) return;
+            const mx = (src.x + tgt.x) / 2, my = (src.y + tgt.y) / 2 - 6;
+            const txt = link.label || '';
+            labelG.select('rect').attr('x', mx - txt.length * 3).attr('y', my - 8).attr('width', txt.length * 6).attr('height', 14);
+            labelG.select('text').attr('x', mx).attr('y', my + 2);
+        });
+        archNodeGroups.forEach(g => {
+            const n = g.datum();
+            g.attr('transform', `translate(${n.x},${n.y})`);
+        });
+    }
+
+    // Apply hover highlight without rebuilding DOM
+    function applyArchHover() {
+        const h = archState.hovered;
+        const conn = h ? connected(h) : null;
+
+        archNodeGroups.forEach(g => {
+            const n = g.datum();
+            const dim = h && h !== n.id && conn && !conn.has(n.id);
+            g.classed('dimmed', dim);
+            g.select('.node-bg').attr('opacity', (h && (h === n.id || (conn && conn.has(n.id)))) ? 1 : 0.9);
+        });
+
+        archEdgePaths.forEach(path => {
+            const link = path.datum();
+            const srcId = typeof link.source === 'object' ? link.source.id : link.source;
+            const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
+            const rel = h && (srcId === h || tgtId === h);
+            const dim = h && !rel;
+            const s = CSTYLES[link.type];
+            path.classed('dimmed', dim)
+                .attr('stroke-width', rel ? s.w + 0.5 : s.w)
+                .attr('opacity', rel ? 0.9 : 0.35);
+        });
+
+        archEdgeLabels.forEach(labelG => {
+            const link = labelG.datum();
+            const srcId = typeof link.source === 'object' ? link.source.id : link.source;
+            const tgtId = typeof link.target === 'object' ? link.target.id : link.target;
+            const rel = h && (srcId === h || tgtId === h);
+            labelG.style('display', (link.label && rel) ? null : 'none');
+        });
+    }
+
+    // Full rebuild when filters change
+    function rebuildArch() {
+        const visNodes = NODES.filter(nVisible);
+        const visEdges = EDGES.filter(eVisible);
+        const { links } = buildSimulation(visNodes, visEdges);
+        buildArchDOM(visNodes, visEdges, links);
+        updatePrompt();
+        updateComments();
+    }
+
+    // Expose for controls
+    window.rebuildArch = rebuildArch;
+
+    // Initial build
+    rebuildArch();
+})();
+
+// Prompt & comments
+function updatePrompt(){
+    const vis = NODES.filter(nVisible), ve = EDGES.filter(eVisible);
+    let t = `Architecture: MinimalMermaid — 50-file SPA (TypeScript + Vite)\n\nComponents (${vis.length}):\n`;
+    vis.forEach(n => { t += `  ${n.label} (${n.path})${n.hub ? ' [HUB]' : ''}\n` });
+    if (ve.length) { t += `\nRelationships:\n`; ve.forEach(e => { const f = nById(e.from), tt = nById(e.to); if (f && tt) t += `  ${f.label} → ${tt.label}: ${e.label || e.type}\n` }) }
+    if (archState.comments.length) { t += `\nAnnotations:\n`; archState.comments.forEach(c => { const n = nById(c.nodeId); if (n) t += `  ${n.label}: ${c.text}\n` }) }
+    document.getElementById('prompt-output').textContent = t;
+}
+
+function updateComments(){
+    const list = document.getElementById('comments-list'); list.innerHTML = '';
+    document.getElementById('comment-count').textContent = archState.comments.length;
+    archState.comments.forEach((c, i) => {
+        const n = nById(c.nodeId); if (!n) return;
+        const d = document.createElement('div'); d.className = 'comment-card';
+        d.innerHTML = `<div class="comment-header"><span class="comment-name">${n.label}</span><button class="comment-del" data-i="${i}">&times;</button></div><div class="comment-text">${c.text}</div>`;
+        list.appendChild(d);
+    });
+}
+document.getElementById('comments-list').onclick = e => {
+    if (e.target.classList.contains('comment-del')) {
+        archState.comments.splice(+e.target.dataset.i, 1);
+        updatePrompt(); updateComments();
+    }
+};
+
+// Controls
+function buildControls(){
+    const ld = document.getElementById('arch-layers');
+    Object.entries(LAYERS).forEach(([k, l]) => {
+        const r = document.createElement('div'); r.className = 'toggle-row';
+        r.innerHTML = `<input type=checkbox id="l-${k}" checked><label for="l-${k}"><span class="color-dot" style="background:${l.color}"></span>${l.label}</label>`;
+        r.querySelector('input').onchange = function(){ archState.layers[k] = this.checked; clrPreset(); window.rebuildArch() };
+        ld.appendChild(r);
+    });
+    const cd = document.getElementById('arch-conns');
+    Object.entries(CSTYLES).forEach(([k, s]) => {
+        const nm = k.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const r = document.createElement('div'); r.className = 'toggle-row';
+        r.innerHTML = `<input type=checkbox id="c-${k}" checked><label for="c-${k}"><span class="conn-sample" style="border-top:2px ${s.dash ? 'dashed' : 'solid'} ${s.color}"></span>${nm}</label>`;
+        r.querySelector('input').onchange = function(){ archState.conns[k] = this.checked; clrPreset(); window.rebuildArch() };
+        cd.appendChild(r);
+    });
+}
+function clrPreset(){ document.querySelectorAll('#arch-presets .preset-btn').forEach(b => b.classList.remove('active')) }
+function syncToggles(){
+    Object.keys(LAYERS).forEach(k => { const c = document.getElementById(`l-${k}`); if (c) c.checked = !!archState.layers[k] });
+    Object.keys(CSTYLES).forEach(k => { const c = document.getElementById(`c-${k}`); if (c) c.checked = !!archState.conns[k] });
+}
+
+const PRESETS = {
+    'full-system':  { layers:{external:true,client:true,core:true,infra:true,data:true}, conns:{'data-flow':true,dependency:true,event:true,calls:true} },
+    'data-flow':    { layers:{external:true,client:true,core:true,infra:false,data:true}, conns:{'data-flow':true,dependency:false,event:false,calls:false} },
+    'dependencies': { layers:{external:false,client:false,core:true,infra:true,data:false}, conns:{'data-flow':false,dependency:true,event:false,calls:false} },
+    'ai-flow':      { layers:{external:true,client:true,core:true,infra:true,data:false}, conns:{'data-flow':true,dependency:false,event:true,calls:true} },
+    'collab-flow':  { layers:{external:true,client:true,core:true,infra:true,data:false}, conns:{'data-flow':true,dependency:false,event:true,calls:false} }
+};
+document.querySelectorAll('#arch-presets .preset-btn').forEach(btn => {
+    btn.onclick = () => {
+        const p = PRESETS[btn.dataset.preset]; if (!p) return;
+        archState.layers = {...p.layers}; archState.conns = {...p.conns};
+        document.querySelectorAll('#arch-presets .preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        syncToggles();
+        window.rebuildArch();
+    };
+});
+
+document.getElementById('arch-search').oninput = e => { archState.search = e.target.value; window.rebuildArch() };
+document.getElementById('copy-prompt').onclick = () => {
+    navigator.clipboard.writeText(document.getElementById('prompt-output').textContent);
+    const b = document.getElementById('copy-prompt'); b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1200);
+};
+
+// Modal
+let modalNode = null;
+function openModal(n){
+    modalNode = n;
+    document.getElementById('modal-title').textContent = 'Annotate: ' + n.label;
+    const ex = archState.comments.find(c => c.nodeId === n.id);
+    document.getElementById('modal-text').value = ex ? ex.text : '';
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('modal-text').focus();
+}
+document.getElementById('modal-cancel').onclick = () => document.getElementById('modal').classList.remove('active');
+document.getElementById('modal').onclick = e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('active') };
+document.getElementById('modal-save').onclick = () => {
+    const t = document.getElementById('modal-text').value.trim();
+    if (!modalNode) return;
+    const i = archState.comments.findIndex(c => c.nodeId === modalNode.id);
+    if (t) { if (i >= 0) archState.comments[i].text = t; else archState.comments.push({nodeId: modalNode.id, text: t}) }
+    else if (i >= 0) archState.comments.splice(i, 1);
+    document.getElementById('modal').classList.remove('active');
+    updatePrompt(); updateComments();
+};
+
+// Init controls
+buildControls();
+
+// ========= DEPENDENCIES TAB — D3 Force Graph =========
+let depGraphInitialized = false;
+
+function initDepGraph() {
+    depGraphInitialized = true;
+    const container = document.getElementById('dep-graph-container');
+    const rect = container.getBoundingClientRect();
+    const width = rect.width || 900;
+    const height = 450;
+
+    // Internal modules only
+    const DEP_MODULES = [
+        { id: 'main', label: 'main.ts', layer: 'client', hub: true },
+        { id: 'ai_handler', label: 'ai-handler.ts', layer: 'core', hub: false },
+        { id: 'collab', label: 'collaboration.ts', layer: 'core', hub: false },
+        { id: 'events', label: 'events.ts', layer: 'infra', hub: true },
+        { id: 'config', label: 'config.ts', layer: 'infra', hub: false },
+        { id: 'utils', label: 'utils.ts', layer: 'infra', hub: false },
+        { id: 'types', label: 'types.ts', layer: 'infra', hub: true },
+        { id: 'monaco_lang', label: 'configMermaidLanguage.ts', layer: 'client', hub: false },
+        { id: 'skill_content', label: 'skill-content.ts', layer: 'client', hub: false }
+    ];
+
+    // Dependency edges only (imports)
+    const DEP_EDGES = EDGES
+        .filter(e => e.type === 'dependency')
+        .filter(e => DEP_MODULES.find(m => m.id === e.from) && DEP_MODULES.find(m => m.id === e.to))
+        .map(e => ({ source: e.from, target: e.to }));
+
+    // Layer y targets for force
+    const layerYMap = { client: height * 0.2, core: height * 0.5, infra: height * 0.8 };
+
+    // Clone nodes for simulation
+    const nodes = DEP_MODULES.map(m => ({
+        ...m,
+        x: width / 2 + (Math.random() - 0.5) * 200,
+        y: layerYMap[m.layer] + (Math.random() - 0.5) * 40
+    }));
+    const links = DEP_EDGES.map(e => ({ source: e.source, target: e.target }));
+
+    const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`);
+
+    // Arrow marker
+    svg.append('defs').append('marker')
+        .attr('id', 'dep-arrow')
+        .attr('markerWidth', 8).attr('markerHeight', 6).attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+        .append('polygon').attr('points', '0 0,8 3,0 6').attr('fill', '#888').attr('opacity', 1);
+
+    const zoomG = svg.append('g');
+
+    const zoomBehavior = d3.zoom()
+        .scaleExtent([0.4, 3])
+        .on('zoom', (event) => zoomG.attr('transform', event.transform));
+    svg.call(zoomBehavior);
+
+    const edgeG = zoomG.append('g');
+    const nodeG = zoomG.append('g');
+
+    let hoveredDep = null;
+
+    function depConnected(id) {
+        const s = new Set();
+        links.forEach(l => {
+            const sid = typeof l.source === 'object' ? l.source.id : l.source;
+            const tid = typeof l.target === 'object' ? l.target.id : l.target;
+            if (sid === id) s.add(tid);
+            if (tid === id) s.add(sid);
+        });
+        return s;
+    }
+
+    // Build DOM once
+    const depEdgePaths = [];
+    const depNodeGroups = [];
+
+    links.forEach(link => {
+        const path = edgeG.append('path')
+            .attr('class', 'dep-edge')
+            .attr('marker-end', 'url(#dep-arrow)')
+            .attr('opacity', 0.6)
+            .datum(link);
+        depEdgePaths.push(path);
+    });
+
+    nodes.forEach(n => {
+        const l = LAYERS[n.layer];
+        const w = n.hub ? 150 : 120, ht = n.hub ? 36 : 28;
+
+        const g = nodeG.append('g')
+            .attr('class', 'dep-node')
+            .datum(n);
+
+        g.append('rect')
+            .attr('x', -w/2).attr('y', -ht/2).attr('width', w).attr('height', ht).attr('rx', 6)
+            .attr('fill', l.bg).attr('stroke', l.color).attr('stroke-width', n.hub ? 2.5 : 1)
+            .attr('opacity', 0.9);
+
+        if (n.hub) {
+            g.append('text').attr('x', w/2 - 6).attr('y', -ht/2 + 9)
+                .attr('fill', l.color).attr('opacity', 0.7).attr('text-anchor', 'end')
+                .attr('font-size', '7px').attr('font-weight', '700')
+                .attr('font-family', '-apple-system,system-ui,sans-serif')
+                .text('HUB');
+        }
+
+        g.append('text').attr('x', 0).attr('y', 4)
+            .attr('fill', l.color).attr('text-anchor', 'middle')
+            .attr('font-size', '10px').attr('font-weight', '600')
+            .attr('font-family', '-apple-system,system-ui,sans-serif')
+            .text(n.label);
+
+        g.on('mouseenter', () => { hoveredDep = n.id; applyDepHover(); })
+         .on('mouseleave', () => { hoveredDep = null; applyDepHover(); });
+
+        g.call(d3.drag()
+            .on('start', (event) => {
+                if (!event.active) simulation.alphaTarget(0.1).restart();
+                n.fx = n.x; n.fy = n.y;
+            })
+            .on('drag', (event) => {
+                n.fx = event.x; n.fy = event.y;
+            })
+            .on('end', (event) => {
+                if (!event.active) simulation.alphaTarget(0);
+                n.fx = null; n.fy = null;
+            })
+        );
+
+        depNodeGroups.push(g);
+    });
+
+    // Position update on tick (no DOM rebuild)
+    function tickDep() {
+        depEdgePaths.forEach(path => {
+            const link = path.datum();
+            const sn = typeof link.source === 'object' ? link.source : nodes.find(n => n.id === link.source);
+            const tn = typeof link.target === 'object' ? link.target : nodes.find(n => n.id === link.target);
+            if (!sn || !tn) return;
+            const dx = tn.x - sn.x, dy = tn.y - sn.y;
+            const dist = Math.sqrt(dx*dx + dy*dy), c = Math.min(dist * 0.25, 60);
+            const pathD = Math.abs(dy) > Math.abs(dx) * 0.5
+                ? `M${sn.x},${sn.y}C${sn.x},${sn.y+c} ${tn.x},${tn.y-c} ${tn.x},${tn.y}`
+                : `M${sn.x},${sn.y}C${sn.x+dx*0.4},${sn.y} ${tn.x-dx*0.4},${tn.y} ${tn.x},${tn.y}`;
+            path.attr('d', pathD);
+        });
+        depNodeGroups.forEach(g => {
+            const n = g.datum();
+            g.attr('transform', `translate(${n.x},${n.y})`);
+        });
+    }
+
+    // Hover highlight without DOM rebuild
+    function applyDepHover() {
+        const h = hoveredDep;
+        const conn = h ? depConnected(h) : null;
+
+        depNodeGroups.forEach(g => {
+            const n = g.datum();
+            const dim = h && h !== n.id && conn && !conn.has(n.id);
+            g.style('opacity', dim ? 0.15 : 1);
+            g.select('rect').attr('opacity', (h && (h === n.id || (conn && conn.has(n.id)))) ? 1 : 0.9);
+        });
+
+        depEdgePaths.forEach(path => {
+            const link = path.datum();
+            const sid = typeof link.source === 'object' ? link.source.id : link.source;
+            const tid = typeof link.target === 'object' ? link.target.id : link.target;
+            const rel = h && (sid === h || tid === h);
+            const dim = h && !rel;
+            path.attr('opacity', dim ? 0.08 : rel ? 0.7 : 0.4)
+                .attr('stroke-width', rel ? 2 : 1.5);
+        });
+    }
+
+    const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
+            const s = typeof d.source === 'object' ? d.source : nodes.find(n => n.id === d.source);
+            const t = typeof d.target === 'object' ? d.target : nodes.find(n => n.id === d.target);
+            if (!s || !t) return 100;
+            const layerOrder = { client: 0, core: 1, infra: 2 };
+            return 80 + Math.abs((layerOrder[s.layer] || 0) - (layerOrder[t.layer] || 0)) * 40;
+        }).strength(0.4))
+        .force('charge', d3.forceManyBody().strength(-300))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('y', d3.forceY(d => layerYMap[d.layer]).strength(0.4))
+        .force('collide', d3.forceCollide(70))
+        .on('tick', tickDep);
+}
+
+// ========= MERMAID FLOWS RENDERING =========
+let mermaidFlowsInitialized = false;
+
+async function initMermaidFlows() {
+    if (mermaidFlowsInitialized) return;
+    mermaidFlowsInitialized = true;
+
+    // Initialize mermaid with dark theme config
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'dark',
+        themeVariables: {
+            darkMode: true,
+            background: '#0c0c0c',
+            primaryColor: '#161616',
+            primaryTextColor: '#e5e5e5',
+            primaryBorderColor: '#2a2a2a',
+            lineColor: '#525252',
+            secondaryColor: '#1a1a1a',
+            tertiaryColor: '#161616',
+            fontSize: '11px'
+        },
+        flowchart: {
+            useMaxWidth: false,
+            htmlLabels: true,
+            curve: 'basis'
+        }
+    });
+
+    // Render all mermaid-flow blocks
+    const flowBlocks = document.querySelectorAll('.mermaid-flow');
+    for (const block of flowBlocks) {
+        try {
+            const code = block.textContent.trim();
+            const { svg } = await mermaid.render('mermaid-' + Math.random().toString(36).substr(2, 9), code);
+            block.innerHTML = svg;
+            // Scale SVG to fit container
+            const svgEl = block.querySelector('svg');
+            if (svgEl) {
+                svgEl.style.maxWidth = '100%';
+                svgEl.style.height = 'auto';
+            }
+        } catch (e) {
+            console.error('Mermaid render error:', e);
+            block.innerHTML = '<pre style="color:#ef4444">' + block.textContent + '</pre>';
+        }
+    }
+}
+</script>
+</body>
+</html>
