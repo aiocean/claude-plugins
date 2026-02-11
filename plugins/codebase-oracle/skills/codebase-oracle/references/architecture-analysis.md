@@ -185,3 +185,239 @@ Trade-offs: Independent scaling, but distributed system complexity.
 3. **Trace dependencies** — what does it touch?
 4. **Analyze impact** — what would changing this affect?
 5. **Document findings** — capture insights
+
+## Mermaid Diagram Templates
+
+Ready-to-use templates for visualizing architecture. Replace bracketed placeholders with your system's specifics.
+
+### C4 Context Diagram
+
+Use this to show the big picture: your system, its users, and external dependencies. Start here when explaining a system to stakeholders.
+
+```mermaid
+C4Context
+    title System Context Diagram — [System Name]
+
+    Person(user, "User", "Description of primary user")
+    Person(admin, "Admin", "Description of admin user")
+
+    System(system, "System Name", "What the system does")
+
+    System_Ext(extSystem, "External System", "What it provides")
+    SystemDb_Ext(extDb, "External Database", "What it stores")
+
+    Rel(user, system, "Uses", "HTTPS")
+    Rel(admin, system, "Manages", "HTTPS")
+    Rel(system, extSystem, "Calls", "API")
+    Rel(system, extDb, "Reads/writes", "SQL")
+```
+
+### C4 Container Diagram
+
+Use this to show the major deployable units inside your system. Customize containers to match your actual tech stack.
+
+```mermaid
+C4Container
+    title Container Diagram — [System Name]
+
+    Person(user, "User", "End user")
+
+    Container_Boundary(system, "System Name") {
+        Container(webapp, "Web App", "React/Vue/etc", "Serves the UI")
+        Container(api, "API Server", "Node.js/Go/etc", "Handles business logic")
+        ContainerDb(db, "Database", "PostgreSQL/etc", "Stores data")
+        Container(worker, "Background Worker", "Node.js/etc", "Processes async tasks")
+        ContainerQueue(queue, "Message Queue", "Redis/RabbitMQ", "Task queue")
+    }
+
+    Rel(user, webapp, "Uses", "HTTPS")
+    Rel(webapp, api, "Calls", "REST/GraphQL")
+    Rel(api, db, "Reads/writes", "SQL")
+    Rel(api, queue, "Publishes", "AMQP")
+    Rel(worker, queue, "Consumes", "AMQP")
+    Rel(worker, db, "Updates", "SQL")
+```
+
+### C4 Component Diagram
+
+Use this to zoom into a single container and show its internal components. Best for documenting API server internals or complex services.
+
+```mermaid
+C4Component
+    title Component Diagram — [Container Name]
+
+    Container_Boundary(api, "API Server") {
+        Component(auth, "Auth Module", "JWT/Session", "Handles authentication")
+        Component(routes, "Route Handler", "Express/Fastify", "HTTP routing")
+        Component(service, "Business Service", "TypeScript", "Core logic")
+        Component(repo, "Repository", "Prisma/TypeORM", "Data access")
+    }
+
+    ContainerDb(db, "Database", "PostgreSQL")
+
+    Rel(routes, auth, "Validates tokens")
+    Rel(routes, service, "Delegates to")
+    Rel(service, repo, "Uses")
+    Rel(repo, db, "Queries")
+```
+
+### C4 Deployment Diagram
+
+Use this to show where containers run in production. Customize cloud provider, services, and infrastructure to match your setup.
+
+```mermaid
+C4Deployment
+    title Deployment Diagram — [System Name]
+
+    Deployment_Node(cloud, "Cloud Provider", "AWS/GCP/etc") {
+        Deployment_Node(cdn, "CDN", "CloudFront/etc") {
+            Container(static, "Static Assets", "S3/etc", "HTML, CSS, JS")
+        }
+        Deployment_Node(compute, "Compute", "ECS/K8s/etc") {
+            Container(api, "API Server", "Docker", "Handles requests")
+            Container(worker, "Worker", "Docker", "Background jobs")
+        }
+        Deployment_Node(data, "Data Layer") {
+            ContainerDb(db, "Database", "RDS/CloudSQL", "Primary store")
+            ContainerDb(cache, "Cache", "ElastiCache/etc", "Hot data")
+        }
+    }
+
+    Rel(static, api, "API calls", "HTTPS")
+    Rel(api, db, "Reads/writes", "TCP")
+    Rel(api, cache, "Caches", "TCP")
+```
+
+### ERD (Entity Relationship Diagram)
+
+Use this to document data models and their relationships. Customize entities, fields, and cardinality for your domain.
+
+```mermaid
+erDiagram
+    USER {
+        uuid id PK
+        string email UK
+        string name
+        timestamp created_at
+    }
+    ORGANIZATION {
+        uuid id PK
+        string name
+        string slug UK
+    }
+    MEMBERSHIP {
+        uuid id PK
+        uuid user_id FK
+        uuid org_id FK
+        enum role
+    }
+    PROJECT {
+        uuid id PK
+        uuid org_id FK
+        string name
+        timestamp created_at
+    }
+
+    USER ||--o{ MEMBERSHIP : "has"
+    ORGANIZATION ||--o{ MEMBERSHIP : "has"
+    ORGANIZATION ||--o{ PROJECT : "owns"
+```
+
+### Sequence Diagram
+
+Use this to trace request flows through multiple components. Customize participants and the alt/else blocks for your authentication or business logic flows.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Web App
+    participant API as API Server
+    participant Auth as Auth Service
+    participant DB as Database
+
+    User->>UI: Submit login form
+    UI->>API: POST /auth/login
+    API->>Auth: Validate credentials
+    Auth->>DB: Query user record
+    DB-->>Auth: User data
+
+    alt Valid credentials
+        Auth-->>API: JWT token
+        API-->>UI: 200 + Set-Cookie
+        UI-->>User: Redirect to dashboard
+    else Invalid credentials
+        Auth-->>API: Error
+        API-->>UI: 401 Unauthorized
+        UI-->>User: Show error message
+    end
+```
+
+### Dependency Flowchart
+
+Use this to visualize module dependency direction and identify architectural layers. Customize subgraphs and nodes to match your project structure. Hub nodes are highlighted in red.
+
+```mermaid
+flowchart TD
+    subgraph Presentation
+        UI[UI Components]
+        Pages[Pages/Routes]
+    end
+
+    subgraph Business["Business Logic"]
+        Services[Services]
+        Models[Domain Models]
+    end
+
+    subgraph Data["Data Layer"]
+        Repos[Repositories]
+        DB[(Database)]
+    end
+
+    subgraph Shared["Shared/Core"]
+        Config[Config]:::hub
+        Types[Types/Interfaces]:::hub
+        Utils[Utilities]
+    end
+
+    Pages --> UI
+    Pages --> Services
+    UI --> Services
+    Services --> Models
+    Services --> Repos
+    Repos --> DB
+
+    Pages -.-> Config
+    Services -.-> Config
+    Services -.-> Types
+    Models -.-> Types
+    Repos -.-> Types
+
+    classDef hub fill:#ff6b6b,stroke:#c92a2a,color:#fff
+```
+
+### Mindmap (Product Features)
+
+Use this for high-level feature mapping or brainstorming. Customize the root and branches to match your product's feature areas.
+
+```mermaid
+mindmap
+    root((System Name))
+        Authentication
+            Login/Signup
+            OAuth providers
+            Password reset
+            Session management
+        Dashboard
+            Overview metrics
+            Activity feed
+            Quick actions
+        Settings
+            Profile
+            Notifications
+            Billing
+            Team management
+        API
+            REST endpoints
+            Webhooks
+            Rate limiting
+```
