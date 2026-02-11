@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aiocean/claude-plugins | Developer Marketplace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background Grid -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <!-- Scan Lines Overlay -->
+    <div class="scanlines"></div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-brand">
+            <span class="nav-prompt">~</span>
+            <span class="nav-text">aiocean/plugins</span>
+        </div>
+        <div class="nav-links">
+            <a href="#plugins" class="nav-link">plugins</a>
+            <a href="https://github.com/aiocean/claude-plugins" class="nav-link" target="_blank">github</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <div class="terminal-dot red"></div>
+                    <div class="terminal-dot yellow"></div>
+                    <div class="terminal-dot green"></div>
+                    <span class="terminal-title">claude-plugins — bash — 80x24</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-line">
+                        <span class="prompt">$</span>
+                        <span class="command" id="typewriter"></span>
+                        <span class="cursor">_</span>
+                    </div>
+                </div>
+            </div>
+
+            <h1 class="hero-title">
+                Supercharge Your<br>
+                <span class="gradient-text">Claude Code</span> Workflow
+            </h1>
+
+            <p class="hero-subtitle">
+                A curated collection of 14 developer plugins for Claude Code.
+                From git worktrees to codebase visualization, mental models to iOS debugging.
+            </p>
+
+            <div class="hero-cta">
+                <button class="cta-button" onclick="scrollToSection('plugins')">
+                    <span class="cta-prompt">$</span>
+                    <span class="cta-text">explore_plugins</span>
+                </button>
+                <div class="install-snippet">
+                    <code class="install-code">/plugin marketplace add aiocean/claude-plugins</code>
+                    <button class="copy-btn" onclick="copyToClipboard('/plugin marketplace add aiocean/claude-plugins')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Code Snippets -->
+        <div class="floating-snippets">
+            <div class="snippet snippet-1">
+                <pre><code>const plugin = {
+  name: "worktree",
+  action: "sync"
+};</code></pre>
+            </div>
+            <div class="snippet snippet-2">
+                <pre><code>$ git worktree add
+$ spotlight sync
+$ merge --clean</code></pre>
+            </div>
+            <div class="snippet snippet-3">
+                <pre><code>analyze codebase
+├── architecture
+├── dependencies
+└── visualize</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats">
+        <div class="stat-item">
+            <span class="stat-number" data-count="14">0</span>
+            <span class="stat-label">plugins</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-number" data-count="4">0</span>
+            <span class="stat-label">categories</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-number">∞</span>
+            <span class="stat-label">possibilities</span>
+        </div>
+    </section>
+
+    <!-- Search & Filter -->
+    <section class="search-section" id="plugins">
+        <div class="search-container">
+            <div class="search-box">
+                <span class="search-prompt">$</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="grep plugins..." autocomplete="off">
+                <span class="search-cursor">_</span>
+            </div>
+            <div class="filter-tags">
+                <button class="filter-tag active" data-filter="all">all</button>
+                <button class="filter-tag" data-filter="devtools">devtools</button>
+                <button class="filter-tag" data-filter="utilities">utilities</button>
+                <button class="filter-tag" data-filter="knowledge">knowledge</button>
+                <button class="filter-tag" data-filter="design">design</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- All Plugins Grid -->
+    <section class="plugins-section">
+        <h2 class="section-title">
+            <span class="section-prompt">$</span>
+            ls -la plugins/
+        </h2>
+        <div class="plugins-grid" id="pluginsGrid">
+            <!-- Plugin cards generated by JS -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-prompt">
+                <span class="footer-user">aiocean</span>
+                <span class="footer-at">@</span>
+                <span class="footer-host">claude-plugins</span>
+                <span class="footer-path">~/marketplace</span>
+                <span class="footer-symbol">$</span>
+                <span class="footer-cursor">_</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/aiocean/claude-plugins" target="_blank" class="footer-link">GitHub</a>
+                <a href="#plugins" class="footer-link">Plugins</a>
+            </div>
+            <p class="footer-copy">
+                Crafted with <span class="heart">◆</span> by aiocean
+            </p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message">Copied to clipboard</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
