@@ -1,8 +1,14 @@
 # Codebase Oracle
 
-Comprehensive architecture documentation generator using specialized analyst teams.
+Comprehensive codebase analysis and visualization using specialized analyst teams.
 
-Produces a full `docs/` directory with multi-document architecture docs — C4 diagrams, ERD, API maps, sequence diagrams, dependency graphs, and more. All diagrams use Mermaid for native markdown rendering.
+**Two skills included:**
+
+1. **codebase-oracle** — Produces a full `docs/` directory with multi-document architecture docs (C4 diagrams, ERD, API maps, sequence diagrams, dependency graphs, and more)
+
+2. **codebase-viz** — Turns architecture docs into interactive HTML playgrounds with 5 tabs: Overview, Architecture, Dependencies, Flows, and Modules
+
+All diagrams use Mermaid for native markdown rendering.
 
 ## Output
 
@@ -24,6 +30,7 @@ Produces a full `docs/` directory with multi-document architecture docs — C4 d
 | **Full Map** | New codebase, onboarding | `docs/` directory with architecture docs |
 | **Investigate** | Targeted questions | Findings with confidence assessment |
 | **Impact** | Before changes | Dependency graph + blast radius |
+| **Visualize** | Explore architecture interactively | Interactive HTML playground |
 
 ## Specialized Analysts
 
@@ -46,15 +53,27 @@ For small codebases (<30 files), analysts are combined. For large codebases, ext
 
 ## Usage
 
-Just ask Claude to analyze your codebase:
-
+**Analyze codebase:**
 - "map this codebase"
 - "analyze the architecture"
 - "document this project"
 - "what would break if I change X?"
 - "how does authentication work?"
 
-## Requirements
+**Visualize architecture:**
+- "visualize this codebase"
+- "show me an interactive architecture view"
+- "create an architecture playground"
 
-- Python 3.9+ (for the scanner script)
-- UV recommended (auto-installs dependencies)
+## Static Analysis with Tree-sitter
+
+The skill uses Tree-sitter for precise AST-based static analysis:
+
+- **Accurate import extraction** — distinguishes imports from strings/comments
+- **Function/class discovery** — with exact line numbers
+- **Call graph construction** — for dependency analysis
+- **Export identification** — for API surface mapping
+
+**Supported languages:** Python, JavaScript, TypeScript/TSX, Go, Rust, Java, Ruby
+
+Tree-sitter analysis runs automatically when UV is available (auto-installs all dependencies).

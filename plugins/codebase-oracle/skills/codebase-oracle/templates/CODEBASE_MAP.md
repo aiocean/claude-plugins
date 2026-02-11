@@ -2,6 +2,9 @@
 last_mapped: REPLACE_TIMESTAMP
 total_files: REPLACE_COUNT
 total_files_scanned: REPLACE_COUNT
+total_functions: REPLACE_COUNT
+total_classes: REPLACE_COUNT
+static_analysis: REPLACE_METHOD
 confidence: REPLACE_LEVEL
 generated_docs:
   - CODEBASE_MAP.md
@@ -22,6 +25,30 @@ REPLACE: 2-3 sentence summary
 
 **Stack**: REPLACE: key technologies (language, framework, database, etc.)
 **Architecture**: REPLACE: pattern name (monolith, microservices, serverless, etc.)
+
+## Static Analysis Metrics
+
+<!-- ORACLE:METRICS
+Include this section if Tree-sitter analysis was performed.
+Metrics from .tree-sitter-results.json:
+- summary.total_functions: total functions discovered
+- summary.total_classes: total classes/types discovered
+- summary.total_imports: total imports found
+- summary.total_exports: total exports found
+- summary.by_language: breakdown of files by language
+- available_languages: which languages were parsed
+-->
+
+| Metric | Count |
+|--------|-------|
+| Functions/Methods | REPLACE |
+| Classes/Types | REPLACE |
+| Imports | REPLACE |
+| Exports | REPLACE |
+| Call Relationships | REPLACE |
+
+**Languages Parsed**: REPLACE (from .tree-sitter-results.json available_languages)
+**Import Graph Accuracy**: Tree-sitter provides AST-based import extraction (distinguishes imports from strings/comments)
 
 ## Architecture Docs
 
@@ -49,6 +76,11 @@ Add these rows ONLY if the corresponding doc was generated:
 <!-- ORACLE:HUBS
 Lead fills this from dependency-graph.md Hub Analysis table.
 Copy the top hubs (5+ dependents) with their dependent count and role.
+
+Primary source: Tree-sitter `hubs` array from .tree-sitter-results.json
+Fallback: Grep-based dependency counting
+
+Tree-sitter hub format: [{"file": "src/utils.ts", "dependents": 12}, ...]
 -->
 
 | Package | Dependents | Stability | Risk |
