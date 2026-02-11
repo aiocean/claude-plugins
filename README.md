@@ -112,18 +112,10 @@ Debug iOS apps on real hardware from your terminal. Build, install, and launch a
 
 ## codebase-oracle
 
-Understand any codebase fast. Creates an agent team that analyzes your project in parallel - multiple teammates reading code, tracing dependencies, and mapping architecture simultaneously. Three modes: Full Map generates a complete `CODEBASE_MAP.md` with architecture diagrams, hub files, and navigation guides. Investigate answers targeted questions with evidence-based confidence tracking. Impact tells you exactly what breaks before you change something. Works on codebases of any size.
+Deep codebase analysis using specialized agent teams. Instead of one AI reading everything serially, codebase-oracle creates parallel analyst teammates - each focusing on their domain: structure analysts map architecture and dependencies, data analysts document models and schemas, flow analysts trace execution paths and APIs, product analysts capture user-facing behavior, and infra analysts map deployment and configuration. Tree-sitter static analysis provides accurate import graphs and function extraction. Three modes: Full Map generates complete architecture docs (C4 diagrams, data models, API surfaces, dependency graphs), Investigate answers targeted questions with evidence-based confidence tracking, and Impact analysis tells you exactly what breaks before you change something. Includes interactive visualization to explore your architecture as an HTML playground.
 
 ```bash
 /plugin install codebase-oracle@aiocean-plugins
-```
-
-## codebase-viz
-
-See your architecture, don't just read about it. Takes codebase-oracle's documentation and turns it into interactive HTML playgrounds - SVG canvas with clickable components, layer toggles, connection type filters, zoom/pan, and click-to-comment annotations. Also generates shareable Mermaid diagram URLs via mimaid for every diagram in your docs. Run oracle to analyze, then viz to explore visually. Works standalone too.
-
-```bash
-/plugin install codebase-viz@aiocean-plugins
 ```
 
 ## License
