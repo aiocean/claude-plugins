@@ -95,7 +95,7 @@ graph LR
 
 Special characters in metric names are auto-replaced with underscore:
 ```
-" , ; = : { }
+" , ; = : { } /
 ```
 
 Example: `metric-name` becomes `metric_name`
@@ -119,6 +119,51 @@ graph LR
 ```
 
 Query aliases: `api_gateway`, `auth_service`
+
+### Critical: Time Field Required for Mermaid Binding
+
+`jdbranham-diagram-panel` only binds/updates nodes for series that include a **time field**.
+If your query returns only a single table value (no time column), stat cards may show data but Mermaid nodes will not update.
+
+This comes from plugin behavior in `getDiagramSeriesModel` (`getTimeField(...)` is required; series without time are skipped).
+
+Use:
+- `format: "time_series"`
+- `time` column in milliseconds
+- metric alias matching your Mermaid node ID/text
+
+MySQL example (working):
+
+```sql
+SELECT
+  FLOOR(UNIX_TIMESTAMP(Timestamp) / 60) * 60 * 1000 as time,
+  COALESCE(
+    ROUND(
+      SUM(CASE WHEN StatusCode = 'Error' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0),
+      2
+    ),
+    0
+  ) as lambda_metric
+FROM otel.otel_traces
+WHERE $__timeFilter(Timestamp)
+  AND ServiceName LIKE 'orderfns%'
+GROUP BY time
+ORDER BY time
+```
+
+### Text/Value Rendering Behavior
+
+- `{{value}}` inside Mermaid labels is **not** a guaranteed templating mechanism.
+- Plugin appends metric value to a matched node when binding succeeds.
+- For reliable matching, use a dedicated metric node with alias text in quotes, e.g.:
+
+```mermaid
+graph LR
+  lambda --> metric_box["lambda_metric"]
+```
+
+- Keep labels with special characters quoted, e.g. `node["Error Rate (%)"]`, to avoid Mermaid parse errors.
+- Avoid keeping empty/placeholder targets (e.g. `refId` with no SQL); keep one clean target per metric to reduce ambiguity.
 
 ## Thresholds and Colors
 
@@ -370,16 +415,23 @@ graph TB
 - Verify query returns data
 - Check thresholds are configured
 - Ensure time range has data
+- Ensure query has a `time` field and panel target uses `format: "time_series"` (required for diagram binding)
 
 ### Diagram not rendering?
 - Validate Mermaid syntax at [mermaid.live](https://mermaid.live)
 - Check browser console for errors
 - Try simpler diagram first
+- Quote labels containing `%`, parentheses, or punctuation (example: `node["Error Rate (%)"]`)
 
 ### Wrong colors showing?
 - Verify threshold values
 - Check aggregation method (last/max/min)
 - Ensure numeric data types
+
+### Stat shows data but Mermaid node is empty?
+- Stat panel can render table-only single values; diagram panel cannot bind those without time series.
+- Convert diagram query to time series (`time` + metric alias).
+- Confirm alias equals node ID/text after replacement rules.
 
 ## Resources
 
