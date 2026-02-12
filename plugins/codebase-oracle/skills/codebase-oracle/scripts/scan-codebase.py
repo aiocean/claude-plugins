@@ -13,6 +13,7 @@ UV will automatically install tiktoken in an isolated environment.
 """
 
 import argparse
+import fnmatch
 import json
 import sys
 from pathlib import Path
@@ -115,72 +116,87 @@ DEFAULT_IGNORE = {
 }
 
 
-def parse_gitignore(root: Path) -> list[str]:
-    """Parse .gitignore file and return patterns."""
+def parse_gitignore(root: Path) -> list[tuple[str, bool]]:
+    """Parse .gitignore and return ordered (pattern, is_negated) rules."""
     gitignore_path = root / ".gitignore"
-    patterns = []
+    rules: list[tuple[str, bool]] = []
     if gitignore_path.exists():
         with open(gitignore_path, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
                 line = line.strip()
                 # Skip comments and empty lines
                 if line and not line.startswith("#"):
-                    patterns.append(line)
-    return patterns
+                    is_negated = line.startswith("!")
+                    pattern = line[1:] if is_negated else line
+                    pattern = pattern.strip()
+                    if pattern:
+                        rules.append((pattern, is_negated))
+    return rules
 
 
 def matches_pattern(path: Path, pattern: str, root: Path) -> bool:
     """Check if a path matches a gitignore-style pattern."""
-    rel_path = str(path.relative_to(root))
-    name = path.name
-
-    # Handle negation (we don't support it for simplicity)
-    if pattern.startswith("!"):
+    rel_path = path.relative_to(root).as_posix()
+    if rel_path == ".":
         return False
 
-    # Handle directory-only patterns
-    if pattern.endswith("/"):
-        if not path.is_dir():
-            return False
+    name = path.name
+    parts = rel_path.split("/")
+    is_dir = path.is_dir()
+
+    anchored = pattern.startswith("/")
+    if anchored:
+        pattern = pattern[1:]
+    if not pattern:
+        return False
+
+    directory_only = pattern.endswith("/")
+    if directory_only:
         pattern = pattern[:-1]
+        if not pattern:
+            return False
 
-    # Handle patterns with /
+        # Directory patterns match both the directory itself and its descendants.
+        if "/" in pattern:
+            candidates = [rel_path] if anchored else ["/".join(parts[i:]) for i in range(len(parts))]
+            for candidate in candidates:
+                if candidate == pattern or candidate.startswith(pattern + "/"):
+                    return True
+                if fnmatch.fnmatch(candidate, pattern):
+                    return True
+            return False
+
+        directory_parts = parts if is_dir else parts[:-1]
+        return any(fnmatch.fnmatch(part, pattern) for part in directory_parts)
+
     if "/" in pattern:
-        # Pattern with path separator - match against relative path
-        if pattern.startswith("/"):
-            pattern = pattern[1:]
-        import fnmatch
+        candidates = [rel_path] if anchored else ["/".join(parts[i:]) for i in range(len(parts))]
+        return any(fnmatch.fnmatch(candidate, pattern) for candidate in candidates)
 
-        return fnmatch.fnmatch(rel_path, pattern) or fnmatch.fnmatch(
-            rel_path, pattern + "/**"
-        )
-    else:
-        # Simple pattern - match against name
-        import fnmatch
-
-        return fnmatch.fnmatch(name, pattern)
+    return fnmatch.fnmatch(name, pattern)
 
 
-def should_ignore(path: Path, root: Path, gitignore_patterns: list[str]) -> bool:
+def should_ignore(path: Path, root: Path, gitignore_patterns: list[tuple[str, bool]]) -> bool:
     """Check if a path should be ignored."""
     name = path.name
+    ignored = False
 
     # Check default ignores
     for pattern in DEFAULT_IGNORE:
         if "*" in pattern:
-            import fnmatch
-
             if fnmatch.fnmatch(name, pattern):
-                return True
+                ignored = True
+                break
         elif name == pattern:
-            return True
+            ignored = True
+            break
 
-    # Check gitignore patterns
-    for pattern in gitignore_patterns:
+    # Apply .gitignore in order; last matching rule wins.
+    for pattern, is_negated in gitignore_patterns:
         if matches_pattern(path, pattern, root):
-            return True
+            ignored = not is_negated
 
-    return False
+    return ignored
 
 
 def count_tokens(text: str, encoding: tiktoken.Encoding) -> int:
@@ -390,7 +406,7 @@ def scan_directory(
     def walk(current: Path, depth: int = 0):
         nonlocal total_tokens
 
-        if should_ignore(current, root, gitignore_patterns):
+        if current != root and should_ignore(current, root, gitignore_patterns):
             return
 
         if current.is_dir():
