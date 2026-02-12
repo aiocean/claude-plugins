@@ -31,6 +31,11 @@ plugins/{plugin-name}/
 - SKILL.md frontmatter requires `name` and `description` fields — description must include trigger words/phrases for skill discovery
 - Scripts reference path: `~/.claude/skills/{skill-name}/`
 - Script naming: prefix with skill name (e.g., `worktree-create.sh`, `worktree-sync.sh`)
+- Any change inside `plugins/{plugin-name}/` MUST include a version bump in `plugins/{plugin-name}/.claude-plugin/plugin.json`
+  - Use semantic versioning:
+  - `patch` for fixes/docs/internal script updates
+  - `minor` for backward-compatible new capabilities
+  - `major` for breaking behavior changes
 
 ## Marketplace Registry
 
