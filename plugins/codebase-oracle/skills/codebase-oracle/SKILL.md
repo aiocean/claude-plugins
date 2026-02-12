@@ -1,16 +1,53 @@
 ---
 name: codebase-oracle
 description: |
-  Deep codebase analysis combining parallel agent team mapping, dependency/hub analysis, and evidence-based investigation. Use when "analyze codebase", "map architecture", "understand this project", "codebase oracle", "document architecture", "explore codebase", "what does this codebase do", "map this codebase", "codebase map", or exploring unfamiliar code. Automatically detects existing maps and updates incrementally.
+  Deep codebase analysis combining CodeWiki LLM-powered analysis, parallel agent team mapping, dependency/hub analysis, and evidence-based investigation. Use when "analyze codebase", "map architecture", "understand this project", "codebase oracle", "document architecture", "explore codebase", "what does this codebase do", "map this codebase", "codebase map", or exploring unfamiliar code. Automatically detects existing maps and updates incrementally.
 ---
 
 # Codebase Oracle
 
-Comprehensive architecture documentation: template-driven analysis with specialized analyst teams.
+Comprehensive architecture documentation: CodeWiki-enhanced analysis with specialized analyst teams.
+
+**CodeWiki Integration:** Uses CodeWiki for deep LLM-powered code analysis when available, falling back to Tree-sitter for static analysis. CodeWiki provides: dependency graphs, call graphs, module trees, component analysis, and LLM-generated insights.
 
 **Orchestration model:** Create an agent team. Lead orchestrates in delegate mode, teammates read and analyze. Never have the lead read codebase files directly. Always delegate file reading to teammates — even for small codebases.
 
-**Template-driven approach:** Templates with embedded `<!-- ORACLE: -->` instructions are copied to `docs/`, then analysts fill each section following the inline guidance. This ensures consistent output, correct tool usage, and complete coverage.
+**Template-driven approach:** Templates with embedded `<!-- ORACLE: -->` instructions are filled by analysts following the inline guidance. This ensures consistent output, correct tool usage, and complete coverage.
+
+## CodeWiki Integration
+
+CodeWiki is an LLM-powered documentation generator that provides rich analysis data. When available, Oracle uses CodeWiki as the primary analysis source.
+
+### What CodeWiki Provides
+
+| Data | File | Use For |
+|------|------|---------|
+| **Dependency Graph** | `.codewiki/dependency_graph.json` | Module dependencies, import relationships |
+| **Call Graph** | `.codewiki/call_graph.json` | Function-level call relationships |
+| **Module Tree** | `.codewiki/module_tree.json` | Hierarchical module structure |
+| **Component Analysis** | `.codewiki/components/*.json` | Per-component metadata (functions, classes, docstrings) |
+| **LLM Documentation** | `docs/*.md` | Pre-generated module documentation |
+
+### CodeWiki vs Tree-sitter
+
+| Aspect | CodeWiki | Tree-sitter |
+|--------|----------|-------------|
+| **Analysis Depth** | LLM-powered semantic understanding | AST-based syntactic analysis |
+| **Call Graph** | Full call relationships with resolution | Basic function discovery |
+| **Module Clustering** | AI-powered grouping | Directory-based |
+| **Docstrings** | LLM-enhanced | Raw extraction |
+| **Speed** | Slower (LLM calls) | Fast (local parsing) |
+| **Availability** | Requires installation + API key | Built-in |
+
+### Checking CodeWiki Availability
+
+```bash
+# Check if codewiki is installed
+which codewiki && codewiki --version
+
+# Check if CodeWiki has analyzed this project
+ls -la .codewiki/ 2>/dev/null || echo "No CodeWiki cache found"
+```
 
 ## Modes
 
@@ -42,17 +79,17 @@ Not every doc is generated. See [Detection Rules](#detection-rules) for when eac
 
 ## Templates
 
-Templates live in `~/.claude/skills/codebase-oracle/templates/`. Each template contains:
+Templates live in `${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/templates/`. Each template contains:
 - The final document structure (headers, tables, Mermaid code blocks)
 - `<!-- ORACLE:SECTION_NAME ... -->` comment blocks with per-section instructions:
   - **What to fill** in this section
-  - **Which tools** to use (Grep, Glob, LSP, Read)
+  - **Which tools** to use (Grep, Glob, LSP, Read, CodeWiki data)
   - **Specific patterns** to search for
   - **Mermaid syntax** examples for diagram sections
 - `REPLACE` placeholders where values must be filled
 
 **Template workflow:**
-1. Analyst reads the template from `~/.claude/skills/codebase-oracle/templates/` as a format guide and analysis checklist
+1. Analyst reads the template as a format guide and analysis checklist
 2. Analyst analyzes the codebase following each `<!-- ORACLE: -->` instruction
 3. Analyst writes a **new file** to `docs/` with the completed content — no ORACLE comments, no REPLACE placeholders
 4. The template is never copied to `docs/` — analysts always write fresh output files
@@ -95,13 +132,13 @@ The skill detects what's present and only generates relevant docs.
 
 Instead of generic file-group teammates, use **domain-specific analysts**:
 
-| Teammate | Focus | Templates Filled |
-|----------|-------|-----------------|
-| **structure-analyst** | Code architecture, layers, modules, dependencies | `c4-architecture.md`, `dependency-graph.md` |
-| **data-analyst** | Data model, schemas, storage | `data-model.md` |
-| **flow-analyst** | Execution paths, APIs, events | `key-flows.md`, `api-surface.md` |
-| **product-analyst** | User-facing behavior, features | `product-requirements.md` |
-| **infra-analyst** | Deployment, CI/CD, config | `infrastructure.md` |
+| Teammate | Focus | Templates Filled | CodeWiki Data Used |
+|----------|-------|-----------------|-------------------|
+| **structure-analyst** | Code architecture, layers, modules, dependencies | `c4-architecture.md`, `dependency-graph.md` | `dependency_graph.json`, `module_tree.json` |
+| **data-analyst** | Data model, schemas, storage | `data-model.md` | Component analysis with entity classes |
+| **flow-analyst** | Execution paths, APIs, events | `key-flows.md`, `api-surface.md` | `call_graph.json`, component functions |
+| **product-analyst** | User-facing behavior, features | `product-requirements.md` | LLM-generated docs if available |
+| **infra-analyst** | Deployment, CI/CD, config | `infrastructure.md` | Config file analysis |
 
 **Lead** synthesizes all analyst work into `CODEBASE_MAP.md` (the index doc).
 
@@ -125,6 +162,8 @@ Track certainty throughout analysis. Report confidence with every finding.
 
 *Calibration: 0=0–19%, 1=20–39%, 2=40–59%, 3=60–74%, 4=75–89%, 5=90–100%*
 
+**CodeWiki provides +1 confidence boost** when available due to LLM-powered semantic understanding.
+
 Start honest. Clear codebase + focused question → level 2–3. Vague or complex → level 0–1.
 
 At level 4: "High confidence in findings. One more angle would reach full certainty. Continue or deliver now?"
@@ -137,13 +176,14 @@ Below level 5: include `△ Caveats` section.
 
 ### Source Priority
 
-1. **Direct observation** — read code, run searches, examine files
-2. **Documentation** — official docs, inline comments, ADRs
-3. **Tests** — reveal intended behavior and edge cases
-4. **History** — git log, commit messages, PR discussions
-5. **External research** — library docs, RFCs
-6. **Inference** — logical deduction from available evidence
-7. **Assumption** — clearly flagged when other sources unavailable
+1. **CodeWiki analysis** — LLM-powered semantic understanding (highest quality)
+2. **Direct observation** — read code, run searches, examine files
+3. **Documentation** — official docs, inline comments, ADRs
+4. **Tests** — reveal intended behavior and edge cases
+5. **History** — git log, commit messages, PR discussions
+6. **External research** — library docs, RFCs
+7. **Inference** — logical deduction from available evidence
+8. **Assumption** — clearly flagged when other sources unavailable
 
 ### Investigation Patterns
 
@@ -168,6 +208,52 @@ Below level 5: include `△ Caveats` section.
 - Comments → capture historical context
 
 ## Workflow: Full Map Mode
+
+### Phase 0: CodeWiki Analysis (Optional but Recommended)
+
+**Step 0a: Check CodeWiki availability**
+
+```bash
+# Check if codewiki is installed
+which codewiki && codewiki --version
+```
+
+**Step 0b: Run CodeWiki analysis**
+
+If CodeWiki is installed and configured (has API key):
+
+```bash
+# Generate CodeWiki analysis cache
+codewiki generate --output .codewiki-cache --no-cache 2>/dev/null
+
+# Or if you want LLM documentation too:
+codewiki generate --output docs-codewiki/ --no-cache
+```
+
+**Step 0c: Verify CodeWiki output**
+
+```bash
+# Check what CodeWiki produced
+ls -la .codewiki-cache/
+
+# Expected files:
+# - module_tree.json      # Hierarchical module structure
+# - dependency_graph.json # Import relationships
+# - call_graph.json       # Function call relationships
+# - components/           # Per-component analysis
+```
+
+**Step 0d: Load CodeWiki data for analysts**
+
+```bash
+# Read module tree
+cat .codewiki-cache/module_tree.json | python3 -c "import json,sys; print(json.dumps(json.load(sys.stdin), indent=2))" | head -100
+
+# Read dependency graph (for hub detection)
+cat .codewiki-cache/dependency_graph.json | python3 -c "import json,sys; d=json.load(sys.stdin); print('Nodes:', len(d.get('nodes',[])), 'Edges:', len(d.get('edges',[])))"
+```
+
+**If CodeWiki is not available**, proceed to Phase 1 with Tree-sitter fallback.
 
 ### Phase 1: Scan and Detect
 
@@ -197,9 +283,15 @@ uv run ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/scan-codebase.py . -
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/scan-codebase.py . --format json
 ```
 
-**Step 3: Static Analysis (Tree-sitter)**
+**Step 3: Static Analysis (Tree-sitter or CodeWiki)**
 
-For enhanced accuracy, run the Tree-sitter analyzer on supported languages:
+**If CodeWiki data exists (from Phase 0):**
+- Skip Tree-sitter — use CodeWiki's richer analysis
+- Load `.codewiki-cache/dependency_graph.json` for dependencies
+- Load `.codewiki-cache/call_graph.json` for call relationships
+- Load `.codewiki-cache/module_tree.json` for module structure
+
+**If no CodeWiki data, run Tree-sitter:**
 
 ```bash
 # Option 1: UV (preferred - auto-installs dependencies)
@@ -242,7 +334,7 @@ Determine which templates analysts should use as guides based on detection resul
 - **Always**: `CODEBASE_MAP.md`, `c4-architecture.md`, `key-flows.md`, `dependency-graph.md`
 - **Conditional**: `data-model.md` (if data model found), `api-surface.md` (if API found), `product-requirements.md` (if product evidence), `infrastructure.md` (if infra found)
 
-Templates are at `~/.claude/skills/codebase-oracle/templates/` — analysts read them as reference guides, then write completed docs directly to `docs/`. No copying needed.
+Templates are at `${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/templates/` — analysts read them as reference guides, then write completed docs directly to `docs/`. No copying needed.
 
 ### Phase 3: Analyze and Fill
 
@@ -255,7 +347,7 @@ Templates are at `~/.claude/skills/codebase-oracle/templates/` — analysts read
 
 **Step 6: Spawn analysts to fill templates**
 
-Each analyst reads their assigned template(s) from `~/.claude/skills/codebase-oracle/templates/` as a format guide and analysis checklist, then writes the completed document directly to `docs/`.
+Each analyst reads their assigned template(s) as a format guide and analysis checklist, then writes the completed document directly to `docs/`.
 
 **Analyst prompt template:**
 
@@ -263,7 +355,7 @@ Each analyst reads their assigned template(s) from `~/.claude/skills/codebase-or
 You are the [ROLE]-analyst for codebase analysis.
 
 Your job:
-1. Read the template at ~/.claude/skills/codebase-oracle/templates/[TEMPLATE].md — this is your FORMAT GUIDE and ANALYSIS CHECKLIST
+1. Read the template at ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/templates/[TEMPLATE].md — this is your FORMAT GUIDE and ANALYSIS CHECKLIST
 2. For each <!-- ORACLE: --> comment block in the template, follow the instructions:
    - Use the specified tools (Grep, Glob, LSP, Read)
    - Search for the specified patterns
@@ -275,26 +367,73 @@ Your job:
 Codebase root: [PROJECT_ROOT]
 Files to focus on: [RELEVANT_FILES_FROM_SCAN]
 
+Data sources available:
+- CodeWiki cache: [PATH_TO_CODEWIKI_CACHE or "Not available"]
+- Tree-sitter results: [PATH_TO_TREE_SITTER_JSON or "Not available"]
+
 Important:
 - The template is a REFERENCE — read it, follow it, but write a fresh completed file to docs/
 - Follow the tool guidance in each ORACLE comment exactly
 - Use LSP (goToDefinition, findReferences, hover) for precise analysis
 - Use Grep for pattern-based discovery
+- If CodeWiki data is available, use it as primary source (higher confidence)
 - Cite file paths as evidence
 - Do NOT invent information — if uncertain, flag with △
 ```
 
 **Analyst-to-template mapping:**
 
-| Analyst | Templates to Fill | Key Tools |
-|---------|------------------|-----------|
-| structure-analyst | `c4-architecture.md`, `dependency-graph.md` | Tree-sitter imports, Grep (imports), LSP (references), Glob (file structure) |
-| data-analyst | `data-model.md` | Tree-sitter class definitions, Glob (model files), Read (schemas), LSP (hover for types) |
-| flow-analyst | `key-flows.md`, `api-surface.md` | Tree-sitter exports/functions, Grep (routes), LSP (outgoingCalls, goToDefinition), Read (handlers) |
-| product-analyst | `product-requirements.md` | Read (README, tests), Grep (roles, permissions), Glob (UI files) |
-| infra-analyst | `infrastructure.md` | Read (Dockerfiles, CI configs), Grep (env vars, ports) |
+| Analyst | Templates to Fill | Key Tools | CodeWiki Data |
+|---------|------------------|-----------|---------------|
+| structure-analyst | `c4-architecture.md`, `dependency-graph.md` | CodeWiki deps, Tree-sitter imports, Grep, LSP, Glob | `dependency_graph.json`, `module_tree.json` |
+| data-analyst | `data-model.md` | CodeWiki components, Tree-sitter classes, Glob, Read, LSP | Component analysis with entities |
+| flow-analyst | `key-flows.md`, `api-surface.md` | CodeWiki call graph, Tree-sitter exports, Grep, LSP, Read | `call_graph.json` |
+| product-analyst | `product-requirements.md` | Read (README, tests), Grep, Glob | LLM docs if available |
+| infra-analyst | `infrastructure.md` | Read (Dockerfiles, CI configs), Grep | Config analysis |
 
-**Using Tree-sitter output:**
+**Using CodeWiki output:**
+
+If `.codewiki-cache/` exists from Phase 0, analysts should reference it for:
+
+**structure-analyst:**
+```bash
+# Load dependency graph
+cat .codewiki-cache/dependency_graph.json | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+# Nodes are modules/files
+for node in d.get('nodes', [])[:10]:
+    print(f\"Node: {node.get('name', node.get('id'))}\")
+# Edges are dependencies
+for edge in d.get('edges', [])[:10]:
+    print(f\"{edge.get('from')} -> {edge.get('to')}\")
+"
+
+# Load module tree for structure
+cat .codewiki-cache/module_tree.json | python3 -c "
+import json, sys
+def print_tree(tree, indent=0):
+    for name, data in tree.items():
+        print('  ' * indent + name)
+        if 'children' in data:
+            print_tree(data['children'], indent + 1)
+print_tree(json.load(sys.stdin))
+"
+```
+
+**flow-analyst:**
+```bash
+# Load call graph for flow analysis
+cat .codewiki-cache/call_graph.json | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+# CallRelationship: caller, callee, call_line, is_resolved
+for rel in d.get('relationships', d.get('calls', []))[:20]:
+    print(f\"{rel.get('caller')} -> {rel.get('callee')} (line {rel.get('call_line')})\")
+"
+```
+
+**Using Tree-sitter output (fallback):**
 
 If `docs/.tree-sitter-results.json` exists from Phase 1 Step 3, analysts should reference it for:
 - **structure-analyst**: Use `import_graph` and `hubs` for dependency analysis (more accurate than regex)
@@ -323,7 +462,7 @@ Once all analysts complete:
    ```bash
    date -u +"%Y-%m-%dT%H:%M:%SZ"
    ```
-7. Update frontmatter in CODEBASE_MAP.md (last_mapped, total_files, confidence, generated_docs list)
+7. Update frontmatter in CODEBASE_MAP.md (last_mapped, total_files, confidence, generated_docs list, analysis_method: "codewiki" or "tree-sitter")
 8. Assess overall confidence
 
 **Step 8: Update CLAUDE.md**
@@ -337,6 +476,7 @@ Add or update the codebase summary in CLAUDE.md:
 
 **Stack**: [key technologies]
 **Structure**: [high-level layout]
+**Analysis**: CodeWiki/Tree-sitter (delete as appropriate)
 
 For detailed architecture, see [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
 ```
@@ -362,14 +502,15 @@ For targeted questions ("how does auth work?", "where is X configured?").
 ### Steps
 
 0. **Check for existing map** — if `docs/CODEBASE_MAP.md` exists, read it first for architectural context before investigating
-1. **Calibrate starting confidence** — what do we already know?
-2. **Identify evidence sources** — where can we look?
-3. **Create agent team and spawn teammates** — create a team, then spawn teammates to investigate in parallel:
+1. **Check CodeWiki cache** — if `.codewiki-cache/` exists, use it for quick lookups
+2. **Calibrate starting confidence** — what do we already know?
+3. **Identify evidence sources** — where can we look?
+4. **Create agent team and spawn teammates** — create a team, then spawn teammates to investigate in parallel:
    - One teammate per investigation angle (code, tests, docs, history)
-4. **Cross-reference findings** — verify patterns hold across sources
-5. **Flag uncertainties** — mark gaps with △
-6. **Synthesize conclusions** — connect evidence to insights
-7. **Deliver with confidence level** — clear about certainty
+5. **Cross-reference findings** — verify patterns hold across sources
+6. **Flag uncertainties** — mark gaps with △
+7. **Synthesize conclusions** — connect evidence to insights
+8. **Deliver with confidence level** — clear about certainty
 
 ### During Investigation
 
@@ -417,20 +558,21 @@ For assessing change blast radius ("what breaks if I change X?", "impact of refa
 ### Steps
 
 0. **Check for existing map** — if `docs/CODEBASE_MAP.md` exists, read it first for hub files and dependency context
-1. **Identify the target** — file, function, type, or module being changed
-2. **Trace forward dependencies** — what does the target import/use?
-3. **Trace reverse dependencies** — what imports/uses the target? (use Grep to find all import statements)
-4. **Detect hub status** — is this a hub file? How many dependents?
-5. **Assess blast radius**:
+1. **Check CodeWiki call graph** — if `.codewiki-cache/call_graph.json` exists, use it for precise call-level impact
+2. **Identify the target** — file, function, type, or module being changed
+3. **Trace forward dependencies** — what does the target import/use?
+4. **Trace reverse dependencies** — what imports/uses the target? (use CodeWiki call graph, Grep, or LSP)
+5. **Detect hub status** — is this a hub file? How many dependents?
+6. **Assess blast radius**:
    - **Direct impact**: files that import the target
    - **Indirect impact**: files that import direct dependents
    - **Test coverage**: which tests exercise this code?
-6. **Rate risk level**:
+7. **Rate risk level**:
    - `LOW` — few dependents, good test coverage
    - `MEDIUM` — several dependents or partial test coverage
    - `HIGH` — hub file, many dependents, or no tests
    - `CRITICAL` — core infrastructure, everything depends on it
-7. **Recommend approach** — safe refactoring strategy
+8. **Recommend approach** — safe refactoring strategy
 
 ### Output Format
 
@@ -464,9 +606,10 @@ For assessing change blast radius ("what breaks if I change X?", "impact of refa
 Hubs are files imported by many others — they're architectural linchpins.
 
 **Detection methods (in order of accuracy):**
-1. **Tree-sitter import graph** (most accurate): Use `hubs` array from `.tree-sitter-results.json` - these are files with 3+ dependents based on AST-parsed imports
-2. **Grep import counting** (fallback): Count how many files import each module using regex patterns
-3. **LSP findReferences** (verification): Verify hub status by finding actual references
+1. **CodeWiki dependency graph** (most accurate): Analyze `dependency_graph.json` for nodes with many incoming edges
+2. **Tree-sitter import graph**: Use `hubs` array from `.tree-sitter-results.json` - files with 3+ dependents based on AST-parsed imports
+3. **Grep import counting** (fallback): Count how many files import each module using regex patterns
+4. **LSP findReferences** (verification): Verify hub status by finding actual references
 
 **Hub thresholds:**
 - 5+ importers = hub
@@ -501,17 +644,19 @@ Before concluding at confidence level 4+:
 - ✓ Confidence calibrated honestly?
 - ✓ Caveats section included if <100%?
 - ✓ Mermaid diagrams syntactically valid?
+- ✓ CodeWiki data used when available (noted in frontmatter)?
 
 ## Rules
 
 ALWAYS:
 - Create an agent team (TeamCreate) for analysis work
 - Use delegate mode — lead coordinates, teammates analyze
+- Check for CodeWiki availability first — use it as primary source when available
 - Analysts read templates as format guides, then write fresh completed files to `docs/`
 - Use specialized analysts (structure, data, flow, product, infra) not generic file groups
 - Run detection rules before spawning analysts — only assign templates for docs that should be generated
 - Analysts must follow `<!-- ORACLE: -->` instructions in each template section
-- Analysts must use the tools specified in each ORACLE comment (Grep, Glob, LSP, Read)
+- Analysts must use the tools specified in each ORACLE comment (Grep, Glob, LSP, Read, CodeWiki data)
 - Remove all `<!-- ORACLE: -->` comments from final output
 - Fill all `REPLACE` placeholders — no unfilled templates in output
 - Cite evidence sources with file paths
@@ -521,6 +666,7 @@ ALWAYS:
 - Detect and report hub files
 - Get actual timestamp before writing map (`date -u`)
 - Clean up the team (TeamDelete) after work is done
+- Note analysis method in CODEBASE_MAP.md frontmatter (codewiki vs tree-sitter)
 
 NEVER:
 - Have the lead read codebase files directly
@@ -537,6 +683,7 @@ NEVER:
 - Hardcode timestamps
 - Ignore hub files in impact analysis
 - Generate docs without evidence (skip docs where detection rules fail)
+- Ignore CodeWiki data when available
 
 ## Architecture Analysis Reference
 
@@ -549,6 +696,16 @@ Load this reference when:
 - Analyzing component relationships or layer violations
 
 ## Troubleshooting
+
+**CodeWiki not found:**
+- Install: `pip install git+https://github.com/FSoft-AI4Code/CodeWiki.git`
+- Configure: `codewiki config set --api-key YOUR_KEY --base-url https://api.anthropic.com --main-model claude-sonnet-4`
+- CodeWiki is optional — Oracle falls back to Tree-sitter
+
+**CodeWiki fails with API error:**
+- Check API key: `codewiki config get`
+- Verify base URL matches your provider
+- Continue with Tree-sitter fallback
 
 **Scanner fails with dependency error:**
 Use `uv run` (preferred — handles dependencies automatically), or install manually: `pip install tiktoken`
@@ -565,15 +722,15 @@ Try `python3`, `python`, or use `uv run` which handles Python automatically.
 **Codebase too large even for teammates:**
 - Increase number of teammates
 - Focus on src/ directories, skip vendored code
+- Use CodeWiki for clustering large codebases
 
 **Git not available:**
 - Fall back to file count/path comparison for change detection
 - Store file list hash in map frontmatter
 
 **Template not found:**
-- Templates are at `~/.claude/skills/codebase-oracle/templates/`
+- Templates are at `${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/templates/`
 - Verify the skill is installed correctly
-- Templates can also be accessed via the plugin root path
 
 **Mermaid diagram not rendering:**
 - Ensure code blocks use triple-backtick mermaid syntax

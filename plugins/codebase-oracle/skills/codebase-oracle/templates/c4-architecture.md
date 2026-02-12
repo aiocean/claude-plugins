@@ -4,17 +4,29 @@
 This doc is filled by the structure-analyst.
 Generate all three diagram levels. Each diagram uses Mermaid syntax.
 If the codebase is simple (single container), the Component diagram IS the Container diagram — merge them.
+
+Primary data sources:
+1. CodeWiki: .codewiki-cache/module_tree.json for module structure
+2. CodeWiki: .codewiki-cache/dependency_graph.json for relationships
+3. Tree-sitter: .tree-sitter-results.json (fallback)
+4. Grep/LSP for additional discovery
+
+CodeWiki module_tree.json structure:
+- Hierarchical tree of modules with components list per module
+- Each module has: name, path, components (core files/classes), children
 -->
 
 ## Context Diagram
 
 <!-- ORACLE:C4_CONTEXT
 Shows the system in its ecosystem — users, external systems.
+
 Tools:
 - Read README.md, package.json for system description
 - Grep for external API calls (fetch, axios, http.get, grpc) to find external systems
 - Grep for auth providers (OAuth, SAML, LDAP) to find identity systems
 - Read env files / config for external service URLs
+- If CodeWiki is available, check module_tree.json for external integrations
 
 Identify:
 1. Primary users (who uses this system?)
@@ -46,11 +58,25 @@ C4Context
 
 <!-- ORACLE:C4_CONTAINER
 Shows major deployable units and how they communicate.
+
 Tools:
 - Glob for docker-compose.yml, Dockerfile, package.json (monorepo packages)
 - Read entry points to identify separate processes
 - Grep for database connection strings to identify DB type
 - Grep for queue/worker patterns (bull, bee-queue, celery, sidekiq)
+- If CodeWiki is available, use module_tree.json top-level modules as container candidates
+
+If CodeWiki is available:
+```bash
+# Get top-level modules (potential containers)
+cat .codewiki-cache/module_tree.json | python3 -c "
+import json, sys
+tree = json.load(sys.stdin)
+for name, data in tree.items():
+    components = data.get('components', [])
+    print(f'{name}: {len(components)} components')
+"
+```
 
 Identify containers:
 1. Web applications (frontend builds, SSR servers)
@@ -84,11 +110,30 @@ C4Container
 
 <!-- ORACLE:C4_COMPONENT
 Shows key components within the main container (usually the API/backend).
+
 Tools:
 - Read source directory structure to identify modules
 - Grep for export/class/interface definitions in each module
 - LSP documentSymbol on key files to list exported symbols
 - LSP findReferences to trace component relationships
+- If CodeWiki is available, use module_tree.json for accurate component structure
+
+**If CodeWiki is available:**
+```bash
+# Get component structure for a module
+cat .codewiki-cache/module_tree.json | python3 -c "
+import json, sys
+def print_components(tree, indent=0):
+    for name, data in tree.items():
+        comps = data.get('components', [])
+        print('  ' * indent + f'{name}/')
+        for comp in comps[:10]:  # limit output
+            print('  ' * (indent + 1) + f'- {comp}')
+        if 'children' in data:
+            print_components(data['children'], indent + 1)
+print_components(json.load(sys.stdin))
+"
+```
 
 For each major container, identify:
 1. Entry/routing layer (controllers, route handlers)
@@ -117,5 +162,10 @@ C4Component
 <!-- ORACLE:ADDITIONAL_CONTAINERS
 If multiple containers have significant internal structure,
 add another Component diagram section for each.
+
+Use CodeWiki module_tree.json to identify modules with rich internal structure:
+- Modules with many children or components are good candidates
+- Look for domain-specific groupings (e.g., auth/, payment/, notification/)
+
 Delete this comment if only one container needs a component diagram.
 -->
