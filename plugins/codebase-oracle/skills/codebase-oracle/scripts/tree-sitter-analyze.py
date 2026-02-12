@@ -44,6 +44,21 @@ LANGUAGE_MAP = {
     ".rb": "ruby",
 }
 
+DEFAULT_IGNORES = {
+    "node_modules",
+    "__pycache__",
+    ".git",
+    "venv",
+    ".venv",
+    "dist",
+    "build",
+    ".next",
+    ".nuxt",
+    ".output",
+    "target",
+    "vendor",
+}
+
 
 def get_language(name: str):
     """Dynamically import and return language module."""
@@ -78,20 +93,18 @@ def get_language(name: str):
 QUERIES = {
     "python": """
         ; Imports
-        (import_statement name: (_) @import_name)
+        (import_statement name: (_) @import_source)
         (import_from_statement module_name: (_) @import_from)
-        (future_import_statement name: (_) @future_import)
 
         ; Function definitions
         (function_definition name: (identifier) @func_name)
-        (method_definition name: (identifier) @method_name)
 
         ; Class definitions
         (class_definition name: (identifier) @class_name)
 
         ; Call expressions (for call graph)
-        (call_expression function: (identifier) @call_func)
-        (call_expression function: (attribute attribute: (identifier) @call_method))
+        (call function: (identifier) @call_func)
+        (call function: (attribute attribute: (identifier) @call_method))
 
         ; Exports (in Python, we look for __all__ or module-level definitions)
         (assignment left: (identifier) @export_name right: (list))
@@ -195,11 +208,10 @@ QUERIES = {
     "go": """
         ; Imports
         (import_spec path: (interpreted_string_literal) @import_path)
-        (import_spec name: (package_identifier) @import_alias path: (interpreted_string_literal))
 
         ; Function definitions
         (function_declaration name: (identifier) @func_name)
-        (method_declaration name: (field_identifier) @method_name receiver: (parameter_list (parameter_declaration type: (type_identifier) @receiver_type)))
+        (method_declaration name: (field_identifier) @method_name)
 
         ; Type definitions (structs and interfaces)
         (type_declaration (type_spec name: (type_identifier) @type_name type: (struct_type)))
@@ -241,7 +253,7 @@ QUERIES = {
     "java": """
         ; Package and imports
         (package_declaration (identifier) @package_name)
-        (import_declaration (identifier) @import_name)
+        (import_declaration (identifier) @import_path)
         (import_declaration (asterisk) @import_wildcard)
 
         ; Class/interface/enum definitions
@@ -283,9 +295,76 @@ QUERIES = {
 }
 
 
+def build_parser(lang):
+    """Construct a parser compatible with old and new tree-sitter APIs."""
+    from tree_sitter import Parser
+
+    try:
+        return Parser(lang)
+    except TypeError:
+        parser = Parser()
+        parser.set_language(lang)
+        return parser
+
+
+def compile_query(lang, query_text: str):
+    """Compile a query with compatibility fallback."""
+    try:
+        from tree_sitter import Query
+
+        return Query(lang, query_text)
+    except Exception:
+        if hasattr(lang, "query"):
+            return lang.query(query_text)
+        raise
+
+
+def iter_query_captures(query, tree_root):
+    """Yield (node, capture_name) pairs across tree-sitter API variants."""
+    raw_captures = None
+
+    if hasattr(query, "captures"):
+        raw_captures = query.captures(tree_root)
+    else:
+        from tree_sitter import QueryCursor
+
+        try:
+            cursor = QueryCursor(query)
+            raw_captures = cursor.captures(tree_root)
+        except TypeError:
+            cursor = QueryCursor()
+            try:
+                raw_captures = cursor.captures(query, tree_root)
+            except TypeError:
+                raw_captures = cursor.captures(tree_root, query)
+
+    if isinstance(raw_captures, dict):
+        for capture_name, nodes in raw_captures.items():
+            for node in nodes:
+                yield node, str(capture_name)
+        return
+
+    for item in raw_captures or []:
+        if not isinstance(item, tuple) or len(item) != 2:
+            continue
+
+        first, second = item
+        if hasattr(first, "start_byte"):
+            capture_name = second
+            if isinstance(second, int) and hasattr(query, "capture_name"):
+                capture_name = query.capture_name(second)
+            yield first, str(capture_name)
+            continue
+
+        if isinstance(second, dict):
+            for capture_name, nodes in second.items():
+                for node in nodes:
+                    yield node, str(capture_name)
+
+
 def analyze_file(file_path: Path, language: str) -> dict[str, Any]:
     """Analyze a single file using tree-sitter."""
-    from tree_sitter import Language, Parser
+    from tree_sitter import Language
 
     lang_module = get_language(language)
     if lang_module is None:
@@ -293,7 +372,7 @@ def analyze_file(file_path: Path, language: str) -> dict[str, Any]:
 
     try:
         lang = Language(lang_module())
-        parser = Parser(lang)
+        parser = build_parser(lang)
     except Exception as e:
         return {"error": f"Failed to initialize parser: {e}"}
 
@@ -316,85 +395,95 @@ def analyze_file(file_path: Path, language: str) -> dict[str, Any]:
         "calls": [],
         "decorators": [],
     }
+    seen = {name: set() for name in results}
 
     query_text = QUERIES.get(language, "")
     if not query_text:
         return results
 
     try:
-        query = lang.query(query_text)
-        captures = query.captures(tree.root_node)
+        query = compile_query(lang, query_text)
 
-        # Process captures
-        for node, capture_name in captures:
+        for node, capture_name in iter_query_captures(query, tree.root_node):
             text = content[node.start_byte:node.end_byte]
-            line = node.start_point[0] + 1  # 1-indexed line numbers
+            line = node.start_point[0] + 1
 
-            if capture_name in ("import_name", "import_from", "import_source",
-                               "import_path", "import_alias", "require_path",
-                               "use_path", "use_base", "use_item"):
-                # Clean up import paths (remove quotes)
+            if capture_name in ("import_source", "import_from", "import_path", "require_path", "use_path"):
                 clean_path = text.strip("'\"`")
-                if clean_path and clean_path not in [i["path"] for i in results["imports"]]:
+                if clean_path and clean_path not in seen["imports"]:
                     results["imports"].append({
                         "path": clean_path,
                         "line": line,
                         "raw": text,
                     })
+                    seen["imports"].add(clean_path)
 
-            elif capture_name in ("func_name", "method_name", "method_sig_name",
-                                 "func_sig_name", "singleton_method_name"):
-                if text not in [f["name"] for f in results["functions"]]:
+            elif capture_name in (
+                "func_name",
+                "method_name",
+                "method_sig_name",
+                "func_sig_name",
+                "singleton_method_name",
+                "component_func",
+                "arrow_func",
+                "constructor_name",
+            ):
+                if text not in seen["functions"]:
                     results["functions"].append({
                         "name": text,
                         "line": line,
                         "type": "method" if "method" in capture_name else "function",
                     })
+                    seen["functions"].add(text)
 
-            elif capture_name in ("class_name", "struct_name", "enum_name",
-                                 "trait_name", "interface_name", "component_class"):
-                if text not in [c["name"] for c in results["classes"]]:
+            elif capture_name in ("class_name", "struct_name", "enum_name", "trait_name", "interface_name", "component_class", "module_name"):
+                if text not in seen["classes"]:
                     results["classes"].append({
                         "name": text,
                         "line": line,
                         "type": capture_name.replace("_name", ""),
                     })
+                    seen["classes"].add(text)
 
-            elif capture_name in ("export_func", "export_class", "export_interface",
-                                 "export_type", "export_const", "export_specifier",
-                                 "export_name"):
+            elif capture_name in ("export_func", "export_class", "export_interface", "export_type", "export_const", "export_specifier", "export_name"):
                 export_text = text
-                if capture_name == "export_name" and "=" in content[node.start_byte:node.start_byte+50]:
-                    # Python __all__ assignment - extract list contents
+                if capture_name == "export_name" and "=" in content[node.start_byte:node.start_byte + 50]:
                     export_text = "__all__ export"
-                if export_text not in [e["name"] for e in results["exports"]]:
+                if export_text not in seen["exports"]:
                     results["exports"].append({
                         "name": export_text,
                         "line": line,
                         "type": capture_name.replace("export_", ""),
                     })
+                    seen["exports"].add(export_text)
 
             elif capture_name in ("type_name", "interface_name", "impl_trait", "impl_type"):
-                if text not in [t["name"] for t in results["types"]]:
+                if text not in seen["types"]:
                     results["types"].append({
                         "name": text,
                         "line": line,
                         "type": capture_name.replace("_name", ""),
                     })
+                    seen["types"].add(text)
 
-            elif capture_name in ("called_function", "called_method", "call_func",
-                                 "call_method", "called_method"):
-                results["calls"].append({
-                    "name": text,
-                    "line": line,
-                    "type": "method" if "method" in capture_name else "function",
-                })
+            elif capture_name in ("called_function", "called_method", "call_func", "call_method"):
+                key = f"{text}:{line}:{capture_name}"
+                if key not in seen["calls"]:
+                    results["calls"].append({
+                        "name": text,
+                        "line": line,
+                        "type": "method" if "method" in capture_name else "function",
+                    })
+                    seen["calls"].add(key)
 
             elif capture_name in ("decorator_name", "decorator_simple", "annotation_name"):
-                results["decorators"].append({
-                    "name": text,
-                    "line": line,
-                })
+                key = f"{text}:{line}"
+                if key not in seen["decorators"]:
+                    results["decorators"].append({
+                        "name": text,
+                        "line": line,
+                    })
+                    seen["decorators"].add(key)
 
     except Exception as e:
         results["error"] = f"Query error: {e}"
@@ -402,31 +491,46 @@ def analyze_file(file_path: Path, language: str) -> dict[str, Any]:
     return results
 
 
-def should_analyze(path: Path, gitignore_patterns: list[str]) -> bool:
+def should_analyze(path: Path, root: Path, allowed_languages: set[str] | None = None) -> bool:
     """Check if file should be analyzed."""
-    name = path.name
-
-    # Default ignores (same as scan-codebase.py)
-    default_ignores = {
-        "node_modules", "__pycache__", ".git", "venv", ".venv",
-        "dist", "build", ".next", ".nuxt", ".output",
-        "target", "vendor",
-    }
-
-    parts = path.parts
-    if any(part in default_ignores for part in parts):
+    try:
+        relative_path = path.relative_to(root)
+    except ValueError:
         return False
 
-    # Check extension
-    if path.suffix.lower() not in LANGUAGE_MAP:
+    if any(part in DEFAULT_IGNORES for part in relative_path.parts[:-1]):
+        return False
+
+    language = LANGUAGE_MAP.get(path.suffix.lower())
+    if language is None:
+        return False
+
+    if allowed_languages is not None and language not in allowed_languages:
         return False
 
     return True
 
 
-def analyze_codebase(root: Path) -> dict[str, Any]:
+def read_go_module_path(root: Path) -> str | None:
+    """Read Go module path from go.mod if present."""
+    go_mod = root / "go.mod"
+    if not go_mod.exists():
+        return None
+
+    try:
+        for line in go_mod.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = line.strip()
+            if line.startswith("module "):
+                module_path = line[len("module "):].strip()
+                return module_path or None
+    except Exception:
+        return None
+
+    return None
+
+
+def analyze_codebase(root: Path, language_filter: str | None = None) -> dict[str, Any]:
     """Analyze entire codebase using tree-sitter."""
-    from tree_sitter import Language
 
     results = {
         "root": str(root),
@@ -441,32 +545,32 @@ def analyze_codebase(root: Path) -> dict[str, Any]:
             "total_calls": 0,
         },
         "language_stats": {},
+        "go_module_path": read_go_module_path(root),
     }
 
     # Check which languages are available
     available_languages = {}
     for ext, lang in LANGUAGE_MAP.items():
+        if language_filter is not None and lang != language_filter:
+            continue
         if lang not in available_languages:
             mod = get_language(lang)
             available_languages[lang] = mod is not None
 
     results["available_languages"] = [k for k, v in available_languages.items() if v]
+    allowed_languages = set(results["available_languages"])
+    if language_filter is not None and language_filter not in allowed_languages:
+        return results
 
     # Walk directory
     for path in root.rglob("*"):
         if not path.is_file():
             continue
 
-        if not should_analyze(path, []):
+        if not should_analyze(path, root, allowed_languages):
             continue
 
-        ext = path.suffix.lower()
-        if ext not in LANGUAGE_MAP:
-            continue
-
-        language = LANGUAGE_MAP[ext]
-        if not available_languages.get(language):
-            continue
+        language = LANGUAGE_MAP[path.suffix.lower()]
 
         rel_path = str(path.relative_to(root))
 
@@ -490,7 +594,7 @@ def analyze_codebase(root: Path) -> dict[str, Any]:
             results["files"][rel_path] = {"error": str(e)}
 
     # Build import graph
-    results["import_graph"] = build_import_graph(results["files"])
+    results["import_graph"] = build_import_graph(results["files"], results["go_module_path"])
 
     # Identify hubs (files imported by many others)
     results["hubs"] = identify_hubs(results["import_graph"])
@@ -498,7 +602,7 @@ def analyze_codebase(root: Path) -> dict[str, Any]:
     return results
 
 
-def build_import_graph(files: dict) -> dict:
+def build_import_graph(files: dict, go_module_path: str | None = None) -> dict:
     """Build module-level import graph from file analysis."""
     graph = {
         "nodes": [],
@@ -520,7 +624,13 @@ def build_import_graph(files: dict) -> dict:
             import_path = imp["path"]
 
             # Try to resolve import to a file in the codebase
-            resolved = resolve_import(file_path, import_path, graph["nodes"])
+            resolved = resolve_import(
+                file_path,
+                import_path,
+                graph["nodes"],
+                source_language=data.get("language"),
+                go_module_path=go_module_path,
+            )
             if resolved:
                 edge = {
                     "from": file_path,
@@ -534,40 +644,103 @@ def build_import_graph(files: dict) -> dict:
     return graph
 
 
-def resolve_import(source_file: str, import_path: str, known_files: list[str]) -> str | None:
+def resolve_import(
+    source_file: str,
+    import_path: str,
+    known_files: list[str],
+    source_language: str | None = None,
+    go_module_path: str | None = None,
+) -> str | None:
     """Try to resolve an import path to a file in the codebase."""
+    known_set = set(known_files)
+
+    def find_exact_or_suffix(candidate: str) -> str | None:
+        if candidate in known_set:
+            return candidate
+
+        suffix = f"/{candidate}"
+        matches = [file for file in known_files if file.endswith(suffix)]
+        if matches:
+            return sorted(matches, key=lambda p: (p.count("/"), p))[0]
+        return None
+
+    def resolve_with_extensions(base: str) -> str | None:
+        for ext in ["", ".js", ".ts", ".jsx", ".tsx", ".py", ".go", ".rs", ".java", ".rb"]:
+            for candidate in (f"{base}{ext}", f"{base}/index{ext}", f"{base}/main{ext}"):
+                resolved = find_exact_or_suffix(candidate)
+                if resolved is not None:
+                    return resolved
+        return None
+
+    def resolve_package_directory(base: str) -> str | None:
+        exact_prefix = f"{base}/"
+        suffix_prefix = f"/{base}/"
+        directory_files = [
+            file
+            for file in known_files
+            if file.startswith(exact_prefix) or suffix_prefix in file
+        ]
+        if not directory_files:
+            return None
+        return sorted(directory_files, key=lambda p: (p.count("/"), p))[0]
+
     # Handle relative imports (Python, JS, etc.)
     if import_path.startswith("."):
         source_dir = Path(source_file).parent
-        attempted = []
 
         # Try various extensions
         for ext in ["", ".js", ".ts", ".jsx", ".tsx", ".py", ".go", ".rs", ".java", ".rb"]:
-            # Try as file
-            resolved = source_dir / (import_path + ext)
-            resolved_str = str(resolved).replace("./", "").replace(".\\", "")
-            attempted.append(resolved_str)
-            if resolved_str in known_files:
-                return resolved_str
-
-            # Try as index file in directory
-            resolved = source_dir / import_path / (f"index{ext}")
-            resolved_str = str(resolved).replace("./", "").replace(".\\", "")
-            attempted.append(resolved_str)
-            if resolved_str in known_files:
-                return resolved_str
+            for candidate in (
+                source_dir / f"{import_path}{ext}",
+                source_dir / import_path / f"index{ext}",
+                source_dir / import_path / f"main{ext}",
+            ):
+                resolved_str = str(candidate).replace("\\", "/")
+                while resolved_str.startswith("./"):
+                    resolved_str = resolved_str[2:]
+                if resolved_str in known_set:
+                    return resolved_str
 
         return None
 
-    # Handle absolute/module imports - try to match against known files
-    # This is a heuristic match
-    parts = import_path.replace("/", ".").split(".")
+    # Strip query/hash fragments and normalize separators.
+    normalized = import_path.split("?", 1)[0].split("#", 1)[0].strip().strip("'\"`")
+    normalized = normalized.strip("/").replace("\\", "/")
+    if not normalized:
+        return None
 
-    for file in known_files:
-        file_lower = file.lower()
-        # Match if all parts appear in the file path
-        if all(part.lower() in file_lower for part in parts if part):
-            return file
+    # Skip known non-local import forms.
+    if normalized.startswith("node:"):
+        return None
+
+    if source_language == "go":
+        if go_module_path:
+            module_prefix = go_module_path.rstrip("/")
+            if normalized == module_prefix:
+                return None
+            if not normalized.startswith(module_prefix + "/"):
+                # External module or stdlib import.
+                return None
+            normalized = normalized[len(module_prefix) + 1:]
+        else:
+            # Without module path, avoid guessing for absolute Go imports.
+            return None
+
+    parts = [part for part in normalized.split("/") if part and part != "."]
+    if len(parts) < 2:
+        # Avoid mapping stdlib/global modules like "os", "fs", "react", etc.
+        return None
+
+    # Try longest suffix first so local paths win over broad package prefixes.
+    suffixes = ["/".join(parts[i:]) for i in range(len(parts))]
+    for suffix in suffixes:
+        resolved = resolve_with_extensions(suffix)
+        if resolved is not None:
+            return resolved
+
+        resolved = resolve_package_directory(suffix)
+        if resolved is not None:
+            return resolved
 
     return None
 
@@ -633,7 +806,7 @@ def main():
 
     if args.file:
         # Single file analysis
-        file_path = Path(args.file)
+        file_path = Path(args.file).resolve()
         if not file_path.exists():
             print(f"ERROR: File not found: {file_path}", file=sys.stderr)
             sys.exit(1)
@@ -644,11 +817,17 @@ def main():
             sys.exit(1)
 
         language = LANGUAGE_MAP[ext]
+        if args.language is not None and args.language != language:
+            print(
+                f"ERROR: --language={args.language} does not match file language {language}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
         result = analyze_file(file_path, language)
         print(json.dumps(result, indent=2))
     else:
         # Directory analysis
-        results = analyze_codebase(root)
+        results = analyze_codebase(root, args.language)
 
         if args.format == "json":
             print(json.dumps(results, indent=2))
