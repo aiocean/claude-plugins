@@ -8,7 +8,7 @@ description: |
 
 Comprehensive architecture documentation: CodeWiki-enhanced analysis with specialized analyst teams.
 
-**Core Philosophy:** Oracle collaborates with CodeWiki - it **supplements missing pieces, validates claims, and enhances** with runtime/infrastructure knowledge that static analysis cannot detect.
+**Core Philosophy:** Oracle is an **active editor**, not a passive auditor. It reads CodeWiki output, validates against actual code, then **rewrites incorrect content directly** and **adds missing knowledge** (runtime, infrastructure, failure modes). The final doc should read as one coherent document — not CodeWiki content with a validation report stapled to the end.
 
 **What CodeWiki Misses:** See [references/codewiki-gaps.md](references/codewiki-gaps.md) for full details on infrastructure, serverless, multi-language, and monorepo patterns that require Oracle supplementation.
 
@@ -34,13 +34,16 @@ Every non-trivial claim must be represented as:
 
 Unknowns must be written as `Unknown` with a concrete verification step. Never present assumptions as facts.
 
-**Required claim table format for Oracle sections:**
+**Preferred inline evidence format:**
+
+Instead of separate claim tables, add evidence directly in prose:
 
 ```markdown
-| Claim | Evidence | Confidence | Impact |
-|------|----------|------------|--------|
-| Request path is sync and DB-bound | `internal/handler/handler.go:42`, `internal/repository/mongodb.go:88` | ▓▓▓▓░ | High latency risk under load |
+The request path is synchronous and DB-bound (`internal/handler/handler.go:42`,
+`internal/repository/mongodb.go:88`), creating high latency risk under load.
 ```
+
+Use claim tables only in CODEBASE_MAP.md for the cross-module summary, not inside individual module docs.
 
 ## Meaningfulness Criteria
 
@@ -69,7 +72,7 @@ If a section only describes structure without decision guidance, it is incomplet
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ Phase 2: Oracle (Validation + Enhancement)                      │
+│ Phase 2: Oracle (Correct + Enhance)                             │
 │                                                                 │
 │   /codebase-oracle                                              │
 │   ↓                                                             │
@@ -77,35 +80,24 @@ If a section only describes structure without decision guidance, it is incomplet
 │   1. Read CodeWiki's claims about the module                   │
 │   2. Oracle agents analyze the actual code independently        │
 │   3. Compare findings → Cross-validation                       │
-│   4. ENHANCE the SAME module.md file with:                     │
-│      - ✓ Validated sections (both AI systems agree)            │
-│      - ⚠ Review needed sections (discrepancies found)          │
-│      - Hub analysis & blast radius                             │
-│      - Confidence badges                                       │
+│   4. REWRITE incorrect sections inline (fix errors in place)   │
+│   5. ADD missing sections (failure modes, blast radius, etc.)  │
+│   6. ADD evidence (path:line) to existing claims               │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ Output: Single Enhanced Documentation                           │
+│ Output: Single Corrected + Enhanced Documentation               │
 │                                                                 │
-│   docs/{module}.md (CodeWiki + Oracle combined)                │
-│   ├── Original CodeWiki content (architecture, flows, etc.)    │
-│   ├── <!-- ORACLE-ENHANCED --> section added at end            │
-│   │   ├── ✓ Validation Status                                  │
-│   │   ├── Hub Analysis                                         │
-│   │   ├── Blast Radius                                         │
-│   │   └── Confidence Assessment                                │
-│   └── Cross-reference links to other enhanced modules          │
+│   docs/{module}.md (rewritten as one coherent doc)             │
+│   ├── Corrected content (errors fixed inline)                  │
+│   ├── Evidence added (path:line references throughout)         │
+│   ├── New sections added inline where they belong:             │
+│   │   ├── Failure Modes & Recovery                             │
+│   │   ├── Blast Radius & Safe Change Plan                      │
+│   │   └── Design Rationale & Trade-offs                        │
+│   └── <!-- ORACLE-META --> compact footer (confidence + stamp) │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
-### Validation Badges
-
-| Badge | Meaning | Action |
-|-------|---------|--------|
-| ✓ Validated | CodeWiki + Oracle agree | High confidence, trust it |
-| ⚠ Review | Discrepancy found | Human review recommended |
-| ? Unknown | Oracle couldn't verify | Needs investigation |
-| + Enhanced | Oracle added new info | Cross-validated addition |
 
 ## CodeWiki ACTUAL Output Structure
 
@@ -130,9 +122,9 @@ docs/
 | User Request | Run These Phases |
 |--------------|------------------|
 | "Analyze codebase" / "Full analysis" | All phases (0-5) |
-| "Validate docs" / "Check accuracy" | Phase 0, 2, 4 only |
+| "Validate docs" / "Check accuracy" | Phase 0, 2 only (report findings, don't rewrite) |
 | "Find missing docs" / "What's not documented?" | Phase 0, 1.2 only |
-| "Add Oracle section" / "Enhance existing docs" | Phase 2-5 only |
+| "Enhance existing docs" / "Fix docs" | Phase 2-5 (validate then rewrite) |
 | "Quick check" / "Is this up to date?" | Phase 2 only |
 
 ### Phase 0: Run CodeWiki (if not done)
@@ -265,9 +257,12 @@ Steps:
    - Run tree-sitter-analyze.py on the module directory
    - Compare findings with CodeWiki claims
 
-3. Output claim table with actual evidence from code
+3. Build a corrections list:
+   - CORRECT: CodeWiki claims X but code shows Y → record the fix
+   - ADD: Code has Z but CodeWiki doesn't mention it → record the addition
+   - EVIDENCE: Claim is correct but lacks path:line → record the reference
 
-4. If CodeWiki claims X but code shows Y → flag ⚠ Review
+4. Output the corrections list (not just a validation table)
 ```
 
 #### 2.2 Infrastructure & Runtime Validation
@@ -305,77 +300,47 @@ For each module, add decision-support context:
 6. **Runtime context** (for serverless/Lambda): cold start implications, timeout risks, concurrency limits
 7. **Infrastructure dependencies**: required IAM permissions, VPC config, external service dependencies
 
-### Phase 4: Editorial Pass (Quality)
+### Phase 4: Rewrite Module Docs (Correct + Enhance)
 
-Before writing final docs:
+This is the core phase. For each module doc, **rewrite the file** to produce one coherent document:
 
-1. Remove duplicated statements.
-2. Remove generic language without evidence.
-3. Ensure each section answers "so what?" for the target audience.
-4. Ensure every high-confidence claim has concrete evidence.
-5. Keep unresolved gaps explicit under `Unknowns and Verification`.
+**Step 1: Fix errors inline.** Don't flag — fix. Examples:
+- CodeWiki says "5 Lambda functions" but code has 3 → rewrite to say 3
+- CodeWiki says "Go 1.x" but go.mod says 1.21 → rewrite to say 1.21
+- CodeWiki describes a component that doesn't exist → remove it
+- CodeWiki misses a component that does exist → add it
 
-### Phase 5: Enhance Module Docs and Generate CODEBASE_MAP.md
+**Step 2: Add evidence inline.** Sprinkle `path:line` references throughout the existing content, not in a separate table. Example:
+- Before: "The handler validates the request payload"
+- After: "The handler validates the request payload (`internal/handler/create.go:45`)"
 
-Append Oracle section to each module doc with this required structure:
+**Step 3: Add missing sections inline where they naturally belong.** Don't dump everything at the bottom. Insert:
+- **Design Rationale** near the architecture section
+- **Failure Modes & Recovery** after the component/flow descriptions
+- **Blast Radius & Safe Change Plan** near the dependency section
+- **Infrastructure Context** (Lambda config, IAM, VPC) near deployment/runtime sections
+- **Unknowns** at the end — things Oracle couldn't verify with concrete next steps
+
+**Step 4: Editorial cleanup.**
+1. Remove duplicated statements
+2. Remove generic language without evidence
+3. Ensure each section answers "so what?" for the target audience
+4. Keep the doc readable as a single coherent document — no "CodeWiki section" vs "Oracle section" split
+
+**Step 5: Append compact Oracle metadata footer.**
+
+Only metadata goes at the bottom — not a second copy of the analysis:
 
 ```markdown
-<!-- ORACLE-ENHANCED
-Generated by codebase-oracle to validate and enhance CodeWiki output.
-Validation timestamp: {timestamp}
-Audience: {audience}
-Primary tasks: {task_1}, {task_2}
+<!-- ORACLE-META
+Enhanced by codebase-oracle | {timestamp}
+Audience: {audience} | Confidence: {overall}%
+Corrections: {N} errors fixed | Additions: {N} sections added
+Unknowns: {N} items pending verification
 -->
-
-## Oracle Validation
-
-### Validation Status
-
-| Section | Status | Notes |
-|---------|--------|-------|
-| Components | ✓ Validated | 12 components verified |
-| Dependencies | ⚠ Review | 3 imports not documented |
-| Architecture | ✓ Validated | Layer assignment consistent |
-
-### Claim Ledger
-
-| Claim | Evidence | Confidence | Impact |
-|------|----------|------------|--------|
-| {ACTUAL_CLAIM_FROM_DOC} | `{file}:{line}` | ▓▓▓▓░ | {WHY_THIS_MATTERS} |
-
-### Design Rationale and Trade-offs
-
-- Why this module is shaped this way.
-- Trade-offs explicitly observed in code.
-
-### Failure Modes and Recovery
-
-- Failure mode
-- Detection signal
-- First-response action
-
-### Blast Radius and Safe Change Plan
-
-- Direct dependents
-- Indirect dependents
-- Tests to run first
-
-### Unknowns and Verification
-
-- Unknown item + exact step to verify.
-
-### Infrastructure Context (if applicable)
-
-| Resource Type | Configuration | Link to Code |
-|---------------|---------------|--------------|
-| Lambda | Runtime: Node18, Memory: 512MB | `serverless.yml:42` |
-| API Gateway | Route: /api/v1/orders | `template.yml:88` |
-| DynamoDB | Table: orders, GSI: status-index | `terraform/table.tf:12` |
-
-### Confidence Assessment
-
-Overall: ▓▓▓▓░ 85%
 ```
+
+### Phase 5: Generate CODEBASE_MAP.md
 
 Generate `CODEBASE_MAP.md` as the index of all enhanced module docs and include:
 
@@ -389,60 +354,64 @@ Generate `CODEBASE_MAP.md` as the index of all enhanced module docs and include:
 
 ## Cross-Validation Logic
 
-### When Both AI Systems Agree → High Confidence
+### When Both AI Systems Agree → Keep + Add Evidence
 
 ```python
 if codewiki_claim == oracle_finding:
-    confidence = "✓ Validated"
-    badge = "▓▓▓▓▓ 95%"
+    # Keep the content, add path:line evidence inline
+    action = "add evidence references"
 ```
 
-### When They Disagree → Flag for Review
+### When They Disagree → Fix the Content
 
 ```python
 if codewiki_claim != oracle_finding:
-    confidence = "⚠ Review"
-    note = f"CodeWiki: {codewiki_claim}, Oracle: {oracle_finding}"
-    # Human review needed
+    if oracle_has_strong_evidence:
+        # Rewrite the section with correct information
+        action = "fix inline with evidence"
+    else:
+        # Add as Unknown with verification step
+        action = "add to Unknowns section"
 ```
 
-### Example Discrepancy Detection
+### Example: Before and After Correction
 
+**Before (CodeWiki error):**
 ```markdown
-### ⚠ Discrepancy Found: Dependencies
+## Dependencies
+This module depends on: config, utils, logger
+```
 
-**CodeWiki says:**
-> This module depends on: config, utils, logger
-
-**Oracle found:**
-> This module also imports: database, cache
-
-**Recommendation:** Review if database/cache imports are intentional.
+**After (Oracle correction):**
+```markdown
+## Dependencies
+This module depends on: config, utils, logger, database, cache (`internal/service/export.go:12-16`).
+The database and cache imports are used for export job persistence and result caching.
 ```
 
 ## Rules
 
 ALWAYS:
-- Enhance CodeWiki module.md files, don't create separate Oracle docs
-- Add validation badges showing CodeWiki vs Oracle agreement
-- Flag discrepancies for human review
-- Include hub analysis and blast radius in enhancement section
+- **Fix errors directly in the doc** — don't just flag them in a separate section
+- **Add evidence inline** (`path:line`) throughout the content, not in a separate table
+- **Insert new sections where they belong** — failure modes near flows, blast radius near dependencies
+- Produce one coherent document that reads naturally, not "CodeWiki part" + "Oracle part"
 - Generate single CODEBASE_MAP.md as index
 - Cross-validate: compare CodeWiki claims with Oracle findings
 - Start with Documentation Intent Contract (audience, tasks, decision horizon)
-- Use claim tables with path:line evidence and confidence bars
 - Include rationale, trade-offs, failure modes, and safe-change guidance
-- Use `Unknown` + verification steps for unresolved gaps
+- Use `Unknown` + verification steps for things Oracle couldn't verify
 - **Scan for infrastructure context** (serverless.yml, terraform, k8s) and document runtime behavior
 - **Detect monorepo structure** (workspaces, nx.json) and document package boundaries
 - **Trace cross-language contracts** (protobuf, GraphQL, OpenAPI) when multiple languages present
 - **Supplement missing child modules** from CodeWiki's module_tree.json
 
 NEVER:
-- Create duplicate documentation
-- Overwrite CodeWiki content - only APPEND Oracle section
+- **Append a "validation report" section** — Oracle is an editor, not an auditor
+- **Leave CodeWiki errors untouched** — if you found it's wrong, fix it
+- **Duplicate information** — don't repeat content in both the doc body and a footer table
+- Create separate Oracle docs alongside CodeWiki docs
 - Skip validation step
-- Ignore discrepancies - always flag them
 - Reference `.codewiki-cache/` - does not exist
 - Write high-confidence claims without evidence
 - Leave generic summaries that do not help decisions
@@ -452,10 +421,11 @@ NEVER:
 
 Use these checks to keep docs meaningful over time:
 
-1. **Evidence completeness**: fail if Oracle section has claims without `path:line`.
+1. **Evidence density**: docs should have `path:line` references throughout the body, not just in a footer.
 2. **Placeholder check**: fail if `REPLACE` remains.
-3. **Unknown discipline**: fail if uncertainty is implied but no `Unknowns and Verification` section exists.
+3. **Unknown discipline**: fail if uncertainty is implied but no `Unknowns` section exists.
 4. **Drift check**: if module files changed, corresponding module docs must be updated.
+5. **No validation report anti-pattern**: fail if doc has a large `## Oracle Validation` section with claim tables — content should be integrated inline.
 
 Run bundled checker (recommended):
 
@@ -477,23 +447,27 @@ Fallback manual checks:
 # 1) No placeholders
 ! rg -n "REPLACE" docs/*.md
 
-# 2) Oracle section must include claim ledger and unknowns
-rg -n "### Claim Ledger" docs/*.md
-rg -n "### Unknowns and Verification" docs/*.md
-
-# 3) Basic evidence pattern in claim rows
+# 2) Evidence references throughout doc body (not just in a footer)
 rg -n '`[^`]+:[0-9]+`' docs/*.md
+
+# 3) Must have Unknowns section
+rg -n "### Unknowns" docs/*.md
+
+# 4) Should NOT have the old "Oracle Validation" report pattern
+! rg -n "## Oracle Validation" docs/*.md
 ```
 
 ## Output Structure After Enhancement
 
 ```
 docs/
-├── CODEBASE_MAP.md              # Oracle index with validation summary
-├── {module1}.md                 # CodeWiki + Oracle enhancement
-│   ├── (original CodeWiki content)
-│   └── <!-- ORACLE-ENHANCED --> section
-├── {module2}.md                 # CodeWiki + Oracle enhancement
+├── CODEBASE_MAP.md              # Oracle index with priorities and unknowns
+├── {module1}.md                 # Corrected + enhanced (one coherent doc)
+│   ├── Content with errors fixed inline
+│   ├── Evidence (path:line) throughout
+│   ├── New sections added where they belong
+│   └── <!-- ORACLE-META --> compact footer
+├── {module2}.md                 # Corrected + enhanced
 ├── module_tree.json             # Unchanged
 └── temp/                        # Unchanged
 ```
