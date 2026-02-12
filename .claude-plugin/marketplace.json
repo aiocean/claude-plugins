@@ -108,6 +108,13 @@
       "description": "Guide for using grafana-diagram plugin to create Mermaid diagrams with data binding in Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic metric-driven coloring.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "jira-mcp",
+      "source": "./plugins/jira-mcp",
+      "description": "Interact with Jira through MCP tools. Issue management, sprint tracking, workflow transitions, comments, JQL search, and development information.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
