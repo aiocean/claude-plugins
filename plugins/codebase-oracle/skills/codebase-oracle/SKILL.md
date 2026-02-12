@@ -71,7 +71,7 @@ docs/
 ├── {module_name}.md         # Per-module LLM documentation
 ├── module_tree.json         # Module hierarchy
 ├── first_module_tree.json   # Initial clustering
-└── temp/dependency_graphs/  # (optional) Component dependencies
+└── temp/dependency_graphs/  # JSON for dependency graphs
 ```
 
 **What CodeWiki does NOT output:**
