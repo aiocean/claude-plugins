@@ -11,9 +11,11 @@ Turns documentation into a multi-tab interactive viewer. **Now integrates both C
 ## Input Sources (priority order)
 
 1. **CodeWiki module docs** — `{module}.md` files with LLM-generated content: architecture diagrams, sequence diagrams, usage examples, best practices
-2. **CodeWiki structure** — `module_tree.json` for hierarchy, `metadata.json` for stats, `overview.md` for repo summary
+2. **CodeWiki structure** — `module_tree.json` for hierarchy (NOTE: `metadata.json` and `overview.md` may not exist)
 3. **codebase-oracle docs** — `CODEBASE_MAP.md`, `c4-architecture.md`, `dependency-graph.md`, etc. for structural analysis
 4. **Direct analysis** — Fallback if no docs exist
+
+**IMPORTANT:** CodeWiki outputs to `docs/`, NOT `.codewiki-cache/`. See actual structure below.
 
 ## Output
 
@@ -28,11 +30,12 @@ Single interactive HTML file with **6 tabs** for comprehensive exploration:
 
 ## NEW: CodeWiki Integration
 
-### What CodeWiki Provides
+### What CodeWiki ACTUALLY Provides
+
+**NOTE:** CodeWiki outputs to `docs/`, NOT `.codewiki-cache/`. The following files may or may not exist:
 
 ```
 docs/
-├── overview.md              # Repository overview (LLM-generated)
 ├── {module_name}.md         # Per-module docs with:
 │   ├── Architecture diagrams (Mermaid graph TB)
 │   ├── Sequence diagrams (Mermaid sequenceDiagram)
@@ -41,11 +44,21 @@ docs/
 │   ├── Usage examples (code blocks)
 │   ├── Configuration tables
 │   ├── Best practices
-│   ├── Performance notes
-│   └── Cross-references to related modules
-├── module_tree.json         # Hierarchical module structure
-└── metadata.json            # Generation info, statistics
+│   └── Cross-references
+├── module_tree.json         # Module hierarchy (ALWAYS present)
+├── first_module_tree.json   # Initial clustering (ALWAYS present)
+│
+├── overview.md              # May NOT exist (module name used instead)
+├── metadata.json            # May NOT exist
+│
+└── temp/                    # Optional, may be deleted
+    └── dependency_graphs/
+        └── {repo}_dependency_graph.json
 ```
+
+**NOT available (do not look for):**
+- ❌ `.codewiki-cache/` directory
+- ❌ `call_graph.json` in output
 
 ### Data Extraction from CodeWiki
 

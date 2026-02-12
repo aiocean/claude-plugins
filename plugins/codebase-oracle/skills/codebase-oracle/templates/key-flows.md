@@ -10,22 +10,18 @@ How to identify key flows:
 2. Find the most important user actions (login, create, process, etc.)
 3. Check test files for integration tests — they often test key flows
 4. Look for README usage examples
-5. If CodeWiki is available, check call_graph.json for heavily-called functions
+5. **Check CodeWiki module docs** - they often contain sequence diagrams!
 
 Primary data sources:
-1. CodeWiki: .codewiki-cache/call_graph.json (function-level call relationships)
-2. Tree-sitter: .tree-sitter-results.json (function discovery)
+1. **CodeWiki module docs** - docs/{module}.md files often have sequence diagrams
+2. Tree-sitter: docs/.tree-sitter-results.json (function discovery)
 3. LSP: goToDefinition, outgoingCalls for tracing
 
-Tools:
-- CodeWiki call graph (preferred): precise caller→callee with line numbers
-- LSP goToDefinition to trace call chains from entry → handler → service → data
-- LSP outgoingCalls to map the call tree from each entry point
-- Grep for route/handler definitions to find entry points
-- Read test files for flow expectations
-
-CodeWiki call_graph.json structure:
-- relationships: [{caller, callee, call_line, is_resolved}]
+IMPORTANT:
+- CodeWiki outputs to docs/, NOT .codewiki-cache/
+- call_graph.json does NOT exist in CodeWiki output
+- Use CodeWiki module docs for pre-built sequence diagrams
+- Use LSP outgoingCalls for tracing call chains
 
 For each flow:
 1. Name it clearly (e.g., "User Authentication", "Order Processing")
@@ -39,36 +35,30 @@ For each flow:
 
 <!-- ORACLE:FLOW
 Describe: what triggers this flow, what is the expected outcome.
-Trace the execution path step by step.
 
-**If CodeWiki is available, use call_graph.json for precise tracing:**
+**FIRST: Check CodeWiki module docs for existing sequence diagrams:**
 ```bash
-# Find all calls from an entry point
-cat .codewiki-cache/call_graph.json | python3 -c "
-import json, sys
-from collections import defaultdict
-d = json.load(sys.stdin)
-# Build call tree
-call_tree = defaultdict(list)
-for rel in d.get('relationships', d.get('calls', [])):
-    call_tree[rel.get('caller')].append({
-        'callee': rel.get('callee'),
-        'line': rel.get('call_line')
-    })
-# Trace from entry point
-entry = 'module_name.function_name'
-def trace(caller, depth=0):
-    indent = '  ' * depth
-    print(f'{indent}{caller}')
-    for call in call_tree.get(caller, [])[:5]:  # limit breadth
-        trace(call['callee'], depth + 1)
-trace(entry)
-"
+# Look for sequence diagrams in module docs
+grep -l "sequenceDiagram" docs/*.md
 ```
 
-**If using LSP:**
-- LSP outgoingCalls from the entry point to map the call chain
-- Read each function in the chain to understand what it does
+If found, extract and adapt the Mermaid sequence diagram from the module doc.
+
+**For tracing call chains, use LSP:**
+- LSP outgoingCalls from the entry point
+- Read each function to understand what it does
+
+**Or use Tree-sitter (if available):**
+```bash
+cat docs/.tree-sitter-results.json | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+# Find functions with most calls
+for path, info in list(data.get('files', {}).items())[:5]:
+    funcs = info.get('functions', [])
+    print(f'{path}: {len(funcs)} functions')
+"
+```
 
 Sequence diagram syntax:
 ```
@@ -102,7 +92,8 @@ sequenceDiagram
 
 <!-- ORACLE:FLOW_2
 Same approach as Flow 1.
-Use CodeWiki call graph if available for precise function-level tracing.
+Check CodeWiki module docs for existing sequence diagrams.
+Use LSP outgoingCalls for tracing.
 -->
 
 REPLACE: description
@@ -117,7 +108,7 @@ sequenceDiagram
 
 <!-- ORACLE:FLOW_3
 Same approach as Flow 1.
-Use CodeWiki call graph if available for precise function-level tracing.
+Check CodeWiki module docs for existing sequence diagrams.
 -->
 
 REPLACE: description
@@ -131,22 +122,10 @@ sequenceDiagram
 <!-- ORACLE:MORE_FLOWS
 Add more flow sections if 4-5 critical flows exist.
 Prioritize flows that cross multiple layers or involve external systems.
-Use CodeWiki call_graph.json to identify heavily-used execution paths.
 
-To find important flows from CodeWiki:
+Check CodeWiki module docs for additional sequence diagrams:
 ```bash
-# Find most-called functions (likely important)
-cat .codewiki-cache/call_graph.json | python3 -c "
-import json, sys
-from collections import Counter
-d = json.load(sys.stdin)
-call_counts = Counter()
-for rel in d.get('relationships', d.get('calls', [])):
-    call_counts[rel.get('callee')] += 1
-print('Most-called functions:')
-for func, count in call_counts.most_common(20):
-    print(f'  {func}: {count} callers')
-"
+grep -l "sequenceDiagram" docs/*.md
 ```
 
 Delete this comment when done.

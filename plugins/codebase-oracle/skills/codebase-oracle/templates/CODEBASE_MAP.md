@@ -1,9 +1,6 @@
 ---
 last_mapped: REPLACE_TIMESTAMP
 total_files: REPLACE_COUNT
-total_files_scanned: REPLACE_COUNT
-total_functions: REPLACE_COUNT
-total_classes: REPLACE_COUNT
 analysis_method: REPLACE_CODEWIKI_ORACLE_OR_ORACLE_ONLY
 confidence: REPLACE_LEVEL
 generated_docs:
@@ -20,9 +17,9 @@ codewiki_docs_available: REPLACE_YES_OR_NO
 Lead fills this section.
 
 IF CODEWIKI DOCS EXIST:
-1. Read docs/overview.md for the repository overview
-2. Extract the 2-3 sentence summary
-3. Note that this is from CodeWiki's LLM analysis
+1. Check for docs/*.md files (module documentation)
+2. Read the first paragraph of a key module doc for summary
+3. Note: overview.md may not exist - module docs are the primary source
 
 IF NO CODEWIKI:
 - Fill from c4-architecture.md System Context section
@@ -33,49 +30,59 @@ IF NO CODEWIKI:
 
 REPLACE: 2-3 sentence summary
 
-**Stack**: REPLACE: key technologies (language, framework, database, etc.)
-**Architecture**: REPLACE: pattern name (monolith, microservices, serverless, etc.)
+**Stack**: REPLACE: key technologies
+**Architecture**: REPLACE: pattern name
 **Analysis Method**: REPLACE: "CodeWiki + Oracle" or "Oracle-only"
 
 ## Source Documentation
 
 <!-- ORACLE:SOURCES
-List the documentation sources used for this analysis.
+List the documentation sources used.
 
-IF CODEWIKI DOCS EXIST:
-```
-ls -la docs/*.md | grep -v CODEBASE_MAP
-cat docs/metadata.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'Generated: {d[\"generation_info\"][\"timestamp\"]}'); print(f'Model: {d[\"generation_info\"][\"main_model\"]}')"
-```
+NOTE: CodeWiki outputs to docs/, NOT .codewiki-cache/
+- Module docs: docs/{module_name}.md
+- Module tree: docs/module_tree.json
+- metadata.json may NOT exist
+- overview.md may NOT exist (module name used instead)
 
-List CodeWiki-generated module docs:
-- overview.md (repository overview)
-- {module1}.md (module documentation)
-- {module2}.md (module documentation)
+```bash
+# List CodeWiki module docs
+ls docs/*.md | grep -v CODEBASE_MAP | grep -v c4 | grep -v key-flows | grep -v dependency
+
+# Check module tree
+ls docs/module_tree.json 2>/dev/null && echo "Module tree found"
+```
 -->
 
 **CodeWiki Documentation**: REPLACE_YES_OR_NO
 
 | Source | Description |
 |--------|-------------|
-| [CodeWiki Overview](overview.md) | LLM-generated repository overview |
-| [CodeWiki Modules](#) | REPLACE: list of module .md files |
+| [module_tree.json](module_tree.json) | Module structure |
+| REPLACE | REPLACE: list module .md files |
 
 ## Static Analysis Metrics
 
 <!-- ORACLE:METRICS
-Include this section based on analysis method used.
-
-IF CODEWIKI WAS USED:
-- Read docs/metadata.json for generation statistics
-- Read docs/module_tree.json for module/component counts
+From CodeWiki module_tree.json (in docs/):
 ```bash
-cat docs/metadata.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(json.dumps(d['statistics'], indent=2))"
-cat docs/module_tree.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'Modules: {len(d)}')"
+cat docs/module_tree.json | python3 -c "
+import json, sys
+tree = json.load(sys.stdin)
+total_comps = 0
+def count_comps(node):
+    global total_comps
+    for name, data in node.items():
+        total_comps += len(data.get('components', []))
+        if data.get('children'):
+            count_comps(data['children'])
+count_comps(tree)
+print(f'Modules: {len(tree)}')
+print(f'Components: {total_comps}')
+"
 ```
 
-IF TREE-SITTER WAS USED:
-- Metrics from .tree-sitter-results.json
+From Tree-sitter (if exists): docs/.tree-sitter-results.json
 -->
 
 | Metric | Count |
@@ -84,15 +91,12 @@ IF TREE-SITTER WAS USED:
 | Components | REPLACE |
 | Files Analyzed | REPLACE |
 
-**Analysis Source**: REPLACE (CodeWiki, Tree-sitter, or both)
+**Analysis Source**: REPLACE
 
 ## Architecture Docs
 
 <!-- ORACLE:DOC_INDEX
 Only include rows for docs that were actually generated.
-Remove rows for docs that were skipped.
-
-Include BOTH Oracle-generated docs AND CodeWiki docs.
 -->
 
 ### Oracle Analysis
@@ -101,39 +105,25 @@ Include BOTH Oracle-generated docs AND CodeWiki docs.
 |----------|-------------|
 | [C4 Architecture](c4-architecture.md) | System context, containers, components |
 | [Key Flows](key-flows.md) | Cross-module execution paths |
-| [Dependency Graph](dependency-graph.md) | Hub analysis, layer violations, blast radius |
-
-<!-- ORACLE:CONDITIONAL_DOCS
-Add these rows ONLY if the corresponding doc was generated:
-| [Data Model](data-model.md) | Entity relationships, schemas |
-| [API Surface](api-surface.md) | Routes, endpoints, auth |
-| [Product Requirements](product-requirements.md) | Features, user roles, business rules |
-| [Infrastructure](infrastructure.md) | Deployment, CI/CD, config |
--->
+| [Dependency Graph](dependency-graph.md) | Hub analysis, blast radius |
 
 ### CodeWiki Documentation (if available)
 
 <!-- ORACLE:CODEWIKI_DOCS
-List CodeWiki-generated module docs if they exist.
+List CodeWiki module docs:
 ```bash
-ls docs/*.md | grep -v CODEBASE_MAP | grep -v c4 | grep -v key-flows | grep -v dependency | grep -v data-model | grep -v api-surface | grep -v product | grep -v infrastructure
+ls docs/*.md | grep -v CODEBASE_MAP | grep -v c4 | grep -v key-flows | grep -v dependency
 ```
 -->
 
 | Document | Description |
 |----------|-------------|
-| [overview.md](overview.md) | Repository overview |
-| REPLACE | REPLACE: list other module docs |
+| REPLACE | REPLACE: module .md files |
 
 ## Hub Files
 
 <!-- ORACLE:HUBS
-Lead fills this from dependency-graph.md Hub Analysis table.
-
-PRIMARY METHOD - Use CodeWiki module_tree.json if available:
-- Count how many modules reference each component
-- Components referenced by 3+ modules are hubs
-
+From CodeWiki module_tree.json (in docs/, NOT .codewiki-cache/):
 ```bash
 cat docs/module_tree.json | python3 -c "
 import json, sys
@@ -145,17 +135,16 @@ def count_refs(node):
     for name, data in node.items():
         for comp in data.get('components', []):
             component_refs[comp] += 1
-        if 'children' in data:
+        if data.get('children'):
             count_refs(data['children'])
 
 count_refs(tree)
+print('Hub components (2+ modules):')
 for comp, count in component_refs.most_common(10):
-    if count >= 3:
-        print(f'{comp}: {count} module refs')
+    if count >= 2:
+        print(f'  {comp}: {count} modules')
 "
 ```
-
-FALLBACK - Use Tree-sitter hubs or Grep import counting.
 -->
 
 | Package | Dependents | Stability | Risk |
@@ -165,37 +154,27 @@ FALLBACK - Use Tree-sitter hubs or Grep import counting.
 ## Module Guide
 
 <!-- ORACLE:MODULES
-Lead fills this from module_tree.json and CodeWiki module docs.
+From docs/module_tree.json and docs/{module}.md files.
 
-IF CODEWIKI DOCS EXIST:
-- Use module_tree.json for structure
-- Read each {module}.md for purpose/description
-- Cross-reference with Oracle analysis
-
-Create one subsection per top-level module.
-For each module: purpose, layer, key files, link to CodeWiki doc.
+```bash
+cat docs/module_tree.json | python3 -c "
+import json, sys
+tree = json.load(sys.stdin)
+for name, data in tree.items():
+    print(f'{name}: {len(data.get(\"components\", []))} components')
+"
+```
 -->
 
 ### REPLACE: Module Name
 
 **Purpose**: REPLACE (from CodeWiki module doc if available)
 **Layer**: REPLACE
-**Entry point**: REPLACE
 **Detailed docs**: [{module}.md]({module}.md) (CodeWiki)
 
 | Directory | Purpose | Layer |
 |-----------|---------|-------|
 | REPLACE | REPLACE | REPLACE |
-
-## Navigation Guide
-
-<!-- ORACLE:NAVIGATION
-Lead fills this from module structure and api-surface.md patterns.
-Common developer tasks and which files to touch.
-Include links to relevant CodeWiki module docs.
--->
-
-REPLACE: task-to-files mapping
 
 ## Confidence Assessment
 
@@ -210,8 +189,7 @@ Overall: REPLACE_BAR REPLACE_PERCENTAGE%
 ## △ Caveats
 
 <!-- ORACLE:CAVEATS
-Include this section if overall confidence < 5.
-List assumptions made and gaps in analysis.
+If confidence < 5, list assumptions and gaps.
 -->
 
-REPLACE: assumptions and gaps (delete section if confidence = 5)
+REPLACE: assumptions and gaps (delete if confidence = 5)
