@@ -1,7 +1,7 @@
 {
   "name": "remove-bg",
   "description": "Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "aiocean"
   },

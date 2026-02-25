@@ -1,6 +1,6 @@
 ---
 name: react-minimal-effects
-description: Minimize useEffect in React 19. Use when seeing multiple useEffect, derived state via effect+setState, effect chains, or polling. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns.
+description: This skill should be used when the user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop. Provides proper patterns to minimize useEffect usage in React 19.
 author: Claude Code
 version: 3.0.0
 date: 2025-01-20

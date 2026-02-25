@@ -1,6 +1,6 @@
 ---
 name: golangci-lint
-description: Run golangci-lint efficiently on Go projects. Lint only changed code, fix v2 config issues, handle common warnings. Use when linting Go code, seeing golangci-lint errors, or user asks to "lint changed code", "lint PR", "fix lint errors".
+description: This skill should be used when the user asks to "lint Go code", "lint changed code", "lint PR", "fix lint errors", "fix golangci-lint config", or mentions golangci-lint, Go linting. Efficiently lints only changed code, fixes v2 config issues, and handles common warnings.
 ---
 
 # golangci-lint

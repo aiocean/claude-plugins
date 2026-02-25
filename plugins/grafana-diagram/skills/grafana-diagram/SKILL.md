@@ -1,10 +1,9 @@
 ---
 name: grafana-diagram
 description: |
-  Guide for using grafana-diagram plugin (jdbranham-diagram-panel) to create Mermaid diagrams in Grafana dashboards.
-  Use when creating flowcharts, sequence diagrams, gantt charts, state diagrams, ER diagrams, user journey diagrams,
-  or when user asks about "grafana diagram", "mermaid in grafana", "diagram panel", "binding data to diagram nodes",
-  "grafana mermaid widget", "dynamic diagram", "data-driven diagram", or needs to visualize metrics as colored nodes.
+  This skill should be used when the user asks about "grafana diagram", "mermaid in grafana", "diagram panel", "binding data to diagram nodes",
+  "grafana mermaid widget", "dynamic diagram", "data-driven diagram", or needs to create flowcharts, sequence diagrams, gantt charts, state
+  diagrams, ER diagrams, or user journey diagrams in Grafana dashboards. Guide for using the jdbranham-diagram-panel plugin with data binding.
 ---
 
 # Grafana Diagram Plugin Guide

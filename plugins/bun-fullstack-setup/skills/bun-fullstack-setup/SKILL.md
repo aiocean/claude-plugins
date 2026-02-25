@@ -1,6 +1,6 @@
 ---
 name: bun-fullstack-setup
-description: Setup Bun server serving both API and static frontend on single port. Use when creating fullstack apps, setting up monorepo, configuring Docker for Bun, or user mentions single port, Bun server, Vite proxy, fullstack Bun.
+description: This skill should be used when the user asks to "create a fullstack app", "setup Bun server", "configure single port server", "add Vite proxy", "setup monorepo", "configure Docker for Bun", or mentions fullstack Bun, single port, Bun server, Vite proxy.
 ---
 
 # Bun Fullstack Setup

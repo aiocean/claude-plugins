@@ -1,6 +1,6 @@
 ---
 name: jira
-description: Interact with Jira through MCP tools for issue lifecycle management. Use when user mentions jira, issue, sprint, bug, story, task, transition, jql, or asks to create/update/search issues, add comments, manage sprints, link issues, or track time.
+description: This skill should be used when the user asks to "create a Jira issue", "search issues", "update issue status", "add comment", "manage sprint", "link issues", "track time", or mentions jira, jql, sprint, story, epic, bug. Provides Jira operations through MCP tools for issue lifecycle management.
 ---
 
 # Jira MCP Integration

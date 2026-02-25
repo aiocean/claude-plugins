@@ -1,6 +1,6 @@
 ---
 name: neobrutalism
-description: Apply neobrutalism design patterns to web UI. Bold borders, hard shadows, vibrant colors, no gradients. Use when creating buttons, cards, forms, interactive elements with raw high-contrast aesthetic, or user mentions brutalist, bold design, hard shadows.
+description: This skill should be used when the user asks to "apply neobrutalism", "create brutalist design", "add bold borders", "use hard shadows", or mentions neobrutalism, brutalist, bold design, high-contrast aesthetic. Provides neobrutalism design patterns with bold borders, hard shadows, vibrant colors, and no gradients.
 ---
 
 # Neobrutalism Design System
