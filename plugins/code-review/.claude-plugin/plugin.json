@@ -1,0 +1,8 @@
+{
+  "name": "code-review",
+  "description": "Comprehensive code review with static analytics. Runs CodeWiki static analysis first, then feeds dependency graphs, metrics, and codebase structure to parallel review agents for evidence-backed findings.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}
