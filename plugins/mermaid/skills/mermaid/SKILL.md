@@ -1,6 +1,6 @@
 ---
-name: mimaid
-description: This skill should be used when the user asks to "share a mermaid diagram", "generate diagram URL", "create diagram link", or mentions mimaid, minimalmermaid, shareable mermaid. Generates shareable MinimalMermaid diagram URLs using LZ-String compression.
+name: mermaid
+description: This skill should be used when the user asks to "share a mermaid diagram", "generate diagram URL", "create diagram link", or mentions mermaid, minimalmermaid, shareable mermaid. Generates shareable MinimalMermaid diagram URLs using LZ-String compression.
 ---
 
 # MinimalMermaid URL Generator
