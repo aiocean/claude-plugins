@@ -1,6 +1,6 @@
 ---
 name: monitoring-observability
-description: Monitoring and observability strategy, implementation, and troubleshooting. Use for designing metrics/logs/traces systems, setting up Prometheus/Grafana/Loki, creating alerts and dashboards, calculating SLOs and error budgets, analyzing performance issues, and comparing monitoring tools (Datadog, ELK, CloudWatch). Covers the Four Golden Signals, RED/USE methods, OpenTelemetry instrumentation, log aggregation patterns, and distributed tracing.
+description: This skill should be used when the user asks to "set up monitoring", "design metrics", "create alerts", "build dashboards", "calculate SLOs", "analyze performance", "compare monitoring tools", "migrate from Datadog", or mentions Prometheus, Grafana, Loki, OpenTelemetry, Four Golden Signals, RED/USE methods, error budgets, distributed tracing.
 ---
 
 # Monitoring & Observability

@@ -1,6 +1,6 @@
 {
   "name": "jira-mcp",
   "description": "Interact with Jira using MCP tools for issue management, sprint tracking, comments, and workflow transitions",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "aiocean"
 }

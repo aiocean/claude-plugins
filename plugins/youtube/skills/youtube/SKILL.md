@@ -1,6 +1,6 @@
 ---
 name: youtube
-description: Search YouTube and extract video transcripts using yt-dlp. Use when user mentions YouTube, video search, transcript, subtitles, captions, summarize video, or provides youtube.com/youtu.be URLs.
+description: This skill should be used when the user asks to "search YouTube", "get video transcript", "summarize video", "extract subtitles", or mentions YouTube, video search, captions, yt-dlp, or provides youtube.com/youtu.be URLs.
 ---
 
 # YouTube

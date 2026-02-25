@@ -1,6 +1,6 @@
 ---
 name: epub-packing
-description: Generate professional EPUB ebooks from Markdown files with auto-generated covers and embedded images. Use when creating ebooks, converting Markdown to EPUB, packaging web articles for offline reading, or user mentions epub, ebook, e-reader, kindle.
+description: This skill should be used when the user asks to "create an ebook", "convert Markdown to EPUB", "generate EPUB", "package articles for offline reading", or mentions epub, ebook, e-reader, kindle. Generates professional EPUB ebooks from Markdown with auto-generated neo-brutalism covers and embedded images.
 ---
 
 # EPUB Generator Skill

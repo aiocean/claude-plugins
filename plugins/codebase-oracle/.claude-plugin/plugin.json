@@ -1,7 +1,7 @@
 {
   "name": "codebase-oracle",
   "description": "Comprehensive codebase analysis and visualization with CodeWiki integration: architecture documentation (C4 diagrams, ERD, API maps, dependency graphs) and interactive HTML playgrounds. Uses CodeWiki for LLM-powered analysis when available, with Tree-sitter fallback. Specialized analyst teams produce multi-document docs with Mermaid diagrams.",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "author": {
     "name": "aiocean"
   }

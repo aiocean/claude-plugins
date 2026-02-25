@@ -1,6 +1,6 @@
 ---
 name: mental-models
-description: Comprehensive mental models framework with 50+ models. Use when facing complex decisions, problem-solving, debugging, system design, strategic thinking, or need structured reasoning. Covers first principles, second-order thinking, inversion, feedback loops, and more.
+description: This skill should be used when the user faces complex decisions, problem-solving, debugging, system design, strategic thinking, or needs structured reasoning. Comprehensive mental models framework with 50+ models covering first principles, second-order thinking, inversion, feedback loops, and more.
 ---
 
 # The Great Mental Models - Complete Reference

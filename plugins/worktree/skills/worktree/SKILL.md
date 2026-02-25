@@ -1,6 +1,6 @@
 ---
 name: worktree
-description: Manage git worktrees for parallel development. Create worktrees, sync commits, preview with spotlight, cleanup. Use when working on multiple features simultaneously, running parallel AI agents, or user mentions worktree, spotlight, sync commits.
+description: This skill should be used when the user asks to "create a worktree", "sync worktree", "spotlight preview", "manage worktrees", "parallel development", or mentions worktree, spotlight, sync commits. Manages git worktrees for parallel development workflows.
 ---
 
 # Git Worktree Management

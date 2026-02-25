@@ -1,6 +1,6 @@
 ---
 name: claude-manager
-description: Enable/disable skills and agents based on project context. Use when user says manage skills, disable skills, enable skills, reduce skill clutter, analyze usage, or starting work on specific project type (frontend, backend, data, ai).
+description: This skill should be used when the user asks to "manage skills", "disable skills", "enable skills", "reduce skill clutter", "analyze usage", "apply preset", or mentions starting work on a specific project type (frontend, backend, data, ai).
 ---
 
 # Claude Manager

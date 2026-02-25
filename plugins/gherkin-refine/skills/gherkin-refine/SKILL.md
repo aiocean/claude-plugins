@@ -1,6 +1,6 @@
 ---
 name: gherkin-refine
-description: Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation. Use when requests are unclear, have multiple interpretations, need requirement confirmation, or user mentions gherkin, BDD, acceptance criteria.
+description: This skill should be used when the user asks to "refine requirements", "write acceptance criteria", "clarify requirements", "use gherkin format", or mentions gherkin, BDD, Given/When/Then. Refines ambiguous requests into structured Gherkin format before implementation.
 ---
 
 # gherkin-refine
