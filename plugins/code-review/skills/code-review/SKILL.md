@@ -72,6 +72,8 @@ Spawn specialized review agents in parallel. Each agent receives:
 | `quality-reviewer` | sonnet | Logic defects, complexity, anti-patterns, SOLID | Module structure to assess coupling and cohesion |
 | `performance-reviewer` | sonnet | Hotspots, N+1, memory, latency | Dependency graphs to find hot paths and bottlenecks |
 | `api-reviewer` | sonnet | API contracts, versioning, breaking changes | Module boundaries to check contract violations |
+| `code-simplifier` | sonnet | Clarity, consistency, maintainability, simplification | Module structure to identify over-engineered areas |
+| `feature-dev:code-reviewer` | sonnet | Bugs, logic errors, security vulnerabilities, project conventions | Dependency graphs to trace code paths and adherence to patterns |
 
 #### Agent Prompt Template
 
@@ -123,6 +125,12 @@ Task(subagent_type="oh-my-claudecode:performance-reviewer", model="sonnet",
 
 Task(subagent_type="oh-my-claudecode:api-reviewer", model="sonnet",
   prompt="<analytics context>\n\nReview these files for API contracts: {files}")
+
+Task(subagent_type="oh-my-claudecode:code-simplifier", model="sonnet",
+  prompt="<analytics context>\n\nReview these files for clarity, consistency, and simplification opportunities: {files}")
+
+Task(subagent_type="feature-dev:code-reviewer", model="sonnet",
+  prompt="<analytics context>\n\nReview these files for bugs, logic errors, security vulnerabilities, and adherence to project conventions: {files}")
 ```
 
 ### Phase 4: Synthesize Report
