@@ -5,9 +5,12 @@ description: This skill should be used when the user asks to "search YouTube", "
 
 # YouTube
 
-Scripts location: `~/.claude/skills/youtube/scripts/`
+Before calling any script, resolve the scripts directory (version may vary):
+```bash
+YT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/youtube/*/skills/youtube/scripts | sort -V | tail -1)"
+```
 
-Call scripts with full path: `~/.claude/skills/youtube/scripts/yt-search "query"`
+Then call scripts as: `$YT/yt-search "query"`
 
 ## Scripts
 
@@ -24,21 +27,24 @@ Call scripts with full path: `~/.claude/skills/youtube/scripts/yt-search "query"
 ## Quick Examples
 
 ```bash
+# Resolve scripts path first
+YT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/youtube/*/skills/youtube/scripts | sort -V | tail -1)"
+
 # Search
-yt-search "react hooks tutorial" 10
-yt-search "typescript 2025" --date
+$YT/yt-search "react hooks tutorial" 10
+$YT/yt-search "typescript 2025" --date
 
 # Get transcript
-yt-transcript "https://youtube.com/watch?v=xxx"
+$YT/yt-transcript "https://youtube.com/watch?v=xxx"
 # Then read /tmp/transcript-clean.txt
 
 # Video info
-yt-meta "URL" --full
-yt-chapters "URL"
+$YT/yt-meta "URL" --full
+$YT/yt-chapters "URL"
 
 # Channel/Playlist
-yt-channel "@ThePrimeagen" 5
-yt-playlist "PLAYLIST_URL" --duration
+$YT/yt-channel "@ThePrimeagen" 5
+$YT/yt-playlist "PLAYLIST_URL" --duration
 ```
 
 ## Use Cases
@@ -46,8 +52,8 @@ yt-playlist "PLAYLIST_URL" --duration
 ### Summarize Video Before Watching
 
 ```bash
-yt-meta "URL"
-yt-transcript "URL"
+$YT/yt-meta "URL"
+$YT/yt-transcript "URL"
 # Read /tmp/transcript-clean.txt, provide:
 # - Main topic, Key points (3-5), Who should watch, Skip recommendation
 ```
@@ -55,25 +61,25 @@ yt-transcript "URL"
 ### Research a Topic
 
 ```bash
-yt-search "topic" 5
+$YT/yt-search "topic" 5
 # Pick 2-3 relevant videos, get transcripts
-yt-transcript "URL1"
-yt-transcript "URL2"
+$YT/yt-transcript "URL1"
+$YT/yt-transcript "URL2"
 # Synthesize: consensus points, different perspectives, recommended deep-dive
 ```
 
 ### Extract Tutorial Steps
 
 ```bash
-yt-chapters "URL"
-yt-transcript "URL"
+$YT/yt-chapters "URL"
+$YT/yt-transcript "URL"
 # Extract: Prerequisites, Step-by-step instructions, Common mistakes, Tips
 ```
 
 ### Compare Multiple Videos
 
 ```bash
-yt-search "controversial topic" 8
+$YT/yt-search "controversial topic" 8
 # Get transcripts from different viewpoints
 # Present: Position A, Position B, Disagreements, Agreements
 ```
@@ -81,9 +87,9 @@ yt-search "controversial topic" 8
 ### Programming Tutorial
 
 ```bash
-yt-meta "URL" --full
-yt-links "URL" --github
-yt-transcript "URL"
+$YT/yt-meta "URL" --full
+$YT/yt-links "URL" --github
+$YT/yt-transcript "URL"
 # Extract: Code blocks, Dependencies, Config steps
 ```
 
