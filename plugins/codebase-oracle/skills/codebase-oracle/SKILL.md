@@ -127,15 +127,40 @@ docs/
 | "Enhance existing docs" / "Fix docs" | Phase 2-5 (validate then rewrite) |
 | "Quick check" / "Is this up to date?" | Phase 2 only |
 
-### Phase 0: Run CodeWiki (if not done)
+### Phase 0: Run CodeWiki (MANDATORY first step)
+
+**You MUST run CodeWiki before any manual analysis.** Do not skip this step. Do not substitute with manual file reading. CodeWiki generates LLM-powered module documentation that Oracle then corrects and enhances.
 
 ```bash
-# Check if CodeWiki docs exist
+# Check if CodeWiki docs already exist and are recent
 ls docs/*.md docs/module_tree.json 2>/dev/null
 
-# If not, run CodeWiki first
-codewiki generate --output docs/
+# If docs don't exist OR user requested fresh analysis → run CodeWiki
+codewiki generate --use-agent-sdk --verbose --no-cache
+
+# If docs exist and user just wants to update/enhance → still run with cache
+codewiki generate --use-agent-sdk --verbose
 ```
+
+**Flags explained:**
+- `--use-agent-sdk`: Uses Claude agent SDK for higher-quality module docs
+- `--verbose`: Shows progress so user can track generation
+- `--no-cache`: Forces fresh analysis (use when no docs exist or docs are stale)
+
+**When to use `--no-cache`:**
+- First run (no existing docs)
+- User explicitly asks for fresh/full analysis
+- Code has changed significantly since last run
+
+**When to skip `--no-cache`:**
+- Docs exist and user wants incremental update
+- User says "enhance docs" or "fix docs" (existing CodeWiki output is fine)
+
+**If `codewiki` is not installed**, inform the user:
+```
+CodeWiki is required. Install with: pip install codewiki
+```
+Do NOT proceed with manual analysis as a substitute — CodeWiki's LLM-generated docs are the foundation Oracle builds on.
 
 ### Phase 1: Scope and Claim Inventory
 
@@ -474,8 +499,10 @@ docs/
 
 ## Troubleshooting
 
-**No CodeWiki docs:** Run `codewiki generate --output docs/` first
+**No CodeWiki docs:** Oracle MUST run `codewiki generate --use-agent-sdk --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
 
-**Validation failures:** Check if code changed since CodeWiki run
+**`codewiki` not found:** User needs to install: `pip install codewiki`
 
-**Many discrepancies:** Re-run CodeWiki with `--no-cache`
+**Validation failures:** Code likely changed since CodeWiki run. Re-run: `codewiki generate --use-agent-sdk --verbose --no-cache`
+
+**Many discrepancies:** Re-run CodeWiki with `--no-cache` to get fresh LLM analysis, then Oracle corrects remaining issues.
