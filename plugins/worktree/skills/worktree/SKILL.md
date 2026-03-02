@@ -9,7 +9,12 @@ Manages git worktrees for parallel development workflows.
 
 ## Available Scripts
 
-All scripts are in `~/.claude/skills/worktree/`:
+Before calling any script, resolve the scripts directory (version may vary):
+```bash
+WT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/worktree/*/skills/worktree 2>/dev/null | sort -V | tail -1)"
+```
+
+Then call scripts as `$WT/script-name`.
 
 | Script                         | Purpose                              |
 | ------------------------------ | ------------------------------------ |
@@ -27,7 +32,7 @@ All scripts are in `~/.claude/skills/worktree/`:
 ### 1. Create Worktree
 
 ```bash
-~/.claude/skills/worktree/worktree-create.sh <name> [source_ref]
+$WT/worktree-create.sh <name> [source_ref]
 
 # Examples:
 worktree-create.sh feature-login          # from HEAD
@@ -45,7 +50,7 @@ Sync worktree with parent branch. Both end up at the same commit with same hash.
 
 ```bash
 # From within worktree directory
-~/.claude/skills/worktree/worktree-sync.sh
+$WT/worktree-sync.sh
 ```
 
 **How it works:**
@@ -79,7 +84,7 @@ Preview worktree changes in main repo with hot reload. One-way sync, temporary.
 
 ```bash
 # Run in background from MAIN repo
-~/.claude/skills/worktree/worktree-spotlight.sh <worktree_path> . [excludes...]
+$WT/worktree-spotlight.sh <worktree_path> . [excludes...]
 
 # Example:
 worktree-spotlight.sh ../myrepo--wtr-feature . node_modules dist .env
@@ -102,7 +107,7 @@ worktree-spotlight.sh ../myrepo--wtr-feature . node_modules dist .env
 ### 4. Remove Worktree
 
 ```bash
-~/.claude/skills/worktree/worktree-remove.sh <path_or_name>
+$WT/worktree-remove.sh <path_or_name>
 
 # Examples:
 worktree-remove.sh ../myrepo--wtr-feature  # by path

@@ -17,17 +17,22 @@ description: This skill should be used when the user asks to "reflect on session
 
 ## Quick Start
 
-Run from the skill directory (`~/.claude/skills/reflect/` or wherever installed):
+Before calling any script, resolve the scripts directory (version may vary):
+```bash
+RF="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/reflect/*/skills/reflect/scripts 2>/dev/null | sort -V | tail -1)"
+```
+
+Then call scripts as `bun run $RF/script-name`:
 
 ```bash
 # Extract last 5 sessions with diary summary
-bun run scripts/extract-session.ts <project-path> --last 5 --diary
+bun run $RF/extract-session.ts <project-path> --last 5 --diary
 
 # Full extraction with thinking blocks
-bun run scripts/extract-session.ts <project-path> --last 5 --verbose
+bun run $RF/extract-session.ts <project-path> --last 5 --verbose
 
 # JSON output for further processing
-bun run scripts/extract-session.ts <project-path> --last 5 --json
+bun run $RF/extract-session.ts <project-path> --last 5 --json
 ```
 
 ## Workflow
@@ -38,7 +43,7 @@ bun run scripts/extract-session.ts <project-path> --last 5 --json
 2. Get target project path (or use current directory)
 3. Verify sessions exist:
    ```bash
-   bun run scripts/get-project-path.ts <path> --check
+   bun run $RF/get-project-path.ts <path> --check
    ```
 4. Check for unprocessed sessions:
    ```bash
@@ -50,7 +55,7 @@ bun run scripts/extract-session.ts <project-path> --last 5 --json
 ### Phase 2: Extract Sessions
 
 ```bash
-bun run scripts/extract-session.ts <project-folder> --last N --verbose
+bun run $RF/extract-session.ts <project-folder> --last N --verbose
 ```
 
 Output includes:
@@ -310,7 +315,7 @@ date: [YYYY-MM-DD]
 **Save locations:**
 
 - Project-specific: `.claude/skills/[name]/SKILL.md`
-- User-wide: `~/.claude/skills/[name]/SKILL.md`
+- User-wide: `~/.claude/plugins/cache/aiocean-plugins/[name]/*/skills/[name]/SKILL.md`
 
 ## Scripts Reference
 

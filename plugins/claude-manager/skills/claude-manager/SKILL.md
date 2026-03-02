@@ -9,8 +9,13 @@ Manages skills, agents, and provides usage analytics to optimize Claude Code wor
 
 ## Script
 
+Before calling any script, resolve the scripts directory (version may vary):
 ```bash
-~/.claude/skills/claude-manager/manage.sh [command] [args]
+CM="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/claude-manager/*/skills/claude-manager 2>/dev/null | sort -V | tail -1)"
+```
+
+```bash
+$CM/manage.sh [command] [args]
 ```
 
 | Command          | Example                                    | Description                  |
@@ -25,12 +30,12 @@ Manages skills, agents, and provides usage analytics to optimize Claude Code wor
 | `enable`         | `manage.sh enable youtube`                 | Enable skills (shortcut)     |
 | `disable`        | `manage.sh disable shopify`                | Disable skills (shortcut)    |
 | `preset`         | `manage.sh preset frontend`                | Apply a preset configuration |
-| `detect`         | `manage.sh detect`                         | Auto-detect project type     |
-| `usage`          | `manage.sh usage`                          | Full usage analytics report  |
+| `detect`         | `$CM/manage.sh detect`                         | Auto-detect project type     |
+| `usage`          | `$CM/manage.sh usage`                          | Full usage analytics report  |
 
 ## Usage Report
 
-Run `manage.sh usage` for comprehensive analytics:
+Run `$CM/manage.sh usage` for comprehensive analytics:
 
 - **Skills usage**: Invocation count from `/skill-name` history
 - **Agents usage**: Session count with agent invocations from transcripts
@@ -54,22 +59,22 @@ Run `manage.sh usage` for comprehensive analytics:
 
 ```bash
 # Check current state
-~/.claude/skills/claude-manager/manage.sh status
+$CM/manage.sh status
 
 # Analyze actual usage patterns
-~/.claude/skills/claude-manager/manage.sh usage
+$CM/manage.sh usage
 
 # Apply preset for frontend work
-~/.claude/skills/claude-manager/manage.sh preset frontend
+$CM/manage.sh preset frontend
 
 # Disable specific unused skills
-~/.claude/skills/claude-manager/manage.sh disable shopify-listing epub-packing
+$CM/manage.sh disable shopify-listing epub-packing
 
 # Disable specific agents
-~/.claude/skills/claude-manager/manage.sh agents disable vue-lint-fixer
+$CM/manage.sh agents disable vue-lint-fixer
 
 # Re-enable everything
-~/.claude/skills/claude-manager/manage.sh preset all
+$CM/$CM/manage.sh preset all
 ```
 
 **Note:** Restart Claude Code after changes to apply.
@@ -80,28 +85,28 @@ Run `manage.sh usage` for comprehensive analytics:
 
 ```bash
 # Check what's actually being used
-manage.sh usage
+$CM/manage.sh usage
 
 # Apply minimal preset
-manage.sh preset minimal
+$CM/manage.sh preset minimal
 
 # Enable only what you need
-manage.sh enable youtube mental-models
+$CM/manage.sh enable youtube mental-models
 ```
 
 ### "Starting a new project type"
 
 ```bash
 # Auto-detect and suggest preset
-manage.sh detect
+$CM/manage.sh detect
 
 # Or manually apply
-manage.sh preset backend
+$CM/manage.sh preset backend
 ```
 
 ### "Want to see everything available"
 
 ```bash
-manage.sh preset all
-manage.sh status
+$CM/manage.sh preset all
+$CM/manage.sh status
 ```

@@ -7,14 +7,19 @@ description: This skill should be used when the user asks to "remove background"
 
 Remove image backgrounds using threshold (fast, for mono/simple images) or rembg AI (complex images). Automatically trims transparent edges.
 
+Before calling any script, resolve the scripts directory (version may vary):
+```bash
+RB="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/remove-bg/*/skills/remove-bg 2>/dev/null | sort -V | tail -1)"
+```
+
 ## Quick start
 
 ```bash
 # Simple/mono images (threshold-based)
-python3 ~/.claude/skills/remove-bg/remove_bg.py image.png
+python3 $RB/remove_bg.py image.png
 
 # Complex images (AI-based with rembg)
-python3 ~/.claude/skills/remove-bg/remove_bg.py image.jpg --rembg
+python3 $RB/remove_bg.py image.jpg --rembg
 ```
 
 Output: `{filename}-transparent.png` in same directory.
