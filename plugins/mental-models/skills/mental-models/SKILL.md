@@ -10,20 +10,25 @@ description: This skill should be used when the user faces complex decisions, pr
 
 ## List Available Models
 
-Use the script to browse and search models:
+Before calling any script, resolve the scripts directory (version may vary):
+```bash
+MM="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/mental-models/*/skills/mental-models/scripts 2>/dev/null | sort -V | tail -1)"
+```
+
+Then use the script to browse and search models:
 
 ```bash
 # List all 54 models grouped by volume
-~/.claude/skills/mental-models/scripts/list-models.sh
+$MM/list-models.sh
 
 # Filter by volume (1-4)
-~/.claude/skills/mental-models/scripts/list-models.sh --volume 1
+$MM/list-models.sh --volume 1
 
 # Search by keyword
-~/.claude/skills/mental-models/scripts/list-models.sh --search "thinking"
+$MM/list-models.sh --search "thinking"
 
 # Quick count
-~/.claude/skills/mental-models/scripts/list-models.sh --count
+$MM/list-models.sh --count
 ```
 
 **Volumes:**

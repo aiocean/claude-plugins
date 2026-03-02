@@ -1,7 +1,7 @@
 {
   "name": "worktree",
   "description": "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "aiocean"
   },
