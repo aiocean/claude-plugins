@@ -136,6 +136,13 @@
       "description": "Comprehensive code review with static analytics. Runs CodeWiki analysis-only mode first to generate dependency graphs, metrics, and module maps, then feeds this data to parallel review agents for evidence-backed findings with blast radius assessment.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "xstate-v5-strict",
+      "source": "./plugins/xstate-v5-strict",
+      "description": "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCallback, fromObservable, fromTransition), invoke vs spawnChild, and React integration.",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
