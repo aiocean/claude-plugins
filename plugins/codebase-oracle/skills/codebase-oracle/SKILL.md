@@ -56,6 +56,47 @@ Docs are "meaningful" only when they answer:
 
 If a section only describes structure without decision guidance, it is incomplete.
 
+## Writing Quality Standards
+
+Architecture docs must be **clear, scannable, and decision-useful**. Full guide: [references/writing-quality.md](references/writing-quality.md).
+
+### Prose Rules (apply during Phase 4 rewrite)
+
+1. **Active voice.** "The handler validates input" not "Input is validated by the handler."
+2. **Present tense.** "The service returns JSON" not "The service will return JSON."
+3. **Lead with the point.** First sentence = main idea. Support follows.
+4. **Short sentences.** Under 25 words. Split at natural breaking points.
+5. **Concrete over abstract.** "3 Lambda functions with 30s timeout" not "several serverless functions."
+6. **Conditions before instructions.** "To enable caching, set `CACHE_TTL`" not "Set `CACHE_TTL` to enable caching."
+7. **Define terms on first use.** "The circuit breaker (stops cascading failures) trips after 5 errors."
+
+### Word Choice
+
+- **Use**: "use" not "utilize", "start" not "initiate", "to" not "in order to"
+- **Never**: "simply", "just", "easily", "obviously", "note that", "there is/are" as opener
+- **Cut weasel words**: replace "some", "many", "various" with exact numbers
+- **Modal precision**: "can" = ability, "should" = recommendation, "must" = requirement
+- **Consistency**: one term per concept everywhere — don't alternate "service"/"handler"/"processor"
+
+### Structure Rules
+
+- **One H1 per document**, heading levels increment by one, sentence case
+- **Always specify language** in fenced code blocks
+- **Descriptive link text** — "See [API surface docs](api-surface.md)" not "click here"
+- **No screenshots of text** — use code blocks for CLI output, configs, errors
+- **Numbered lists** for sequences, **bullet lists** for non-sequential items
+
+### Anti-pattern Quick Reference
+
+| Anti-pattern | Fix |
+|---|---|
+| Wall of text without headings | Break into short paragraphs with descriptive headings |
+| Describing what without why | Add design rationale and trade-off context |
+| Generic ("handles business logic") | Be specific: what inputs, outputs, side effects |
+| Burying critical info | Lead with the point — most important fact first |
+| Hedging ("might cause issues") | Be direct, or use Unknown protocol if uncertain |
+| Inconsistent terminology | Pick one term, use everywhere, define on first use |
+
 ## Integration Architecture
 
 ### Consolidated + Cross-Validation Model
@@ -346,11 +387,16 @@ This is the core phase. For each module doc, **rewrite the file** to produce one
 - **Infrastructure Context** (Lambda config, IAM, VPC) near deployment/runtime sections
 - **Unknowns** at the end — things Oracle couldn't verify with concrete next steps
 
-**Step 4: Editorial cleanup.**
-1. Remove duplicated statements
-2. Remove generic language without evidence
-3. Ensure each section answers "so what?" for the target audience
-4. Keep the doc readable as a single coherent document — no "CodeWiki section" vs "Oracle section" split
+**Step 4: Writing quality pass.** Apply [Writing Quality Standards](#writing-quality-standards):
+1. Active voice, present tense, short sentences (under 25 words)
+2. Lead with the point — first sentence of each paragraph states the main idea
+3. Replace vague language with specifics: exact counts, concrete names, measured values
+4. Cut filler words: "simply", "just", "note that", "there is/are", weasel words
+5. Consistent terminology — same concept = same word throughout
+6. Each section answers "so what?" for the target audience
+7. One coherent document — no "CodeWiki section" vs "Oracle section" split
+8. Heading hierarchy: sentence case, levels increment by one, no trailing punctuation
+9. Scrub sensitive data: replace real webhook URLs, bot tokens, API keys, personal names from git config, and `/Users/username/...` paths with generic placeholders
 
 **Step 5: Append compact Oracle metadata footer.**
 
@@ -376,6 +422,16 @@ Generate `CODEBASE_MAP.md` as the index of all enhanced module docs and include:
 - Top risky hubs
 - Most critical unknowns
 - Priority recommendations for next engineering work
+
+**Multi-diagram architecture section.** Include separate Mermaid diagrams for each concern (see [references/architecture-analysis.md](references/architecture-analysis.md) for templates):
+
+1. **C4 Context** — system boundary, users, external dependencies
+2. **Module/domain relationships** — internal component ownership and communication
+3. **Infrastructure topology** — where things run (Lambda, containers, databases, queues)
+4. **Key data flows** — sequence diagrams for critical request paths
+5. **Dependency graph** — hub nodes highlighted, blast radius annotated
+
+Do not flatten everything into a single overview diagram. Each diagram answers a different question.
 
 ## Cross-Validation Logic
 
@@ -451,6 +507,8 @@ Use these checks to keep docs meaningful over time:
 3. **Unknown discipline**: fail if uncertainty is implied but no `Unknowns` section exists.
 4. **Drift check**: if module files changed, corresponding module docs must be updated.
 5. **No validation report anti-pattern**: fail if doc has a large `## Oracle Validation` section with claim tables — content should be integrated inline.
+6. **Writing quality**: no "simply"/"just"/"easily"/"obviously" in docs. No weasel words ("some", "many", "various") without specifics. All code blocks specify language. Headings in sentence case.
+7. **Sensitive data**: no webhook URLs, API keys, bot tokens, personal names from git config, internal server names, or file paths containing usernames (`/Users/username/...`, `/home/username/...`). Replace with placeholders like `<YOUR_WEBHOOK_URL>`, `<BOT_TOKEN>`, `your-username`.
 
 Run bundled checker (recommended):
 
@@ -480,6 +538,15 @@ rg -n "### Unknowns" docs/*.md
 
 # 4) Should NOT have the old "Oracle Validation" report pattern
 ! rg -n "## Oracle Validation" docs/*.md
+
+# 5) No filler/weasel words
+! rg -wn "simply|obviously|easily" docs/*.md
+# Should not find unqualified weasel words
+rg -wn "some\b|many\b|various\b|several\b" docs/*.md
+
+# 6) No sensitive data leakage
+! rg -in "webhook.*https?://|bot.*token|api[_-]?key" docs/*.md
+! rg -n "/Users/[a-zA-Z]|/home/[a-zA-Z]" docs/*.md
 ```
 
 ## Output Structure After Enhancement
