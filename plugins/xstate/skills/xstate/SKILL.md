@@ -1,5 +1,5 @@
 ---
-name: xstate-v5-strict
+name: xstate
 description: Implement, refactor, and review XState v5 state machines in TypeScript with strict setup().createMachine() ruleset, design-first planning, params-first typing, anti-god-machine enforcement, and canonical actor patterns (fromPromise, fromCallback, fromObservable, fromTransition). Covers invoke vs spawnChild boundaries, hierarchical/parallel states, delayed transitions, cleanup patterns, and real-world patterns like SDK bridging with fromCallback actors and Promise-bridge for async external events. Use when building state machines, actors, statecharts, finite state logic, actor systems, or reviewing/refactoring XState code.
 ---
 
