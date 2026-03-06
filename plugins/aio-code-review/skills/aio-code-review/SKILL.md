@@ -1,5 +1,5 @@
 ---
-name: aio-code-review-ultra
+name: aio-code-review
 description: |
   Ultimate code review with multi-phase pipeline. Triggers when user says "review code", "code review", "review this", "review changes", "review PR", "ultra review", or mentions "comprehensive review". Runs domain-specific skills (Go, iOS, React, XState, observability), CodeWiki static analytics, 4 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.
 ---
@@ -94,12 +94,15 @@ Spawn specialized review agents in parallel. Each agent receives:
 
 **Core agents (always run):**
 
-| Agent | Model | Focus | Uses analytics for |
-|-------|-------|-------|-------------------|
-| `oh-my-claudecode:security-reviewer` | sonnet | OWASP Top 10, secrets, auth, injection | Dependency graphs to trace untrusted input paths |
-| `oh-my-claudecode:quality-reviewer` | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | Module structure to assess coupling and cohesion |
-| `oh-my-claudecode:code-reviewer` | opus | Comprehensive review, API contracts, backward compatibility | Module boundaries and dependency graphs for contract violations |
-| `oh-my-claudecode:code-simplifier` | opus | Clarity, consistency, maintainability, simplification | Module structure to identify over-engineered areas |
+OMC internal agents are spawned via `Task(subagent_type=...)`. External agents are invoked via `@agent-name`.
+
+| Agent | Type | Model | Focus | Uses analytics for |
+|-------|------|-------|-------|-------------------|
+| `oh-my-claudecode:security-reviewer` | OMC | sonnet | OWASP Top 10, secrets, auth, injection | Dependency graphs to trace untrusted input paths |
+| `oh-my-claudecode:quality-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | Module structure to assess coupling and cohesion |
+| `@feature-dev:code-reviewer` | External | sonnet | Feature-level review: requirement completeness, implementation correctness, edge case coverage | Changed files mapped to feature scope |
+| `@superpowers:code-reviewer` | External | sonnet | Superpowers-based comprehensive review, verification before completion | Module boundaries and dependency graphs for contract violations |
+| `@code-simplifier:code-simplifier` | External | opus | Clarity, consistency, maintainability, simplification | Module structure to identify over-engineered areas |
 
 **Conditional agents (spawn based on scope and content):**
 
@@ -155,17 +158,26 @@ show their structural impact using the dependency and module information.
 
 ```
 # Spawn core agents in parallel (always)
+
+# OMC internal agents via Task()
 Task(subagent_type="oh-my-claudecode:security-reviewer", model="sonnet",
   prompt="<analytics context>\n\nReview these files for security: {files}")
 
 Task(subagent_type="oh-my-claudecode:quality-reviewer", model="sonnet",
   prompt="<analytics context>\n\nReview these files for quality and performance: {files}")
 
-Task(subagent_type="oh-my-claudecode:code-reviewer", model="opus",
-  prompt="<analytics context>\n\nReview these files for API contracts and comprehensive issues: {files}")
+# External agents via @ invocation — trigger alongside OMC agents
+@feature-dev:code-reviewer — Review these files for feature completeness and implementation correctness:
+  <analytics context>
+  Files: {files}
 
-Task(subagent_type="oh-my-claudecode:code-simplifier", model="opus",
-  prompt="<analytics context>\n\nReview these files for clarity and simplification: {files}")
+@superpowers:code-reviewer — Comprehensive review with verification, API contracts, backward compatibility:
+  <analytics context>
+  Files: {files}
+
+@code-simplifier:code-simplifier — Review these files for clarity, consistency, and simplification opportunities:
+  <analytics context>
+  Files: {files}
 
 # Conditional agents (spawn only when criteria met)
 if crosses_module_boundaries or affected_modules >= 3:
