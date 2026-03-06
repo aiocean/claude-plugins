@@ -124,10 +124,10 @@
       "author": { "name": "aiocean" }
     },
     {
-      "name": "aio-code-review-ultra",
-      "source": "./plugins/aio-code-review-ultra",
+      "name": "aio-code-review",
+      "source": "./plugins/aio-code-review",
       "description": "Ultimate code review with multi-phase pipeline: domain-specific skill detection (Go, iOS, React, XState, observability), CodeWiki static analytics, 4 core + 4 conditional parallel review agents, and a critic meta-review that eliminates false positives and provides confidence scoring.",
-      "version": "2.0.1",
+      "version": "2.2.0",
       "author": { "name": "aiocean" }
     },
     {
