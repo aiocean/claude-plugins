@@ -5,143 +5,150 @@
   },
   "plugins": [
     {
-      "name": "remove-bg",
-      "source": "./plugins/remove-bg",
+      "name": "aio-remove-bg",
+      "source": "./plugins/aio-remove-bg",
       "description": "Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods.",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "author": { "name": "aiocean" }
     },
     {
-      "name": "worktree",
-      "source": "./plugins/worktree",
+      "name": "aio-worktree",
+      "source": "./plugins/aio-worktree",
       "description": "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup.",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "author": { "name": "aiocean" }
     },
     {
-      "name": "epub-packing",
-      "source": "./plugins/epub-packing",
+      "name": "aio-epub-packing",
+      "source": "./plugins/aio-epub-packing",
       "description": "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "youtube",
-      "source": "./plugins/youtube",
-      "description": "Search YouTube and extract video transcripts using yt-dlp.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "gherkin-refine",
-      "source": "./plugins/gherkin-refine",
-      "description": "Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "claude-manager",
-      "source": "./plugins/claude-manager",
-      "description": "Enable/disable skills based on project context. Reduce skill clutter for specific project types.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "neobrutalism",
-      "source": "./plugins/neobrutalism",
-      "description": "Apply neobrutalism design patterns to web UI. Bold borders, hard shadows, vibrant colors.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "bun-fullstack-setup",
-      "source": "./plugins/bun-fullstack-setup",
-      "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "mental-models",
-      "source": "./plugins/mental-models",
-      "description": "Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "reflect",
-      "source": "./plugins/reflect",
-      "description": "Learn from Claude Code sessions to extract reusable knowledge. Analyzes corrections, preferences, and technical discoveries to build CLAUDE.md rules and new skills.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "golangci-lint",
-      "source": "./plugins/golangci-lint",
-      "description": "Efficient Go linting with golangci-lint. Lint only changed code, fix v2 config issues, handle common warnings.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "monitoring-observability",
-      "source": "./plugins/monitoring-observability",
-      "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
-      "version": "1.0.1",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "ios-device-debug",
-      "source": "./plugins/ios-device-debug",
-      "description": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
-      "version": "1.0.0",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "codebase-oracle",
-      "source": "./plugins/codebase-oracle",
-      "description": "Comprehensive codebase analysis and visualization with CodeWiki integration: architecture documentation (C4 diagrams, ERD, API maps, dependency graphs) and interactive HTML playgrounds. Uses CodeWiki for LLM-powered analysis when available, with Tree-sitter fallback. Specialized analyst teams produce multi-document docs with Mermaid diagrams.",
-      "version": "2.9.0",
-      "author": { "name": "aiocean" }
-    },
-    {
-      "name": "grafana-diagram",
-      "source": "./plugins/grafana-diagram",
-      "description": "Guide for using grafana-diagram plugin to create Mermaid diagrams with data binding in Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic metric-driven coloring.",
       "version": "1.0.2",
       "author": { "name": "aiocean" }
     },
     {
-      "name": "jira",
-      "source": "./plugins/jira",
-      "description": "Jira operations through MCP tools. Issue management, sprint tracking, workflow transitions, comments, JQL search, and development information. Auto-installs jira-mcp server if missing.",
-      "version": "2.0.0",
+      "name": "aio-youtube",
+      "source": "./plugins/aio-youtube",
+      "description": "Search YouTube and extract video transcripts using yt-dlp.",
+      "version": "1.0.3",
       "author": { "name": "aiocean" }
     },
     {
-      "name": "react-minimal-effects",
-      "source": "./plugins/react-minimal-effects",
-      "description": "Minimize useEffect in React 19. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns.",
-      "version": "3.0.1",
+      "name": "aio-gherkin-refine",
+      "source": "./plugins/aio-gherkin-refine",
+      "description": "Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation.",
+      "version": "1.0.3",
       "author": { "name": "aiocean" }
     },
     {
-      "name": "mermaid",
-      "source": "./plugins/mermaid",
-      "description": "Generate shareable MinimalMermaid diagram URLs. Compress mermaid code into shareable links.",
-      "version": "1.1.0",
+      "name": "aio-claude-manager",
+      "source": "./plugins/aio-claude-manager",
+      "description": "Enable/disable skills based on project context. Reduce skill clutter for specific project types.",
+      "version": "1.0.3",
       "author": { "name": "aiocean" }
     },
     {
-      "name": "code-review-ultra",
-      "source": "./plugins/code-review-ultra",
-      "description": "Ultimate code review with multi-phase pipeline: domain-specific skill detection (Go, iOS, React, XState, observability), CodeWiki static analytics, 4 core + 4 conditional parallel review agents, and a critic meta-review that eliminates false positives and provides confidence scoring.",
-      "version": "2.0.0",
+      "name": "aio-neobrutalism",
+      "source": "./plugins/aio-neobrutalism",
+      "description": "Apply neobrutalism design patterns to web UI. Bold borders, hard shadows, vibrant colors.",
+      "version": "1.0.2",
       "author": { "name": "aiocean" }
     },
     {
-      "name": "xstate",
-      "source": "./plugins/xstate",
-      "description": "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCallback, fromObservable, fromTransition), invoke vs spawnChild, and React integration.",
+      "name": "aio-bun-fullstack-setup",
+      "source": "./plugins/aio-bun-fullstack-setup",
+      "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
+      "version": "1.0.2",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-mental-models",
+      "source": "./plugins/aio-mental-models",
+      "description": "Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.",
+      "version": "1.0.3",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-reflect",
+      "source": "./plugins/aio-reflect",
+      "description": "Learn from Claude Code sessions to extract reusable knowledge. Analyzes corrections, preferences, and technical discoveries to build CLAUDE.md rules and new skills.",
+      "version": "1.0.3",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-golangci-lint",
+      "source": "./plugins/aio-golangci-lint",
+      "description": "Efficient Go linting with golangci-lint. Lint only changed code, fix v2 config issues, handle common warnings.",
+      "version": "1.0.2",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-monitoring-observability",
+      "source": "./plugins/aio-monitoring-observability",
+      "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
+      "version": "1.0.2",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-ios-device-debug",
+      "source": "./plugins/aio-ios-device-debug",
+      "description": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
       "version": "1.0.1",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-codebase-oracle",
+      "source": "./plugins/aio-codebase-oracle",
+      "description": "Comprehensive codebase analysis and visualization with CodeWiki integration: architecture documentation (C4 diagrams, ERD, API maps, dependency graphs) and interactive HTML playgrounds. Uses CodeWiki for LLM-powered analysis when available, with Tree-sitter fallback. Specialized analyst teams produce multi-document docs with Mermaid diagrams.",
+      "version": "2.9.1",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-grafana-diagram",
+      "source": "./plugins/aio-grafana-diagram",
+      "description": "Guide for using grafana-diagram plugin to create Mermaid diagrams with data binding in Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic metric-driven coloring.",
+      "version": "1.0.4",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-jira",
+      "source": "./plugins/aio-jira",
+      "description": "Jira operations through MCP tools. Issue management, sprint tracking, workflow transitions, comments, JQL search, and development information. Auto-installs jira-mcp server if missing.",
+      "version": "2.0.1",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-react-minimal-effects",
+      "source": "./plugins/aio-react-minimal-effects",
+      "description": "Minimize useEffect in React 19. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns.",
+      "version": "3.0.2",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-mermaid",
+      "source": "./plugins/aio-mermaid",
+      "description": "Generate shareable MinimalMermaid diagram URLs. Compress mermaid code into shareable links.",
+      "version": "1.1.2",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-code-review-ultra",
+      "source": "./plugins/aio-code-review-ultra",
+      "description": "Ultimate code review with multi-phase pipeline: domain-specific skill detection (Go, iOS, React, XState, observability), CodeWiki static analytics, 4 core + 4 conditional parallel review agents, and a critic meta-review that eliminates false positives and provides confidence scoring.",
+      "version": "2.0.1",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-xstate",
+      "source": "./plugins/aio-xstate",
+      "description": "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCallback, fromObservable, fromTransition), invoke vs spawnChild, and React integration.",
+      "version": "1.0.2",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-debug",
+      "source": "./plugins/aio-debug",
+      "description": "Systematic debug & fix orchestrator. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation.",
+      "version": "1.0.0",
       "author": { "name": "aiocean" }
     }
   ]

@@ -1,0 +1,10 @@
+{
+  "name": "aio-ios-device-debug",
+  "description": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
+  "version": "1.0.1",
+  "author": {
+    "name": "aiocean"
+  },
+  "repository": "https://github.com/aiocean/claude-plugins",
+  "license": "MIT"
+}

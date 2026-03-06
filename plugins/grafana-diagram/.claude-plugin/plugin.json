@@ -1,7 +1,0 @@
-{
-  "name": "grafana-diagram",
-  "version": "1.0.2",
-  "author": { "name": "aiocean" },
-  "description": "Guide for using grafana-diagram plugin to create Mermaid diagrams with data binding in Grafana dashboards.",
-  "license": "MIT"
-}
