@@ -1,7 +1,0 @@
-{
-  "name": "aio-golangci-lint",
-  "description": "Efficient Go linting with golangci-lint. Lint only changed code, fix v2 config issues, handle common warnings.",
-  "version": "1.0.2",
-  "author": { "name": "aiocean" },
-  "license": "MIT"
-}

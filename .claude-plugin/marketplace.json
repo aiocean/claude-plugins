@@ -75,13 +75,6 @@
       "author": { "name": "aiocean" }
     },
     {
-      "name": "aio-golangci-lint",
-      "source": "./plugins/aio-golangci-lint",
-      "description": "Efficient Go linting with golangci-lint. Lint only changed code, fix v2 config issues, handle common warnings.",
-      "version": "1.0.2",
-      "author": { "name": "aiocean" }
-    },
-    {
       "name": "aio-monitoring-observability",
       "source": "./plugins/aio-monitoring-observability",
       "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
