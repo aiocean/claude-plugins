@@ -126,6 +126,68 @@ Systematic debug & fix orchestrator. Four-phase pipeline: understand codebase co
 /plugin install aio-debug@aiocean-plugins
 ```
 
+## Workflows
+
+Plugins are designed to work independently, but they compose naturally into multi-step workflows.
+
+### Feature Development
+Clarify requirements → understand the codebase → apply correct patterns → review before merge → update tickets.
+
+```
+gherkin-refine → codebase-oracle → [xstate / react-minimal-effects] → code-review-ultra → jira
+```
+
+```bash
+/plugin install aio-gherkin-refine@aiocean-plugins
+/plugin install aio-codebase-oracle@aiocean-plugins
+/plugin install aio-xstate@aiocean-plugins
+/plugin install aio-code-review-ultra@aiocean-plugins
+/plugin install aio-jira@aiocean-plugins
+```
+
+### Debugging
+Investigate root cause → lint changed code → add observability → visualize metrics.
+
+```
+aio-debug → golangci-lint / ios-device-debug → monitoring-observability → grafana-diagram
+```
+
+```bash
+/plugin install aio-debug@aiocean-plugins
+/plugin install aio-golangci-lint@aiocean-plugins
+/plugin install aio-monitoring-observability@aiocean-plugins
+/plugin install aio-grafana-diagram@aiocean-plugins
+```
+
+### Content & Documentation
+Research external sources → apply thinking frameworks → document the codebase → publish.
+
+```
+youtube → mental-models → codebase-oracle → epub-packing / mermaid
+```
+
+```bash
+/plugin install aio-youtube@aiocean-plugins
+/plugin install aio-mental-models@aiocean-plugins
+/plugin install aio-codebase-oracle@aiocean-plugins
+/plugin install aio-epub-packing@aiocean-plugins
+```
+
+### Project Bootstrap
+Scaffold the project → apply design system → set up parallel dev environments → add observability → learn from sessions.
+
+```
+bun-fullstack-setup → neobrutalism → worktree → monitoring-observability → reflect
+```
+
+```bash
+/plugin install aio-bun-fullstack-setup@aiocean-plugins
+/plugin install aio-neobrutalism@aiocean-plugins
+/plugin install aio-worktree@aiocean-plugins
+/plugin install aio-monitoring-observability@aiocean-plugins
+/plugin install aio-reflect@aiocean-plugins
+```
+
 ## License
 
 MIT
