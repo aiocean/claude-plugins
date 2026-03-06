@@ -1,7 +1,0 @@
-{
-  "name": "mermaid",
-  "description": "Generate shareable MinimalMermaid diagram URLs. Compress mermaid code into shareable links.",
-  "version": "1.1.0",
-  "author": { "name": "aiocean" },
-  "license": "MIT"
-}

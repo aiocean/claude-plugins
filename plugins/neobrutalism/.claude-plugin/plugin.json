@@ -1,7 +1,0 @@
-{
-  "name": "neobrutalism",
-  "description": "Apply neobrutalism design patterns to web UI. Bold borders, hard shadows, vibrant colors.",
-  "version": "1.0.1",
-  "author": { "name": "aiocean" },
-  "license": "MIT"
-}

@@ -1,0 +1,7 @@
+{
+  "name": "aio-gherkin-refine",
+  "description": "Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation.",
+  "version": "1.0.3",
+  "author": { "name": "aiocean" },
+  "license": "MIT"
+}
