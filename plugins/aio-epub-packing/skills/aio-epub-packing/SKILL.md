@@ -289,7 +289,7 @@ Error: Input file not found: chapter-01.md
 ## File Structure
 
 ```
-.claude/skills/epub-packing/
+plugins/aio-epub-packing/skills/aio-epub-packing/
 ├── fonts/
 │   ├── BricolageGrotesque-Variable.ttf  # Neo-brutalism cover font
 │   └── Roboto-Bold.ttf                  # Fallback font

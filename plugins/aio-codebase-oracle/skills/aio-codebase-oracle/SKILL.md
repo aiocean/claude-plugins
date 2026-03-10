@@ -252,9 +252,7 @@ CodeWiki may not generate docs for all child modules in `module_tree.json`, espe
 
 **Step 1: Find missing modules**
 ```bash
-# Note: CLAUDE_PLUGIN_ROOT is automatically set by Claude Code
-# If running standalone, use relative path: ./scripts/find-missing-modules.py
-uv run "${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/find-missing-modules.py" docs --format compact
+uv run scripts/find-missing-modules.py docs --format compact
 ```
 
 **Step 2: Generate docs for missing children**
@@ -273,7 +271,7 @@ For each missing module:
 **Example workflow:**
 ```bash
 # Check what's missing
-uv run find-missing-modules.py docs --format compact
+uv run scripts/find-missing-modules.py docs --format compact
 # Output shows: "shipping-partner_sync-ship-hero.md" missing
 
 # Generate the missing doc with infrastructure context:
@@ -514,14 +512,14 @@ Run bundled checker (recommended):
 
 ```bash
 # from project root
-bash ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/doc-quality-check.sh docs
+bash scripts/doc-quality-check.sh docs
 
 # fallback when developing in this plugin repo
-bash plugins/codebase-oracle/skills/codebase-oracle/scripts/doc-quality-check.sh docs
+bash scripts/doc-quality-check.sh docs
 
 # CI/MR mode: compare against target branch
 DOC_CHECK_BASE_REF=origin/main \
-  bash ${CLAUDE_PLUGIN_ROOT}/skills/codebase-oracle/scripts/doc-quality-check.sh docs
+  bash scripts/doc-quality-check.sh docs
 ```
 
 Fallback manual checks:

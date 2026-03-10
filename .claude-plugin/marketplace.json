@@ -22,7 +22,7 @@
       "name": "aio-epub-packing",
       "source": "./plugins/aio-epub-packing",
       "description": "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": { "name": "aiocean" }
     },
     {
@@ -43,7 +43,7 @@
       "name": "aio-claude-manager",
       "source": "./plugins/aio-claude-manager",
       "description": "Enable/disable skills based on project context. Reduce skill clutter for specific project types.",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "author": { "name": "aiocean" }
     },
     {
@@ -85,14 +85,14 @@
       "name": "aio-ios-device-debug",
       "source": "./plugins/aio-ios-device-debug",
       "description": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": { "name": "aiocean" }
     },
     {
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
       "description": "Comprehensive codebase analysis and visualization with CodeWiki integration: architecture documentation (C4 diagrams, ERD, API maps, dependency graphs) and interactive HTML playgrounds. Uses CodeWiki for LLM-powered analysis when available, with Tree-sitter fallback. Specialized analyst teams produce multi-document docs with Mermaid diagrams.",
-      "version": "2.9.1",
+      "version": "2.9.2",
       "author": { "name": "aiocean" }
     },
     {
