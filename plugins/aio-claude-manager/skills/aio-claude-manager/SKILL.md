@@ -74,7 +74,7 @@ $CM/manage.sh disable shopify-listing epub-packing
 $CM/manage.sh agents disable vue-lint-fixer
 
 # Re-enable everything
-$CM/$CM/manage.sh preset all
+$CM/manage.sh preset all
 ```
 
 **Note:** Restart Claude Code after changes to apply.
