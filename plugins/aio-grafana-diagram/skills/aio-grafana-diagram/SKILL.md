@@ -1,10 +1,6 @@
 ---
 name: aio-grafana-diagram
-description: |
-  This skill should be used when the user asks about "grafana diagram", "mermaid in grafana", "diagram panel", "binding data to diagram nodes",
-  "grafana mermaid widget", "dynamic diagram", "data-driven diagram", or needs to create flowcharts, sequence diagrams, gantt charts, state
-  diagrams, ER diagrams, or user journey diagrams in Grafana dashboards. Use whenever user mentions Grafana and wants to visualize
-  time-series data or service health as interactive diagrams in their dashboard. Guide for using the jdbranham-diagram-panel plugin with data binding.
+description: Create Mermaid diagrams with data binding in Grafana dashboards. Use when user mentions "grafana diagram", "mermaid in grafana", "diagram panel", "data-driven diagram", "dynamic diagram", or wants flowcharts, sequence/state/ER diagrams in Grafana. Covers the jdbranham-diagram-panel plugin with metric-driven node coloring and data binding.
 ---
 
 # Grafana Diagram Plugin Guide

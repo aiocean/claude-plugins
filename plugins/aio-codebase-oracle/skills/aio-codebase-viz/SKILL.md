@@ -1,7 +1,6 @@
 ---
 name: aio-codebase-viz
-description: |
-  This skill should be used when the user asks to "visualize codebase", "codebase visualization", "interactive architecture", "architecture playground", "explore architecture visually", "codebase viz", or wants to turn documentation into interactive HTML. Interactive codebase visualization from CodeWiki and codebase-oracle docs with LLM-generated module documentation, diagrams, examples, and best practices.
+description: Interactive codebase visualization as HTML playground. Use when user says "visualize codebase", "codebase visualization", "interactive architecture", "architecture playground", "explore architecture visually", or "codebase viz". Turns codebase-oracle docs into explorable HTML with module documentation, diagrams, examples, and best practices.
 ---
 
 # Codebase Viz

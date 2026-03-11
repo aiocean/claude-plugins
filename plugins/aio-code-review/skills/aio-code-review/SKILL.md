@@ -1,7 +1,6 @@
 ---
 name: aio-code-review
-description: |
-  Ultimate code review with multi-phase pipeline. Triggers when user says "review code", "code review", "review this", "review changes", "review PR", "ultra review", or mentions "comprehensive review". Runs domain-specific skills (Go, iOS, React, XState, observability), CodeWiki static analytics, 4 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.
+description: Multi-phase code review pipeline. Use when user says "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Runs domain-specific analysis (Go, iOS, React, XState, observability), CodeWiki static analytics, parallel review agents, and critic meta-review with confidence scoring.
 ---
 
 # Code Review Ultra

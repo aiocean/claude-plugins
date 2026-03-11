@@ -1,7 +1,6 @@
 ---
 name: aio-codebase-oracle
-description: |
-  This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "map this codebase", "codebase map", or mentions "codebase oracle". Deep codebase analysis combining CodeIndex static analysis (dependency graphs, codebase maps, metrics) with Oracle direct documentation writing, parallel agent team mapping, and evidence-based investigation. Automatically detects existing maps and updates incrementally.
+description: Deep codebase analysis and architecture documentation. Use when user says "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Combines CodeIndex static analysis with parallel agent mapping, direct documentation writing, and evidence-based investigation. Auto-detects existing maps for incremental updates.
 ---
 
 # Codebase Oracle
