@@ -118,6 +118,20 @@ grep EMBEDDING_API_TYPE .cocoindex/config.py .cocoindex/.env
 | `GEMINI_API_KEY` not set | Add to `.cocoindex/.env` — required for Gemini mode |
 | Dimension mismatch error | Switched model without re-index — run `setup` then `update --full-reprocess` |
 
+## Code Search (Tree-Sitter)
+
+Code collections use **tree-sitter aware chunking** — splits at AST boundaries (functions, classes, methods) instead of naive character splitting. This means search results return complete, meaningful code units.
+
+```bash
+# Search code collections
+.venv-cocoindex/bin/python .cocoindex/query.py "authentication middleware" --collection code_typescript
+
+# Search across all collections (docs + code)
+.venv-cocoindex/bin/python .cocoindex/query.py "how does user login work"
+```
+
+Supported tree-sitter languages: python, typescript, javascript, go, rust, java, c, cpp, c_sharp, ruby, php, swift, kotlin, scala, sql, bash.
+
 ## Adding New Collections
 
 Edit `.cocoindex/config.py` to add new collections:
@@ -125,6 +139,7 @@ Edit `.cocoindex/config.py` to add new collections:
 ```python
 COLLECTIONS = {
     "existing": { ... },
+    # Add documentation collection
     "new_collection": {
         "dirs": ["new-directory/"],
         "patterns": ["**/*.md"],
@@ -132,6 +147,11 @@ COLLECTIONS = {
         "chunk_overlap": 300,
         "language": "markdown",
     },
+    # Add code collections with tree-sitter chunking
+    **generate_code_collections(
+        ["src/", "lib/"],
+        languages=["typescript", "python"],
+    ),
 }
 ```
 
