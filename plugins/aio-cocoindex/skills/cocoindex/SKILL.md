@@ -1,7 +1,6 @@
 ---
 name: cocoindex
-description: |
-  This skill should be used when the user asks to "search knowledge", "find in docs", "query index", "semantic search", "update index", "rebuild index", "check index status", "cocoindex query", "cocoindex update", or wants to search/maintain an existing CocoIndex. Requires a `.cocoindex/` directory in the project (created by cocoindex-setup skill).
+description: This skill should be used when the user asks to "search knowledge", "find in docs", "query index", "semantic search", "update index", "rebuild index", "check index status", "cocoindex query", "cocoindex update", or wants to search/maintain an existing CocoIndex. Requires a `.cocoindex/` directory in the project (created by cocoindex-setup skill).
 ---
 
 # CocoIndex — Search & Maintain
