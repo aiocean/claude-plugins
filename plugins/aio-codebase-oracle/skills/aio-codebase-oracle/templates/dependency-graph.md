@@ -5,13 +5,13 @@ This doc is filled by the structure-analyst.
 Maps module-level dependencies, identifies hubs, detects layer violations.
 
 Primary data sources (in order of preference):
-1. CodeWiki: docs/codebase_map.json for components, edges, communities, hubs
-2. CodeWiki: docs/dependency_graphs/*.json for detailed dependency data
+1. CodeIndex: docs/codebase_map.json for components, edges, communities, hubs
+2. CodeIndex: docs/dependency_graphs/*.json for detailed dependency data
 3. Tree-sitter: docs/.tree-sitter-results.json (if exists)
 4. Grep: fallback for import statements
 
 IMPORTANT PATHS:
-- CodeWiki output is in docs/, NOT .codewiki-cache/
+- CodeIndex output is in docs/, NOT .codeindex-cache/
 - Static analysis: docs/codebase_map.json
 - Dependency graphs: docs/dependency_graphs/*.json
 - Interactive viewer: docs/graph.html

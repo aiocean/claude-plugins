@@ -1,16 +1,16 @@
 ---
 name: aio-codebase-oracle
 description: |
-  This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "map this codebase", "codebase map", or mentions "codebase oracle". Deep codebase analysis combining CodeWiki static analysis (dependency graphs, codebase maps, metrics) with Oracle direct documentation writing, parallel agent team mapping, and evidence-based investigation. Automatically detects existing maps and updates incrementally.
+  This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "map this codebase", "codebase map", or mentions "codebase oracle". Deep codebase analysis combining CodeIndex static analysis (dependency graphs, codebase maps, metrics) with Oracle direct documentation writing, parallel agent team mapping, and evidence-based investigation. Automatically detects existing maps and updates incrementally.
 ---
 
 # Codebase Oracle
 
-Comprehensive architecture documentation: CodeWiki static analysis combined with Oracle direct documentation writing and specialized analyst teams.
+Comprehensive architecture documentation: CodeIndex static analysis combined with Oracle direct documentation writing and specialized analyst teams.
 
-**Core Philosophy:** Oracle **writes all documentation from scratch** using CodeWiki's static analysis data (codebase map, dependency graphs, metrics, communities) combined with direct source code reading. CodeWiki provides the quantitative foundation; Oracle provides the qualitative analysis and writes every doc.
+**Core Philosophy:** Oracle **writes all documentation from scratch** using CodeIndex's static analysis data (codebase map, dependency graphs, metrics, communities) combined with direct source code reading. CodeIndex provides the quantitative foundation; Oracle provides the qualitative analysis and writes every doc.
 
-**What CodeWiki Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `graph.html` (interactive viewer), `dependency_graphs/*.json` (detailed dependency data), and a full set of `.tpl` templates for doc structure:
+**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `graph.html` (interactive viewer), `dependency_graphs/*.json` (detailed dependency data), and a full set of `.tpl` templates for doc structure:
 - `overview.md.tpl` — project-level overview (architecture pattern, entry points, health dashboard, module map)
 - `module.md.tpl` — per-module docs (components, hubs, internal/external deps, quality metrics)
 - `architecture.md.tpl` — architecture analysis (layer map, community detection, data flow, design decisions)
@@ -112,9 +112,9 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Phase 0: CodeWiki (Static Analysis Only)                        │
+│ Phase 0: CodeIndex (Static Analysis Only)                        │
 │                                                                 │
-│   codewiki generate --verbose                                   │
+│   codeindex generate --verbose                                   │
 │   ↓                                                             │
 │   Produces:                                                     │
 │   - docs/codebase_map.json (components, edges, metrics, hubs) │
@@ -133,7 +133,7 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 │                                                                 │
 │   /codebase-oracle                                              │
 │   ↓                                                             │
-│   1. Ingest CodeWiki static analysis data                      │
+│   1. Ingest CodeIndex static analysis data                      │
 │   2. Read actual source code for each module/community         │
 │   3. Analyze: structure, dependencies, patterns, rationale     │
 │   4. Write all documentation from scratch                      │
@@ -150,14 +150,14 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 │   │   ├── Blast Radius & Safe Change Plan                      │
 │   │   ├── Design Rationale & Trade-offs                        │
 │   │   └── <!-- ORACLE-META --> compact footer                  │
-│   ├── codebase_map.json        (CodeWiki static analysis)     │
-│   ├── graph.html               (CodeWiki interactive viewer)  │
-│   ├── dependency_graphs/       (CodeWiki dependency data)     │
-│   └── templates/               (CodeWiki doc templates)       │
+│   ├── codebase_map.json        (CodeIndex static analysis)     │
+│   ├── graph.html               (CodeIndex interactive viewer)  │
+│   ├── dependency_graphs/       (CodeIndex dependency data)     │
+│   └── templates/               (CodeIndex doc templates)       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## CodeWiki Static Analysis Output
+## CodeIndex Static Analysis Output
 
 ```
 docs/
@@ -167,10 +167,10 @@ docs/
 └── templates/                   # Doc structure templates (.tpl)
 ```
 
-**What CodeWiki does NOT output in static-only mode:**
+**What CodeIndex does NOT output in static-only mode:**
 - ❌ `{module}.md` files - Oracle writes these
 - ❌ `module_tree.json` - Not produced without `--use-agent-sdk`
-- ❌ `.codewiki-cache/` - Does not exist
+- ❌ `.codeindex-cache/` - Does not exist
 - ❌ `metadata.json` - Not produced
 - ❌ `overview.md` - Not produced
 
@@ -187,26 +187,26 @@ docs/
 | "Update docs" / "Refresh docs" | Phase 0-4 (full re-run) |
 | "Quick check" / "Is this up to date?" | Phase 1 only (review static analysis data) |
 
-### Phase 0: Run CodeWiki Static Analysis (MANDATORY first step)
+### Phase 0: Run CodeIndex Static Analysis (MANDATORY first step)
 
-**You MUST run CodeWiki before any manual analysis.** Do not skip this step. Do not substitute with manual file reading. CodeWiki generates static analysis data that Oracle uses as the quantitative foundation for documentation.
+**You MUST run CodeIndex before any manual analysis.** Do not skip this step. Do not substitute with manual file reading. CodeIndex generates static analysis data that Oracle uses as the quantitative foundation for documentation.
 
 ```bash
-# Check if CodeWiki static analysis already exists and is recent
+# Check if CodeIndex static analysis already exists and is recent
 ls docs/codebase_map.json docs/graph.html docs/dependency_graphs/ 2>/dev/null
 
-# If static analysis doesn't exist OR user requested fresh analysis → run CodeWiki
-codewiki generate --verbose --no-cache
+# If static analysis doesn't exist OR user requested fresh analysis → run CodeIndex
+codeindex generate --verbose --no-cache
 
 # If static analysis exists and user just wants to update → still run with cache
-codewiki generate --verbose
+codeindex generate --verbose
 ```
 
 **Flags explained:**
 - `--verbose`: Shows progress so user can track generation
 - `--no-cache`: Forces fresh analysis (use when no static analysis exists or code has changed)
 
-**Do NOT use `--use-agent-sdk`** — Oracle writes all documentation directly. CodeWiki runs in static analysis mode only.
+**Do NOT use `--use-agent-sdk`** — Oracle writes all documentation directly. CodeIndex runs in static analysis mode only.
 
 **When to use `--no-cache`:**
 - First run (no existing static analysis)
@@ -217,11 +217,11 @@ codewiki generate --verbose
 - Static analysis exists and codebase hasn't changed
 - User says "update docs" and only wants Oracle to re-generate written docs
 
-**If `codewiki` is not installed**, inform the user:
+**If `codeindex` is not installed**, inform the user:
 ```
-CodeWiki is required. Install with: pip install codewiki
+CodeIndex is required. Install with: pip install -e codeindex/
 ```
-Do NOT proceed with manual analysis as a substitute — CodeWiki's static analysis provides the dependency graph, metrics, and community detection that Oracle builds on.
+Do NOT proceed with manual analysis as a substitute — CodeIndex's static analysis provides the dependency graph, metrics, and community detection that Oracle builds on.
 
 ### Phase 1: Scope and Static Analysis Ingestion
 
@@ -230,9 +230,9 @@ Do NOT proceed with manual analysis as a substitute — CodeWiki's static analys
 - User wants "find gaps" → Run Phase 1, identify undocumented modules/communities
 - User wants "full analysis" → Run all phases (default)
 
-#### 1.1 Ingest CodeWiki Static Analysis
+#### 1.1 Ingest CodeIndex Static Analysis
 
-Read and parse CodeWiki's static analysis output:
+Read and parse CodeIndex's static analysis output:
 
 1. **Parse `codebase_map.json`**: Extract components, edges, metrics, communities, and hubs
 2. **Parse `dependency_graphs/*.json`**: Extract detailed per-module dependency data
@@ -349,7 +349,7 @@ Oracle writes all documentation from scratch using analysis data from Phase 2.
 
 #### Templates (hybrid approach)
 
-**CodeWiki templates** (use as structural guides — fill with Oracle's analysis):
+**CodeIndex templates** (use as structural guides — fill with Oracle's analysis):
 - `overview.md.tpl` — project overview: architecture pattern, entry points, health dashboard, module map
 - `module.md.tpl` — per-module: components table, hub analysis, internal/external deps, quality metrics
 - `architecture.md.tpl` — architecture: layer map, community detection, data flow, design decisions
@@ -358,20 +358,20 @@ Oracle writes all documentation from scratch using analysis data from Phase 2.
 - `quality.md.tpl` — code quality: complexity hotspots, maintainability index, violations, improvement priorities
 - `_partials/` — reusable fragments for callouts, health badges, mermaid graphs, metrics tables, source refs
 
-**Oracle cross-cutting templates** (for analysis CodeWiki templates don't cover):
+**Oracle cross-cutting templates** (for analysis CodeIndex templates don't cover):
 - `c4-architecture.md` — C4 context/container/component diagrams
 - `key-flows.md` — cross-module execution paths and sequence diagrams
 - `dependency-graph.md` — hub analysis with blast radius annotations
 
-Oracle fills CodeWiki template structures with data from `codebase_map.json` and direct source code reading, then adds decision-support sections (failure modes, design rationale, blast radius) that the templates don't include.
+Oracle fills CodeIndex template structures with data from `codebase_map.json` and direct source code reading, then adds decision-support sections (failure modes, design rationale, blast radius) that the templates don't include.
 
 #### Writing each module doc
 
 For each module/community identified in Phase 1:
 
 **Step 1: Write the module doc from scratch** using:
-- CodeWiki `module.md.tpl` template as structural guide (components table, hub analysis, deps, quality metrics)
-- CodeWiki static analysis data from `codebase_map.json` (metrics, dependencies, communities, hubs)
+- CodeIndex `module.md.tpl` template as structural guide (components table, hub analysis, deps, quality metrics)
+- CodeIndex static analysis data from `codebase_map.json` (metrics, dependencies, communities, hubs)
 - Direct source code reading from Phase 2
 - For project-level overview, use `overview.md.tpl`; for architecture, use `architecture.md.tpl`; for dependencies, use `dependencies.md.tpl`; for quality, use `quality.md.tpl`
 
@@ -402,7 +402,7 @@ Only metadata goes at the bottom:
 ```markdown
 <!-- ORACLE-META
 Written by codebase-oracle | {timestamp}
-Data: CodeWiki static analysis + direct source reading
+Data: CodeIndex static analysis + direct source reading
 Audience: {audience} | Confidence: {overall}%
 Unknowns: {N} items pending verification
 -->
@@ -431,8 +431,8 @@ Do not flatten everything into a single overview diagram. Each diagram answers a
 ## Rules
 
 ALWAYS:
-- **Write all documentation from scratch** — Oracle is the sole author, not an editor of CodeWiki output
-- **Use CodeWiki static analysis as quantitative foundation** (metrics, dependencies, communities, hubs)
+- **Write all documentation from scratch** — Oracle is the sole author, not an editor of CodeIndex output
+- **Use CodeIndex static analysis as quantitative foundation** (metrics, dependencies, communities, hubs)
 - **Read actual source code for all qualitative claims** — never rely solely on static analysis data
 - **Add evidence inline** (`path:line`) throughout the content, not in a separate table
 - **Insert sections where they belong** — failure modes near flows, blast radius near dependencies
@@ -449,9 +449,9 @@ NEVER:
 - **Append a "validation report" section** — there is nothing to validate against
 - **Duplicate information** — don't repeat content in both the doc body and a footer table
 - Create separate validation docs alongside module docs
-- Reference `.codewiki-cache/` - does not exist
+- Reference `.codeindex-cache/` - does not exist
 - Reference `module_tree.json` - not produced in static-only mode
-- Use `--use-agent-sdk` flag — CodeWiki runs static analysis only
+- Use `--use-agent-sdk` flag — CodeIndex runs static analysis only
 - Write high-confidence claims without evidence
 - Leave generic summaries that do not help decisions
 - Hide uncertainty when evidence is incomplete
@@ -509,21 +509,21 @@ rg -wn "some\b|many\b|various\b|several\b" docs/*.md
 docs/
 ├── CODEBASE_MAP.md              # Oracle-written index with priorities and unknowns
 ├── {module}.md                  # Oracle-written module docs (one per community)
-│   ├── Structure from CodeWiki templates
+│   ├── Structure from CodeIndex templates
 │   ├── Data from codebase_map.json + source code reading
 │   ├── Evidence (path:line) throughout
 │   ├── Decision-support sections (failure modes, blast radius, rationale)
 │   └── <!-- ORACLE-META --> compact footer
-├── codebase_map.json            # CodeWiki static analysis (unchanged)
-├── graph.html                   # CodeWiki interactive viewer (unchanged)
-├── dependency_graphs/           # CodeWiki dependency data (unchanged)
-└── templates/                   # CodeWiki doc templates (unchanged)
+├── codebase_map.json            # CodeIndex static analysis (unchanged)
+├── graph.html                   # CodeIndex interactive viewer (unchanged)
+├── dependency_graphs/           # CodeIndex dependency data (unchanged)
+└── templates/                   # CodeIndex doc templates (unchanged)
 ```
 
 ## Troubleshooting
 
-**No CodeWiki static analysis:** Oracle MUST run `codewiki generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
+**No CodeIndex static analysis:** Oracle MUST run `codeindex generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
 
-**`codewiki` not found:** User needs to install: `pip install codewiki`
+**`codeindex` not found:** User needs to install: `pip install -e codeindex/`
 
-**Stale static analysis:** Code changed since last CodeWiki run. Re-run: `codewiki generate --verbose --no-cache`
+**Stale static analysis:** Code changed since last CodeIndex run. Re-run: `codeindex generate --verbose --no-cache`

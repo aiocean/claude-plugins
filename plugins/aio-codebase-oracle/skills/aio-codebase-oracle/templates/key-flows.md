@@ -10,17 +10,17 @@ How to identify key flows:
 2. Find the most important user actions (login, create, process, etc.)
 3. Check test files for integration tests — they often test key flows
 4. Look for README usage examples
-5. **Check CodeWiki module docs** - they often contain sequence diagrams!
+5. **Check CodeIndex module docs** - they often contain sequence diagrams!
 
 Primary data sources:
-1. **CodeWiki module docs** - docs/{module}.md files often have sequence diagrams
+1. **CodeIndex module docs** - docs/{module}.md files often have sequence diagrams
 2. Tree-sitter: docs/.tree-sitter-results.json (function discovery)
 3. LSP: goToDefinition, outgoingCalls for tracing
 
 IMPORTANT:
-- CodeWiki outputs to docs/, NOT .codewiki-cache/
-- call_graph.json does NOT exist in CodeWiki output
-- Use CodeWiki module docs for pre-built sequence diagrams
+- CodeIndex outputs to docs/, NOT .codeindex-cache/
+- call_graph.json does NOT exist in CodeIndex output
+- Use CodeIndex module docs for pre-built sequence diagrams
 - Use LSP outgoingCalls for tracing call chains
 
 For each flow:
@@ -36,7 +36,7 @@ For each flow:
 <!-- ORACLE:FLOW
 Describe: what triggers this flow, what is the expected outcome.
 
-**FIRST: Check CodeWiki module docs for existing sequence diagrams:**
+**FIRST: Check CodeIndex module docs for existing sequence diagrams:**
 ```bash
 # Look for sequence diagrams in module docs
 grep -l "sequenceDiagram" docs/*.md
@@ -92,7 +92,7 @@ sequenceDiagram
 
 <!-- ORACLE:FLOW_2
 Same approach as Flow 1.
-Check CodeWiki module docs for existing sequence diagrams.
+Check CodeIndex module docs for existing sequence diagrams.
 Use LSP outgoingCalls for tracing.
 -->
 
@@ -108,7 +108,7 @@ sequenceDiagram
 
 <!-- ORACLE:FLOW_3
 Same approach as Flow 1.
-Check CodeWiki module docs for existing sequence diagrams.
+Check CodeIndex module docs for existing sequence diagrams.
 -->
 
 REPLACE: description
@@ -123,7 +123,7 @@ sequenceDiagram
 Add more flow sections if 4-5 critical flows exist.
 Prioritize flows that cross multiple layers or involve external systems.
 
-Check CodeWiki module docs for additional sequence diagrams:
+Check CodeIndex module docs for additional sequence diagrams:
 ```bash
 grep -l "sequenceDiagram" docs/*.md
 ```
