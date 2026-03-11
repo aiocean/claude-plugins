@@ -57,10 +57,7 @@ pip show codeindex 2>/dev/null
 ### Run Static Analysis
 
 ```bash
-# Full analysis (first run or fresh analysis)
-codeindex generate --verbose --no-cache
-
-# Incremental (use cache if available)
+# Run analysis
 codeindex generate --verbose
 
 # Custom output directory
