@@ -7,6 +7,8 @@ description: Manage the CodeIndex static analysis tool — install, update, run,
 
 Manages the bundled CodeIndex static analysis tool — install, update, run, and troubleshoot.
 
+**IMPORTANT:** CodeIndex MUST be installed into a project-local `.codeindex/` virtual environment. Never use a globally installed codeindex. This prevents version conflicts between projects and ensures each project uses the correct codeindex version.
+
 ## Path Resolution
 
 ```bash
@@ -23,22 +25,21 @@ If `$PLUGIN_DIR` is empty, CodeIndex is not available. The plugin may not be ins
 # Resolve the plugin path
 PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
 
-# Install in editable mode (development) — changes to plugin auto-apply
-pip install -e "$(dirname "$PLUGIN_DIR")"
+# Create project-local venv
+python3 -m venv .codeindex
+
+# Install into project-local venv
+.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
 
 # Verify installation
-codeindex --version
+.codeindex/bin/codeindex --version
 ```
 
 **If pip install fails with dependency errors:**
 ```bash
 # Try with uv (faster, better dependency resolution)
-uv pip install -e "$(dirname "$PLUGIN_DIR")"
-
-# Or install in a venv
-python3 -m venv ~/.codeindex-venv
-~/.codeindex-venv/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
-# Then use: ~/.codeindex-venv/bin/codeindex generate --verbose
+uv venv .codeindex
+uv pip install -e "$(dirname "$PLUGIN_DIR")" --python .codeindex/bin/python
 ```
 
 **Requirements:** Python >= 3.12
@@ -46,22 +47,23 @@ python3 -m venv ~/.codeindex-venv
 ### Check Status
 
 ```bash
-# Check if codeindex is installed and which version
-codeindex --version 2>/dev/null && echo "installed" || echo "not installed"
+# Check if project-local codeindex exists
+.codeindex/bin/codeindex --version 2>/dev/null && echo "installed" || echo "not installed"
 
-# Check if it's the bundled version
-which codeindex
-pip show codeindex 2>/dev/null
+# Check installation details
+.codeindex/bin/pip show codeindex 2>/dev/null
 ```
 
 ### Run Static Analysis
 
+Always use the project-local binary:
+
 ```bash
 # Run analysis
-codeindex generate --verbose
+.codeindex/bin/codeindex generate --verbose
 
 # Custom output directory
-codeindex generate --verbose -o docs/
+.codeindex/bin/codeindex generate --verbose -o docs/
 ```
 
 **Output produced:**
@@ -71,61 +73,67 @@ codeindex generate --verbose -o docs/
 
 ### Update CodeIndex
 
-When the plugin is updated, CodeIndex is updated automatically. To force reinstall:
+When the plugin is updated, reinstall into the project-local venv:
 
 ```bash
 PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
-pip install -e "$(dirname "$PLUGIN_DIR")" --force-reinstall --no-deps
-codeindex --version
+.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")" --force-reinstall --no-deps
+.codeindex/bin/codeindex --version
 ```
 
 ### Uninstall
 
 ```bash
-pip uninstall codeindex -y
+rm -rf .codeindex
 ```
 
 ## Troubleshooting
 
-### `codeindex: command not found`
+### `codeindex: command not found` or wrong version
 
-CodeIndex is not installed. Run the install command above.
+Do NOT install globally. Create the project-local venv:
+```bash
+python3 -m venv .codeindex
+PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
+.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
+```
 
 ### `ModuleNotFoundError: No module named 'codeindex'`
 
-The package is not in the Python path. Check:
+The venv may be corrupted or missing. Recreate it:
 ```bash
-python3 -c "import codeindex; print(codeindex.__file__)"
+rm -rf .codeindex
+python3 -m venv .codeindex
+PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
+.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
 ```
-
-If this fails, reinstall with `pip install -e`.
 
 ### `tree-sitter` build errors
 
 Some tree-sitter grammars need compilation. Try:
 ```bash
-pip install --upgrade tree-sitter tree-sitter-language-pack
+.codeindex/bin/pip install --upgrade tree-sitter tree-sitter-language-pack
 ```
 
 ### Slow analysis on large codebases
 
 Use file filters:
 ```bash
-codeindex generate --verbose --exclude "**/node_modules/**,**/vendor/**,**/.git/**"
+.codeindex/bin/codeindex generate --verbose --exclude "**/node_modules/**,**/vendor/**,**/.git/**"
 ```
 
 ### Output directory issues
 
 CodeIndex defaults to `docs/` in the current directory. Specify explicitly:
 ```bash
-codeindex generate --verbose -o ./docs
+.codeindex/bin/codeindex generate --verbose -o ./docs
 ```
 
 ## Integration with Codebase Oracle
 
 After running CodeIndex, use the Codebase Oracle skill to write documentation:
 
-1. `codeindex generate --verbose` — produces static analysis data
+1. `.codeindex/bin/codeindex generate --verbose` — produces static analysis data
 2. `/aio-codebase-oracle` — Oracle reads the data and writes all docs
 
 CodeIndex provides the **quantitative foundation** (metrics, dependencies, communities). Oracle provides the **qualitative analysis** (design rationale, failure modes, decision guidance).
