@@ -42,15 +42,12 @@ qdrant_connection = cocoindex.add_auth_entry(
 def _get_embed_spec():
     """Return the embedding function spec based on config."""
     if config.EMBEDDING_API_TYPE == "gemini":
-        # output_dimension=1536: Gemini recommends 768/1536/3072.
-        # 1536 balances quality vs storage/compute cost.
-        # NOTE: If CocoIndex batch API errors on task_type/output_dimension,
-        # remove them — it's a CocoIndex compatibility issue, not Gemini's.
+        # CocoIndex 0.3.x batch API does NOT support task_type or output_dimension.
+        # These params cause "Unknown name 'config'" error from Gemini batchEmbedContents.
+        # Full 3072-dim vectors are used. query.py must also omit output_dimensionality.
         return cocoindex.functions.EmbedText(
             api_type=cocoindex.llm.LlmApiType.GEMINI,
             model=config.EMBEDDING_MODEL,
-            task_type="RETRIEVAL_DOCUMENT",
-            output_dimension=1536,
         )
     return cocoindex.functions.SentenceTransformerEmbed(
         model=config.EMBEDDING_MODEL,
@@ -65,7 +62,8 @@ def _detect_languages():
     """
     detected = {}
     for root, dirs, files in os.walk(config.PROJECT_ROOT):
-        dirs[:] = [d for d in dirs if d not in config.EXCLUDED_DIRS]
+        # Skip explicitly excluded dirs AND all dot-directories (hidden/internal)
+        dirs[:] = [d for d in dirs if d not in config.EXCLUDED_DIRS and not d.startswith(".")]
         for f in files:
             ext = os.path.splitext(f)[1].lower()
             if ext in config.EXTENSION_MAP:
@@ -77,6 +75,15 @@ def _detect_languages():
     for lang_info in detected.values():
         lang_info["patterns"] = sorted(lang_info["patterns"])
     return detected
+
+
+def _get_excluded_patterns():
+    """Convert EXCLUDED_DIRS to glob patterns for LocalFile's excluded_patterns.
+    Also excludes all dot-directories (hidden/internal) by default.
+    """
+    patterns = [f"{d}/**" for d in config.EXCLUDED_DIRS]
+    patterns.append(".*/**")  # Exclude all dot-directories
+    return patterns
 
 
 def build_flow(
@@ -93,6 +100,7 @@ def build_flow(
         cocoindex.sources.LocalFile(
             path=config.PROJECT_ROOT,
             included_patterns=patterns,
+            excluded_patterns=_get_excluded_patterns(),
         )
     )
 
@@ -110,6 +118,7 @@ def build_flow(
             chunk["embedding"] = chunk["text"].transform(_get_embed_spec())
 
             doc_embeddings.collect(
+                chunk_id=cocoindex.GeneratedField.UUID,
                 filename=doc["filename"],
                 location=chunk["location"],
                 text=chunk["text"],
@@ -123,7 +132,7 @@ def build_flow(
             collection_name=collection_name,
             connection=qdrant_connection,
         ),
-        primary_key_fields=["filename", "location"],
+        primary_key_fields=["chunk_id"],
     )
 
 

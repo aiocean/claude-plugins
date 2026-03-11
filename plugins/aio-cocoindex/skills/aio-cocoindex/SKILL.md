@@ -127,6 +127,12 @@ grep EMBEDDING_API_TYPE .cocoindex/config.py .cocoindex/.env
 | `GEMINI_API_KEY` not set | Add to `.cocoindex/.env` — required for Gemini mode |
 | Dimension mismatch error | Switched model without re-index — delete Qdrant collections, run `setup` then `update --full-reprocess` |
 | No languages detected | Check `EXCLUDED_DIRS` in config.py isn't excluding your source directories |
+| Qdrant "Expected exactly one primary key field" | Old boilerplate used 2 primary keys. Fix: use `GeneratedField.UUID` in `collect()` with `primary_key_fields=["chunk_id"]` |
+| Gemini "Unknown name 'config'" batch API error | CocoIndex 0.3.x doesn't support `task_type`/`output_dimension` in batch embed. Remove them from `index.py` `_get_embed_spec()` |
+| Docker daemon not running (macOS) | Try `open -a OrbStack` or `open -a Docker`, wait ~10s for initialization |
+| Indexing `node_modules`/`.output` | Old boilerplate didn't pass `excluded_patterns` to `LocalFile`. Fix: add `excluded_patterns=_get_excluded_patterns()` to `add_source()` in `index.py` |
+| Query "Not existing vector name" | CocoIndex uses named vectors (`embedding`). Pass `using="embedding"` to `query_points()` |
+| `query.py` "illegal request line" | Using gRPC port (6334) for REST client. Swap to port 6333 for `qdrant_client` |
 
 ## Excluding Directories
 

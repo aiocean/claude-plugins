@@ -175,6 +175,14 @@ Add to `.gitignore`:
 __pycache__/
 ```
 
+## Shared Infrastructure
+
+Qdrant and PostgreSQL can be shared across multiple projects safely:
+- **Qdrant collections** are namespaced: `{PROJECT_NAME}_{language}` (e.g., `poeai_nuxt_typescript`, `webapp_python`)
+- **PostgreSQL tables** are namespaced: `{FlowName}__cocoindex_tracking` (e.g., `Poeai_NuxtTypescript__cocoindex_tracking`)
+- Each project must have a **unique `PROJECT_NAME`** in `config.py` — this is the namespace key
+- `query.py` auto-discovers only collections matching the current project's `PROJECT_NAME` prefix
+
 ## How It Works Internally
 
 Languages are auto-detected by scanning `PROJECT_ROOT` for known file extensions (skipping `EXCLUDED_DIRS`).
@@ -190,13 +198,13 @@ toml, json, html, css.
 
 | | Local (MiniLM-L6-v2) | Gemini (embedding-2-preview) |
 |---|---|---|
-| Dimension | 384 | 1536 (reduced from 3072 for efficiency) |
+| Dimension | 384 | 3072 (full, no reduction — CocoIndex 0.3.x doesn't support output_dimension in batch API) |
 | Quality | Good (English) | Excellent (multilingual) |
 | Cost | Free | ~$0.00025/1K tokens |
 | Speed | Fast (no network) | Slower (API calls) |
-| Task types | Symmetric | Asymmetric (doc vs query) |
+| Task types | Symmetric | Asymmetric (RETRIEVAL_QUERY for search only — indexing uses default) |
 | Vietnamese | Weak | Strong |
-| Storage | ~15KB/1K chunks | ~120KB/1K chunks |
+| Storage | ~15KB/1K chunks | ~240KB/1K chunks |
 
 ## Gotchas (Learned From Experience)
 
@@ -212,6 +220,12 @@ toml, json, html, css.
 | Qdrant connection refused | Qdrant container not running — check Docker. Default gRPC port is 6334 |
 | `GEMINI_API_KEY` from shell overrides `.env` | Boilerplate uses `load_dotenv(override=True)` to ensure `.env` takes precedence over shell env vars |
 | No languages detected | Check EXCLUDED_DIRS isn't excluding your source directories |
+| Qdrant "Expected exactly one primary key field" | Qdrant requires a single primary key for point ID. Use `GeneratedField.UUID` in `collect()` with `primary_key_fields=["chunk_id"]` — **already fixed in boilerplate** |
+| Gemini "Unknown name 'config'" batch API error | CocoIndex 0.3.x `EmbedText` does NOT support `task_type` or `output_dimension` for Gemini batch embedding. Omit both params. `query.py` can still use `task_type` (single embed, not batch) — **already fixed in boilerplate** |
+| Docker daemon not running | On macOS, check for OrbStack (`open -a OrbStack`) or Docker Desktop (`open -a Docker`). Wait ~10s for daemon to initialize before running containers |
+| Indexing `node_modules`, `.output`, etc. | `EXCLUDED_DIRS` only affects language detection scan, NOT `LocalFile` source. Boilerplate now passes `excluded_patterns` to `LocalFile` — **already fixed in boilerplate** |
+| Qdrant query "Not existing vector name" | CocoIndex stores named vectors (field name `embedding`). `query.py` must pass `using="embedding"` to `query_points()` — **already fixed in boilerplate** |
+| `query.py` "illegal request line" on port 6334 | `QDRANT_URL` is the gRPC port (6334) for CocoIndex. `qdrant_client` Python lib uses REST (port 6333). Boilerplate now auto-swaps port — **already fixed** |
 
 ## File Roles
 
