@@ -94,9 +94,13 @@ Only include rows for docs that were actually generated.
 
 | Document | Description |
 |----------|-------------|
-| [C4 Architecture](c4-architecture.md) | System context, containers, components |
+| [Architecture](architecture.md) | System context, C4 diagrams, design decisions |
+| [Dependencies](dependencies.md) | Dependency graph, hub analysis, blast radius |
 | [Key Flows](key-flows.md) | Cross-module execution paths |
-| [Dependency Graph](dependency-graph.md) | Hub analysis, blast radius |
+| [API Surface](api-surface.md) | Public interfaces and endpoints |
+| [Data Model](data-model.md) | Data structures and schemas |
+| [Infrastructure](infrastructure.md) | Deployment and infrastructure |
+| [Product Requirements](product-requirements.md) | Inferred product requirements |
 
 ### Oracle-Written Module Docs
 

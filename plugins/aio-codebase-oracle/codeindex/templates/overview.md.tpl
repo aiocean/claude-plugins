@@ -101,6 +101,12 @@ graph LR
 - [Architecture Deep Dive](./architecture.md) - Design patterns and decisions
 - [Dependency Analysis](./dependencies.md) - Full dependency graph and metrics
 - [Code Quality Report](./quality.md) - Violations, complexity hotspots
+- [API Surface](./api-surface.md) - Public interfaces and endpoints
+- [Data Model](./data-model.md) - Data structures and schemas
+- [Key Flows](./key-flows.md) - Cross-module execution paths
+- [Infrastructure](./infrastructure.md) - Deployment and infrastructure
+- [Product Requirements](./product-requirements.md) - Inferred product requirements
+- [Codebase Map](./CODEBASE_MAP.md) - Full codebase index and navigation
 {{#each modules}}
 - [Module: {{name}}](./modules/{{slug}}.md) - {{description}}
 {{/each}}

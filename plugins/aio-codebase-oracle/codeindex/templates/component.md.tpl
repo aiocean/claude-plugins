@@ -127,8 +127,4 @@ graph LR
 
 ## Source
 
-```{{language}}
-{{source_code}}
-```
-
-> Source: [`{{file_path}}:{{start_line}}-{{end_line}}`]({{source_url}})
+> [`{{file_path}}:{{start_line}}-{{end_line}}`]({{source_url}})

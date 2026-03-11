@@ -9,12 +9,15 @@ Template types:
 - overview.md.tpl: Project-level overview and architecture
 - module.md.tpl: Per-module/domain deep dive
 - component.md.tpl: Per-component (class/function) documentation
-- architecture.md.tpl: Architecture patterns and design decisions
-- dependencies.md.tpl: Dependency graph and relationship analysis
+- architecture.md.tpl: Architecture patterns, C4 diagrams, and design decisions
+- dependencies.md.tpl: Dependency graph, hub analysis, blast radius, and metrics
 - quality.md.tpl: Code quality, violations, and health metrics
-
-Partials (_partials/):
-- Reusable content blocks for diagrams, tables, callouts, etc.
+- api-surface.md.tpl: Public interfaces and endpoints
+- data-model.md.tpl: Data structures and schemas
+- key-flows.md.tpl: Cross-module execution paths
+- infrastructure.md.tpl: Deployment and infrastructure
+- product-requirements.md.tpl: Inferred product requirements
+- CODEBASE_MAP.md.tpl: Full codebase index and navigation
 """
 
 import os
