@@ -7,6 +7,8 @@ Usage:
     python .cocoindex/query.py "search query"
     python .cocoindex/query.py "search query" --top-k 10 --json
     python .cocoindex/query.py --status
+    python .cocoindex/query.py --dry-run          # List files that WOULD be indexed
+    python .cocoindex/query.py --dry-run --json   # Same, as JSON
 """
 import argparse
 import json
@@ -28,13 +30,12 @@ def _embed_query(text: str) -> list[float]:
     if config.EMBEDDING_API_TYPE == "gemini":
         import google.genai
         client = google.genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        # NOTE: Do not pass output_dimensionality — must match indexing dimension (3072).
+        # CocoIndex 0.3.x indexes without dimension reduction, so query must match.
         result = client.models.embed_content(
             model=config.EMBEDDING_MODEL,
             contents=text,
-            config={
-                "task_type": "RETRIEVAL_QUERY",
-                "output_dimensionality": 1536,
-            },
+            config={"task_type": "RETRIEVAL_QUERY"},
         )
         return result.embeddings[0].values
     else:
@@ -44,7 +45,10 @@ def _embed_query(text: str) -> list[float]:
 
 
 def get_client():
-    kwargs = {"url": config.QDRANT_URL}
+    # QDRANT_URL is the gRPC endpoint (port 6334) used by CocoIndex.
+    # qdrant_client Python library uses REST API (port 6333), so swap the port.
+    url = config.QDRANT_URL.replace(":6334", ":6333")
+    kwargs = {"url": url}
     if config.QDRANT_API_KEY:
         kwargs["api_key"] = config.QDRANT_API_KEY
     return QdrantClient(**kwargs)
@@ -85,6 +89,43 @@ def get_status():
     return results
 
 
+def dry_run():
+    """Scan PROJECT_ROOT with the same logic as index.py and list files that would be indexed.
+
+    Uses EXCLUDED_DIRS, EXTENSION_MAP, and the same excluded_patterns that LocalFile would use.
+    This lets you verify exclusions BEFORE running the expensive embedding step.
+    """
+    from fnmatch import fnmatch
+
+    excluded_patterns = [f"{d}/**" for d in config.EXCLUDED_DIRS]
+    excluded_patterns.append(".*/**")  # Exclude all dot-directories
+    results = {}  # {language: [file_paths]}
+
+    for root, dirs, files in os.walk(config.PROJECT_ROOT):
+        dirs[:] = [d for d in dirs if d not in config.EXCLUDED_DIRS and not d.startswith(".")]
+        for f in files:
+            ext = os.path.splitext(f)[1].lower()
+            if ext not in config.EXTENSION_MAP:
+                continue
+            lang, category = config.EXTENSION_MAP[ext]
+            abs_path = os.path.join(root, f)
+            rel_path = os.path.relpath(abs_path, config.PROJECT_ROOT)
+
+            # Check excluded_patterns (same as LocalFile would)
+            excluded = any(fnmatch(rel_path, pat) for pat in excluded_patterns)
+            if excluded:
+                continue
+
+            if lang not in results:
+                results[lang] = []
+            results[lang].append(rel_path)
+
+    # Sort files within each language
+    for lang in results:
+        results[lang].sort()
+    return results
+
+
 def query_similar(question: str, top_k: int = 5):
     """Search all project collections by semantic similarity."""
     query_embedding = _embed_query(question)
@@ -99,6 +140,7 @@ def query_similar(question: str, top_k: int = 5):
             hits = client.query_points(
                 collection_name=coll,
                 query=query_embedding,
+                using="embedding",
                 limit=top_k,
                 with_payload=True,
             ).points
@@ -122,9 +164,30 @@ def main():
     parser.add_argument("question", nargs="?", help="Search query")
     parser.add_argument("--top-k", "-k", type=int, default=5, help="Number of results (default: 5)")
     parser.add_argument("--status", action="store_true", help="Show index status")
+    parser.add_argument("--dry-run", action="store_true", help="List files that would be indexed (no embedding, no Qdrant needed)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     args = parser.parse_args()
+
+    if args.dry_run:
+        results = dry_run()
+        total_files = sum(len(files) for files in results.values())
+        if args.json:
+            print(json.dumps({"languages": {k: len(v) for k, v in results.items()}, "total": total_files, "files": results}, indent=2))
+        else:
+            print(f"Dry Run — files that WOULD be indexed ({total_files} total):")
+            print(f"  PROJECT_ROOT: {config.PROJECT_ROOT}")
+            print(f"  EXCLUDED_DIRS: {sorted(config.EXCLUDED_DIRS)}")
+            print()
+            for lang in sorted(results.keys()):
+                files = results[lang]
+                print(f"  {lang}: {len(files)} files")
+                for f in files[:10]:
+                    print(f"    {f}")
+                if len(files) > 10:
+                    print(f"    ... and {len(files) - 10} more")
+            print(f"\n  Total: {total_files} files")
+        return
 
     if args.status:
         status = get_status()

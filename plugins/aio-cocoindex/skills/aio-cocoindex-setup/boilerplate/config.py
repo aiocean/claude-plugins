@@ -111,7 +111,7 @@ CHUNK_CONFIG = {
 
 # Directories to always skip during language detection scan
 EXCLUDED_DIRS = {
-    "node_modules", ".git", "__pycache__", "dist", "build",
+    "node_modules", ".git", "__pycache__", "dist", "build", ".output",
     ".venv", ".venv-cocoindex", "vendor", "target", ".cocoindex",
     ".next", ".nuxt", "coverage", ".tox", ".mypy_cache", ".ruff_cache",
 }
