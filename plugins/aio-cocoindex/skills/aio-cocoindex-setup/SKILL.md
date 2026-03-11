@@ -77,7 +77,8 @@ cat $BP/config.py
 
 Then write a customized version to `.cocoindex/config.py` with:
 - Correct `PROJECT_NAME`
-- Correct `DATABASE_URL` (ask user for their PostgreSQL host)
+- Correct `DATABASE_URL` (ask user for their PostgreSQL host — used for CocoIndex metadata only)
+- Correct `QDRANT_URL` (ask user for their Qdrant endpoint — used for vector storage)
 - Correct `EMBEDDING_API_TYPE` — `"local"` or `"gemini"` based on user choice
 - Correct `SOURCE_DIRS` — directories to index
 
@@ -98,6 +99,7 @@ Languages are auto-detected from file extensions. No need to configure collectio
 ```bash
 cat > .cocoindex/.env << 'EOF'
 COCOINDEX_DATABASE_URL=postgresql://cocoindex:cocoindex@<HOST>:5432/cocoindex
+COCOINDEX_QDRANT_URL=http://localhost:6334
 COCOINDEX_EMBEDDING_API_TYPE=local
 COCOINDEX_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 EOF
@@ -107,16 +109,24 @@ EOF
 ```bash
 cat > .cocoindex/.env << 'EOF'
 COCOINDEX_DATABASE_URL=postgresql://cocoindex:cocoindex@<HOST>:5432/cocoindex
+COCOINDEX_QDRANT_URL=http://localhost:6334
 COCOINDEX_EMBEDDING_API_TYPE=gemini
 COCOINDEX_EMBEDDING_MODEL=gemini-embedding-2-preview
 GEMINI_API_KEY=<user's API key>
 EOF
 ```
 
-Ask user for the PostgreSQL host. If they don't have one:
+**For Qdrant Cloud** (instead of local), set:
+```
+COCOINDEX_QDRANT_URL=https://xyz-example.cloud-region.cloud.qdrant.io:6334
+COCOINDEX_QDRANT_API_KEY=<your-qdrant-api-key>
+```
 
+Ask user for the PostgreSQL host (needed for CocoIndex metadata tracking) and Qdrant endpoint.
+
+If they don't have PostgreSQL:
 ```bash
-# Start PostgreSQL + pgvector via Docker
+# Start PostgreSQL via Docker (metadata only — no pgvector needed)
 docker run -d \
   --name cocoindex-postgres \
   --restart unless-stopped \
@@ -124,9 +134,18 @@ docker run -d \
   -e POSTGRES_PASSWORD=cocoindex \
   -e POSTGRES_DB=cocoindex \
   -p 5432:5432 \
-  pgvector/pgvector:pg17
+  postgres:17
+```
 
-docker exec cocoindex-postgres psql -U cocoindex -c "CREATE EXTENSION IF NOT EXISTS vector;"
+If they don't have Qdrant:
+```bash
+# Start Qdrant via Docker
+docker run -d \
+  --name cocoindex-qdrant \
+  --restart unless-stopped \
+  -p 6333:6333 \
+  -p 6334:6334 \
+  qdrant/qdrant
 ```
 
 ### Step 7: Install & Index
@@ -171,7 +190,7 @@ toml, json, html, css.
 
 | | Local (MiniLM-L6-v2) | Gemini (embedding-2-preview) |
 |---|---|---|
-| Dimension | 384 | 1536 (reduced from 3072 for HNSW compatibility) |
+| Dimension | 384 | 1536 (reduced from 3072 for efficiency) |
 | Quality | Good (English) | Excellent (multilingual) |
 | Cost | Free | ~$0.00025/1K tokens |
 | Speed | Fast (no network) | Slower (API calls) |
@@ -188,8 +207,9 @@ toml, json, html, css.
 | `pip install` fails with PEP 668 error | Use `python3 -m venv` — never install globally |
 | Closure captures wrong loop variable | `index.py` uses `_lang=lang` default arg — don't modify |
 | "UNEXPECTED key: embeddings.position_ids" | Harmless warning from sentence-transformers — ignore it |
-| Switching embedding model | Must re-index everything — vector dimensions and space are incompatible |
+| Switching embedding model | Must re-index everything — vector dimensions are incompatible. Delete Qdrant collections and re-run setup + update |
 | Gemini rate limits on large indexes | CocoIndex handles batching internally, but very large indexes (50K+ chunks) may need patience |
+| Qdrant connection refused | Qdrant container not running — check Docker. Default gRPC port is 6334 |
 | `GEMINI_API_KEY` from shell overrides `.env` | Boilerplate uses `load_dotenv(override=True)` to ensure `.env` takes precedence over shell env vars |
 | No languages detected | Check SOURCE_DIRS points to directories with supported file types |
 

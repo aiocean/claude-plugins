@@ -154,8 +154,8 @@
     {
       "name": "aio-cocoindex",
       "source": "./plugins/aio-cocoindex",
-      "description": "CocoIndex-based semantic search with auto language detection and tree-sitter code chunking. One project = one unified index. Zero-config: just set PROJECT_NAME and SOURCE_DIRS. Two skills: aio-cocoindex-setup (scaffold .cocoindex/) and aio-cocoindex (search and maintain).",
-      "version": "3.0.0",
+      "description": "CocoIndex-based semantic search with Qdrant vector storage, auto language detection and tree-sitter code chunking. One project = one unified index. Zero-config: just set PROJECT_NAME and SOURCE_DIRS. Two skills: aio-cocoindex-setup (scaffold .cocoindex/) and aio-cocoindex (search and maintain).",
+      "version": "4.0.0",
       "author": { "name": "aiocean" }
     },
     {
