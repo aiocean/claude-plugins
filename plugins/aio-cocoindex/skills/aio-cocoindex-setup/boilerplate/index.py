@@ -29,12 +29,21 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"), ov
 import cocoindex
 import config
 
+# Register Qdrant connection (used by all flows)
+qdrant_connection = cocoindex.add_auth_entry(
+    "qdrant",
+    cocoindex.targets.QdrantConnection(
+        grpc_url=config.QDRANT_URL,
+        **({"api_key": config.QDRANT_API_KEY} if config.QDRANT_API_KEY else {}),
+    ),
+)
+
 
 def _get_embed_spec():
     """Return the embedding function spec based on config."""
     if config.EMBEDDING_API_TYPE == "gemini":
         # output_dimension=1536: Gemini recommends 768/1536/3072.
-        # 1536 fits pgvector HNSW limit (max 2000 dims) while keeping quality.
+        # 1536 balances quality vs storage/compute cost.
         # NOTE: If CocoIndex batch API errors on task_type/output_dimension,
         # remove them — it's a CocoIndex compatibility issue, not Gemini's.
         return cocoindex.functions.EmbedText(
@@ -117,17 +126,14 @@ def build_flow(
                 embedding=chunk["embedding"],
             )
 
-    table_name = f"{config.PROJECT_NAME}_{language}"
+    collection_name = f"{config.PROJECT_NAME}_{language}"
     doc_embeddings.export(
-        table_name,
-        cocoindex.storages.Postgres(),
+        collection_name,
+        cocoindex.targets.Qdrant(
+            collection_name=collection_name,
+            connection=qdrant_connection,
+        ),
         primary_key_fields=["filename", "location"],
-        vector_indexes=[
-            cocoindex.VectorIndexDef(
-                field_name="embedding",
-                metric=cocoindex.VectorSimilarityMetric.COSINE_SIMILARITY,
-            )
-        ],
     )
 
 

@@ -118,13 +118,14 @@ grep EMBEDDING_API_TYPE .cocoindex/config.py .cocoindex/.env
 | Problem | Solution |
 |---------|----------|
 | `.cocoindex/` not found | Run `aio-cocoindex-setup` skill first |
-| Connection refused | PostgreSQL container not running — check Docker |
+| Connection refused (Postgres) | PostgreSQL container not running — needed for CocoIndex metadata |
+| Connection refused (Qdrant) | Qdrant container not running — check Docker (gRPC port 6334) |
 | 0 chunks after update | Make sure to use `update` subcommand, not `server` |
 | Slow first run (local) | Model download (~90MB) + bulk embedding — subsequent runs are incremental |
 | Slow first run (Gemini) | API calls for all chunks — subsequent runs are incremental |
 | venv missing | `python3 -m venv .venv-cocoindex && .venv-cocoindex/bin/pip install -r .cocoindex/requirements.txt` |
 | `GEMINI_API_KEY` not set | Add to `.cocoindex/.env` — required for Gemini mode |
-| Dimension mismatch error | Switched model without re-index — run `setup` then `update --full-reprocess` |
+| Dimension mismatch error | Switched model without re-index — delete Qdrant collections, run `setup` then `update --full-reprocess` |
 | No languages detected | Check `SOURCE_DIRS` in config.py points to directories with supported file types |
 
 ## Adding New Source Directories
@@ -141,14 +142,16 @@ Then re-run setup and index:
 .venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f
 ```
 
-## Direct Database Access
+## Direct Qdrant Access
 
-Read `config.py` to find the database URL and project name. Tables are auto-named as `{project}{language}__{project}_{language}`:
+Read `config.py` to find the Qdrant URL and project name. Collections are named `{project}_{language}`:
 
 ```bash
-# Connect
-docker exec -it cocoindex-postgres psql -U cocoindex
+# List collections via REST API
+curl http://localhost:6333/collections
 
-# Row counts
-SELECT tablename, (SELECT count(*) FROM <tablename>) FROM pg_tables WHERE schemaname = 'public' AND tablename NOT LIKE '%tracking%' AND tablename != 'cocoindex_setup_metadata';
+# Get collection info
+curl http://localhost:6333/collections/{project}_{language}
+
+# Or use Qdrant Web UI at http://localhost:6333/dashboard
 ```
