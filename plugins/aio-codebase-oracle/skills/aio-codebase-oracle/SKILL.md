@@ -9,7 +9,7 @@ Comprehensive architecture documentation: CodeIndex static analysis combined wit
 
 **Core Philosophy:** Oracle **writes all documentation from scratch** using CodeIndex's static analysis data (codebase map, dependency graphs, metrics, communities) combined with direct source code reading. CodeIndex provides the quantitative foundation; Oracle provides the qualitative analysis and writes every doc.
 
-**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `dependency_graphs/*.json` (detailed dependency data), and `.tpl` templates for doc structure (including `graph.html.tpl` for interactive graph generation).
+**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `dependency_graphs/*.json` (detailed dependency data), and `.tpl` templates for doc structure.
 
 **What Oracle Provides:** All written documentation — module docs, architecture analysis, key flows, dependency narratives, failure modes, design rationale, and decision guidance.
 
@@ -110,7 +110,7 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 │   ↓                                                             │
 │   Produces:                                                     │
 │   - docs/codebase_map.json (components, edges, metrics, hubs) │
-│   - docs/templates/graph.html.tpl (template for AI graph gen)  │
+│   - (graph.html.tpl lives in skill dir, not CodeIndex)         │
 │   - docs/dependency_graphs/*.json (detailed dependency data)   │
 │   - docs/templates/*.tpl (doc structure templates)             │
 │                                                                 │
@@ -143,7 +143,7 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 │   │   ├── Design Rationale & Trade-offs                        │
 │   │   └── <!-- ORACLE-META --> compact footer                  │
 │   ├── codebase_map.json        (CodeIndex static analysis)     │
-│   ├── graph.html               (Oracle-generated from graph.html.tpl) │
+│   ├── graph.html               (AI-generated from skill's graph.html.tpl) │
 │   ├── dependency_graphs/       (CodeIndex dependency data)     │
 │   └── templates/               (CodeIndex doc templates)       │
 └─────────────────────────────────────────────────────────────────┘
@@ -155,7 +155,7 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 docs/
 ├── codebase_map.json            # Components, edges, metrics, communities, hubs
 ├── dependency_graphs/           # Per-module dependency JSON files
-└── templates/                   # Doc structure templates (.tpl, including graph.html.tpl)
+└── templates/                   # Doc structure templates (.tpl)
 ```
 
 **What CodeIndex does NOT output in static-only mode:**
@@ -227,7 +227,7 @@ Read and parse CodeIndex's static analysis output:
 
 1. **Parse `codebase_map.json`**: Extract components, edges, metrics, communities, and hubs
 2. **Parse `dependency_graphs/*.json`**: Extract detailed per-module dependency data
-3. **Note `graph.html.tpl`**: Available in templates/ for Oracle to generate an interactive graph viewer in Phase 3
+3. **Note `graph.html.tpl`**: Available in this skill's directory for generating an interactive graph viewer in Phase 3
 
 From `codebase_map.json`, identify:
 - **Communities**: Groups of related components (these become module docs)
@@ -410,79 +410,31 @@ Unknowns: {N} items pending verification
 
 **Step 6: Generate interactive graph viewer (`graph.html`).**
 
-Read `codeindex/templates/graph.html.tpl` from the plugin installation. This template produces a D3 force-directed graph with module clustering, convex hulls, colored links, search (files + functions), hover tooltips, click-to-lock highlight, double-click zoom, minimap, keyboard shortcuts, and hub pulse animations.
+The `graph.html.tpl` template lives in this skill's directory (not in codeindex). It produces a self-contained D3 force-directed graph with module clustering, convex hulls, colored links, search, tooltips, minimap, and keyboard shortcuts.
 
-**How to locate the template:**
+**How to generate:**
 
+1. **Read the template** from this skill's directory:
 ```bash
-# Find the template in the plugin cache
-GRAPH_TPL="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex/templates/graph.html.tpl 2>/dev/null | sort -V | tail -1)"
-cat "$GRAPH_TPL"
+GRAPH_TPL="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/skills/aio-codebase-oracle/graph.html.tpl 2>/dev/null | sort -V | tail -1)"
 ```
 
-**How to fill the template:** Copy the entire template HTML and replace the 4 JavaScript data blocks near the top of `<script>`. All 4 are extracted from `codebase_map.json`:
+2. **Read `docs/codebase_map.json`** — this is the data source.
 
-**1. `filesData`** — Object keyed by file path. Each value has the component's metrics:
-```javascript
-const filesData = {
-  "src/index.ts": {
-    "functions": 6,           // from nodes[].metrics.functions
-    "max_complexity": 3,      // from nodes[].metrics.max_complexity
-    "hub_count": 1,           // number of hub functions in this file
-    "community_ids": [0, 1],  // from nodes[].community_ids
-    "function_names": ["main", "start", "stop", "fetch", "createBot", "createAdaptersForBot"]
-  },
-  // ... one entry per component in codebase_map.json nodes
-};
-```
+3. **Copy the template to `docs/graph.html`** and fill in the 4 JavaScript data blocks near the top of `<script>`. All data comes from `codebase_map.json`:
 
-**2. `edgesData`** — Array of edges between files:
-```javascript
-const edgesData = [
-  {"source": "src/index.ts", "target": "src/session.ts", "weight": 6},
-  {"source": "src/index.ts", "target": "src/commands.ts", "weight": 2},
-  // ... from codebase_map.json edges array
-];
-```
+| Data block | Source | Description |
+|---|---|---|
+| `filesData` | `nodes[]` | Object keyed by file path. Each: `{functions, max_complexity, hub_count, community_ids, function_names}` |
+| `edgesData` | `edges[]` | Array of `{source, target, weight}` |
+| `summaryData` | `summary_metrics` | `{total_nodes, total_edges, hub_files, circular_dependencies}` |
+| `moduleConfig` | Inferred from communities/dirs | `{"Module Name": {color: "#hex", files: [...]}}` per community |
 
-**3. `summaryData`** — Global graph summary:
-```javascript
-const summaryData = {
-  total_nodes: 222,               // from summary_metrics.total_nodes
-  total_edges: 209,               // from summary_metrics.total_edges
-  hub_files: ["main", "createBot", "handleIncomingMessage"],  // function names with high hub_score
-  circular_dependencies: []       // from summary_metrics.circular_dependencies
-};
-```
+4. **Replace the title** — Change `<title>` and `<h1>` to the actual project name.
 
-**4. `moduleConfig`** — Group files into named modules with colors. Infer module names from directory structure or community groupings:
-```javascript
-const moduleConfig = {
-  "Core Runtime":       { color: "#58a6ff", files: ["src/index.ts", "src/types.ts"] },
-  "Message Processing": { color: "#f78166", files: ["src/chat-handlers.ts", "src/commands.ts"] },
-  "Infrastructure":     { color: "#f0883e", files: ["src/session.ts", "src/scheduler.ts"] },
-  // ... one entry per module/community
-};
-```
+5. **Write to `docs/graph.html`**.
 
-Color palette: `#58a6ff, #f78166, #d2a8ff, #7ee787, #f0883e, #79c0ff, #ffa657, #ff7b72, #3fb950, #a5d6ff`
-
-**5. Replace the title** — Change `<title>` and the `<h1>` text from the placeholder to the actual project name.
-
-**6. Write to `docs/graph.html`** — Save the filled template as a standalone HTML file.
-
-**Template features (no changes needed — these work automatically once data is filled):**
-- Module-colored links and arrow markers
-- Convex hull outlines around module clusters
-- Hover tooltip with file name, module, function count, dependency counts
-- Click node for detailed info panel (functions, hub functions, dependencies)
-- Double-click to zoom to a node
-- Search by file name, path, or function name
-- Module toggle buttons with file counts
-- Minimap with viewport indicator (click to navigate)
-- Hub pulse animation on high-connectivity nodes
-- Keyboard shortcuts: `/` search, `Esc` close, `F` fit view, `L` lock layout
-- Fit-to-view and layout lock toolbar buttons
+Color palette for modules: `#58a6ff, #f78166, #d2a8ff, #7ee787, #f0883e, #79c0ff, #ffa657, #ff7b72, #3fb950, #a5d6ff`
 
 Generate `CODEBASE_MAP.md` as the index of all Oracle-written module docs and include:
 
@@ -591,7 +543,7 @@ docs/
 │   ├── Decision-support sections (failure modes, blast radius, rationale)
 │   └── <!-- ORACLE-META --> compact footer
 ├── codebase_map.json            # CodeIndex static analysis (unchanged)
-├── graph.html                   # Oracle-generated interactive viewer (from graph.html.tpl)
+├── graph.html                   # AI-generated interactive viewer (from skill's graph.html.tpl)
 ├── dependency_graphs/           # CodeIndex dependency data (unchanged)
 └── templates/                   # CodeIndex doc templates (unchanged)
 ```
