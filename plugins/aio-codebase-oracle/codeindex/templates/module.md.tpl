@@ -1,6 +1,6 @@
 # Module: {{module_name}}
 
-> Part of [{{project_name}}](./overview.md) | Community ID: {{community_id}}
+> Part of [{{project_name}}](./CODEBASE_MAP.md) | Community ID: {{community_id}}
 
 ## Purpose
 

@@ -10,14 +10,7 @@ Comprehensive architecture documentation: CodeIndex static analysis combined wit
 
 **Core Philosophy:** Oracle **writes all documentation from scratch** using CodeIndex's static analysis data (codebase map, dependency graphs, metrics, communities) combined with direct source code reading. CodeIndex provides the quantitative foundation; Oracle provides the qualitative analysis and writes every doc.
 
-**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `graph.html` (interactive viewer), `dependency_graphs/*.json` (detailed dependency data), and a full set of `.tpl` templates for doc structure:
-- `overview.md.tpl` — project-level overview (architecture pattern, entry points, health dashboard, module map)
-- `module.md.tpl` — per-module docs (components, hubs, internal/external deps, quality metrics)
-- `architecture.md.tpl` — architecture analysis (layer map, community detection, data flow, design decisions)
-- `component.md.tpl` — per-component docs (signature, metrics, dependencies, temporal coupling)
-- `dependencies.md.tpl` — dependency graph (PageRank, bottlenecks, instability, circular deps, hubs)
-- `quality.md.tpl` — code quality report (complexity hotspots, maintainability index, violations)
-- `_partials/` — reusable fragments (callout, health_badge, mermaid_graph, metrics_table, source_ref)
+**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `graph.html` (interactive viewer), `dependency_graphs/*.json` (detailed dependency data), and 18 `.tpl` templates for doc structure.
 
 **What Oracle Provides:** All written documentation — module docs, architecture analysis, key flows, dependency narratives, failure modes, design rationale, and decision guidance.
 
@@ -349,30 +342,30 @@ Oracle writes all documentation from scratch using analysis data from Phase 2.
 
 #### Templates
 
-All templates live in `codeindex/templates/`. Use them as structural guides — Oracle fills with analysis data.
+All 18 templates live in `codeindex/templates/`. Use them as structural guides — Oracle fills with analysis data from `codebase_map.json` and direct source code reading.
 
-**Static analysis templates** (data-driven from `codebase_map.json`):
-- `overview.md.tpl` — project overview: architecture pattern, entry points, health dashboard, module map
-- `module.md.tpl` — per-module: components table, hub analysis, internal/external deps, quality metrics
-- `architecture.md.tpl` — architecture: layer map, community detection, data flow, design decisions
-- `component.md.tpl` — per-component: signature, metrics (PageRank, fan-in/out, complexity), dependencies
-- `dependencies.md.tpl` — dependency graph: bottlenecks, instability analysis, circular deps, temporal coupling
-- `quality.md.tpl` — code quality: complexity hotspots, maintainability index, violations, improvement priorities
+**Structure & analysis:**
+- `overview.md.tpl` — project overview, health dashboard, module map
+- `module.md.tpl` — per-module: components, hubs, deps, quality metrics
+- `architecture.md.tpl` — C4 diagrams, layer map, community detection, design decisions
+- `component.md.tpl` — per-component: signature, metrics, dependencies
+- `dependencies.md.tpl` — dependency graph, hubs, blast radius, circular deps, temporal coupling
+- `quality.md.tpl` — complexity hotspots, maintainability index, violations
 
-**Cross-cutting analysis templates** (require source code reading):
-- `c4-architecture.md.tpl` — C4 context/container/component diagrams
+**Cross-cutting concerns:**
 - `key-flows.md.tpl` — cross-module execution paths and sequence diagrams
-- `dependency-graph.md.tpl` — hub analysis with blast radius annotations
 - `api-surface.md.tpl` — API endpoints, contracts, versioning
 - `data-model.md.tpl` — data schemas, relationships, migrations
 - `infrastructure.md.tpl` — deployment, runtime, infrastructure-as-code
+- `testing.md.tpl` — test architecture, coverage mapping, test-to-component traceability
+- `observability.md.tpl` — logging, metrics, tracing, health checks, alerting
+- `security.md.tpl` — trust boundaries, auth flows, secrets management, input validation
+
+**Process & navigation:**
+- `onboarding.md.tpl` — getting started, dev workflow, common tasks
+- `adr.md.tpl` — architecture decision records (explicit + inferred from code)
 - `product-requirements.md.tpl` — functional requirements traceability
 - `CODEBASE_MAP.md.tpl` — Oracle index document with priorities and unknowns
-
-**Reusable fragments** (`_partials/`):
-- callout, health_badge, mermaid_graph, metrics_table, source_ref
-
-Oracle fills template structures with data from `codebase_map.json` and direct source code reading, then adds decision-support sections (failure modes, design rationale, blast radius).
 
 #### Writing each module doc
 
@@ -382,7 +375,7 @@ For each module/community identified in Phase 1:
 - `codeindex/templates/module.md.tpl` as structural guide (components table, hub analysis, deps, quality metrics)
 - Static analysis data from `codebase_map.json` (metrics, dependencies, communities, hubs)
 - Direct source code reading from Phase 2
-- Match template to doc type: `overview.md.tpl` for project overview, `architecture.md.tpl` for architecture, `dependencies.md.tpl` for deps, `quality.md.tpl` for quality, `c4-architecture.md.tpl` for C4 diagrams, `key-flows.md.tpl` for execution paths
+- Match template to doc type — all 18 templates in `codeindex/templates/` cover: overview, module, architecture (with C4), component, dependencies (with blast radius), quality, key-flows, api-surface, data-model, infrastructure, testing, observability, security, onboarding, adr, product-requirements, CODEBASE_MAP
 
 **Step 2: Add evidence inline.** Sprinkle `path:line` references throughout, not in a separate table. Example:
 - "The handler validates the request payload (`internal/handler/create.go:45`)"
