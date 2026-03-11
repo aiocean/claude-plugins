@@ -5,18 +5,23 @@ This doc is filled by the structure-analyst.
 Maps module-level dependencies, identifies hubs, detects layer violations.
 
 Primary data sources (in order of preference):
-1. CodeWiki: docs/temp/dependency_graphs/*.json (if exists)
-2. CodeWiki: docs/module_tree.json for module structure
+1. CodeWiki: docs/codebase_map.json for components, edges, communities, hubs
+2. CodeWiki: docs/dependency_graphs/*.json for detailed dependency data
 3. Tree-sitter: docs/.tree-sitter-results.json (if exists)
 4. Grep: fallback for import statements
 
 IMPORTANT PATHS:
 - CodeWiki output is in docs/, NOT .codewiki-cache/
-- Dependency graph: docs/temp/dependency_graphs/{repo}_dependency_graph.json
-- Module tree: docs/module_tree.json
-- call_graph.json does NOT exist - use Tree-sitter or LSP instead
+- Static analysis: docs/codebase_map.json
+- Dependency graphs: docs/dependency_graphs/*.json
+- Interactive viewer: docs/graph.html
 
-CodeWiki dependency_graph format (ACTUAL):
+codebase_map.json contains:
+- nodes: components with metrics (PageRank, fan-in, fan-out, complexity)
+- edges: dependency relationships between components
+- communities: detected module groupings with keywords
+
+dependency_graph JSON format:
 {
   "component.id": {
     "id": "...",
@@ -27,15 +32,6 @@ CodeWiki dependency_graph format (ACTUAL):
   }
 }
 It's a flat dict keyed by component ID, NOT a graph with nodes/edges arrays.
-
-CodeWiki module_tree.json format:
-{
-  "ModuleName": {
-    "path": "path/to/module",
-    "components": ["fully.qualified.ComponentName", ...],
-    "children": { ... }
-  }
-}
 -->
 
 ## Module Dependencies
@@ -43,21 +39,21 @@ CodeWiki module_tree.json format:
 <!-- ORACLE:DEP_GRAPH
 Build a Mermaid flowchart showing how modules depend on each other.
 
-**If CodeWiki module_tree.json exists:**
+**From codebase_map.json communities:**
 ```bash
-cat docs/module_tree.json | python3 -c "
+cat docs/codebase_map.json | python3 -c "
 import json, sys
-tree = json.load(sys.stdin)
-for name, data in tree.items():
-    print(f'{name}:')
-    print(f'  Path: {data.get(\"path\")}')
-    print(f'  Components: {len(data.get(\"components\", []))}')
+data = json.load(sys.stdin)
+for comm in data.get('communities', []):
+    print(f'{comm[\"name\"]}:')
+    print(f'  Components: {comm.get(\"node_count\", 0)}')
+    print(f'  Keywords: {comm.get(\"keywords\", [])}')
 "
 ```
 
-**If CodeWiki dependency_graph exists:**
+**From dependency_graphs/*.json:**
 ```bash
-cat docs/temp/dependency_graphs/*.json | python3 -c "
+cat docs/dependency_graphs/*.json | python3 -c "
 import json, sys
 data = json.load(sys.stdin)
 # Format: {component_id: {depends_on: [...]}}
@@ -104,32 +100,25 @@ For each hub file (5+ dependents), document:
 - Stability: how frequently it changes
 - Risk: Low/Medium/High/Critical
 
-**From CodeWiki module_tree.json (count component references):**
+**From codebase_map.json nodes (find high fan-in components):**
 ```bash
-cat docs/module_tree.json | python3 -c "
+cat docs/codebase_map.json | python3 -c "
 import json, sys
-from collections import Counter
-tree = json.load(sys.stdin)
-component_refs = Counter()
-
-def count_refs(node):
-    for name, data in node.items():
-        for comp in data.get('components', []):
-            component_refs[comp] += 1
-        if data.get('children'):
-            count_refs(data['children'])
-
-count_refs(tree)
-print('Hub components (2+ modules):')
-for comp, count in component_refs.most_common(10):
-    if count >= 2:
-        print(f'  {comp}: {count} modules')
+data = json.load(sys.stdin)
+nodes = data.get('nodes', [])
+hubs = sorted(
+    [n for n in nodes if n.get('fan_in', 0) >= 5],
+    key=lambda n: n.get('fan_in', 0),
+    reverse=True
+)[:10]
+for h in hubs:
+    print(f'{h[\"name\"]}: fan_in={h.get(\"fan_in\",0)}, fan_out={h.get(\"fan_out\",0)}')
 "
 ```
 
-**From CodeWiki dependency_graph (if exists):**
+**From dependency_graphs/*.json (if exists):**
 ```bash
-cat docs/temp/dependency_graphs/*.json | python3 -c "
+cat docs/dependency_graphs/*.json | python3 -c "
 import json, sys
 from collections import Counter
 data = json.load(sys.stdin)
@@ -174,8 +163,7 @@ Trace 2 levels deep:
 1. Direct dependents (files that import the hub)
 2. Indirect dependents (files that import direct dependents)
 
-Use CodeWiki module_tree.json or dependency_graph to trace.
-NOTE: call_graph.json does NOT exist in CodeWiki output.
+Use codebase_map.json edges and dependency_graphs/*.json to trace.
 
 Present as a list per hub:
 ### hub-file.ts
