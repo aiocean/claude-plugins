@@ -79,7 +79,6 @@ def generate_command(ctx, output: str, include: Optional[str], exclude: Optional
 
         from codeindex.analyzer import DependencyGraphBuilder
         from codeindex.reporting.codebase_map_generator import generate_codebase_map
-        from codeindex.reporting.graph_viewer_generator import generate_graph_viewer
         from codeindex.reporting.arch_rules import evaluate_rules
         from codeindex.utils import file_manager
 
@@ -109,10 +108,7 @@ def generate_command(ctx, output: str, include: Optional[str], exclude: Optional
             arch_violations=evaluate_rules(components, builder.circular_deps, builder.temporal_couplings),
         )
 
-        # Interactive graph viewer
-        graph_path = generate_graph_viewer(str(output_dir))
-
-        # Copy doc templates to output directory
+        # Copy doc templates to output directory (includes graph.html.tpl for AI-generated graph)
         from codeindex.templates import TEMPLATES_DIR
         import shutil
 
@@ -136,8 +132,6 @@ def generate_command(ctx, output: str, include: Optional[str], exclude: Optional
         click.echo(f"  Time:          {int(elapsed)}s")
         click.echo()
         click.echo(f"  Output:        {output_dir}")
-        if graph_path:
-            click.echo(f"  Graph viewer:  {graph_path}")
         click.echo()
 
     except RepositoryError as e:
