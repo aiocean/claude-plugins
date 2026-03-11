@@ -414,10 +414,7 @@ The `graph.html.tpl` template lives in this skill's directory (not in codeindex)
 
 **How to generate:**
 
-1. **Read the template** from this skill's directory:
-```bash
-GRAPH_TPL="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/skills/aio-codebase-oracle/graph.html.tpl 2>/dev/null | sort -V | tail -1)"
-```
+1. **Read the template** `graph.html.tpl` from this skill's directory.
 
 2. **Read `docs/codebase_map.json`** — this is the data source.
 
