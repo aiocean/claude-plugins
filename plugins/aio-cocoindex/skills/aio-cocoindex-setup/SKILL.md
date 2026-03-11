@@ -1,5 +1,5 @@
 ---
-name: cocoindex-setup
+name: aio-cocoindex-setup
 description: This skill should be used when the user asks to "setup cocoindex", "create index for this project", "add semantic search", "index this codebase", "setup markdown indexing", "cocoindex init", or wants to set up CocoIndex-based document indexing for a project. Scaffolds a `.cocoindex/` directory with project-specific indexing code using boilerplate files.
 ---
 
@@ -18,7 +18,7 @@ Scaffold a `.cocoindex/` directory for any project with semantic search capabili
 ### Step 1: Resolve Boilerplate Path
 
 ```bash
-BP="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-cocoindex/*/skills/cocoindex-setup/boilerplate 2>/dev/null | sort -V | tail -1)"
+BP="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-cocoindex/*/skills/aio-cocoindex-setup/boilerplate 2>/dev/null | sort -V | tail -1)"
 ls $BP  # Should show: config.py  index.py  query.py  requirements.txt
 ```
 

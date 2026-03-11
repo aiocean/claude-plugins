@@ -559,7 +559,7 @@ ls .cocoindex/query.py 2>/dev/null
 
 ### Setup
 
-If CocoIndex is not set up for the project, suggest the user run `/aio-cocoindex:cocoindex-setup` first. Oracle does not set up CocoIndex itself — it only queries an existing index.
+If CocoIndex is not set up for the project, suggest the user run `/aio-cocoindex:aio-cocoindex-setup` first. Oracle does not set up CocoIndex itself — it only queries an existing index.
 
 ## Troubleshooting
 

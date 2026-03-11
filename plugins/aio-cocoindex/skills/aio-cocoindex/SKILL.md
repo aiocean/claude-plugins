@@ -1,6 +1,6 @@
 ---
-name: cocoindex
-description: This skill should be used when the user asks to "search knowledge", "find in docs", "query index", "semantic search", "update index", "rebuild index", "check index status", "cocoindex query", "cocoindex update", or wants to search/maintain an existing CocoIndex. Requires a `.cocoindex/` directory in the project (created by cocoindex-setup skill).
+name: aio-cocoindex
+description: This skill should be used when the user asks to "search knowledge", "find in docs", "query index", "semantic search", "update index", "rebuild index", "check index status", "cocoindex query", "cocoindex update", or wants to search/maintain an existing CocoIndex. Requires a `.cocoindex/` directory in the project (created by aio-cocoindex-setup skill).
 ---
 
 # CocoIndex — Search & Maintain
@@ -9,7 +9,7 @@ Use an existing `.cocoindex/` setup to search documents and maintain the index.
 
 ## Prerequisites
 
-A `.cocoindex/` directory must exist in the project root (use `cocoindex-setup` skill to create one).
+A `.cocoindex/` directory must exist in the project root (use `aio-cocoindex-setup` skill to create one).
 
 Required files:
 ```
@@ -75,7 +75,7 @@ Incremental — only reprocesses changed files, then exits automatically:
 
 | Problem | Solution |
 |---------|----------|
-| `.cocoindex/` not found | Run `cocoindex-setup` skill first |
+| `.cocoindex/` not found | Run `aio-cocoindex-setup` skill first |
 | Connection refused | PostgreSQL container not running — check Docker |
 | 0 chunks after update | Make sure to use `update` subcommand, not `server` |
 | Slow first run | Model download (~90MB) + bulk embedding — subsequent runs are incremental |
