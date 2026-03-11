@@ -19,12 +19,27 @@ DATABASE_URL = os.getenv(
     "postgresql://cocoindex:cocoindex@localhost:5432/cocoindex",
 )
 
-# Embedding model — local, free, no API key needed
-# all-MiniLM-L6-v2: 384-dim, fast, good quality
-# all-mpnet-base-v2: 768-dim, slower, better quality
+# ============================================================
+# EMBEDDING CONFIGURATION
+# ============================================================
+# Two options:
+#   "local"  — Free, uses sentence-transformers (default)
+#   "gemini" — Better quality (especially multilingual), uses Google API
+#
+# For Gemini: set GEMINI_API_KEY in .env
+EMBEDDING_API_TYPE = os.getenv("COCOINDEX_EMBEDDING_API_TYPE", "local")
+
+# Model name (depends on API type):
+#   local:  "sentence-transformers/all-MiniLM-L6-v2" (384-dim, fast)
+#           "sentence-transformers/all-mpnet-base-v2" (768-dim, better)
+#   gemini: "gemini-embedding-2-preview" (3072-dim, best multilingual)
+_DEFAULT_MODELS = {
+    "local": "sentence-transformers/all-MiniLM-L6-v2",
+    "gemini": "gemini-embedding-2-preview",
+}
 EMBEDDING_MODEL = os.getenv(
     "COCOINDEX_EMBEDDING_MODEL",
-    "sentence-transformers/all-MiniLM-L6-v2",
+    _DEFAULT_MODELS.get(EMBEDDING_API_TYPE, _DEFAULT_MODELS["local"]),
 )
 
 # ============================================================

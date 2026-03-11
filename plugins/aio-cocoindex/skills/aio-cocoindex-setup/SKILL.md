@@ -38,7 +38,27 @@ Determine:
 - **PROJECT_NAME**: Lowercase, no hyphens (e.g., `compass`, `trueprofitfns`, `webapp`)
 - **COLLECTIONS**: Group files by purpose — docs, code, configs, etc.
 
-### Step 3: Copy Boilerplate
+### Step 3: Ask About Embedding Model
+
+**IMPORTANT:** Ask the user which embedding approach they want:
+
+> **Embedding Model Choice:**
+>
+> 1. **Local (default)** — `sentence-transformers/all-MiniLM-L6-v2` (384-dim)
+>    - Free, no API key needed
+>    - Good for English content
+>    - Runs locally, faster indexing
+>
+> 2. **Gemini** — `gemini-embedding-2-preview` (3072-dim)
+>    - Much better quality, especially for **multilingual content** (Vietnamese, etc.)
+>    - Uses asymmetric embedding (RETRIEVAL_DOCUMENT for indexing, RETRIEVAL_QUERY for search)
+>    - Requires Google API key (very cheap: ~$0.00025/1K tokens)
+>
+> Which do you prefer?
+
+If user chooses **Gemini**, ask for their `GEMINI_API_KEY`.
+
+### Step 4: Copy Boilerplate
 
 ```bash
 mkdir -p .cocoindex
@@ -47,7 +67,7 @@ cp $BP/index.py $BP/query.py $BP/requirements.txt .cocoindex/
 
 **Do NOT copy `config.py`** — write it fresh based on the project analysis.
 
-### Step 4: Write `config.py`
+### Step 5: Write `config.py`
 
 Read the boilerplate `config.py` for the full template with comments:
 ```bash
@@ -57,6 +77,7 @@ cat $BP/config.py
 Then write a customized version to `.cocoindex/config.py` with:
 - Correct `PROJECT_NAME`
 - Correct `DATABASE_URL` (ask user for their PostgreSQL host)
+- Correct `EMBEDDING_API_TYPE` — `"local"` or `"gemini"` based on user choice
 - Project-specific `COLLECTIONS`
 
 **Chunking guidelines:**
@@ -67,12 +88,24 @@ Then write a customized version to `.cocoindex/config.py` with:
 | Configs (yaml/toml) | 500 | 100 | yaml/toml |
 | Long-form docs (specs) | 2000 | 400 | markdown |
 
-### Step 5: Create `.env`
+### Step 6: Create `.env`
 
+**For local embedding (default):**
 ```bash
 cat > .cocoindex/.env << 'EOF'
 COCOINDEX_DATABASE_URL=postgresql://cocoindex:cocoindex@<HOST>:5432/cocoindex
+COCOINDEX_EMBEDDING_API_TYPE=local
 COCOINDEX_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+EOF
+```
+
+**For Gemini embedding:**
+```bash
+cat > .cocoindex/.env << 'EOF'
+COCOINDEX_DATABASE_URL=postgresql://cocoindex:cocoindex@<HOST>:5432/cocoindex
+COCOINDEX_EMBEDDING_API_TYPE=gemini
+COCOINDEX_EMBEDDING_MODEL=gemini-embedding-2-preview
+GEMINI_API_KEY=<user's API key>
 EOF
 ```
 
@@ -92,7 +125,7 @@ docker run -d \
 docker exec cocoindex-postgres psql -U cocoindex -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
-### Step 6: Install & Index
+### Step 7: Install & Index
 
 ```bash
 # Create venv (MUST use venv — PEP 668 blocks global pip install on Python 3.12+)
@@ -110,7 +143,7 @@ python3 -m venv .venv-cocoindex
 .venv-cocoindex/bin/python .cocoindex/query.py --status
 ```
 
-### Step 7: Update .gitignore
+### Step 8: Update .gitignore
 
 Add to `.gitignore`:
 ```
@@ -118,6 +151,18 @@ Add to `.gitignore`:
 .venv-cocoindex/
 __pycache__/
 ```
+
+## Embedding Comparison
+
+| | Local (MiniLM-L6-v2) | Gemini (embedding-2-preview) |
+|---|---|---|
+| Dimension | 384 | 3072 |
+| Quality | Good (English) | Excellent (multilingual) |
+| Cost | Free | ~$0.00025/1K tokens |
+| Speed | Fast (no network) | Slower (API calls) |
+| Task types | Symmetric | Asymmetric (doc vs query) |
+| Vietnamese | Weak | Strong |
+| Storage | ~15KB/1K chunks | ~120KB/1K chunks |
 
 ## Gotchas (Learned From Experience)
 
@@ -129,13 +174,15 @@ __pycache__/
 | Table name mismatch in query.py | CocoIndex names tables as `{flowname_lowercase}__{export_name}` — this is handled in the boilerplate |
 | Closure captures wrong loop variable | `index.py` uses `_name=name` default arg — don't modify |
 | "UNEXPECTED key: embeddings.position_ids" | Harmless warning from sentence-transformers — ignore it |
+| Switching embedding model | Must re-index everything — vector dimensions and space are incompatible |
+| Gemini rate limits on large indexes | CocoIndex handles batching internally, but very large indexes (50K+ chunks) may need patience |
 
 ## File Roles
 
 | File | Edit? | Purpose |
 |------|-------|---------|
-| `config.py` | **YES** | Project-specific: name, collections, DB URL |
+| `config.py` | **YES** | Project-specific: name, collections, DB URL, embedding choice |
 | `index.py` | NO | CocoIndex flow registration (reads config.py) |
 | `query.py` | NO | Semantic search CLI (reads config.py) |
 | `requirements.txt` | NO | Python dependencies |
-| `.env` | **YES** | DB connection string (gitignored) |
+| `.env` | **YES** | DB connection, API keys (gitignored) |

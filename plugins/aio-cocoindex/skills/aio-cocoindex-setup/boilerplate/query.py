@@ -20,9 +20,25 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 import psycopg2
-from sentence_transformers import SentenceTransformer
 
 import config
+
+
+def _embed_query(text: str) -> list[float]:
+    """Embed a query string using the configured embedding backend."""
+    if config.EMBEDDING_API_TYPE == "gemini":
+        import google.genai
+        client = google.genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        result = client.models.embed_content(
+            model=config.EMBEDDING_MODEL,
+            contents=text,
+            config={"task_type": "RETRIEVAL_QUERY"},
+        )
+        return result.embeddings[0].values
+    else:
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer(config.EMBEDDING_MODEL)
+        return model.encode(text).tolist()
 
 
 def get_tables():
@@ -34,8 +50,8 @@ def get_tables():
         Actual table: {flowname_lowercase}__{export_name}
 
     Example: PROJECT_NAME="compass", collection="knowledge"
-        → Flow: CompassKnowledge
-        → Table: compassknowledge__compass_knowledge
+        -> Flow: CompassKnowledge
+        -> Table: compassknowledge__compass_knowledge
     """
     return {
         name: f"{config.PROJECT_NAME.lower()}{name.lower()}__{config.PROJECT_NAME}_{name}"
@@ -65,8 +81,7 @@ def get_status():
 
 def query_similar(question: str, top_k: int = 5, collection: str | None = None):
     """Search indexed documents by semantic similarity."""
-    model = SentenceTransformer(config.EMBEDDING_MODEL)
-    query_embedding = model.encode(question).tolist()
+    query_embedding = _embed_query(question)
 
     conn = get_connection()
     cur = conn.cursor()
