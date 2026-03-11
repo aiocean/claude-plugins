@@ -9,7 +9,7 @@ Comprehensive architecture documentation: CodeIndex static analysis combined wit
 
 **Core Philosophy:** Oracle **writes all documentation from scratch** using CodeIndex's static analysis data (codebase map, dependency graphs, metrics, communities) combined with direct source code reading. CodeIndex provides the quantitative foundation; Oracle provides the qualitative analysis and writes every doc.
 
-**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `graph.html` (interactive viewer), `dependency_graphs/*.json` (detailed dependency data), and 18 `.tpl` templates for doc structure.
+**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `dependency_graphs/*.json` (detailed dependency data), and `.tpl` templates for doc structure (including `graph.html.tpl` for interactive graph generation).
 
 **What Oracle Provides:** All written documentation — module docs, architecture analysis, key flows, dependency narratives, failure modes, design rationale, and decision guidance.
 
@@ -110,7 +110,7 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 │   ↓                                                             │
 │   Produces:                                                     │
 │   - docs/codebase_map.json (components, edges, metrics, hubs) │
-│   - docs/graph.html (interactive dependency viewer)            │
+│   - docs/templates/graph.html.tpl (template for AI graph gen)  │
 │   - docs/dependency_graphs/*.json (detailed dependency data)   │
 │   - docs/templates/*.tpl (doc structure templates)             │
 │                                                                 │
@@ -143,7 +143,7 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 │   │   ├── Design Rationale & Trade-offs                        │
 │   │   └── <!-- ORACLE-META --> compact footer                  │
 │   ├── codebase_map.json        (CodeIndex static analysis)     │
-│   ├── graph.html               (CodeIndex interactive viewer)  │
+│   ├── graph.html               (Oracle-generated from graph.html.tpl) │
 │   ├── dependency_graphs/       (CodeIndex dependency data)     │
 │   └── templates/               (CodeIndex doc templates)       │
 └─────────────────────────────────────────────────────────────────┘
@@ -154,9 +154,8 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 ```
 docs/
 ├── codebase_map.json            # Components, edges, metrics, communities, hubs
-├── graph.html                   # Interactive dependency viewer
 ├── dependency_graphs/           # Per-module dependency JSON files
-└── templates/                   # Doc structure templates (.tpl)
+└── templates/                   # Doc structure templates (.tpl, including graph.html.tpl)
 ```
 
 **What CodeIndex does NOT output in static-only mode:**
@@ -185,7 +184,7 @@ docs/
 
 ```bash
 # Check if CodeIndex static analysis already exists and is recent
-ls docs/codebase_map.json docs/graph.html docs/dependency_graphs/ 2>/dev/null
+ls docs/codebase_map.json docs/dependency_graphs/ 2>/dev/null
 
 # If static analysis doesn't exist OR user requested fresh analysis → run CodeIndex
 codeindex generate --verbose --no-cache
@@ -228,7 +227,7 @@ Read and parse CodeIndex's static analysis output:
 
 1. **Parse `codebase_map.json`**: Extract components, edges, metrics, communities, and hubs
 2. **Parse `dependency_graphs/*.json`**: Extract detailed per-module dependency data
-3. **Review `graph.html`**: Note the interactive viewer is available for user reference
+3. **Note `graph.html.tpl`**: Available in templates/ for Oracle to generate an interactive graph viewer in Phase 3
 
 From `codebase_map.json`, identify:
 - **Communities**: Groups of related components (these become module docs)
@@ -409,6 +408,18 @@ Unknowns: {N} items pending verification
 -->
 ```
 
+**Step 6: Generate interactive graph viewer (`graph.html`).**
+
+Use `docs/templates/graph.html.tpl` as the template. This produces a D3 force-directed graph with module clustering, convex hulls, search, toggle buttons, and detailed info panels — far richer than a basic node-link diagram.
+
+To fill the template, extract from `codebase_map.json`:
+- **`filesData`**: Map each component to `{ functions, max_complexity, hub_count, community_ids, function_names }` from the nodes
+- **`edgesData`**: Map edges to `{ source, target, weight }` from the edges array
+- **`summaryData`**: `{ total_nodes, total_edges, hub_files, circular_dependencies }` from summary_metrics
+- **`moduleConfig`**: Group components by community into named modules with assigned colors. Use community names or infer domain names from file paths. Assign each module a distinct color from this palette: `#58a6ff, #f78166, #d2a8ff, #7ee787, #f0883e, #79c0ff, #ffa657, #ff7b72, #3fb950, #a5d6ff`
+
+Replace the hardcoded `FamilyBot` title with the actual project name. Write the filled HTML to `docs/graph.html`.
+
 Generate `CODEBASE_MAP.md` as the index of all Oracle-written module docs and include:
 
 - Audience + primary tasks
@@ -516,7 +527,7 @@ docs/
 │   ├── Decision-support sections (failure modes, blast radius, rationale)
 │   └── <!-- ORACLE-META --> compact footer
 ├── codebase_map.json            # CodeIndex static analysis (unchanged)
-├── graph.html                   # CodeIndex interactive viewer (unchanged)
+├── graph.html                   # Oracle-generated interactive viewer (from graph.html.tpl)
 ├── dependency_graphs/           # CodeIndex dependency data (unchanged)
 └── templates/                   # CodeIndex doc templates (unchanged)
 ```
