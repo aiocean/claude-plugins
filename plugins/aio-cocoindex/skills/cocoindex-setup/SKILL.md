@@ -102,10 +102,9 @@ python3 -m venv .venv-cocoindex
 # Setup database schema
 .venv-cocoindex/bin/cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f
 
-# Run indexing (IMPORTANT: -L flag is REQUIRED to trigger processing)
+# Run indexing — processes all files and exits automatically
 # -e flag MUST come BEFORE the subcommand
-.venv-cocoindex/bin/cocoindex -e .cocoindex/.env server .cocoindex/index.py -f -L
-# Wait for progress bars to complete, then Ctrl+C
+.venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f
 
 # Verify
 .venv-cocoindex/bin/python .cocoindex/query.py --status
@@ -125,7 +124,7 @@ __pycache__/
 | Gotcha | Solution |
 |--------|----------|
 | `cocoindex -e .env server ...` → "No such option: -e" | `-e` is a **global** flag — must come BEFORE the subcommand |
-| Server runs but 0 rows in tables | Must use `-L` (live-update) flag to trigger processing |
+| Indexing runs but 0 rows in tables | Use `update` subcommand (not `server`). If using `server`, add `-L` flag |
 | `pip install` fails with PEP 668 error | Use `python3 -m venv` — never install globally |
 | Table name mismatch in query.py | CocoIndex names tables as `{flowname_lowercase}__{export_name}` — this is handled in the boilerplate |
 | Closure captures wrong loop variable | `index.py` uses `_name=name` default arg — don't modify |

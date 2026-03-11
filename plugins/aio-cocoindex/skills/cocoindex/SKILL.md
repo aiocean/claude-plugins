@@ -53,18 +53,16 @@ python3 -m venv .venv-cocoindex
 
 ### Update Index (After Files Change)
 
-Incremental — only reprocesses changed files:
+Incremental — only reprocesses changed files, then exits automatically:
 
 ```bash
-.venv-cocoindex/bin/cocoindex server .cocoindex/index.py -f -L
+.venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f
 ```
-
-Wait for progress bars to finish, then Ctrl+C. Or run in background.
 
 ### Rebuild Index (Full Reprocess)
 
 ```bash
-.venv-cocoindex/bin/cocoindex -e .cocoindex/.env server .cocoindex/index.py -f -L --full-reprocess
+.venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f --full-reprocess
 ```
 
 ### List Flows
@@ -79,7 +77,7 @@ Wait for progress bars to finish, then Ctrl+C. Or run in background.
 |---------|----------|
 | `.cocoindex/` not found | Run `cocoindex-setup` skill first |
 | Connection refused | PostgreSQL container not running — check Docker |
-| 0 chunks after update | Server needs `-L` flag to trigger processing |
+| 0 chunks after update | Make sure to use `update` subcommand, not `server` |
 | Slow first run | Model download (~90MB) + bulk embedding — subsequent runs are incremental |
 | venv missing | `python3 -m venv .venv-cocoindex && .venv-cocoindex/bin/pip install -r .cocoindex/requirements.txt` |
 
@@ -102,8 +100,8 @@ COLLECTIONS = {
 
 Then re-run setup and index:
 ```bash
-.venv-cocoindex/bin/cocoindex setup .cocoindex/index.py -f
-.venv-cocoindex/bin/cocoindex server .cocoindex/index.py -f -L
+.venv-cocoindex/bin/cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f
+.venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f
 ```
 
 ## Direct Database Access
