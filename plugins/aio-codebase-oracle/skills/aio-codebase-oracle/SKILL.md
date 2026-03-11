@@ -1,16 +1,25 @@
 ---
 name: aio-codebase-oracle
 description: |
-  This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "map this codebase", "codebase map", or mentions "codebase oracle". Deep codebase analysis combining CodeWiki LLM-powered documentation, parallel agent team mapping, dependency/hub analysis, and evidence-based investigation. Automatically detects existing maps and updates incrementally.
+  This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "map this codebase", "codebase map", or mentions "codebase oracle". Deep codebase analysis combining CodeWiki static analysis (dependency graphs, codebase maps, metrics) with Oracle direct documentation writing, parallel agent team mapping, and evidence-based investigation. Automatically detects existing maps and updates incrementally.
 ---
 
 # Codebase Oracle
 
-Comprehensive architecture documentation: CodeWiki-enhanced analysis with specialized analyst teams.
+Comprehensive architecture documentation: CodeWiki static analysis combined with Oracle direct documentation writing and specialized analyst teams.
 
-**Core Philosophy:** Oracle is an **active editor**, not a passive auditor. It reads CodeWiki output, validates against actual code, then **rewrites incorrect content directly** and **adds missing knowledge** (runtime, infrastructure, failure modes). The final doc should read as one coherent document — not CodeWiki content with a validation report stapled to the end.
+**Core Philosophy:** Oracle **writes all documentation from scratch** using CodeWiki's static analysis data (codebase map, dependency graphs, metrics, communities) combined with direct source code reading. CodeWiki provides the quantitative foundation; Oracle provides the qualitative analysis and writes every doc.
 
-**What CodeWiki Misses:** See [references/codewiki-gaps.md](references/codewiki-gaps.md) for full details on infrastructure, serverless, multi-language, and monorepo patterns that require Oracle supplementation.
+**What CodeWiki Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `graph.html` (interactive viewer), `dependency_graphs/*.json` (detailed dependency data), and a full set of `.tpl` templates for doc structure:
+- `overview.md.tpl` — project-level overview (architecture pattern, entry points, health dashboard, module map)
+- `module.md.tpl` — per-module docs (components, hubs, internal/external deps, quality metrics)
+- `architecture.md.tpl` — architecture analysis (layer map, community detection, data flow, design decisions)
+- `component.md.tpl` — per-component docs (signature, metrics, dependencies, temporal coupling)
+- `dependencies.md.tpl` — dependency graph (PageRank, bottlenecks, instability, circular deps, hubs)
+- `quality.md.tpl` — code quality report (complexity hotspots, maintainability index, violations)
+- `_partials/` — reusable fragments (callout, health_badge, mermaid_graph, metrics_table, source_ref)
+
+**What Oracle Provides:** All written documentation — module docs, architecture analysis, key flows, dependency narratives, failure modes, design rationale, and decision guidance.
 
 ## Documentation Intent Contract
 
@@ -60,7 +69,7 @@ If a section only describes structure without decision guidance, it is incomplet
 
 Architecture docs must be **clear, scannable, and decision-useful**. Full guide: [references/writing-quality.md](references/writing-quality.md).
 
-### Prose Rules (apply during Phase 4 rewrite)
+### Prose Rules (apply during documentation writing)
 
 1. **Active voice.** "The handler validates input" not "Input is validated by the handler."
 2. **Present tense.** "The service returns JSON" not "The service will return JSON."
@@ -99,62 +108,73 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 
 ## Integration Architecture
 
-### Consolidated + Cross-Validation Model
+### Static Analysis + Direct Documentation Model
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Phase 1: CodeWiki (AI-generated documentation)                  │
+│ Phase 0: CodeWiki (Static Analysis Only)                        │
 │                                                                 │
-│   codewiki generate --output docs/                              │
+│   codewiki generate --verbose                                   │
 │   ↓                                                             │
 │   Produces:                                                     │
-│   - docs/{module}.md (LLM-written with diagrams, examples)     │
-│   - docs/module_tree.json (structure)                          │
+│   - docs/codebase_map.json (components, edges, metrics, hubs) │
+│   - docs/graph.html (interactive dependency viewer)            │
+│   - docs/dependency_graphs/*.json (detailed dependency data)   │
+│   - docs/templates/*.tpl (doc structure templates)             │
+│                                                                 │
+│   Does NOT produce:                                             │
+│   - ❌ Module .md files (Oracle writes those)                   │
+│   - ❌ module_tree.json (not in static-only mode)              │
+│   - ❌ LLM-generated documentation                              │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ Phase 2: Oracle (Correct + Enhance)                             │
+│ Phases 1-3: Oracle (Analyze + Write)                            │
 │                                                                 │
 │   /codebase-oracle                                              │
 │   ↓                                                             │
-│   For EACH CodeWiki module doc:                                 │
-│   1. Read CodeWiki's claims about the module                   │
-│   2. Oracle agents analyze the actual code independently        │
-│   3. Compare findings → Cross-validation                       │
-│   4. REWRITE incorrect sections inline (fix errors in place)   │
-│   5. ADD missing sections (failure modes, blast radius, etc.)  │
-│   6. ADD evidence (path:line) to existing claims               │
+│   1. Ingest CodeWiki static analysis data                      │
+│   2. Read actual source code for each module/community         │
+│   3. Analyze: structure, dependencies, patterns, rationale     │
+│   4. Write all documentation from scratch                      │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│ Output: Single Corrected + Enhanced Documentation               │
+│ Output: Oracle-Written Documentation                            │
 │                                                                 │
-│   docs/{module}.md (rewritten as one coherent doc)             │
-│   ├── Corrected content (errors fixed inline)                  │
-│   ├── Evidence added (path:line references throughout)         │
-│   ├── New sections added inline where they belong:             │
+│   docs/                                                         │
+│   ├── CODEBASE_MAP.md          (Oracle-written index)          │
+│   ├── {module}.md              (Oracle-written module docs)    │
+│   │   ├── Evidence inline (path:line references throughout)    │
 │   │   ├── Failure Modes & Recovery                             │
 │   │   ├── Blast Radius & Safe Change Plan                      │
-│   │   └── Design Rationale & Trade-offs                        │
-│   └── <!-- ORACLE-META --> compact footer (confidence + stamp) │
+│   │   ├── Design Rationale & Trade-offs                        │
+│   │   └── <!-- ORACLE-META --> compact footer                  │
+│   ├── codebase_map.json        (CodeWiki static analysis)     │
+│   ├── graph.html               (CodeWiki interactive viewer)  │
+│   ├── dependency_graphs/       (CodeWiki dependency data)     │
+│   └── templates/               (CodeWiki doc templates)       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## CodeWiki ACTUAL Output Structure
+## CodeWiki Static Analysis Output
 
 ```
 docs/
-├── {module_name}.md         # Per-module LLM documentation
-├── module_tree.json         # Module hierarchy
-├── first_module_tree.json   # Initial clustering
-└── temp/dependency_graphs/  # JSON for dependency graphs
+├── codebase_map.json            # Components, edges, metrics, communities, hubs
+├── graph.html                   # Interactive dependency viewer
+├── dependency_graphs/           # Per-module dependency JSON files
+└── templates/                   # Doc structure templates (.tpl)
 ```
 
-**What CodeWiki does NOT output:**
-- ❌ `call_graph.json` - Not persisted
+**What CodeWiki does NOT output in static-only mode:**
+- ❌ `{module}.md` files - Oracle writes these
+- ❌ `module_tree.json` - Not produced without `--use-agent-sdk`
 - ❌ `.codewiki-cache/` - Does not exist
+- ❌ `metadata.json` - Not produced
+- ❌ `overview.md` - Not produced
 
-## Workflow: Enhanced Documentation Mode
+## Workflow: Documentation Generation
 
 ### Quick Decision Tree
 
@@ -162,61 +182,75 @@ docs/
 
 | User Request | Run These Phases |
 |--------------|------------------|
-| "Analyze codebase" / "Full analysis" | All phases (0-5) |
-| "Validate docs" / "Check accuracy" | Phase 0, 2 only (report findings, don't rewrite) |
-| "Find missing docs" / "What's not documented?" | Phase 0, 1.2 only |
-| "Enhance existing docs" / "Fix docs" | Phase 2-5 (validate then rewrite) |
-| "Quick check" / "Is this up to date?" | Phase 2 only |
+| "Analyze codebase" / "Full analysis" | All phases (0-4) |
+| "Find missing docs" / "What's not documented?" | Phase 0, 1 only |
+| "Update docs" / "Refresh docs" | Phase 0-4 (full re-run) |
+| "Quick check" / "Is this up to date?" | Phase 1 only (review static analysis data) |
 
-### Phase 0: Run CodeWiki (MANDATORY first step)
+### Phase 0: Run CodeWiki Static Analysis (MANDATORY first step)
 
-**You MUST run CodeWiki before any manual analysis.** Do not skip this step. Do not substitute with manual file reading. CodeWiki generates LLM-powered module documentation that Oracle then corrects and enhances.
+**You MUST run CodeWiki before any manual analysis.** Do not skip this step. Do not substitute with manual file reading. CodeWiki generates static analysis data that Oracle uses as the quantitative foundation for documentation.
 
 ```bash
-# Check if CodeWiki docs already exist and are recent
-ls docs/*.md docs/module_tree.json 2>/dev/null
+# Check if CodeWiki static analysis already exists and is recent
+ls docs/codebase_map.json docs/graph.html docs/dependency_graphs/ 2>/dev/null
 
-# If docs don't exist OR user requested fresh analysis → run CodeWiki
-codewiki generate --use-agent-sdk --verbose --no-cache
+# If static analysis doesn't exist OR user requested fresh analysis → run CodeWiki
+codewiki generate --verbose --no-cache
 
-# If docs exist and user just wants to update/enhance → still run with cache
-codewiki generate --use-agent-sdk --verbose
+# If static analysis exists and user just wants to update → still run with cache
+codewiki generate --verbose
 ```
 
 **Flags explained:**
-- `--use-agent-sdk`: Uses Claude agent SDK for higher-quality module docs
 - `--verbose`: Shows progress so user can track generation
-- `--no-cache`: Forces fresh analysis (use when no docs exist or docs are stale)
+- `--no-cache`: Forces fresh analysis (use when no static analysis exists or code has changed)
+
+**Do NOT use `--use-agent-sdk`** — Oracle writes all documentation directly. CodeWiki runs in static analysis mode only.
 
 **When to use `--no-cache`:**
-- First run (no existing docs)
+- First run (no existing static analysis)
 - User explicitly asks for fresh/full analysis
 - Code has changed significantly since last run
 
 **When to skip `--no-cache`:**
-- Docs exist and user wants incremental update
-- User says "enhance docs" or "fix docs" (existing CodeWiki output is fine)
+- Static analysis exists and codebase hasn't changed
+- User says "update docs" and only wants Oracle to re-generate written docs
 
 **If `codewiki` is not installed**, inform the user:
 ```
 CodeWiki is required. Install with: pip install codewiki
 ```
-Do NOT proceed with manual analysis as a substitute — CodeWiki's LLM-generated docs are the foundation Oracle builds on.
+Do NOT proceed with manual analysis as a substitute — CodeWiki's static analysis provides the dependency graph, metrics, and community detection that Oracle builds on.
 
-### Phase 1: Scope and Claim Inventory
+### Phase 1: Scope and Static Analysis Ingestion
 
 **Decision: What mode to run?**
-- User wants "quick check only" → Run only Phase 2 (validation), skip enhancement
-- User wants "find gaps" → Run only Phase 1.2 (missing modules)
+- User wants "quick check only" → Run only Phase 1 (review data), report findings
+- User wants "find gaps" → Run Phase 1, identify undocumented modules/communities
 - User wants "full analysis" → Run all phases (default)
 
-#### 1.1 Detect Missing Context (Infrastructure, Serverless, Multi-lang)
+#### 1.1 Ingest CodeWiki Static Analysis
 
-Before reading CodeWiki output, scan for patterns that static analysis misses:
+Read and parse CodeWiki's static analysis output:
+
+1. **Parse `codebase_map.json`**: Extract components, edges, metrics, communities, and hubs
+2. **Parse `dependency_graphs/*.json`**: Extract detailed per-module dependency data
+3. **Review `graph.html`**: Note the interactive viewer is available for user reference
+
+From `codebase_map.json`, identify:
+- **Communities**: Groups of related components (these become module docs)
+- **Hubs**: High-connectivity components (these need blast radius analysis)
+- **Edges**: Dependency relationships between components
+- **Metrics**: File counts, complexity indicators, coupling scores
+
+#### 1.2 Detect Missing Context (Infrastructure, Serverless, Multi-lang)
+
+Scan for patterns that static analysis misses:
 
 **Decision: Infrastructure detected?**
-- IF serverless.yml OR *.tf OR k8s/ found → Document in CODEBASE_MAP.md + validate in Phase 2.2
-- IF no infrastructure files → Skip Phase 2.2
+- IF serverless.yml OR *.tf OR k8s/ found → Document in CODEBASE_MAP.md
+- IF no infrastructure files → Skip infrastructure sections
 
 **Infrastructure & Runtime Detection:**
 ```bash
@@ -243,62 +277,11 @@ find . -name "*.proto" -o -name "*.graphql" -o -name "*.gql" -o -name "openapi*.
 
 Document these findings in `CODEBASE_MAP.md` under "Infrastructure & Runtime Context".
 
-#### 1.2 Check for Missing Child Modules
+### Phase 2: Analysis Pass (Structure + Meaning)
 
-**⚠️ IMPORTANT:** Only generate missing modules AFTER validating existing docs (Phase 2).
-This prevents propagating CodeWiki errors to new docs.
+Oracle reads actual source code and builds its understanding. Run parallel analysis agents per module/community.
 
-CodeWiki may not generate docs for all child modules in `module_tree.json`, especially in monorepos:
-
-**Step 1: Find missing modules**
-```bash
-uv run scripts/find-missing-modules.py docs --format compact
-```
-
-**Step 2: Generate docs for missing children**
-
-For each missing module:
-1. Extract component list from `module_tree.json`
-2. **Also scan for infrastructure context** (Is it a Lambda? Has serverless.yml? Part of which workspace?)
-3. Generate `{Parent}_{Child}.md` with:
-   - Module purpose and scope
-   - **Runtime context** (Lambda handler, container, cron job)
-   - **Infrastructure links** (serverless config, terraform resources)
-   - Component list with brief descriptions
-   - Architecture overview (Mermaid diagram)
-   - Dependencies on parent/sibling modules
-
-**Example workflow:**
-```bash
-# Check what's missing
-uv run scripts/find-missing-modules.py docs --format compact
-# Output shows: "shipping-partner_sync-ship-hero.md" missing
-
-# Generate the missing doc with infrastructure context:
-# 1. Read module_tree.json components
-# 2. Check for serverless.yml in that module's path
-# 3. Check if it's a Lambda handler (main.go with lambda.Start)
-# 4. Document runtime + static analysis together
-```
-
-**Filename convention:**
-- Child modules: `{Parent}_{Child}.md` (e.g., `Dependency Analyzer_Data Models.md`)
-- Top-level: `{Module}.md` (e.g., `CLI Application.md`)
-
-#### 1.3 Claim Inventory
-
-For each module doc (existing + newly generated):
-
-1. Read `docs/{module}.md`.
-2. Extract claims from CodeWiki (`components`, `dependencies`, `architecture`, `flows`).
-3. Convert to a claim inventory table.
-4. Prioritize claims by decision impact (`incident`, `refactor`, `ownership`, `performance`).
-
-### Phase 2: Structure Pass (Facts)
-
-Run parallel validation agents per module to verify what exists in code.
-
-#### 2.1 Code Structure Validation
+#### 2.1 Code Structure Analysis
 
 **Method:** Use tree-sitter analysis + targeted file reads
 
@@ -307,54 +290,50 @@ You are the structure-analyst for module: {module_name}
 
 Tools to use:
 - scripts/tree-sitter-analyze.py for bulk analysis
-- Read tool for specific file validation
+- Read tool for source file reading
 - Grep for quick symbol lookup
 
+Data sources:
+- codebase_map.json communities and edges for this module
+- dependency_graphs/{module}.json for detailed dependencies
+- Actual source files
+
 Steps:
-1. Read docs/{module_name}.md, extract claims about:
+1. Read codebase_map.json, extract components in this module's community
+2. Read each source file to understand:
    - Component names and locations
    - Import/dependency relationships
-   - Architecture patterns mentioned
-
-2. For each claim, verify using:
-   - Read the claimed file at the specific location
-   - Run tree-sitter-analyze.py on the module directory
-   - Compare findings with CodeWiki claims
-
-3. Build a corrections list:
-   - CORRECT: CodeWiki claims X but code shows Y → record the fix
-   - ADD: Code has Z but CodeWiki doesn't mention it → record the addition
-   - EVIDENCE: Claim is correct but lacks path:line → record the reference
-
-4. Output the corrections list (not just a validation table)
+   - Architecture patterns used
+3. Cross-reference with dependency graph data for accuracy
+4. Build a comprehensive module understanding with evidence (path:line)
 ```
 
-#### 2.2 Infrastructure & Runtime Validation
+#### 2.2 Infrastructure & Runtime Analysis
 
 For modules with detected infrastructure context (Lambda, serverless, containers):
 
 ```
-Validate infrastructure claims:
+Analyze infrastructure:
 - Does serverless.yml match the handler code?
-- Are Lambda triggers documented correctly?
-- Do Terraform resources reference the right code paths?
-- Is the runtime (Node18, Python3.11) documented?
+- What are the Lambda triggers and their configuration?
+- What Terraform resources exist and what code paths do they support?
+- What is the runtime (Node18, Python3.11, Go1.21)?
 ```
 
-#### 2.3 Cross-Language Contract Validation
+#### 2.3 Cross-Language Contract Analysis
 
 For monorepos with multiple languages:
 
 ```
-Validate contract consistency:
+Analyze contract consistency:
 - Does protobuf schema match both Go and TypeScript implementations?
 - Are GraphQL resolvers in sync with schema definitions?
 - Do OpenAPI specs match the actual endpoint handlers?
 ```
 
-### Phase 3: Meaning Pass (Why and Risk)
+#### 2.4 Meaning Analysis (Why and Risk)
 
-For each module, add decision-support context:
+For each module, build decision-support context:
 
 1. **Design rationale**: infer from code, tests, comments, history.
 2. **Trade-offs**: what was optimized, what was sacrificed.
@@ -364,21 +343,42 @@ For each module, add decision-support context:
 6. **Runtime context** (for serverless/Lambda): cold start implications, timeout risks, concurrency limits
 7. **Infrastructure dependencies**: required IAM permissions, VPC config, external service dependencies
 
-### Phase 4: Rewrite Module Docs (Correct + Enhance)
+### Phase 3: Write Documentation
 
-This is the core phase. For each module doc, **rewrite the file** to produce one coherent document:
+Oracle writes all documentation from scratch using analysis data from Phase 2.
 
-**Step 1: Fix errors inline.** Don't flag — fix. Examples:
-- CodeWiki says "5 Lambda functions" but code has 3 → rewrite to say 3
-- CodeWiki says "Go 1.x" but go.mod says 1.21 → rewrite to say 1.21
-- CodeWiki describes a component that doesn't exist → remove it
-- CodeWiki misses a component that does exist → add it
+#### Templates (hybrid approach)
 
-**Step 2: Add evidence inline.** Sprinkle `path:line` references throughout the existing content, not in a separate table. Example:
-- Before: "The handler validates the request payload"
-- After: "The handler validates the request payload (`internal/handler/create.go:45`)"
+**CodeWiki templates** (use as structural guides — fill with Oracle's analysis):
+- `overview.md.tpl` — project overview: architecture pattern, entry points, health dashboard, module map
+- `module.md.tpl` — per-module: components table, hub analysis, internal/external deps, quality metrics
+- `architecture.md.tpl` — architecture: layer map, community detection, data flow, design decisions
+- `component.md.tpl` — per-component: signature, metrics (PageRank, fan-in/out, complexity), dependencies
+- `dependencies.md.tpl` — dependency graph: bottlenecks, instability analysis, circular deps, temporal coupling
+- `quality.md.tpl` — code quality: complexity hotspots, maintainability index, violations, improvement priorities
+- `_partials/` — reusable fragments for callouts, health badges, mermaid graphs, metrics tables, source refs
 
-**Step 3: Add missing sections inline where they naturally belong.** Don't dump everything at the bottom. Insert:
+**Oracle cross-cutting templates** (for analysis CodeWiki templates don't cover):
+- `c4-architecture.md` — C4 context/container/component diagrams
+- `key-flows.md` — cross-module execution paths and sequence diagrams
+- `dependency-graph.md` — hub analysis with blast radius annotations
+
+Oracle fills CodeWiki template structures with data from `codebase_map.json` and direct source code reading, then adds decision-support sections (failure modes, design rationale, blast radius) that the templates don't include.
+
+#### Writing each module doc
+
+For each module/community identified in Phase 1:
+
+**Step 1: Write the module doc from scratch** using:
+- CodeWiki `module.md.tpl` template as structural guide (components table, hub analysis, deps, quality metrics)
+- CodeWiki static analysis data from `codebase_map.json` (metrics, dependencies, communities, hubs)
+- Direct source code reading from Phase 2
+- For project-level overview, use `overview.md.tpl`; for architecture, use `architecture.md.tpl`; for dependencies, use `dependencies.md.tpl`; for quality, use `quality.md.tpl`
+
+**Step 2: Add evidence inline.** Sprinkle `path:line` references throughout, not in a separate table. Example:
+- "The handler validates the request payload (`internal/handler/create.go:45`)"
+
+**Step 3: Include decision-support sections where they naturally belong:**
 - **Design Rationale** near the architecture section
 - **Failure Modes & Recovery** after the component/flow descriptions
 - **Blast Radius & Safe Change Plan** near the dependency section
@@ -392,26 +392,23 @@ This is the core phase. For each module doc, **rewrite the file** to produce one
 4. Cut filler words: "simply", "just", "note that", "there is/are", weasel words
 5. Consistent terminology — same concept = same word throughout
 6. Each section answers "so what?" for the target audience
-7. One coherent document — no "CodeWiki section" vs "Oracle section" split
-8. Heading hierarchy: sentence case, levels increment by one, no trailing punctuation
-9. Scrub sensitive data: replace real webhook URLs, bot tokens, API keys, personal names from git config, and `/Users/username/...` paths with generic placeholders
+7. Heading hierarchy: sentence case, levels increment by one, no trailing punctuation
+8. Scrub sensitive data: replace real webhook URLs, bot tokens, API keys, personal names from git config, and `/Users/username/...` paths with generic placeholders
 
 **Step 5: Append compact Oracle metadata footer.**
 
-Only metadata goes at the bottom — not a second copy of the analysis:
+Only metadata goes at the bottom:
 
 ```markdown
 <!-- ORACLE-META
-Enhanced by codebase-oracle | {timestamp}
+Written by codebase-oracle | {timestamp}
+Data: CodeWiki static analysis + direct source reading
 Audience: {audience} | Confidence: {overall}%
-Corrections: {N} errors fixed | Additions: {N} sections added
 Unknowns: {N} items pending verification
 -->
 ```
 
-### Phase 5: Generate CODEBASE_MAP.md
-
-Generate `CODEBASE_MAP.md` as the index of all enhanced module docs and include:
+Generate `CODEBASE_MAP.md` as the index of all Oracle-written module docs and include:
 
 - Audience + primary tasks
 - **Infrastructure & Runtime Context** (Lambdas, containers, scheduled jobs)
@@ -431,67 +428,30 @@ Generate `CODEBASE_MAP.md` as the index of all enhanced module docs and include:
 
 Do not flatten everything into a single overview diagram. Each diagram answers a different question.
 
-## Cross-Validation Logic
-
-### When Both AI Systems Agree → Keep + Add Evidence
-
-```python
-if codewiki_claim == oracle_finding:
-    # Keep the content, add path:line evidence inline
-    action = "add evidence references"
-```
-
-### When They Disagree → Fix the Content
-
-```python
-if codewiki_claim != oracle_finding:
-    if oracle_has_strong_evidence:
-        # Rewrite the section with correct information
-        action = "fix inline with evidence"
-    else:
-        # Add as Unknown with verification step
-        action = "add to Unknowns section"
-```
-
-### Example: Before and After Correction
-
-**Before (CodeWiki error):**
-```markdown
-## Dependencies
-This module depends on: config, utils, logger
-```
-
-**After (Oracle correction):**
-```markdown
-## Dependencies
-This module depends on: config, utils, logger, database, cache (`internal/service/export.go:12-16`).
-The database and cache imports are used for export job persistence and result caching.
-```
-
 ## Rules
 
 ALWAYS:
-- **Fix errors directly in the doc** — don't just flag them in a separate section
+- **Write all documentation from scratch** — Oracle is the sole author, not an editor of CodeWiki output
+- **Use CodeWiki static analysis as quantitative foundation** (metrics, dependencies, communities, hubs)
+- **Read actual source code for all qualitative claims** — never rely solely on static analysis data
 - **Add evidence inline** (`path:line`) throughout the content, not in a separate table
-- **Insert new sections where they belong** — failure modes near flows, blast radius near dependencies
-- Produce one coherent document that reads naturally, not "CodeWiki part" + "Oracle part"
+- **Insert sections where they belong** — failure modes near flows, blast radius near dependencies
+- Produce one coherent document that reads naturally
 - Generate single CODEBASE_MAP.md as index
-- Cross-validate: compare CodeWiki claims with Oracle findings
 - Start with Documentation Intent Contract (audience, tasks, decision horizon)
 - Include rationale, trade-offs, failure modes, and safe-change guidance
 - Use `Unknown` + verification steps for things Oracle couldn't verify
 - **Scan for infrastructure context** (serverless.yml, terraform, k8s) and document runtime behavior
 - **Detect monorepo structure** (workspaces, nx.json) and document package boundaries
 - **Trace cross-language contracts** (protobuf, GraphQL, OpenAPI) when multiple languages present
-- **Supplement missing child modules** from CodeWiki's module_tree.json
 
 NEVER:
-- **Append a "validation report" section** — Oracle is an editor, not an auditor
-- **Leave CodeWiki errors untouched** — if you found it's wrong, fix it
+- **Append a "validation report" section** — there is nothing to validate against
 - **Duplicate information** — don't repeat content in both the doc body and a footer table
-- Create separate Oracle docs alongside CodeWiki docs
-- Skip validation step
+- Create separate validation docs alongside module docs
 - Reference `.codewiki-cache/` - does not exist
+- Reference `module_tree.json` - not produced in static-only mode
+- Use `--use-agent-sdk` flag — CodeWiki runs static analysis only
 - Write high-confidence claims without evidence
 - Leave generic summaries that do not help decisions
 - Hide uncertainty when evidence is incomplete
@@ -504,9 +464,8 @@ Use these checks to keep docs meaningful over time:
 2. **Placeholder check**: fail if `REPLACE` remains.
 3. **Unknown discipline**: fail if uncertainty is implied but no `Unknowns` section exists.
 4. **Drift check**: if module files changed, corresponding module docs must be updated.
-5. **No validation report anti-pattern**: fail if doc has a large `## Oracle Validation` section with claim tables — content should be integrated inline.
-6. **Writing quality**: no "simply"/"just"/"easily"/"obviously" in docs. No weasel words ("some", "many", "various") without specifics. All code blocks specify language. Headings in sentence case.
-7. **Sensitive data**: no webhook URLs, API keys, bot tokens, personal names from git config, internal server names, or file paths containing usernames (`/Users/username/...`, `/home/username/...`). Replace with placeholders like `<YOUR_WEBHOOK_URL>`, `<BOT_TOKEN>`, `your-username`.
+5. **Writing quality**: no "simply"/"just"/"easily"/"obviously" in docs. No weasel words ("some", "many", "various") without specifics. All code blocks specify language. Headings in sentence case.
+6. **Sensitive data**: no webhook URLs, API keys, bot tokens, personal names from git config, internal server names, or file paths containing usernames (`/Users/username/...`, `/home/username/...`). Replace with placeholders like `<YOUR_WEBHOOK_URL>`, `<BOT_TOKEN>`, `your-username`.
 
 Run bundled checker (recommended):
 
@@ -534,10 +493,7 @@ rg -n '`[^`]+:[0-9]+`' docs/*.md
 # 3) Must have Unknowns section
 rg -n "### Unknowns" docs/*.md
 
-# 4) Should NOT have the old "Oracle Validation" report pattern
-! rg -n "## Oracle Validation" docs/*.md
-
-# 5) No filler/weasel words
+# 4) No filler/weasel words
 ! rg -wn "simply|obviously|easily" docs/*.md
 # Should not find unqualified weasel words
 rg -wn "some\b|many\b|various\b|several\b" docs/*.md
@@ -547,27 +503,27 @@ rg -wn "some\b|many\b|various\b|several\b" docs/*.md
 ! rg -n "/Users/[a-zA-Z]|/home/[a-zA-Z]" docs/*.md
 ```
 
-## Output Structure After Enhancement
+## Output Structure
 
 ```
 docs/
-├── CODEBASE_MAP.md              # Oracle index with priorities and unknowns
-├── {module1}.md                 # Corrected + enhanced (one coherent doc)
-│   ├── Content with errors fixed inline
+├── CODEBASE_MAP.md              # Oracle-written index with priorities and unknowns
+├── {module}.md                  # Oracle-written module docs (one per community)
+│   ├── Structure from CodeWiki templates
+│   ├── Data from codebase_map.json + source code reading
 │   ├── Evidence (path:line) throughout
-│   ├── New sections added where they belong
+│   ├── Decision-support sections (failure modes, blast radius, rationale)
 │   └── <!-- ORACLE-META --> compact footer
-├── {module2}.md                 # Corrected + enhanced
-├── module_tree.json             # Unchanged
-└── temp/                        # Unchanged
+├── codebase_map.json            # CodeWiki static analysis (unchanged)
+├── graph.html                   # CodeWiki interactive viewer (unchanged)
+├── dependency_graphs/           # CodeWiki dependency data (unchanged)
+└── templates/                   # CodeWiki doc templates (unchanged)
 ```
 
 ## Troubleshooting
 
-**No CodeWiki docs:** Oracle MUST run `codewiki generate --use-agent-sdk --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
+**No CodeWiki static analysis:** Oracle MUST run `codewiki generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
 
 **`codewiki` not found:** User needs to install: `pip install codewiki`
 
-**Validation failures:** Code likely changed since CodeWiki run. Re-run: `codewiki generate --use-agent-sdk --verbose --no-cache`
-
-**Many discrepancies:** Re-run CodeWiki with `--no-cache` to get fresh LLM analysis, then Oracle corrects remaining issues.
+**Stale static analysis:** Code changed since last CodeWiki run. Re-run: `codewiki generate --verbose --no-cache`

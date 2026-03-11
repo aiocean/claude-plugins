@@ -6,24 +6,21 @@ Generate all three diagram levels. Each diagram uses Mermaid syntax.
 If the codebase is simple (single container), the Component diagram IS the Container diagram — merge them.
 
 Primary data sources:
-1. **CodeWiki module docs**: docs/{module}.md often have architecture diagrams
-2. CodeWiki: docs/module_tree.json for module structure
-3. Tree-sitter: docs/.tree-sitter-results.json (fallback)
-4. Grep/LSP for additional discovery
+1. **CodeWiki static analysis**: docs/codebase_map.json for components, edges, communities
+2. **CodeWiki dependency graphs**: docs/dependency_graphs/*.json for detailed dependency data
+3. **CodeWiki architecture template**: docs/templates/architecture.md.tpl for structure guidance
+4. **Direct source code reading** for verification and detail
+5. Grep/LSP for additional discovery
 
 IMPORTANT:
 - CodeWiki outputs to docs/, NOT .codewiki-cache/
-- Module tree: docs/module_tree.json
-- Module docs: docs/{module_name}.md
+- Static analysis: docs/codebase_map.json
+- Dependency data: docs/dependency_graphs/
 
-CodeWiki module_tree.json format:
-{
-  "ModuleName": {
-    "path": "path/to/module",
-    "components": ["fully.qualified.ComponentName", ...],
-    "children": { "SubModule": { ... } }
-  }
-}
+codebase_map.json contains:
+- nodes: components with metrics (PageRank, fan-in, fan-out, complexity)
+- edges: dependency relationships between components
+- communities: detected module groupings with keywords
 -->
 
 ## Context Diagram
@@ -31,16 +28,11 @@ CodeWiki module_tree.json format:
 <!-- ORACLE:C4_CONTEXT
 Shows the system in its ecosystem — users, external systems.
 
-**FIRST: Check CodeWiki module docs for existing diagrams:**
-```bash
-grep -l "C4Context\|graph TB" docs/*.md
-```
-
 Tools:
 - Read README.md, package.json for system description
 - Grep for external API calls (fetch, axios, http.get) to find external systems
 - Read env files / config for external service URLs
-- Use docs/module_tree.json for module structure
+- Use docs/codebase_map.json communities for module structure
 
 Identify:
 1. Primary users
@@ -72,15 +64,13 @@ C4Context
 <!-- ORACLE:C4_CONTAINER
 Shows major deployable units and how they communicate.
 
-**Use CodeWiki module_tree.json (in docs/, NOT .codewiki-cache/):**
+**Use CodeWiki codebase_map.json communities:**
 ```bash
-cat docs/module_tree.json | python3 -c "
+cat docs/codebase_map.json | python3 -c "
 import json, sys
-tree = json.load(sys.stdin)
-for name, data in tree.items():
-    components = data.get('components', [])
-    children = data.get('children', {})
-    print(f'{name}: {len(components)} components, {len(children)} sub-modules')
+data = json.load(sys.stdin)
+for comm in data.get('communities', []):
+    print(f'{comm[\"name\"]}: {comm.get(\"node_count\", 0)} components')
 "
 ```
 
@@ -122,23 +112,14 @@ C4Container
 <!-- ORACLE:C4_COMPONENT
 Shows key components within the main container.
 
-**Use CodeWiki module_tree.json (in docs/):**
+**Use CodeWiki codebase_map.json nodes:**
 ```bash
-cat docs/module_tree.json | python3 -c "
+cat docs/codebase_map.json | python3 -c "
 import json, sys
-def print_components(tree, indent=0):
-    for name, data in tree.items():
-        comps = data.get('components', [])
-        print('  ' * indent + f'{name}/ ({len(comps)} components)')
-        if data.get('children'):
-            print_components(data['children'], indent + 1)
-print_components(json.load(sys.stdin))
+data = json.load(sys.stdin)
+for node in sorted(data.get('nodes', []), key=lambda n: n.get('pagerank', 0), reverse=True)[:20]:
+    print(f'{node[\"name\"]}: pagerank={node.get(\"pagerank\",0):.4f}, fan_in={node.get(\"fan_in\",0)}')
 "
-```
-
-**Also check CodeWiki module docs for component diagrams:**
-```bash
-grep -l "graph TB\|flowchart" docs/*.md
 ```
 
 For each major container, identify:
@@ -169,6 +150,6 @@ C4Component
 If multiple containers have significant internal structure,
 add another Component diagram section for each.
 
-Use docs/module_tree.json to identify modules with rich internal structure.
+Use codebase_map.json communities to identify modules with rich internal structure.
 Delete this comment if only one container needs a component diagram.
 -->
