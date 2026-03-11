@@ -521,6 +521,46 @@ docs/
 └── templates/                   # CodeIndex doc templates (unchanged)
 ```
 
+## CocoIndex Collaboration
+
+Oracle can collaborate with the `aio-cocoindex` plugin for **semantic search** alongside standard file system tools (Read, Grep, Glob). This combination gives Oracle two complementary search strategies:
+
+- **File system tools** (Read, Grep, Glob): Exact matches, pattern searches, file structure traversal — fast and precise for known symbols, paths, and patterns.
+- **CocoIndex semantic search**: Meaning-based retrieval — finds relevant code and docs by concept, not just keywords. Useful for discovering related modules, understanding design intent, and tracing cross-cutting concerns.
+
+### When to use CocoIndex during Oracle analysis
+
+| Analysis task | File system tools | CocoIndex semantic search |
+|---|---|---|
+| Find all imports of a module | Grep `import.*module` | — |
+| Find code related to "authentication flow" | — | `query.py "authentication flow"` |
+| Read a specific file | Read `path/to/file` | — |
+| Find where a concept is implemented across modules | Grep (if naming is consistent) | `query.py "error handling strategy"` (when naming varies) |
+| Discover undocumented design patterns | — | `query.py "retry logic"` or `query.py "caching strategy"` |
+| Trace cross-module data flows | Grep for function calls + Read | `query.py "data transformation pipeline"` |
+
+### How to use
+
+If a `.cocoindex/` directory exists in the project, Oracle can query it during Phase 2 analysis:
+
+```bash
+# Check if CocoIndex is available
+ls .cocoindex/query.py 2>/dev/null
+
+# Semantic search across all indexed content
+.venv-cocoindex/bin/python .cocoindex/query.py "your concept or question"
+
+# Filter by collection (docs, code, configs)
+.venv-cocoindex/bin/python .cocoindex/query.py "error handling" --collection code
+
+# Get more results for broader exploration
+.venv-cocoindex/bin/python .cocoindex/query.py "API boundaries" --top-k 10
+```
+
+### Setup
+
+If CocoIndex is not set up for the project, suggest the user run `/aio-cocoindex:cocoindex-setup` first. Oracle does not set up CocoIndex itself — it only queries an existing index.
+
 ## Troubleshooting
 
 **No CodeIndex static analysis:** Oracle MUST run `codeindex generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.

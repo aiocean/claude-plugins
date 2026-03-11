@@ -91,8 +91,8 @@
     {
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
-      "description": "Comprehensive codebase analysis and visualization with CodeWiki integration: architecture documentation (C4 diagrams, ERD, API maps, dependency graphs) and interactive HTML playgrounds. Uses CodeWiki for LLM-powered analysis when available, with Tree-sitter fallback. Specialized analyst teams produce multi-document docs with Mermaid diagrams.",
-      "version": "2.9.2",
+      "description": "Comprehensive codebase analysis and documentation: CodeIndex static analysis (dependency graphs, codebase maps, metrics, community detection) combined with Oracle direct documentation writing. Optionally collaborates with CocoIndex for semantic search. Produces architecture docs (C4 diagrams, dependency graphs, key flows), module docs, and interactive HTML viewers.",
+      "version": "3.2.0",
       "author": { "name": "aiocean" }
     },
     {
