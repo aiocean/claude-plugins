@@ -14,11 +14,15 @@ PROJECT_ROOT = os.getenv(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 )
 
-# PostgreSQL connection (with pgvector extension)
+# PostgreSQL connection (CocoIndex internal metadata only — NOT for vectors)
 DATABASE_URL = os.getenv(
     "COCOINDEX_DATABASE_URL",
     "postgresql://cocoindex:cocoindex@localhost:5432/cocoindex",
 )
+
+# Qdrant connection (vector storage)
+QDRANT_URL = os.getenv("COCOINDEX_QDRANT_URL", "http://localhost:6334")
+QDRANT_API_KEY = os.getenv("COCOINDEX_QDRANT_API_KEY", "")
 
 # ============================================================
 # EMBEDDING CONFIGURATION
