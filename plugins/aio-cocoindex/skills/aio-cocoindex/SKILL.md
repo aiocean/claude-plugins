@@ -6,6 +6,7 @@ description: This skill should be used when the user asks to "search knowledge",
 # CocoIndex — Search & Maintain
 
 Use an existing `.cocoindex/` setup to search documents and maintain the index.
+Searches across all file types (code, docs, configs) in one unified query.
 
 ## Prerequisites
 
@@ -14,9 +15,9 @@ A `.cocoindex/` directory must exist in the project root (use `aio-cocoindex-set
 Required files:
 ```
 .cocoindex/
-├── config.py           # Project-specific collections & embedding config
-├── index.py            # CocoIndex flows
-├── query.py            # Search interface
+├── config.py           # Project name, source dirs, embedding config
+├── index.py            # Auto-detects languages, creates tree-sitter flows
+├── query.py            # Unified search across all languages
 ├── requirements.txt
 └── .env                # DB connection + optional GEMINI_API_KEY
 ```
@@ -38,11 +39,8 @@ python3 -m venv .venv-cocoindex
 ### Search
 
 ```bash
-# Search all collections
+# Search everything (docs + code + configs unified)
 .venv-cocoindex/bin/python .cocoindex/query.py "your question"
-
-# Filter by collection
-.venv-cocoindex/bin/python .cocoindex/query.py "your question" --collection docs
 
 # More results
 .venv-cocoindex/bin/python .cocoindex/query.py "your question" --top-k 10
@@ -50,6 +48,8 @@ python3 -m venv .venv-cocoindex
 # JSON output (for piping or programmatic use)
 .venv-cocoindex/bin/python .cocoindex/query.py "your question" --json
 ```
+
+Results include the language and filename, ranked by similarity across all file types.
 
 ### Update Index (After Files Change)
 
@@ -71,9 +71,17 @@ Incremental — only reprocesses changed files, then exits automatically:
 .venv-cocoindex/bin/cocoindex ls .cocoindex/index.py
 ```
 
+## Tree-Sitter Code Chunking
+
+Code files are split at **AST boundaries** (functions, classes, methods) instead of naive character splitting. This means search results return complete, meaningful code units.
+
+Supported languages: python, typescript, javascript, go, rust, java, c, cpp, c_sharp, ruby, php, swift, kotlin, scala, sql, bash.
+
+Doc/config files use appropriate chunking too (markdown headers, yaml blocks, etc.).
+
 ## Embedding Modes
 
-The setup supports two embedding backends (configured in `.cocoindex/config.py`):
+Two embedding backends (configured in `.cocoindex/config.py`):
 
 | Mode | `EMBEDDING_API_TYPE` | Model | Quality |
 |------|---------------------|-------|---------|
@@ -117,42 +125,14 @@ grep EMBEDDING_API_TYPE .cocoindex/config.py .cocoindex/.env
 | venv missing | `python3 -m venv .venv-cocoindex && .venv-cocoindex/bin/pip install -r .cocoindex/requirements.txt` |
 | `GEMINI_API_KEY` not set | Add to `.cocoindex/.env` — required for Gemini mode |
 | Dimension mismatch error | Switched model without re-index — run `setup` then `update --full-reprocess` |
+| No languages detected | Check `SOURCE_DIRS` in config.py points to directories with supported file types |
 
-## Code Search (Tree-Sitter)
+## Adding New Source Directories
 
-Code collections use **tree-sitter aware chunking** — splits at AST boundaries (functions, classes, methods) instead of naive character splitting. This means search results return complete, meaningful code units.
-
-```bash
-# Search code collections
-.venv-cocoindex/bin/python .cocoindex/query.py "authentication middleware" --collection code_typescript
-
-# Search across all collections (docs + code)
-.venv-cocoindex/bin/python .cocoindex/query.py "how does user login work"
-```
-
-Supported tree-sitter languages: python, typescript, javascript, go, rust, java, c, cpp, c_sharp, ruby, php, swift, kotlin, scala, sql, bash.
-
-## Adding New Collections
-
-Edit `.cocoindex/config.py` to add new collections:
+Edit `.cocoindex/config.py` to add directories:
 
 ```python
-COLLECTIONS = {
-    "existing": { ... },
-    # Add documentation collection
-    "new_collection": {
-        "dirs": ["new-directory/"],
-        "patterns": ["**/*.md"],
-        "chunk_size": 1500,
-        "chunk_overlap": 300,
-        "language": "markdown",
-    },
-    # Add code collections with tree-sitter chunking
-    **generate_code_collections(
-        ["src/", "lib/"],
-        languages=["typescript", "python"],
-    ),
-}
+SOURCE_DIRS = ["src/", "docs/", "lib/", "scripts/"]
 ```
 
 Then re-run setup and index:
@@ -163,7 +143,7 @@ Then re-run setup and index:
 
 ## Direct Database Access
 
-Read `config.py` to find the database URL and table naming convention (`{PROJECT_NAME}_{collection_name}`):
+Read `config.py` to find the database URL and project name. Tables are auto-named as `{project}{language}__{project}_{language}`:
 
 ```bash
 # Connect

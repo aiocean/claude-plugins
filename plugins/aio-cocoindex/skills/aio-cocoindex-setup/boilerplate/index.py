@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 CocoIndex flow definitions — DO NOT EDIT.
-Customize collections in config.py instead.
+Auto-detects languages from file extensions and creates
+tree-sitter aware flows per language.
+
+Customize PROJECT_NAME and SOURCE_DIRS in config.py instead.
 
 Usage:
     cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f    # Setup DB schema
@@ -34,21 +37,51 @@ def _get_embed_spec():
             api_type=cocoindex.llm.LlmApiType.GEMINI,
             model=config.EMBEDDING_MODEL,
             task_type="RETRIEVAL_DOCUMENT",
+            output_dimension=2000,
         )
     return cocoindex.functions.SentenceTransformerEmbed(
         model=config.EMBEDDING_MODEL,
     )
 
 
+def _detect_languages():
+    """Scan SOURCE_DIRS and return detected languages with their file patterns.
+
+    Returns:
+        dict: {language: {"patterns": [...], "category": "code"|"docs"|"config"}}
+    """
+    detected = {}
+    for source_dir in config.SOURCE_DIRS:
+        abs_dir = os.path.join(config.PROJECT_ROOT, source_dir)
+        if not os.path.isdir(abs_dir):
+            continue
+        for root, dirs, files in os.walk(abs_dir):
+            # Prune excluded directories in-place
+            dirs[:] = [d for d in dirs if d not in config.EXCLUDED_DIRS]
+            for f in files:
+                ext = os.path.splitext(f)[1].lower()
+                if ext in config.EXTENSION_MAP:
+                    lang, category = config.EXTENSION_MAP[ext]
+                    if lang not in detected:
+                        detected[lang] = {"patterns": set(), "category": category}
+                    detected[lang]["patterns"].add(f"**/*{ext}")
+    # Convert sets to sorted lists
+    for lang_info in detected.values():
+        lang_info["patterns"] = sorted(lang_info["patterns"])
+    return detected
+
+
 def build_flow(
     flow_builder: cocoindex.FlowBuilder,
     data_scope: cocoindex.DataScope,
-    collection_name: str,
-    collection_config: dict,
+    language: str,
+    patterns: list[str],
+    category: str,
 ):
-    """Build a CocoIndex flow for one collection."""
+    """Build a CocoIndex flow for one language."""
+    chunk_cfg = config.CHUNK_CONFIG.get(category, config.CHUNK_CONFIG["code"])
 
-    for source_dir in collection_config["dirs"]:
+    for source_dir in config.SOURCE_DIRS:
         abs_path = os.path.join(config.PROJECT_ROOT, source_dir)
         if not os.path.isdir(abs_path):
             continue
@@ -56,7 +89,7 @@ def build_flow(
         data_scope["documents"] = flow_builder.add_source(
             cocoindex.sources.LocalFile(
                 path=abs_path,
-                included_patterns=collection_config.get("patterns", ["**/*.md"]),
+                included_patterns=patterns,
             )
         )
 
@@ -65,9 +98,9 @@ def build_flow(
     with data_scope["documents"].row() as doc:
         doc["chunks"] = doc["content"].transform(
             cocoindex.functions.SplitRecursively(),
-            language=collection_config.get("language", "markdown"),
-            chunk_size=collection_config.get("chunk_size", 1500),
-            chunk_overlap=collection_config.get("chunk_overlap", 300),
+            language=language,
+            chunk_size=chunk_cfg["chunk_size"],
+            chunk_overlap=chunk_cfg["chunk_overlap"],
         )
 
         with doc["chunks"].row() as chunk:
@@ -80,7 +113,7 @@ def build_flow(
                 embedding=chunk["embedding"],
             )
 
-    table_name = f"{config.PROJECT_NAME}_{collection_name}"
+    table_name = f"{config.PROJECT_NAME}_{language}"
     doc_embeddings.export(
         table_name,
         cocoindex.storages.Postgres(),
@@ -95,14 +128,18 @@ def build_flow(
 
 
 def _register_flows():
-    """Dynamically register one flow per collection."""
-    for name, cfg in config.COLLECTIONS.items():
-        flow_name = f"{config.PROJECT_NAME.title()}{name.title()}"
+    """Auto-detect languages and register one flow per language."""
+    languages = _detect_languages()
+    for lang, info in languages.items():
+        flow_name = f"{config.PROJECT_NAME.title()}{lang.title()}"
 
-        # Default arg _name/_cfg captures the loop variable in the closure
+        # Default arg captures the loop variable in the closure
         @cocoindex.flow_def(name=flow_name)
-        def _flow(fb, ds, _name=name, _cfg=cfg):
-            build_flow(fb, ds, _name, _cfg)
+        def _flow(fb, ds, _lang=lang, _patterns=info["patterns"], _cat=info["category"]):
+            build_flow(fb, ds, _lang, _patterns, _cat)
+
+    if languages:
+        print(f"Detected {len(languages)} languages: {', '.join(sorted(languages.keys()))}")
 
 
 _register_flows()
