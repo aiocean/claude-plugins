@@ -410,15 +410,79 @@ Unknowns: {N} items pending verification
 
 **Step 6: Generate interactive graph viewer (`graph.html`).**
 
-Use `docs/templates/graph.html.tpl` as the template. This produces a D3 force-directed graph with module clustering, convex hulls, search, toggle buttons, and detailed info panels — far richer than a basic node-link diagram.
+Read `codeindex/templates/graph.html.tpl` from the plugin installation. This template produces a D3 force-directed graph with module clustering, convex hulls, colored links, search (files + functions), hover tooltips, click-to-lock highlight, double-click zoom, minimap, keyboard shortcuts, and hub pulse animations.
 
-To fill the template, extract from `codebase_map.json`:
-- **`filesData`**: Map each component to `{ functions, max_complexity, hub_count, community_ids, function_names }` from the nodes
-- **`edgesData`**: Map edges to `{ source, target, weight }` from the edges array
-- **`summaryData`**: `{ total_nodes, total_edges, hub_files, circular_dependencies }` from summary_metrics
-- **`moduleConfig`**: Group components by community into named modules with assigned colors. Use community names or infer domain names from file paths. Assign each module a distinct color from this palette: `#58a6ff, #f78166, #d2a8ff, #7ee787, #f0883e, #79c0ff, #ffa657, #ff7b72, #3fb950, #a5d6ff`
+**How to locate the template:**
 
-Replace the hardcoded `FamilyBot` title with the actual project name. Write the filled HTML to `docs/graph.html`.
+```bash
+# Find the template in the plugin cache
+GRAPH_TPL="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex/templates/graph.html.tpl 2>/dev/null | sort -V | tail -1)"
+cat "$GRAPH_TPL"
+```
+
+**How to fill the template:** Copy the entire template HTML and replace the 4 JavaScript data blocks near the top of `<script>`. All 4 are extracted from `codebase_map.json`:
+
+**1. `filesData`** — Object keyed by file path. Each value has the component's metrics:
+```javascript
+const filesData = {
+  "src/index.ts": {
+    "functions": 6,           // from nodes[].metrics.functions
+    "max_complexity": 3,      // from nodes[].metrics.max_complexity
+    "hub_count": 1,           // number of hub functions in this file
+    "community_ids": [0, 1],  // from nodes[].community_ids
+    "function_names": ["main", "start", "stop", "fetch", "createBot", "createAdaptersForBot"]
+  },
+  // ... one entry per component in codebase_map.json nodes
+};
+```
+
+**2. `edgesData`** — Array of edges between files:
+```javascript
+const edgesData = [
+  {"source": "src/index.ts", "target": "src/session.ts", "weight": 6},
+  {"source": "src/index.ts", "target": "src/commands.ts", "weight": 2},
+  // ... from codebase_map.json edges array
+];
+```
+
+**3. `summaryData`** — Global graph summary:
+```javascript
+const summaryData = {
+  total_nodes: 222,               // from summary_metrics.total_nodes
+  total_edges: 209,               // from summary_metrics.total_edges
+  hub_files: ["main", "createBot", "handleIncomingMessage"],  // function names with high hub_score
+  circular_dependencies: []       // from summary_metrics.circular_dependencies
+};
+```
+
+**4. `moduleConfig`** — Group files into named modules with colors. Infer module names from directory structure or community groupings:
+```javascript
+const moduleConfig = {
+  "Core Runtime":       { color: "#58a6ff", files: ["src/index.ts", "src/types.ts"] },
+  "Message Processing": { color: "#f78166", files: ["src/chat-handlers.ts", "src/commands.ts"] },
+  "Infrastructure":     { color: "#f0883e", files: ["src/session.ts", "src/scheduler.ts"] },
+  // ... one entry per module/community
+};
+```
+
+Color palette: `#58a6ff, #f78166, #d2a8ff, #7ee787, #f0883e, #79c0ff, #ffa657, #ff7b72, #3fb950, #a5d6ff`
+
+**5. Replace the title** — Change `<title>` and the `<h1>` text from the placeholder to the actual project name.
+
+**6. Write to `docs/graph.html`** — Save the filled template as a standalone HTML file.
+
+**Template features (no changes needed — these work automatically once data is filled):**
+- Module-colored links and arrow markers
+- Convex hull outlines around module clusters
+- Hover tooltip with file name, module, function count, dependency counts
+- Click node for detailed info panel (functions, hub functions, dependencies)
+- Double-click to zoom to a node
+- Search by file name, path, or function name
+- Module toggle buttons with file counts
+- Minimap with viewport indicator (click to navigate)
+- Hub pulse animation on high-connectivity nodes
+- Keyboard shortcuts: `/` search, `Esc` close, `F` fit view, `L` lock layout
+- Fit-to-view and layout lock toolbar buttons
 
 Generate `CODEBASE_MAP.md` as the index of all Oracle-written module docs and include:
 
