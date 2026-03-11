@@ -1,5 +1,5 @@
 ---
-name: feedback
+name: aio-feedback
 description: Submit feedback, bug reports, feature requests, or plugin requests for aiocean plugins via GitHub Issues. Use when user says "submit feedback", "report bug", "request feature", "request plugin", "feedback", "file issue", or wants to report a problem with any aiocean plugin.
 ---
 
