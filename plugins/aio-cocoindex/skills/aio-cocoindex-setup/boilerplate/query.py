@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Semantic search over CocoIndex-indexed project — DO NOT EDIT.
-Auto-discovers all indexed tables for the project and searches them together.
+Auto-discovers all indexed collections for the project and searches them together.
 
 Usage:
     python .cocoindex/query.py "search query"
@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"), override=True)
 
-import psycopg2
+from qdrant_client import QdrantClient
 
 import config
 
@@ -43,95 +43,76 @@ def _embed_query(text: str) -> list[float]:
         return model.encode(text).tolist()
 
 
-def get_connection():
-    return psycopg2.connect(config.DATABASE_URL)
+def get_client():
+    kwargs = {"url": config.QDRANT_URL}
+    if config.QDRANT_API_KEY:
+        kwargs["api_key"] = config.QDRANT_API_KEY
+    return QdrantClient(**kwargs)
 
 
-def get_tables():
-    """Auto-discover all tables for this project.
+def get_collections():
+    """Auto-discover all Qdrant collections for this project.
 
-    CocoIndex naming convention:
-        Flow name: {ProjectTitle}{LanguageTitle}
-        Export name: {project}_{language}
-        Actual table: {flowname_lowercase}__{project}_{language}
-
-    Example: PROJECT_NAME="compass", language="python"
-        -> Flow: CompassPython
-        -> Table: compasspython__compass_python
+    CocoIndex naming convention: {project}_{language}
+    Example: PROJECT_NAME="compass", language="python" -> "compass_python"
     """
-    conn = get_connection()
-    cur = conn.cursor()
-    pattern = f"%\\_\\_{config.PROJECT_NAME}\\_%"
-    cur.execute("""
-        SELECT tablename FROM pg_tables
-        WHERE schemaname = 'public'
-        AND tablename LIKE %s
-        AND tablename NOT LIKE '%%\\_tracking'
-    """, (pattern,))
-    tables = [row[0] for row in cur.fetchall()]
-    conn.close()
-    return tables
+    client = get_client()
+    all_collections = client.get_collections().collections
+    prefix = f"{config.PROJECT_NAME}_"
+    return [c.name for c in all_collections if c.name.startswith(prefix)]
 
 
-def _table_language(table: str) -> str:
-    """Extract language name from table name."""
-    separator = f"__{config.PROJECT_NAME}_"
-    if separator in table:
-        return table.split(separator, 1)[1]
-    return table
+def _collection_language(collection: str) -> str:
+    """Extract language name from collection name."""
+    prefix = f"{config.PROJECT_NAME}_"
+    if collection.startswith(prefix):
+        return collection[len(prefix):]
+    return collection
 
 
 def get_status():
-    """Check index status — row counts per language."""
-    conn = get_connection()
-    cur = conn.cursor()
-    tables = get_tables()
+    """Check index status — point counts per language."""
+    client = get_client()
+    collections = get_collections()
     results = {}
-    for table in tables:
-        lang = _table_language(table)
+    for coll in collections:
+        lang = _collection_language(coll)
         try:
-            cur.execute(f'SELECT count(*) FROM "{table}"')
-            results[lang] = cur.fetchone()[0]
+            info = client.get_collection(coll)
+            results[lang] = info.points_count
         except Exception:
-            conn.rollback()
             results[lang] = 0
-    conn.close()
     return results
 
 
 def query_similar(question: str, top_k: int = 5):
-    """Search all project tables by semantic similarity."""
+    """Search all project collections by semantic similarity."""
     query_embedding = _embed_query(question)
 
-    conn = get_connection()
-    cur = conn.cursor()
-
-    tables = get_tables()
+    client = get_client()
+    collections = get_collections()
     all_results = []
-    for table in tables:
-        lang = _table_language(table)
+
+    for coll in collections:
+        lang = _collection_language(coll)
         try:
-            cur.execute(
-                f"""
-                SELECT filename, text, 1 - (embedding <=> %s::vector) as similarity
-                FROM "{table}"
-                ORDER BY embedding <=> %s::vector
-                LIMIT %s
-                """,
-                (str(query_embedding), str(query_embedding), top_k),
-            )
-            for row in cur.fetchall():
+            hits = client.query_points(
+                collection_name=coll,
+                query=query_embedding,
+                limit=top_k,
+                with_payload=True,
+            ).points
+            for hit in hits:
+                payload = hit.payload or {}
                 all_results.append({
                     "language": lang,
-                    "filename": row[0],
-                    "text": row[1],
-                    "similarity": round(float(row[2]), 4),
+                    "filename": payload.get("filename", ""),
+                    "text": payload.get("text", ""),
+                    "similarity": round(float(hit.score), 4),
                 })
         except Exception as e:
-            conn.rollback()
-            print(f"Warning: Could not query {table}: {e}", file=sys.stderr)
+            print(f"Warning: Could not query {coll}: {e}", file=sys.stderr)
 
-    conn.close()
     all_results.sort(key=lambda x: x["similarity"], reverse=True)
     return all_results[:top_k]
 
