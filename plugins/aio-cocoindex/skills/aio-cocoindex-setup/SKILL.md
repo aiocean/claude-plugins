@@ -171,7 +171,7 @@ toml, json, html, css.
 
 | | Local (MiniLM-L6-v2) | Gemini (embedding-2-preview) |
 |---|---|---|
-| Dimension | 384 | 3072 |
+| Dimension | 384 | 1536 (reduced from 3072 for HNSW compatibility) |
 | Quality | Good (English) | Excellent (multilingual) |
 | Cost | Free | ~$0.00025/1K tokens |
 | Speed | Fast (no network) | Slower (API calls) |

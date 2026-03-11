@@ -33,11 +33,15 @@ import config
 def _get_embed_spec():
     """Return the embedding function spec based on config."""
     if config.EMBEDDING_API_TYPE == "gemini":
+        # output_dimension=1536: Gemini recommends 768/1536/3072.
+        # 1536 fits pgvector HNSW limit (max 2000 dims) while keeping quality.
+        # NOTE: If CocoIndex batch API errors on task_type/output_dimension,
+        # remove them — it's a CocoIndex compatibility issue, not Gemini's.
         return cocoindex.functions.EmbedText(
             api_type=cocoindex.llm.LlmApiType.GEMINI,
             model=config.EMBEDDING_MODEL,
             task_type="RETRIEVAL_DOCUMENT",
-            output_dimension=2000,
+            output_dimension=1536,
         )
     return cocoindex.functions.SentenceTransformerEmbed(
         model=config.EMBEDDING_MODEL,
