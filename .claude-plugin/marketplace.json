@@ -150,6 +150,13 @@
       "description": "Complete Go development skill covering idiomatic patterns, error handling, concurrency, interfaces, generics, testing (TDD, fuzzing, benchmarks), project structure, production hardening, and gRPC. Based on Google Go Style Guide, Uber Go Style Guide, and Effective Go. Updated for Go 1.25.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-cocoindex",
+      "source": "./plugins/aio-cocoindex",
+      "description": "CocoIndex-based document indexing with incremental processing and semantic search. Two skills: cocoindex-setup (scaffold project-specific .cocoindex/ directory) and cocoindex (search and maintain existing index).",
+      "version": "2.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }

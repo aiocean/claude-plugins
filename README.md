@@ -118,6 +118,14 @@ Systematic debug & fix orchestrator. Four-phase pipeline: understand codebase co
 /plugin install aio-debug@aiocean-plugins
 ```
 
+## cocoindex
+
+Index your codebase documents for fast semantic search with CocoIndex. Two skills work together: `cocoindex-setup` scaffolds a project-specific `.cocoindex/` directory with configuration, embedding pipeline, and search functions tailored to your stack. Once set up, `cocoindex` lets you search across indexed documents and maintain the index with incremental processing — only changed files get re-embedded. Perfect for large codebases where grep isn't enough and you need meaning-aware search across documentation, comments, and code.
+
+```bash
+/plugin install aio-cocoindex@aiocean-plugins
+```
+
 ## Workflows
 
 Plugins are designed to work independently, but they compose naturally into multi-step workflows.
