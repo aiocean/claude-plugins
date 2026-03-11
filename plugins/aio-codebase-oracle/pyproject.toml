@@ -74,7 +74,7 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
-codeindex = ["py.typed", "analyzer/queries/*.scm", "templates/*.tpl", "templates/_partials/*.tpl"]
+codeindex = ["py.typed", "analyzer/queries/*.scm", "templates/*.tpl", "templates/*.md.tpl", "templates/_partials/*.tpl"]
 
 [tool.black]
 line-length = 100
