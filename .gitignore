@@ -1,1 +1,2 @@
 plugins/aio-cocoindex/skills/aio-cocoindex-setup/boilerplate/__pycache__/
+*.egg-info/

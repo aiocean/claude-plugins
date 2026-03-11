@@ -106,7 +106,7 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 ┌─────────────────────────────────────────────────────────────────┐
 │ Phase 0: CodeIndex (Static Analysis Only)                        │
 │                                                                 │
-│   codeindex generate --verbose                                   │
+│   .codeindex/bin/codeindex generate --verbose                     │
 │   ↓                                                             │
 │   Produces:                                                     │
 │   - docs/codebase_map.json (components, edges, metrics, hubs) │
@@ -187,10 +187,10 @@ docs/
 ls docs/codebase_map.json docs/dependency_graphs/ 2>/dev/null
 
 # If static analysis doesn't exist OR user requested fresh analysis → run CodeIndex
-codeindex generate --verbose --no-cache
+.codeindex/bin/codeindex generate --verbose --no-cache
 
 # If static analysis exists and user just wants to update → still run with cache
-codeindex generate --verbose
+.codeindex/bin/codeindex generate --verbose
 ```
 
 **Flags explained:**
@@ -198,6 +198,8 @@ codeindex generate --verbose
 - `--no-cache`: Forces fresh analysis (use when no static analysis exists or code has changed)
 
 **Do NOT use `--use-agent-sdk`** — Oracle writes all documentation directly. CodeIndex runs in static analysis mode only.
+
+**Do NOT use globally installed `codeindex`** — Always use the project-local `.codeindex/bin/codeindex`. This prevents version conflicts between projects.
 
 **When to use `--no-cache`:**
 - First run (no existing static analysis)
@@ -587,8 +589,13 @@ If CocoIndex is not set up for the project, suggest the user run `/aio-cocoindex
 
 ## Troubleshooting
 
-**No CodeIndex static analysis:** Oracle MUST run `codeindex generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
+**No CodeIndex static analysis:** Oracle MUST run `.codeindex/bin/codeindex generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
 
-**`codeindex` not found:** User needs to install: `pip install -e codeindex/`
+**`codeindex` not found:** User needs to install into project-local venv. Run `/aio-codebase-oracle:aio-codebase-index` or:
+```bash
+python3 -m venv .codeindex
+PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
+.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
+```
 
-**Stale static analysis:** Code changed since last CodeIndex run. Re-run: `codeindex generate --verbose --no-cache`
+**Stale static analysis:** Code changed since last CodeIndex run. Re-run: `.codeindex/bin/codeindex generate --verbose --no-cache`
