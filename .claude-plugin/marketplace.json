@@ -154,8 +154,15 @@
     {
       "name": "aio-cocoindex",
       "source": "./plugins/aio-cocoindex",
-      "description": "CocoIndex-based document indexing with incremental processing and semantic search. Two skills: cocoindex-setup (scaffold project-specific .cocoindex/ directory) and cocoindex (search and maintain existing index).",
-      "version": "2.0.0",
+      "description": "CocoIndex-based document indexing with incremental processing and semantic search. Index once, query anytime — no long-running server needed. Two skills: cocoindex-setup (scaffold .cocoindex/ directory) and cocoindex (search and maintain index).",
+      "version": "2.1.0",
+      "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-feedback",
+      "source": "./plugins/aio-feedback",
+      "description": "Submit feedback, bug reports, feature requests, and plugin requests for aiocean plugins directly from Claude Code via GitHub Issues.",
+      "version": "1.0.0",
       "author": { "name": "aiocean" }
     }
   ]

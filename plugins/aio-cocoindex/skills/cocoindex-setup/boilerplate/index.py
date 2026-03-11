@@ -4,13 +4,15 @@ CocoIndex flow definitions — DO NOT EDIT.
 Customize collections in config.py instead.
 
 Usage:
-    cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f
-    cocoindex -e .cocoindex/.env server .cocoindex/index.py -f -L
-    cocoindex -e .cocoindex/.env ls .cocoindex/index.py
+    cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f    # Setup DB schema
+    cocoindex -e .cocoindex/.env update .cocoindex/index.py -f   # Index once and exit
+    cocoindex -e .cocoindex/.env ls .cocoindex/index.py          # List flows
 
 IMPORTANT:
-    - The -e flag MUST come BEFORE the subcommand (setup/server/ls)
-    - The -L flag is REQUIRED to trigger actual indexing
+    - The -e flag MUST come BEFORE the subcommand (setup/update/ls)
+    - Use "update" for one-shot indexing (exits when done)
+    - Use "update -L" for continuous live-updating (watches for changes)
+    - query.py works independently — no running process needed after indexing
     - First run downloads the embedding model (~90MB)
 """
 import os

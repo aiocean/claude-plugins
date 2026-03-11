@@ -1,0 +1,8 @@
+{
+  "name": "aio-feedback",
+  "description": "Submit feedback, bug reports, and feature requests for aiocean plugins directly from Claude Code via GitHub Issues.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}

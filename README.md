@@ -126,6 +126,14 @@ Index your codebase documents for fast semantic search with CocoIndex. Two skill
 /plugin install aio-cocoindex@aiocean-plugins
 ```
 
+## feedback
+
+Found a bug? Have an idea for a new plugin? Want to improve an existing one? Submit feedback directly from Claude Code without opening a browser. Just describe what you want — bug report, feature request, or plugin idea — and it files a GitHub issue on the aiocean/claude-plugins repo with the right labels. Track your feedback via the returned issue URL. Requires `gh` CLI authenticated.
+
+```bash
+/plugin install aio-feedback@aiocean-plugins
+```
+
 ## Workflows
 
 Plugins are designed to work independently, but they compose naturally into multi-step workflows.
