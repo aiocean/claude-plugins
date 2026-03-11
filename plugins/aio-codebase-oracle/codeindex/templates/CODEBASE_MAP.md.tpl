@@ -36,13 +36,13 @@ List the documentation sources used.
 
 CodeIndex static analysis outputs:
 - codebase_map.json: components, edges, metrics, communities, hubs
-- graph.html: interactive dependency viewer
 - dependency_graphs/*.json: per-module dependency data
 - templates/*.tpl: doc structure templates
+- graph.html: AI-generated interactive viewer (from skill's graph.html.tpl, not CodeIndex)
 
 ```bash
 # Check CodeIndex static analysis
-ls docs/codebase_map.json docs/graph.html docs/dependency_graphs/ docs/templates/ 2>/dev/null
+ls docs/codebase_map.json docs/dependency_graphs/ docs/templates/ 2>/dev/null
 
 # List Oracle-written module docs
 ls docs/*.md | grep -v CODEBASE_MAP | grep -v c4 | grep -v key-flows | grep -v dependency
@@ -54,9 +54,9 @@ ls docs/*.md | grep -v CODEBASE_MAP | grep -v c4 | grep -v key-flows | grep -v d
 | Source | Description |
 |--------|-------------|
 | [codebase_map.json](codebase_map.json) | Components, edges, metrics, communities, hubs |
-| [graph.html](graph.html) | Interactive dependency viewer |
 | dependency_graphs/ | Per-module dependency JSON data |
 | templates/ | CodeIndex doc structure templates |
+| [graph.html](graph.html) | AI-generated interactive dependency viewer |
 | REPLACE | REPLACE: list Oracle-written module .md files |
 
 ## Static Analysis Metrics

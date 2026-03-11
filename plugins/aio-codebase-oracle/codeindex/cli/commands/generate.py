@@ -108,7 +108,7 @@ def generate_command(ctx, output: str, include: Optional[str], exclude: Optional
             arch_violations=evaluate_rules(components, builder.circular_deps, builder.temporal_couplings),
         )
 
-        # Copy doc templates to output directory (includes graph.html.tpl for AI-generated graph)
+        # Copy doc templates to output directory
         from codeindex.templates import TEMPLATES_DIR
         import shutil
 

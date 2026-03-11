@@ -69,7 +69,6 @@ codeindex generate --verbose -o docs/
 
 **Output produced:**
 - `docs/codebase_map.json` — components, edges, metrics, communities, hubs
-- `docs/graph.html` — interactive dependency viewer
 - `docs/dependency_graphs/*.json` — per-module dependency data
 - `docs/templates/*.tpl` — doc structure templates
 
