@@ -13,7 +13,7 @@ IMPORTANT:
     - Use "update" for one-shot indexing (exits when done)
     - Use "update -L" for continuous live-updating (watches for changes)
     - query.py works independently — no running process needed after indexing
-    - First run downloads the embedding model (~90MB)
+    - First run downloads the embedding model (~90MB) for local mode
 """
 import os
 import sys
@@ -25,6 +25,19 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 import cocoindex
 import config
+
+
+def _get_embed_spec():
+    """Return the embedding function spec based on config."""
+    if config.EMBEDDING_API_TYPE == "gemini":
+        return cocoindex.functions.EmbedText(
+            api_type=cocoindex.llm.LlmApiType.GEMINI,
+            model=config.EMBEDDING_MODEL,
+            task_type="RETRIEVAL_DOCUMENT",
+        )
+    return cocoindex.functions.SentenceTransformerEmbed(
+        model=config.EMBEDDING_MODEL,
+    )
 
 
 def build_flow(
@@ -58,11 +71,7 @@ def build_flow(
         )
 
         with doc["chunks"].row() as chunk:
-            chunk["embedding"] = chunk["text"].transform(
-                cocoindex.functions.SentenceTransformerEmbed(
-                    model=config.EMBEDDING_MODEL,
-                )
-            )
+            chunk["embedding"] = chunk["text"].transform(_get_embed_spec())
 
             doc_embeddings.collect(
                 filename=doc["filename"],

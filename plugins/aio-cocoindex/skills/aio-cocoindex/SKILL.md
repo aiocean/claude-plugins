@@ -14,11 +14,11 @@ A `.cocoindex/` directory must exist in the project root (use `aio-cocoindex-set
 Required files:
 ```
 .cocoindex/
-├── config.py           # Project-specific collections
+├── config.py           # Project-specific collections & embedding config
 ├── index.py            # CocoIndex flows
 ├── query.py            # Search interface
 ├── requirements.txt
-└── .env
+└── .env                # DB connection + optional GEMINI_API_KEY
 ```
 
 ## Operations
@@ -71,6 +71,40 @@ Incremental — only reprocesses changed files, then exits automatically:
 .venv-cocoindex/bin/cocoindex ls .cocoindex/index.py
 ```
 
+## Embedding Modes
+
+The setup supports two embedding backends (configured in `.cocoindex/config.py`):
+
+| Mode | `EMBEDDING_API_TYPE` | Model | Quality |
+|------|---------------------|-------|---------|
+| Local | `"local"` | `sentence-transformers/all-MiniLM-L6-v2` | Good (English) |
+| Gemini | `"gemini"` | `gemini-embedding-2-preview` | Excellent (multilingual) |
+
+Check current mode:
+```bash
+grep EMBEDDING_API_TYPE .cocoindex/config.py .cocoindex/.env
+```
+
+### Switching Embedding Mode
+
+**WARNING:** Switching embedding model requires a full re-index (vectors are incompatible).
+
+1. Update `.cocoindex/.env`:
+   ```bash
+   # For Gemini
+   COCOINDEX_EMBEDDING_API_TYPE=gemini
+   COCOINDEX_EMBEDDING_MODEL=gemini-embedding-2-preview
+   GEMINI_API_KEY=<key>
+   ```
+
+2. Update `config.py` `EMBEDDING_API_TYPE` if hardcoded
+
+3. Re-setup and re-index:
+   ```bash
+   .venv-cocoindex/bin/cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f
+   .venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f --full-reprocess
+   ```
+
 ## Troubleshooting
 
 | Problem | Solution |
@@ -78,8 +112,11 @@ Incremental — only reprocesses changed files, then exits automatically:
 | `.cocoindex/` not found | Run `aio-cocoindex-setup` skill first |
 | Connection refused | PostgreSQL container not running — check Docker |
 | 0 chunks after update | Make sure to use `update` subcommand, not `server` |
-| Slow first run | Model download (~90MB) + bulk embedding — subsequent runs are incremental |
+| Slow first run (local) | Model download (~90MB) + bulk embedding — subsequent runs are incremental |
+| Slow first run (Gemini) | API calls for all chunks — subsequent runs are incremental |
 | venv missing | `python3 -m venv .venv-cocoindex && .venv-cocoindex/bin/pip install -r .cocoindex/requirements.txt` |
+| `GEMINI_API_KEY` not set | Add to `.cocoindex/.env` — required for Gemini mode |
+| Dimension mismatch error | Switched model without re-index — run `setup` then `update --full-reprocess` |
 
 ## Adding New Collections
 
