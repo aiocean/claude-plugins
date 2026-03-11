@@ -154,8 +154,8 @@
     {
       "name": "aio-cocoindex",
       "source": "./plugins/aio-cocoindex",
-      "description": "CocoIndex-based document indexing with incremental processing and semantic search. Index once, query anytime — no long-running server needed. Two skills: cocoindex-setup (scaffold .cocoindex/ directory) and cocoindex (search and maintain index).",
-      "version": "2.1.0",
+      "description": "CocoIndex-based document indexing with incremental processing and semantic search. Index once, query anytime — no long-running server needed. Two skills: aio-cocoindex-setup (scaffold .cocoindex/ directory) and aio-cocoindex (search and maintain index).",
+      "version": "2.2.0",
       "author": { "name": "aiocean" }
     },
     {
