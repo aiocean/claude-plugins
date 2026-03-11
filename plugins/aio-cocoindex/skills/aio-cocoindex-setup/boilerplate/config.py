@@ -2,7 +2,7 @@
 Project-specific CocoIndex configuration.
 THIS IS THE ONLY FILE YOU NEED TO CUSTOMIZE.
 
-Set PROJECT_NAME and SOURCE_DIRS. Languages are auto-detected from file extensions.
+Set PROJECT_NAME. Languages are auto-detected from file extensions.
 Each detected language gets tree-sitter aware chunking at AST boundaries.
 Leave index.py and query.py unchanged.
 """
@@ -53,10 +53,6 @@ EMBEDDING_MODEL = os.getenv(
 
 # Unique name for this project (lowercase, no hyphens, underscores ok)
 PROJECT_NAME = "myproject"
-
-# Directories to scan (relative to project root)
-# All supported files are indexed with auto-detected language
-SOURCE_DIRS = ["."]
 
 # ============================================================
 # AUTO-DETECTION CONFIG (usually no need to modify)

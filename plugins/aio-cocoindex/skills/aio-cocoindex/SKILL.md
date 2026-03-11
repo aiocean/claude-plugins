@@ -15,7 +15,7 @@ A `.cocoindex/` directory must exist in the project root (use `aio-cocoindex-set
 Required files:
 ```
 .cocoindex/
-├── config.py           # Project name, source dirs, embedding config
+├── config.py           # Project name, excluded dirs, embedding config
 ├── index.py            # Auto-detects languages, creates tree-sitter flows
 ├── query.py            # Unified search across all languages
 ├── requirements.txt
@@ -126,21 +126,11 @@ grep EMBEDDING_API_TYPE .cocoindex/config.py .cocoindex/.env
 | venv missing | `python3 -m venv .venv-cocoindex && .venv-cocoindex/bin/pip install -r .cocoindex/requirements.txt` |
 | `GEMINI_API_KEY` not set | Add to `.cocoindex/.env` — required for Gemini mode |
 | Dimension mismatch error | Switched model without re-index — delete Qdrant collections, run `setup` then `update --full-reprocess` |
-| No languages detected | Check `SOURCE_DIRS` in config.py points to directories with supported file types |
+| No languages detected | Check `EXCLUDED_DIRS` in config.py isn't excluding your source directories |
 
-## Adding New Source Directories
+## Excluding Directories
 
-Edit `.cocoindex/config.py` to add directories:
-
-```python
-SOURCE_DIRS = ["src/", "docs/", "lib/", "scripts/"]
-```
-
-Then re-run setup and index:
-```bash
-.venv-cocoindex/bin/cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f
-.venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f
-```
+Edit `EXCLUDED_DIRS` in `.cocoindex/config.py` to skip directories you don't want indexed. The index always scans from `PROJECT_ROOT` and uses `EXCLUDED_DIRS` to filter.
 
 ## Direct Qdrant Access
 

@@ -11,7 +11,7 @@ Auto-detects all file types and uses **tree-sitter aware chunking** for code fil
 ## How It Works
 
 1. **Copy boilerplate files** from this skill's `boilerplate/` directory
-2. **Customize only `config.py`** — set `PROJECT_NAME` and `SOURCE_DIRS`
+2. **Customize only `config.py`** — set `PROJECT_NAME` and `EXCLUDED_DIRS`
 3. **Never edit `index.py` or `query.py`** — they auto-detect languages and handle everything
 
 No manual collection configuration needed. One project = one unified index.
@@ -37,7 +37,7 @@ ls -d */ 2>/dev/null
 
 Determine:
 - **PROJECT_NAME**: Lowercase, no hyphens (e.g., `compass`, `trueprofitfns`, `webapp`)
-- **SOURCE_DIRS**: Which directories to index (default: `["."]` for everything)
+- **EXCLUDED_DIRS**: Which directories to skip (defaults include node_modules, .git, dist, etc.)
 
 ### Step 3: Ask About Embedding Model
 
@@ -80,7 +80,7 @@ Then write a customized version to `.cocoindex/config.py` with:
 - Correct `DATABASE_URL` (ask user for their PostgreSQL host — used for CocoIndex metadata only)
 - Correct `QDRANT_URL` (ask user for their Qdrant endpoint — used for vector storage)
 - Correct `EMBEDDING_API_TYPE` — `"local"` or `"gemini"` based on user choice
-- Correct `SOURCE_DIRS` — directories to index
+- Correct `EXCLUDED_DIRS` — directories to skip during indexing
 
 Languages are auto-detected from file extensions. No need to configure collections.
 
@@ -177,7 +177,7 @@ __pycache__/
 
 ## How It Works Internally
 
-Languages are auto-detected by scanning `SOURCE_DIRS` for known file extensions.
+Languages are auto-detected by scanning `PROJECT_ROOT` for known file extensions (skipping `EXCLUDED_DIRS`).
 Each detected language gets its own CocoIndex flow with the correct tree-sitter
 parser for AST-aware chunking. All results are unified in search — a query for
 "authentication" returns matching docs, code, and configs ranked by relevance.
@@ -211,7 +211,7 @@ toml, json, html, css.
 | Gemini rate limits on large indexes | CocoIndex handles batching internally, but very large indexes (50K+ chunks) may need patience |
 | Qdrant connection refused | Qdrant container not running — check Docker. Default gRPC port is 6334 |
 | `GEMINI_API_KEY` from shell overrides `.env` | Boilerplate uses `load_dotenv(override=True)` to ensure `.env` takes precedence over shell env vars |
-| No languages detected | Check SOURCE_DIRS points to directories with supported file types |
+| No languages detected | Check EXCLUDED_DIRS isn't excluding your source directories |
 
 ## File Roles
 

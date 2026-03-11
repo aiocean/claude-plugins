@@ -4,7 +4,7 @@ CocoIndex flow definitions — DO NOT EDIT.
 Auto-detects languages from file extensions and creates
 tree-sitter aware flows per language.
 
-Customize PROJECT_NAME and SOURCE_DIRS in config.py instead.
+Customize PROJECT_NAME in config.py instead.
 
 Usage:
     cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f    # Setup DB schema
@@ -58,26 +58,21 @@ def _get_embed_spec():
 
 
 def _detect_languages():
-    """Scan SOURCE_DIRS and return detected languages with their file patterns.
+    """Scan PROJECT_ROOT and return detected languages with their file patterns.
 
     Returns:
         dict: {language: {"patterns": [...], "category": "code"|"docs"|"config"}}
     """
     detected = {}
-    for source_dir in config.SOURCE_DIRS:
-        abs_dir = os.path.join(config.PROJECT_ROOT, source_dir)
-        if not os.path.isdir(abs_dir):
-            continue
-        for root, dirs, files in os.walk(abs_dir):
-            # Prune excluded directories in-place
-            dirs[:] = [d for d in dirs if d not in config.EXCLUDED_DIRS]
-            for f in files:
-                ext = os.path.splitext(f)[1].lower()
-                if ext in config.EXTENSION_MAP:
-                    lang, category = config.EXTENSION_MAP[ext]
-                    if lang not in detected:
-                        detected[lang] = {"patterns": set(), "category": category}
-                    detected[lang]["patterns"].add(f"**/*{ext}")
+    for root, dirs, files in os.walk(config.PROJECT_ROOT):
+        dirs[:] = [d for d in dirs if d not in config.EXCLUDED_DIRS]
+        for f in files:
+            ext = os.path.splitext(f)[1].lower()
+            if ext in config.EXTENSION_MAP:
+                lang, category = config.EXTENSION_MAP[ext]
+                if lang not in detected:
+                    detected[lang] = {"patterns": set(), "category": category}
+                detected[lang]["patterns"].add(f"**/*{ext}")
     # Convert sets to sorted lists
     for lang_info in detected.values():
         lang_info["patterns"] = sorted(lang_info["patterns"])
@@ -94,17 +89,12 @@ def build_flow(
     """Build a CocoIndex flow for one language."""
     chunk_cfg = config.CHUNK_CONFIG.get(category, config.CHUNK_CONFIG["code"])
 
-    for source_dir in config.SOURCE_DIRS:
-        abs_path = os.path.join(config.PROJECT_ROOT, source_dir)
-        if not os.path.isdir(abs_path):
-            continue
-
-        data_scope["documents"] = flow_builder.add_source(
-            cocoindex.sources.LocalFile(
-                path=abs_path,
-                included_patterns=patterns,
-            )
+    data_scope["documents"] = flow_builder.add_source(
+        cocoindex.sources.LocalFile(
+            path=config.PROJECT_ROOT,
+            included_patterns=patterns,
         )
+    )
 
     doc_embeddings = data_scope.add_collector()
 
