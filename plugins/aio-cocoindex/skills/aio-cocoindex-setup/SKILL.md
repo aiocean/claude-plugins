@@ -84,9 +84,28 @@ Then write a customized version to `.cocoindex/config.py` with:
 | Content Type | chunk_size | chunk_overlap | language |
 |-------------|-----------|--------------|----------|
 | Markdown docs | 1500 | 300 | markdown |
-| Source code | 1000 | 200 | (match language) |
+| Source code | 1000 | 200 | (use tree-sitter language) |
 | Configs (yaml/toml) | 500 | 100 | yaml/toml |
 | Long-form docs (specs) | 2000 | 400 | markdown |
+
+**For code collections:** Use `generate_code_collections()` helper to auto-create per-language
+collections with tree-sitter aware chunking. This splits code at AST boundaries (functions,
+classes, methods) instead of naive character splitting:
+
+```python
+COLLECTIONS = {
+    "docs": { ... },
+    # Auto-generates code_typescript, code_python, etc. with tree-sitter chunking
+    **generate_code_collections(
+        ["src/", "lib/"],
+        languages=["typescript", "python"],  # omit for all 16 supported languages
+    ),
+}
+```
+
+Tree-sitter ensures chunks respect code structure — a function body stays together,
+imports are grouped, class definitions aren't split mid-method. This dramatically
+improves semantic search quality for code vs naive text chunking.
 
 ### Step 6: Create `.env`
 
@@ -176,6 +195,7 @@ __pycache__/
 | "UNEXPECTED key: embeddings.position_ids" | Harmless warning from sentence-transformers — ignore it |
 | Switching embedding model | Must re-index everything — vector dimensions and space are incompatible |
 | Gemini rate limits on large indexes | CocoIndex handles batching internally, but very large indexes (50K+ chunks) may need patience |
+| `GEMINI_API_KEY` from shell overrides `.env` | Boilerplate uses `load_dotenv(override=True)` to ensure `.env` takes precedence over shell env vars |
 
 ## File Roles
 
