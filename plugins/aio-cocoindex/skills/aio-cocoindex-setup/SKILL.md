@@ -6,12 +6,15 @@ description: This skill should be used when the user asks to "setup cocoindex", 
 # CocoIndex Setup
 
 Scaffold a `.cocoindex/` directory for any project with semantic search capabilities.
+Auto-detects all file types and uses **tree-sitter aware chunking** for code files (splits at AST boundaries: functions, classes, methods).
 
 ## How It Works
 
 1. **Copy boilerplate files** from this skill's `boilerplate/` directory
-2. **Customize only `config.py`** for the target project
-3. **Never edit `index.py` or `query.py`** — they are fixed interfaces
+2. **Customize only `config.py`** — set `PROJECT_NAME` and `SOURCE_DIRS`
+3. **Never edit `index.py` or `query.py`** — they auto-detect languages and handle everything
+
+No manual collection configuration needed. One project = one unified index.
 
 ## Workflow
 
@@ -24,10 +27,8 @@ ls $BP  # Should show: config.py  index.py  query.py  requirements.txt
 
 ### Step 2: Analyze Project
 
-Before copying, understand the project:
-
 ```bash
-# What files exist?
+# What file types exist?
 find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | sed 's|.*\.||' | sort | uniq -c | sort -rn | head -15
 
 # What directories have content?
@@ -36,7 +37,7 @@ ls -d */ 2>/dev/null
 
 Determine:
 - **PROJECT_NAME**: Lowercase, no hyphens (e.g., `compass`, `trueprofitfns`, `webapp`)
-- **COLLECTIONS**: Group files by purpose — docs, code, configs, etc.
+- **SOURCE_DIRS**: Which directories to index (default: `["."]` for everything)
 
 ### Step 3: Ask About Embedding Model
 
@@ -78,34 +79,18 @@ Then write a customized version to `.cocoindex/config.py` with:
 - Correct `PROJECT_NAME`
 - Correct `DATABASE_URL` (ask user for their PostgreSQL host)
 - Correct `EMBEDDING_API_TYPE` — `"local"` or `"gemini"` based on user choice
-- Project-specific `COLLECTIONS`
+- Correct `SOURCE_DIRS` — directories to index
 
-**Chunking guidelines:**
-| Content Type | chunk_size | chunk_overlap | language |
-|-------------|-----------|--------------|----------|
-| Markdown docs | 1500 | 300 | markdown |
-| Source code | 1000 | 200 | (use tree-sitter language) |
-| Configs (yaml/toml) | 500 | 100 | yaml/toml |
-| Long-form docs (specs) | 2000 | 400 | markdown |
+Languages are auto-detected from file extensions. No need to configure collections.
 
-**For code collections:** Use `generate_code_collections()` helper to auto-create per-language
-collections with tree-sitter aware chunking. This splits code at AST boundaries (functions,
-classes, methods) instead of naive character splitting:
+**Tree-sitter chunking** is automatic — code files are split at AST boundaries
+(functions, classes, methods). Chunk sizes vary by category:
 
-```python
-COLLECTIONS = {
-    "docs": { ... },
-    # Auto-generates code_typescript, code_python, etc. with tree-sitter chunking
-    **generate_code_collections(
-        ["src/", "lib/"],
-        languages=["typescript", "python"],  # omit for all 16 supported languages
-    ),
-}
-```
-
-Tree-sitter ensures chunks respect code structure — a function body stays together,
-imports are grouped, class definitions aren't split mid-method. This dramatically
-improves semantic search quality for code vs naive text chunking.
+| Category | chunk_size | chunk_overlap | File types |
+|----------|-----------|--------------|------------|
+| Code | 1000 | 200 | .py, .ts, .js, .go, .rs, .java, etc. |
+| Docs | 1500 | 300 | .md, .mdx, .rst, .txt, .html |
+| Config | 500 | 100 | .yaml, .yml, .toml, .json |
 
 ### Step 6: Create `.env`
 
@@ -154,7 +139,7 @@ python3 -m venv .venv-cocoindex
 # Setup database schema
 .venv-cocoindex/bin/cocoindex -e .cocoindex/.env setup .cocoindex/index.py -f
 
-# Run indexing — processes all files and exits automatically
+# Run indexing — auto-detects languages, processes all files, exits automatically
 # -e flag MUST come BEFORE the subcommand
 .venv-cocoindex/bin/cocoindex -e .cocoindex/.env update .cocoindex/index.py -f
 
@@ -170,6 +155,17 @@ Add to `.gitignore`:
 .venv-cocoindex/
 __pycache__/
 ```
+
+## How It Works Internally
+
+Languages are auto-detected by scanning `SOURCE_DIRS` for known file extensions.
+Each detected language gets its own CocoIndex flow with the correct tree-sitter
+parser for AST-aware chunking. All results are unified in search — a query for
+"authentication" returns matching docs, code, and configs ranked by relevance.
+
+Supported tree-sitter languages: python, typescript, javascript, go, rust, java,
+c, cpp, c_sharp, ruby, php, swift, kotlin, scala, sql, bash, markdown, yaml,
+toml, json, html, css.
 
 ## Embedding Comparison
 
@@ -187,22 +183,22 @@ __pycache__/
 
 | Gotcha | Solution |
 |--------|----------|
-| `cocoindex -e .env server ...` → "No such option: -e" | `-e` is a **global** flag — must come BEFORE the subcommand |
+| `cocoindex -e .env server ...` -> "No such option: -e" | `-e` is a **global** flag — must come BEFORE the subcommand |
 | Indexing runs but 0 rows in tables | Use `update` subcommand (not `server`). If using `server`, add `-L` flag |
 | `pip install` fails with PEP 668 error | Use `python3 -m venv` — never install globally |
-| Table name mismatch in query.py | CocoIndex names tables as `{flowname_lowercase}__{export_name}` — this is handled in the boilerplate |
-| Closure captures wrong loop variable | `index.py` uses `_name=name` default arg — don't modify |
+| Closure captures wrong loop variable | `index.py` uses `_lang=lang` default arg — don't modify |
 | "UNEXPECTED key: embeddings.position_ids" | Harmless warning from sentence-transformers — ignore it |
 | Switching embedding model | Must re-index everything — vector dimensions and space are incompatible |
 | Gemini rate limits on large indexes | CocoIndex handles batching internally, but very large indexes (50K+ chunks) may need patience |
 | `GEMINI_API_KEY` from shell overrides `.env` | Boilerplate uses `load_dotenv(override=True)` to ensure `.env` takes precedence over shell env vars |
+| No languages detected | Check SOURCE_DIRS points to directories with supported file types |
 
 ## File Roles
 
 | File | Edit? | Purpose |
 |------|-------|---------|
-| `config.py` | **YES** | Project-specific: name, collections, DB URL, embedding choice |
-| `index.py` | NO | CocoIndex flow registration (reads config.py) |
-| `query.py` | NO | Semantic search CLI (reads config.py) |
+| `config.py` | **YES** | Project-specific: name, source dirs, embedding choice |
+| `index.py` | NO | Auto-detects languages, creates tree-sitter flows |
+| `query.py` | NO | Unified search across all languages |
 | `requirements.txt` | NO | Python dependencies |
 | `.env` | **YES** | DB connection, API keys (gitignored) |
