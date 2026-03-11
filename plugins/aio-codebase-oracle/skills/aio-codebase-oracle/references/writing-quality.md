@@ -81,7 +81,7 @@ Never mix these modes in the same section. A component list should not include t
 **Consistent terminology:**
 - Pick one term per concept and use it everywhere. Don't alternate "service" / "handler" / "processor" for the same component.
 - Define domain terms on first use: "The circuit breaker (a pattern that stops cascading failures) trips after 5 consecutive errors."
-- Keep CodeWiki's terminology when it's correct — consistency between CodeWiki and Oracle output matters.
+- Keep CodeIndex's terminology when it's correct — consistency between CodeIndex and Oracle output matters.
 
 ## Structure Rules
 

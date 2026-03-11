@@ -6,14 +6,14 @@ Generate all three diagram levels. Each diagram uses Mermaid syntax.
 If the codebase is simple (single container), the Component diagram IS the Container diagram — merge them.
 
 Primary data sources:
-1. **CodeWiki static analysis**: docs/codebase_map.json for components, edges, communities
-2. **CodeWiki dependency graphs**: docs/dependency_graphs/*.json for detailed dependency data
-3. **CodeWiki architecture template**: docs/templates/architecture.md.tpl for structure guidance
+1. **CodeIndex static analysis**: docs/codebase_map.json for components, edges, communities
+2. **CodeIndex dependency graphs**: docs/dependency_graphs/*.json for detailed dependency data
+3. **CodeIndex architecture template**: docs/templates/architecture.md.tpl for structure guidance
 4. **Direct source code reading** for verification and detail
 5. Grep/LSP for additional discovery
 
 IMPORTANT:
-- CodeWiki outputs to docs/, NOT .codewiki-cache/
+- CodeIndex outputs to docs/, NOT .codeindex-cache/
 - Static analysis: docs/codebase_map.json
 - Dependency data: docs/dependency_graphs/
 
@@ -64,7 +64,7 @@ C4Context
 <!-- ORACLE:C4_CONTAINER
 Shows major deployable units and how they communicate.
 
-**Use CodeWiki codebase_map.json communities:**
+**Use CodeIndex codebase_map.json communities:**
 ```bash
 cat docs/codebase_map.json | python3 -c "
 import json, sys
@@ -112,7 +112,7 @@ C4Container
 <!-- ORACLE:C4_COMPONENT
 Shows key components within the main container.
 
-**Use CodeWiki codebase_map.json nodes:**
+**Use CodeIndex codebase_map.json nodes:**
 ```bash
 cat docs/codebase_map.json | python3 -c "
 import json, sys
