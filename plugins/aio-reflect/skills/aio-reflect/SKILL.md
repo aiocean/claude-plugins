@@ -20,6 +20,8 @@ description: This skill should be used when the user asks to "reflect on session
 Before calling any script, resolve the scripts directory (version may vary):
 ```bash
 RF="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-reflect/*/skills/aio-reflect/scripts 2>/dev/null | sort -V | tail -1)"
+MEMORY="$HOME/.claude/aio-reflect/memory"
+mkdir -p "$MEMORY/diary" "$MEMORY/reflections"
 ```
 
 Then call scripts as `bun run $RF/script-name`:
@@ -45,9 +47,15 @@ bun run $RF/extract-session.ts <project-path> --last 5 --json
    ```bash
    bun run $RF/get-project-path.ts <path> --check
    ```
+3.5. (Optional) List all projects with sessions:
+   ```bash
+   bun run $RF/project-tree.ts --stats
+   ```
 4. Check for unprocessed sessions:
    ```bash
-   # Compare sessions in project folder with memory/processed.json
+   # List sessions with stats to identify unprocessed ones
+   bun run $RF/extract-session.ts <project-path> --stats-only
+   # Then compare session IDs against $MEMORY/processed.json
    ```
 5. Load existing CLAUDE.md rules (for violation detection)
 6. Ask user how many sessions to analyze (default: 5)
@@ -230,7 +238,7 @@ For new rules:
 
 **Step 4: Mark sessions as processed**
 
-Update `memory/processed.json`:
+Update `$MEMORY/processed.json`:
 
 ```json
 {
@@ -246,7 +254,7 @@ Update `memory/processed.json`:
 
 **Step 5: Write diary entry (optional)**
 
-If user wants, save reflection to `memory/diary/YYYY-MM-DD-reflection.md`
+If user wants, save reflection to `$MEMORY/diary/YYYY-MM-DD-reflection.md`
 
 ## Skill Template
 
@@ -315,7 +323,7 @@ date: [YYYY-MM-DD]
 **Save locations:**
 
 - Project-specific: `.claude/skills/[name]/SKILL.md`
-- User-wide: `~/.claude/plugins/cache/aiocean-plugins/[name]/*/skills/[name]/SKILL.md`
+- User-wide: `~/.claude/skills/[name]/SKILL.md`
 
 ## Scripts Reference
 
@@ -327,10 +335,10 @@ date: [YYYY-MM-DD]
 
 ## Memory Directory
 
-Located in the skill's `memory/` folder:
+Located at `~/.claude/aio-reflect/memory/` (stable across upgrades, not inside versioned cache):
 
 ```
-memory/
+~/.claude/aio-reflect/memory/
 ├── diary/              # Reflection summaries
 ├── reflections/        # Session-specific notes
 └── processed.json      # Tracking analyzed sessions

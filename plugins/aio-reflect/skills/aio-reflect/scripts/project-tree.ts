@@ -22,6 +22,11 @@ function folderToPath(folderName: string): string {
   // Convert folder name back to path
   // Pattern: double dash = /. (hidden dir), single dash = /
   // e.g., -Users-username--claude → /Users/username/.claude
+  //
+  // LIMITATION: This conversion is lossy for paths containing hyphens.
+  // e.g., -Users-name-my-project cannot be distinguished from
+  //       -Users-name-my/project vs /Users/name/my-project
+  // If the decoded path doesn't exist, use folderName as a fallback hint.
 
   let path = folderName
     // Double dash means hidden directory: /.
@@ -37,7 +42,7 @@ function getSessionCount(projectFolder: string): number {
   try {
     const entries = readdirSync(fullPath);
     // Count .jsonl files (sessions)
-    return entries.filter((e) => e.endsWith(".jsonl")).length;
+    return entries.filter((e) => e.endsWith(".jsonl") && !e.startsWith("agent-")).length;
   } catch {
     return 0;
   }
@@ -111,8 +116,9 @@ function printTree(projects: ProjectInfo[], showStats: boolean) {
       const stats = showStats
         ? ` (${p.sessionCount} sessions, ${p.lastModified.toLocaleDateString()})`
         : "";
+      const folderHint = !p.exists ? ` (folder: ${p.folderName})` : "";
 
-      console.log(`   ${prefix}${status} ${subPath || "(root)"}${stats}`);
+      console.log(`   ${prefix}${status} ${subPath || "(root)"}${stats}${folderHint}`);
     }
     console.log("");
   }
