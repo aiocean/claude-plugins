@@ -40,7 +40,13 @@ function findProjectFolder(realPath: string): string | null {
   // Try to find partial match (for subdirectories)
   if (existsSync(PROJECTS_DIR)) {
     const folders = readdirSync(PROJECTS_DIR);
-    const match = folders.find((f) => expectedFolder.startsWith(f) || f.startsWith(expectedFolder));
+    const match = folders.find((f) => {
+      if (f === expectedFolder) return true;
+      // Only match if prefix ends at a '-' boundary (encoded path separator)
+      if (expectedFolder.startsWith(f + "-")) return true;
+      if (f.startsWith(expectedFolder + "-")) return true;
+      return false;
+    });
     if (match) {
       return join(PROJECTS_DIR, match);
     }

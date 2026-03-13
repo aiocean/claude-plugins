@@ -44,7 +44,12 @@ function resolveSessionFolder(inputPath: string): string {
   // Try partial match for subdirectories
   if (existsSync(PROJECTS_DIR)) {
     const folders = readdirSync(PROJECTS_DIR);
-    const match = folders.find((f) => folderName.startsWith(f) || f.startsWith(folderName));
+    const match = folders.find((f) => {
+      if (f === folderName) return true;
+      if (folderName.startsWith(f + "-")) return true;
+      if (f.startsWith(folderName + "-")) return true;
+      return false;
+    });
     if (match) {
       return join(PROJECTS_DIR, match);
     }
@@ -86,9 +91,6 @@ interface DiaryEntry {
   workDone: string[];
   filesModified: string[];
   toolsUsedSummary: string;
-  keyDecisions: string[];
-  challenges: string[];
-  outcomes: string[];
 }
 
 interface Session {
@@ -123,8 +125,6 @@ function parseSessionFile(filePath: string): Session | null {
   let sessionId = "";
   let project = "";
   let gitBranch = "";
-  const pendingToolResults = new Map<string, string>();
-
   for (const line of lines) {
     try {
       const entry: RawEntry = JSON.parse(line);
@@ -145,7 +145,7 @@ function parseSessionFile(filePath: string): Session | null {
       gitBranch = entry.gitBranch || gitBranch;
 
       if (entry.type === "user") {
-        const parsed = parseUserMessage(entry.message?.content, pendingToolResults);
+        const parsed = parseUserMessage(entry.message?.content);
         if (parsed.content || parsed.toolResults.length > 0) {
           // If this is a tool result, attach it to the previous assistant turn
           if (parsed.toolResults.length > 0 && turns.length > 0) {
@@ -220,7 +220,6 @@ function parseSessionFile(filePath: string): Session | null {
 
 function parseUserMessage(
   content: unknown,
-  _pendingResults: Map<string, string>,
 ): { content: string; toolResults: { id: string; content: string }[] } {
   const toolResults: { id: string; content: string }[] = [];
   let textContent = "";
@@ -409,9 +408,6 @@ function generateDiary(turns: Turn[], stats: SessionStats): DiaryEntry {
     workDone: workDone.slice(0, 10),
     filesModified: [...filesModified],
     toolsUsedSummary: topTools,
-    keyDecisions: [], // To be filled by AI analysis
-    challenges: [], // To be filled by AI analysis
-    outcomes: [], // To be filled by AI analysis
   };
 }
 
@@ -446,6 +442,10 @@ function formatSession(
     }
   }
 
+  if (options.diaryOnly) {
+    return lines.join("\n");
+  }
+
   // Stats summary
   lines.push(`\n## Stats`);
   lines.push(`- Turns: ${session.stats.userTurns} user, ${session.stats.assistantTurns} assistant`);
@@ -467,7 +467,7 @@ function formatSession(
     lines.push(`- Agents: ${session.stats.agentsUsed.join(", ")}`);
   }
 
-  if (options.statsOnly || options.diaryOnly) {
+  if (options.statsOnly) {
     return lines.join("\n");
   }
 
@@ -506,7 +506,7 @@ function formatSession(
           // Show result if available (truncated for readability)
           if (tool.result) {
             const resultPreview =
-              tool.result.length > 500 ? tool.result.slice(0, 500) + "..." : tool.result;
+              tool.result.length > 2000 ? tool.result.slice(0, 2000) + "..." : tool.result;
             lines.push(`Result: ${resultPreview}`);
           }
           lines.push("");
