@@ -227,7 +227,57 @@ func fmtInt(n int) string {
 }
 ```
 
-### 5. Variable Shadowing — Don't Name Vars After Packages
+### 5. Mouse Click Support — Y Offset Calculation Is Non-Obvious
+
+Enable mouse with `tea.WithMouseCellMotion()` and handle `tea.MouseMsg`:
+
+```go
+// main():
+p := tea.NewProgram(newModel(), tea.WithAltScreen(), tea.WithMouseCellMotion())
+
+// Update():
+case tea.MouseMsg:
+    if msg.Action != tea.MouseActionPress || msg.Button != tea.MouseButtonLeft {
+        break
+    }
+    // dispatch on msg.Y / msg.X
+```
+
+**Critical: Y coordinates must be calculated precisely.** The mental model:
+
+| Element | Height | Rule |
+|---------|--------|------|
+| `lipgloss.RoundedBorder()` box | **3 lines** | top-border + content + bottom-border |
+| `b.WriteString("\n\n")` gap | **1 empty line** | first `\n` ends current line, second `\n` creates 1 empty line |
+| Single-line render | **1 line** | lipgloss.Render() does NOT add trailing newline |
+
+**Example layout calculation** for a standard header → filter-tabs → table layout:
+```
+View() output:
+  renderHeader()      → 3 lines  (rows 0-2)   ← lipgloss RoundedBorder
+  "\n\n"              → 1 gap    (row 3 empty) ← \n ends row2, \n = row3 empty
+  renderFilterRow()   → 1 line   (row 4)       ← filterRowY = 4
+  "\n\n"              → 1 gap    (row 5 empty)
+  table header        → 1 line   (row 6)
+  table divider       → 1 line   (row 7)
+  first skill row     → row 8                  ← firstSkillY = 8
+```
+
+**Common mistake:** assuming `\n\n` = 2 empty lines → off-by-2 errors. It's only 1 empty line.
+
+**Debug tip:** During development, show last mouse coordinates in the status bar to verify:
+```go
+m.statusMsg = fmt.Sprintf("click: (%d, %d)", msg.X, msg.Y)
+```
+
+**X coordinate for column clicks:** Count character widths manually using fixed column widths:
+```go
+// cursor(2) + name(22) + space(1) + scope(10) + space(1) + source(20) + space(1) = 57
+const statusColX = 57
+if msg.X >= statusColX { /* clicked status column */ }
+```
+
+### 6. Variable Shadowing — Don't Name Vars After Packages
 
 ```go
 // ❌ WRONG — shadows the `time` package
