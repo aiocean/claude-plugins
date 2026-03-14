@@ -11,6 +11,7 @@ Synthesize discovery and mapping results into a concrete, actionable implementat
 
 - Run `/discover` and `/map` first (or have equivalent understanding)
 - CocoIndex available for convention/duplication checks
+- Kai available for context enrichment
 
 ## Workflow
 
@@ -34,7 +35,26 @@ Search for existing patterns to follow:
 
 Examples: "tauri command structure", "hook cleanup pattern", "error handling in rust"
 
-### Step 3: Write the plan
+### Step 3: Context enrichment (Kai)
+
+For each file you plan to modify, get full context:
+
+```
+kai_context(file, depth=2)
+```
+
+This reveals dependencies, dependents, and all symbols — helps identify:
+- Functions that will be affected by your changes
+- Files that import the file you're changing (blast radius)
+- Existing symbols you can reuse instead of creating new ones
+
+For the most critical change, check impact:
+
+```
+kai_impact(file, max_depth=3)
+```
+
+### Step 4: Write the plan
 
 ```
 ## Plan: [Feature/Fix Name]
@@ -69,7 +89,7 @@ Examples: "tauri command structure", "hook cleanup pattern", "error handling in 
 [Explicitly list out-of-scope items]
 ```
 
-### Step 4: Create baseline
+### Step 5: Create baseline
 
 Run `/snapshot` before starting implementation.
 
