@@ -9,6 +9,7 @@ Architecture docs are primarily **Reference** + **Explanation** in the Diataxis 
 - **Reference sections** (component lists, API surface, dependency graphs): Describe and only describe. Neutral, factual, structured to mirror the codebase. No opinions, no instructions.
 - **Explanation sections** (design rationale, trade-offs, failure modes): Provide context, history, and reasoning. Answer "why?" not just "what". Weigh alternatives, acknowledge trade-offs.
 - **How-to sections** (safe change plans, troubleshooting): Direct, action-oriented. Assume competent reader. Conditions before instructions.
+- **Tutorial sections** (onboarding guides, first-time setup): Lead the reader through a complete experience. Include every step — assume no prior context. Use second person ("Next, run..."). Show expected output after each step. Tutorials trade efficiency for completeness.
 
 Never mix these modes in the same section. A component list should not include tutorial-style explanations. A design rationale section should not list API parameters.
 
@@ -113,6 +114,34 @@ Never mix these modes in the same section. A component list should not include t
 - **Relative links within docs/.** They survive restructuring better than absolute URLs.
 - **Evidence links inline.** `path:line` references woven into prose, not in separate tables (per Oracle evidence protocol).
 
+### Staleness Resistance
+
+Write docs that age well:
+
+- **Link to code, don't quote it.** `See [handler logic](../internal/handler/create.go:45)` ages better than pasting 20 lines that will drift. Quote only when the specific syntax matters to the explanation.
+- **Avoid absolute dates.** "Added in Q1 2024" becomes meaningless. Use relative context: "Added when we migrated from REST to gRPC" — the migration is a stable anchor.
+- **Use semantic quantities.** "Handles ~1000 req/s under current load" not "Handles 1000 req/s" — the tilde signals this is measured, not guaranteed.
+- **Reference behavior, not implementation.** "The auth module validates JWT tokens and rejects expired ones" survives refactors better than "Line 42 of auth.go calls jwt.Parse()".
+- **Mark volatile sections.** If a section describes something likely to change (feature flags, migration state), add: `<!-- VOLATILE: re-verify after [condition] -->`.
+- **Prefer computed over hardcoded.** "See CodeIndex metrics for current counts" rather than "Contains 47 files" — numbers change, the tool query stays valid.
+
+### Cross-Referencing Strategy
+
+When content overlaps across module docs:
+
+| Situation | Strategy | Example |
+|---|---|---|
+| Concept explained in detail elsewhere | **Link with context** | "Uses circuit breaker pattern (see [resilience patterns](resilience.md#circuit-breaker) for configuration)" |
+| Shared dependency used by many modules | **Summarize + link** | One-sentence summary of what the dep provides, link to its module doc for details |
+| Same config referenced in multiple docs | **Single source of truth** | Document config in one place, link from all others. Never duplicate config tables |
+| Cross-module flow | **Each doc owns its segment** | Module A doc: "Sends event to queue." Module B doc: "Consumes event from queue." Key-flows doc: end-to-end sequence diagram |
+
+**Rules:**
+- Never duplicate paragraphs across docs — duplication creates drift
+- Every link must include enough context that the reader can decide whether to follow it
+- Use relative paths (`../module-b.md`) not absolute paths
+- When summarizing, state the one fact the reader needs here, link for everything else
+
 ## Anti-patterns
 
 | Anti-pattern | Impact | Fix |
@@ -137,6 +166,7 @@ When reviewing Oracle-generated docs, score these dimensions:
 3. **Scannability** — Can a reader find what they need in 30 seconds? Headings descriptive? Key info not buried?
 4. **Decision-usefulness** — Does each section help the reader make a decision? (What to change, what not to touch, what to monitor)
 5. **Consistency** — Same terms for same concepts? Same structure across module docs? Same depth of coverage?
+6. **Readability** — Are sentences under 25 words on average? No jargon walls (3+ undefined terms in one paragraph)? Mix of short and medium sentences? Paragraphs under 5 sentences?
 
 Each dimension should score 4/5 or higher for a publishable doc.
 

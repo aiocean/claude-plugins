@@ -70,6 +70,25 @@ Violations indicate architectural drift:
 - Data access code in domain entities
 - Infrastructure concerns leaking into core
 
+### Architecture Smells
+
+Beyond layer violations, detect these structural anti-patterns:
+
+| Smell | Indicator | Impact | Detection |
+|---|---|---|---|
+| **God service** | One module with 30+ exported functions, 500+ importers | Single point of failure, impossible to modify safely | CodeIndex metrics: highest fan-in + highest function count |
+| **Chatty API** | Sequence diagrams show 10+ calls between two services for one operation | Latency multiplication, fragile coupling | Trace request flows, count inter-service calls per operation |
+| **Shared database** | Multiple services read/write same tables | Hidden coupling, schema changes break multiple services | Grep for table names across service boundaries |
+| **Distributed monolith** | All services must deploy together, shared libraries everywhere | Worst of both worlds: distributed complexity without independent deployment | Check deploy scripts — if one service change triggers full redeploy |
+| **Circular dependency** | A → B → C → A at service or module level | Cannot deploy, test, or reason about independently | CodeIndex circular_dependencies metric, or Kai dependency graph |
+| **Data gravity** | One database accumulates all data regardless of domain | Performance bottleneck, schema becomes unmaintainable | Count tables per database, check if tables span multiple bounded contexts |
+| **Missing abstraction** | Same 5-10 lines of code repeated across 4+ files | Fragile — bug fix must touch all copies | CocoIndex semantic search for similar patterns, or CodeIndex duplication metrics |
+
+When documenting smells, include:
+- **Severity:** How much risk does this create? (Low/Medium/High/Critical)
+- **Blast radius:** What breaks if this smell causes a failure?
+- **Remediation path:** Concrete first step to improve (not a full rewrite plan)
+
 ## Interface Analysis
 
 ### Contract Definition
@@ -160,6 +179,57 @@ Trade-offs: Scalable and loosely coupled, but harder to reason about flow.
 Indicators: Service per bounded context, independent deployment, API-based communication.
 Trade-offs: Independent scaling, but distributed system complexity.
 
+## Architecture Decision Records (ADR)
+
+### Format
+
+Each ADR captures one significant architectural decision:
+
+```markdown
+# ADR-{NNN}: {Decision title}
+
+**Status:** Proposed | Accepted | Deprecated | Superseded by ADR-{NNN}
+**Date:** {YYYY-MM-DD}
+**Deciders:** {Who made or approved this decision}
+
+## Context
+
+What problem or situation prompted this decision? Include constraints, requirements, and forces at play. State facts, not opinions.
+
+## Decision
+
+What was decided. State it as a clear, direct sentence: "We will use PostgreSQL for the primary data store."
+
+## Consequences
+
+### Positive
+- What becomes easier or better
+
+### Negative
+- What becomes harder or worse
+- What trade-offs were accepted
+
+### Risks
+- What could go wrong with this decision
+```
+
+### When to Write ADRs
+
+- Technology choice (database, framework, language)
+- Architecture pattern adoption (event-driven, CQRS, microservices)
+- Major refactoring direction
+- Security model decisions
+- API contract changes that affect external consumers
+
+### Inferring ADRs from Code
+
+Oracle infers implicit decisions when no formal ADR exists:
+
+1. **Look for pattern consistency.** If all services use the same error handling pattern, that was a decision — document it.
+2. **Check git blame on foundational files.** The initial commit of core infrastructure often has commit messages explaining "why".
+3. **Identify deviations.** When one module breaks the pattern, document both the pattern and why this module deviates.
+4. **Mark inferred ADRs.** Use `Status: Inferred` and `Confidence: 3/5` — these need validation with the team.
+
 ## Analysis Workflows
 
 ### Top-Down
@@ -185,6 +255,31 @@ Trade-offs: Independent scaling, but distributed system complexity.
 3. **Trace dependencies** — what does it touch?
 4. **Analyze impact** — what would changing this affect?
 5. **Document findings** — capture insights
+
+## Diagram Design Principles
+
+### When to Use Which Diagram
+
+| Question to Answer | Diagram Type | Max Nodes |
+|---|---|---|
+| What are the system boundaries and external deps? | C4 Context | 8-10 |
+| What containers/services make up the system? | C4 Container | 10-15 |
+| What components exist inside a container? | C4 Component | 10-12 |
+| Where does everything run? | C4 Deployment | 12-15 |
+| How does data flow through a request? | Sequence | 6-8 participants |
+| What are the module dependencies? | Dependency Flowchart | 15-20 |
+| What does the data model look like? | ERD | 10-15 entities |
+| What features does the product have? | Mindmap | 20-30 leaves |
+
+### Readability Rules
+
+1. **Node limit.** If a diagram has more than 15 nodes, split it into sub-diagrams by domain or layer. One diagram answering one question is better than one diagram answering three.
+2. **Minimize line crossings.** Rearrange nodes so dependency arrows flow in one direction (top-down or left-right). Crossed lines make the reader work harder.
+3. **Label every arrow.** Unlabeled arrows are ambiguous. "Calls" vs "Subscribes to" vs "Reads from" — each implies different coupling.
+4. **Consistent color meaning.** Define a legend if using colors. Example: blue = internal service, orange = external dependency, red = high-risk hub. Use the same palette across all diagrams in the project.
+5. **Title every diagram.** The title states what question the diagram answers: "Container diagram — request processing pipeline" not just "Architecture".
+6. **Group related nodes.** Use subgraph/boundary boxes to show logical grouping (layers, domains, teams). This reduces visual complexity.
+7. **Show direction of dependency.** Arrow from A → B means "A depends on B" (A knows about B). Be consistent — never reverse the convention mid-doc.
 
 ## Mermaid Diagram Templates
 
@@ -393,6 +488,57 @@ flowchart TD
     Repos -.-> Types
 
     classDef hub fill:#ff6b6b,stroke:#c92a2a,color:#fff
+```
+
+## Oracle Integration Architecture
+
+### Static Analysis + Direct Documentation Model
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Phase 0: CodeIndex (Static Analysis Only)                        │
+│                                                                 │
+│   .codeindex/bin/codeindex generate --verbose                     │
+│   ↓                                                             │
+│   Produces:                                                     │
+│   - docs/codebase_map.json (components, edges, metrics, hubs) │
+│   - (graph.html.tpl lives in skill dir, not CodeIndex)         │
+│   - docs/dependency_graphs/*.json (detailed dependency data)   │
+│   - docs/templates/*.tpl (doc structure templates)             │
+│                                                                 │
+│   Does NOT produce:                                             │
+│   - ❌ Module .md files (Oracle writes those)                   │
+│   - ❌ module_tree.json (not in static-only mode)              │
+│   - ❌ LLM-generated documentation                              │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ Phases 1-3: Oracle (Analyze + Write)                            │
+│                                                                 │
+│   /codebase-oracle                                              │
+│   ↓                                                             │
+│   1. Ingest CodeIndex static analysis data                      │
+│   2. Read actual source code for each module/community         │
+│   3. Analyze: structure, dependencies, patterns, rationale     │
+│   4. Write all documentation from scratch                      │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ Output: Oracle-Written Documentation                            │
+│                                                                 │
+│   docs/                                                         │
+│   ├── CODEBASE_MAP.md          (Oracle-written index)          │
+│   ├── {module}.md              (Oracle-written module docs)    │
+│   │   ├── Evidence inline (path:line references throughout)    │
+│   │   ├── Failure Modes & Recovery                             │
+│   │   ├── Blast Radius & Safe Change Plan                      │
+│   │   ├── Design Rationale & Trade-offs                        │
+│   │   └── <!-- ORACLE-META --> compact footer                  │
+│   ├── codebase_map.json        (CodeIndex static analysis)     │
+│   ├── graph.html               (AI-generated from skill's graph.html.tpl) │
+│   ├── dependency_graphs/       (CodeIndex dependency data)     │
+│   └── templates/               (CodeIndex doc templates)       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Mindmap (Product Features)
