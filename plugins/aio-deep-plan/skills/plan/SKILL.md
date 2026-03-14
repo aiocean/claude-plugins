@@ -1,0 +1,82 @@
+---
+name: plan
+description: Use after /discover and /map to synthesize findings into a concrete implementation plan. Checks for duplicates and conventions via CocoIndex. Produces structured plan with files, changes, risks. Trigger words — "plan", "how should I implement", "approach", "strategy".
+---
+
+# Plan — Implementation Planning
+
+Synthesize discovery and mapping results into a concrete, actionable implementation plan.
+
+## Prerequisites
+
+- Run `/discover` and `/map` first (or have equivalent understanding)
+- CocoIndex available for convention/duplication checks
+
+## Workflow
+
+### Step 1: Duplication check (CocoIndex)
+
+Search if similar features already exist:
+
+```bash
+.venv-cocoindex/bin/python .cocoindex/query.py "similar feature or pattern" --top-k 3
+```
+
+Prevents building what already exists.
+
+### Step 2: Convention check (CocoIndex)
+
+Search for existing patterns to follow:
+
+```bash
+.venv-cocoindex/bin/python .cocoindex/query.py "how are [similar things] implemented" --top-k 3
+```
+
+Examples: "tauri command structure", "hook cleanup pattern", "error handling in rust"
+
+### Step 3: Write the plan
+
+```
+## Plan: [Feature/Fix Name]
+
+### Goal
+[One sentence: what and why]
+
+### Discovery Summary
+[Key findings from /discover]
+
+### Approach
+[High-level strategy: which layer handles what]
+
+### Changes
+
+#### 1. `file path` — [what changes]
+- [ ] Add/modify function `X` to do Y
+- [ ] Update type `Z`
+- Reason: [why this file]
+
+#### 2. `file path` — [what changes]
+- [ ] ...
+
+### Risks
+- **[Risk]**: [Mitigation]
+
+### Convention Check
+- Follows: [existing pattern found]
+- Deviates: [if any, with justification]
+
+### NOT Doing
+[Explicitly list out-of-scope items]
+```
+
+### Step 4: Create baseline
+
+Run `/snapshot` before starting implementation.
+
+## Principles
+
+- Each business logic exists in ONE place only (SSOT)
+- Logic that doesn't need UI goes in backend
+- No workarounds — find root cause
+- Every change must be easy to iterate on
+- Don't add what isn't needed
