@@ -1,6 +1,6 @@
 ---
 name: aio-codebase-oracle
-description: Deep codebase analysis and architecture documentation. Use when user says "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Combines CodeIndex static analysis with parallel agent mapping, direct documentation writing, and evidence-based investigation. Auto-detects existing maps for incremental updates.
+description: Deep codebase analysis and architecture documentation. Use when user says "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Combines CodeIndex static analysis with CocoIndex semantic search, Kai semantic graph, and LSP precision tools. Auto-detects available tools and adapts workflow.
 ---
 
 # Codebase Oracle
@@ -97,6 +97,46 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 | Burying critical info | Lead with the point — most important fact first |
 | Hedging ("might cause issues") | Be direct, or use Unknown protocol if uncertain |
 | Inconsistent terminology | Pick one term, use everywhere, define on first use |
+
+## Tool Availability Detection (Run First)
+
+Before starting any phase, detect which analysis tools are available. Oracle adapts its workflow based on what's installed.
+
+```bash
+# 1. CodeIndex (REQUIRED — static analysis foundation)
+.codeindex/bin/codeindex --version 2>/dev/null && echo "codeindex: YES" || echo "codeindex: NO — run /aio-codebase-oracle:aio-codebase-index to install"
+
+# 2. CocoIndex (OPTIONAL — semantic search)
+ls .cocoindex/query.py 2>/dev/null && echo "cocoindex: YES" || echo "cocoindex: NO — run /aio-cocoindex:aio-cocoindex-setup for semantic search"
+
+# 3. Kai (OPTIONAL — semantic graph, symbols, dependencies)
+kai_status() 2>/dev/null  # If available as MCP tool
+# Check: .kai/ directory exists
+
+# 4. LSP (OPTIONAL — precise type-aware references)
+# Available if LSP MCP tools are configured (lsp_servers, lsp_hover, etc.)
+```
+
+**Decision matrix:**
+
+| Tool | Status | Impact on Oracle |
+|------|--------|-----------------|
+| CodeIndex | Required | Static analysis foundation — will not proceed without it |
+| CocoIndex | Optional | Adds semantic search for concept discovery, cross-cutting concerns |
+| Kai | Optional | Adds symbol inventory, file dependencies, impact analysis, snapshot diffing |
+| LSP | Optional | Adds precise type info, caller tracing, diagnostics |
+
+**If tools are missing**, inform the user once at the start:
+
+```
+Tools detected:
+✓ CodeIndex — static analysis ready
+✗ CocoIndex — semantic search unavailable (install: /aio-cocoindex:aio-cocoindex-setup)
+✓ Kai — semantic graph available
+✗ LSP — no language servers detected
+```
+
+Oracle proceeds with whatever is available — more tools = richer documentation.
 
 ## Integration Architecture
 
@@ -276,7 +316,50 @@ Oracle reads actual source code and builds its understanding. Run parallel analy
 
 #### 2.1 Code Structure Analysis
 
-**Method:** Use tree-sitter analysis + targeted file reads
+**Method:** Use all available tools in order of precision, falling back gracefully.
+
+**Tool priority for structure analysis:**
+
+| Priority | Tool | What it provides | Fallback |
+|----------|------|-----------------|----------|
+| 1st | **Kai** `kai_symbols(file, kind="function", signatures=true)` | Full symbol inventory with signatures — no file reading needed | tree-sitter-analyze.py |
+| 2nd | **Kai** `kai_dependencies(file)` / `kai_dependents(file)` | File-level import graph (TS) | Grep for imports |
+| 3rd | **LSP** `lsp_document_symbols(file)` | Type-aware symbol list with hierarchy | kai_symbols or tree-sitter |
+| 4th | **LSP** `lsp_find_references(file, line, char)` | Precise caller/callee tracing | Grep for function name |
+| 5th | **tree-sitter** `scripts/tree-sitter-analyze.py` | Bulk AST analysis | Read + Grep |
+| 6th | **Read + Grep** | Direct source reading | Always available |
+
+**When Kai is available** (run in parallel for all module files):
+
+```
+# Get symbol inventory for each file — fast overview without reading
+kai_symbols(file, kind="function", signatures=true)
+
+# Get file dependency graph
+kai_dependencies(file)  → what this file imports
+kai_dependents(file)    → what imports this file
+
+# Get full context for hub files (high-connectivity)
+kai_context(file, depth=2)  → symbols + deps + dependents + tests
+```
+
+**When LSP is available** (use for precision on key components):
+
+```
+# Type-aware symbol list with full hierarchy
+lsp_document_symbols(file)
+
+# Precise reference tracing for hub functions
+lsp_find_references(file, line, character)
+
+# Type information for understanding interfaces
+lsp_hover(file, line, character)
+
+# Check for errors/warnings
+lsp_diagnostics(file)
+```
+
+**Fallback** (always works):
 
 ```
 You are the structure-analyst for module: {module_name}
@@ -290,16 +373,15 @@ Data sources:
 - codebase_map.json communities and edges for this module
 - dependency_graphs/{module}.json for detailed dependencies
 - Actual source files
+```
 
 Steps:
 1. Read codebase_map.json, extract components in this module's community
-2. Read each source file to understand:
-   - Component names and locations
-   - Import/dependency relationships
-   - Architecture patterns used
-3. Cross-reference with dependency graph data for accuracy
-4. Build a comprehensive module understanding with evidence (path:line)
-```
+2. For each file, get symbols (Kai → LSP → tree-sitter → Read, whichever is available)
+3. Map dependencies (Kai → Grep for imports)
+4. For hub files, trace references (LSP → Grep for function names)
+5. Cross-reference with dependency graph data for accuracy
+6. Build a comprehensive module understanding with evidence (path:line)
 
 #### 2.2 Infrastructure & Runtime Analysis
 
@@ -335,6 +417,35 @@ For each module, build decision-support context:
 5. **Ownership boundary**: which directory/service boundaries are crossed.
 6. **Runtime context** (for serverless/Lambda): cold start implications, timeout risks, concurrency limits
 7. **Infrastructure dependencies**: required IAM permissions, VPC config, external service dependencies
+
+**Enhanced blast radius with Kai + LSP** (when available):
+
+For hub files identified by CodeIndex (5+ importers), use Kai and LSP to get precise impact data:
+
+```
+# Kai: transitive impact analysis (walks dependency graph)
+kai_impact(file, max_depth=3)  → all affected files + tests
+
+# LSP: precise reference count for specific exported functions
+lsp_find_references(file, line, char)  → exact call sites with line numbers
+```
+
+This produces much richer blast radius documentation than CodeIndex alone:
+- CodeIndex: "file X has 12 importers" (static count)
+- Kai: "changing file X affects 18 files transitively, including 3 test files"
+- LSP: "function `handleAuth` at line 42 is called from 7 specific locations"
+
+**Enhanced pattern discovery with CocoIndex** (when available):
+
+Search for cross-cutting patterns that static analysis misses:
+
+```bash
+.venv-cocoindex/bin/python .cocoindex/query.py "error handling strategy" --top-k 5
+.venv-cocoindex/bin/python .cocoindex/query.py "retry and resilience pattern" --top-k 5
+.venv-cocoindex/bin/python .cocoindex/query.py "authentication authorization flow" --top-k 5
+```
+
+Document discovered patterns in module docs under "Design Patterns" section.
 
 ### Phase 3: Write Documentation
 
@@ -547,45 +658,150 @@ docs/
 └── templates/                   # CodeIndex doc templates (unchanged)
 ```
 
-## CocoIndex Collaboration
+## External Tools Integration
 
-Oracle can collaborate with the `aio-cocoindex` plugin for **semantic search** alongside standard file system tools (Read, Grep, Glob). This combination gives Oracle two complementary search strategies:
+Oracle's analysis improves with each additional tool available. CodeIndex is required; CocoIndex, Kai, and LSP are optional but each adds a unique dimension.
 
-- **File system tools** (Read, Grep, Glob): Exact matches, pattern searches, file structure traversal — fast and precise for known symbols, paths, and patterns.
-- **CocoIndex semantic search**: Meaning-based retrieval — finds relevant code and docs by concept, not just keywords. Useful for discovering related modules, understanding design intent, and tracing cross-cutting concerns.
+### Tool Comparison — What Each Adds to Oracle
 
-### When to use CocoIndex during Oracle analysis
+| Capability | CodeIndex | CocoIndex | Kai | LSP |
+|---|---|---|---|---|
+| **Community/module detection** | Yes (primary) | — | — | — |
+| **Dependency graphs** | Yes (static) | — | Yes (file-level imports) | — |
+| **Metrics & complexity** | Yes | — | — | — |
+| **Semantic concept search** | — | Yes (best for "how does X work?") | — | — |
+| **Symbol inventory** | tree-sitter based | — | Yes (fast, no file read) | Yes (type-aware) |
+| **Caller/callee tracing** | — | — | Partial (TS only) | Yes (precise, all languages) |
+| **Impact/blast radius** | Fan-in count | — | Transitive graph walk | Reference count per function |
+| **Type information** | — | — | Signatures only | Full type resolution |
+| **Snapshot diffing** | — | — | Yes (before/after) | — |
+| **Cross-cutting patterns** | — | Yes ("retry pattern" across codebase) | — | — |
+| **Diagnostics/errors** | — | — | — | Yes (type errors, warnings) |
 
-| Analysis task | File system tools | CocoIndex semantic search |
-|---|---|---|
-| Find all imports of a module | Grep `import.*module` | — |
-| Find code related to "authentication flow" | — | `query.py "authentication flow"` |
-| Read a specific file | Read `path/to/file` | — |
-| Find where a concept is implemented across modules | Grep (if naming is consistent) | `query.py "error handling strategy"` (when naming varies) |
-| Discover undocumented design patterns | — | `query.py "retry logic"` or `query.py "caching strategy"` |
-| Trace cross-module data flows | Grep for function calls + Read | `query.py "data transformation pipeline"` |
+### CocoIndex — Semantic Search
 
-### How to use
-
-If a `.cocoindex/` directory exists in the project, Oracle can query it during Phase 2 analysis:
+Best for: discovering related code by concept, finding cross-cutting patterns, tracing design intent when naming is inconsistent.
 
 ```bash
-# Check if CocoIndex is available
+# Check availability
 ls .cocoindex/query.py 2>/dev/null
 
-# Semantic search across all indexed content
-.venv-cocoindex/bin/python .cocoindex/query.py "your concept or question"
+# Semantic search
+.venv-cocoindex/bin/python .cocoindex/query.py "authentication flow" --top-k 5
 
-# Filter by collection (docs, code, configs)
-.venv-cocoindex/bin/python .cocoindex/query.py "error handling" --collection code
-
-# Get more results for broader exploration
-.venv-cocoindex/bin/python .cocoindex/query.py "API boundaries" --top-k 10
+# Broader exploration
+.venv-cocoindex/bin/python .cocoindex/query.py "error handling strategy" --top-k 10
 ```
 
-### Setup
+**When to use during Oracle analysis:**
 
-If CocoIndex is not set up for the project, suggest the user run `/aio-cocoindex:aio-cocoindex-setup` first. Oracle does not set up CocoIndex itself — it only queries an existing index.
+| Task | Use CocoIndex? |
+|---|---|
+| Find code by concept ("how does auth work?") | Yes |
+| Discover undocumented design patterns | Yes — `"retry logic"`, `"caching strategy"` |
+| Trace cross-module data flows (naming varies) | Yes |
+| Find exact imports of a module | No — use Grep |
+| Read a specific file | No — use Read |
+
+**Setup:** If missing, suggest `/aio-cocoindex:aio-cocoindex-setup`. Oracle does not set up CocoIndex itself.
+
+### Kai — Semantic Graph
+
+Best for: fast symbol overview without reading files, file-level dependency tracking, impact analysis, and snapshot-based change tracking.
+
+```
+# Check availability
+kai_status()  → shows if index exists and is fresh
+
+# Symbol inventory (parallel for all files in a module)
+kai_symbols(file, kind="function", signatures=true)
+
+# Dependency tracking
+kai_dependencies(file)  → what this file imports
+kai_dependents(file)    → what imports this file
+
+# Full context for hub files
+kai_context(file, depth=2)  → symbols + deps + dependents + tests
+
+# Blast radius analysis
+kai_impact(file, max_depth=3)  → transitive downstream files + tests
+
+# Snapshot for change tracking (before/after documentation updates)
+kai_refresh()  → creates snapshot, returns snapshot_id
+kai_diff(base="id1", head="id2")  → semantic diff between snapshots
+```
+
+**When to use during Oracle analysis:**
+
+| Task | Use Kai? |
+|---|---|
+| Get all functions in a file without reading it | Yes — `kai_symbols` |
+| Check what files import a module | Yes — `kai_dependents` |
+| Assess blast radius of hub changes | Yes — `kai_impact` |
+| Track what changed after doc updates | Yes — `kai_diff` |
+| Precise caller tracing for a specific function | No — use LSP |
+| Type information | No — use LSP |
+
+**Setup:** If `.kai/` directory doesn't exist, run `kai_refresh()` to initialize. If Kai MCP server is not configured, inform user to add it to their MCP config.
+
+**Limitations:** Kai's caller/callee tracking may return empty for some language combinations (e.g., Rust modules). Fall back to LSP or Grep.
+
+### LSP — Language Server Protocol
+
+Best for: precise type-aware analysis, exact reference counting, diagnostics, and hover information. The most accurate tool for caller/callee tracing.
+
+```
+# Check availability
+lsp_servers()  → list running language servers
+
+# Symbol list with hierarchy
+lsp_document_symbols(file)
+
+# Precise references (all call sites)
+lsp_find_references(file, line, character)
+
+# Type information on hover
+lsp_hover(file, line, character)
+
+# Navigate to definition
+lsp_goto_definition(file, line, character)
+
+# Errors and warnings
+lsp_diagnostics(file)
+lsp_diagnostics_directory(directory)
+```
+
+**When to use during Oracle analysis:**
+
+| Task | Use LSP? |
+|---|---|
+| Exact caller count for a hub function | Yes — `lsp_find_references` |
+| Type information for interfaces/contracts | Yes — `lsp_hover` |
+| Check for type errors across module | Yes — `lsp_diagnostics_directory` |
+| Bulk symbol listing for many files | No — use Kai (faster, parallel) |
+| Semantic concept search | No — use CocoIndex |
+
+**Setup:** LSP requires language servers to be running. If `lsp_servers()` returns empty, inform user. Common setups:
+- TypeScript: `typescript-language-server` (usually auto-started by editors)
+- Rust: `rust-analyzer`
+- Go: `gopls`
+- Python: `pyright` or `pylsp`
+
+### Unified Analysis Workflow (Phase 2)
+
+When all tools are available, Oracle uses them in combination:
+
+```
+1. CodeIndex codebase_map.json    → identify communities, hubs, metrics
+2. Kai kai_symbols (parallel)     → fast symbol inventory for all files
+3. Kai kai_dependencies           → file-level import graph
+4. CocoIndex semantic search      → discover cross-cutting patterns
+5. LSP lsp_find_references        → precise caller tracing for hubs
+6. LSP lsp_diagnostics            → catch type errors and warnings
+7. Read + Grep                    → fill gaps, read actual implementations
+```
+
+When only CodeIndex is available, Oracle falls back to tree-sitter + Read + Grep (the original workflow). Each additional tool enriches the documentation.
 
 ## Troubleshooting
 
