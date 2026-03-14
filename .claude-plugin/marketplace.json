@@ -91,8 +91,8 @@
     {
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
-      "description": "Comprehensive codebase analysis and documentation: CodeIndex static analysis (dependency graphs, codebase maps, metrics, community detection) combined with Oracle direct documentation writing. Optionally collaborates with CocoIndex for semantic search. Produces architecture docs (C4 diagrams, dependency graphs, key flows), module docs, and interactive HTML viewers.",
-      "version": "3.5.0",
+      "description": "Comprehensive codebase analysis and documentation: CodeIndex static analysis combined with CocoIndex semantic search, Kai semantic graph, and LSP precision tools. Oracle writes architecture docs, module docs, and interactive HTML viewers. Gracefully adapts to available tools.",
+      "version": "4.0.0",
       "author": { "name": "aiocean" }
     },
     {
