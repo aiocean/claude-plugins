@@ -10,7 +10,9 @@ Semantic search across the entire codebase using CocoIndex. Use BEFORE planning 
 ## Prerequisites
 
 - CocoIndex set up in project (`.cocoindex/` directory + `.venv-cocoindex/`)
-- If missing, tell user to run `/aio-cocoindex:aio-cocoindex-setup` first
+  - If missing, tell user to run `/aio-cocoindex:aio-cocoindex-setup` first
+- Kai MCP server configured (`.kai/` directory)
+  - If missing, run `kai_refresh()` to initialize
 
 ## Workflow
 
@@ -39,14 +41,32 @@ Run 3-5 searches as separate parallel Bash calls. Use `--top-k 3` for focused, `
 | 0.55–0.65 | Related — worth knowing |
 | <0.55 | Tangential — skip unless desperate |
 
-### Step 4: Output discovery map
+### Step 4: Enrich with Kai (parallel)
+
+For each highly relevant file found, get symbol overview:
+
+```
+kai_symbols(file, kind="function", signatures=true)
+```
+
+This adds function names and signatures without reading the full file. Run in parallel for all relevant files.
+
+Optionally, get full context for the most important file:
+
+```
+kai_context(file, symbol="main_function", depth=2)
+```
+
+### Step 5: Output discovery map
 
 ```
 ## Discovery: [topic]
 
 ### Highly Relevant (>0.65)
-- `path/file.ts` — [what it does, key functions]
-- `path/file.rs` — [what it does, key functions]
+- `path/file.ts` — [what it does]
+  Functions: fn1, fn2, fn3 (from Kai)
+- `path/file.rs` — [what it does]
+  Functions: fn1, fn2 (from Kai)
 
 ### Related (0.55–0.65)
 - `path/file.tsx` — [tangential but worth knowing]
