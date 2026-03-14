@@ -171,6 +171,13 @@
       "description": "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hover, delta tracking), and critical gotchas.",
       "version": "1.0.0",
       "author": { "name": "aiocean" }
+    },
+    {
+      "name": "aio-deep-plan",
+      "source": "./plugins/aio-deep-plan",
+      "description": "Deep planning toolkit combining CocoIndex semantic search, Kai semantic graph, and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning), review (post-implementation check).",
+      "version": "1.0.0",
+      "author": { "name": "aiocean" }
     }
   ]
 }
