@@ -1,5 +1,5 @@
 ---
-name: aio-codebase-oracle
+name: doc-writer
 description: Deep codebase analysis and architecture documentation. Use when user says "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Combines CodeIndex static analysis with CocoIndex semantic search, Kai semantic graph, and LSP precision tools. Auto-detects available tools and adapts workflow.
 ---
 

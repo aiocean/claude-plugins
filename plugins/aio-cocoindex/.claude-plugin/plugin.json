@@ -1,8 +1,0 @@
-{
-  "name": "aio-cocoindex",
-  "description": "CocoIndex-based document indexing with incremental processing and semantic search. Two skills: aio-cocoindex-setup (scaffold project-specific .cocoindex/ directory) and aio-cocoindex (search and maintain existing index).",
-  "version": "5.0.0",
-  "author": {
-    "name": "aiocean"
-  }
-}
