@@ -1,5 +1,5 @@
 ---
-name: aio-codebase-index
+name: aio-static-index
 description: Manage the CodeIndex static analysis tool — install, update, run, and check status. Use when user says "install codeindex", "setup codeindex", "update codeindex", "check codeindex", "codeindex status", "run codeindex", "index codebase", "generate codebase index", "static analysis", or mentions "codeindex".
 ---
 
