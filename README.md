@@ -1,199 +1,105 @@
 # Claude Code Plugin Marketplace
 
-A collection of Claude Code plugins by aiocean.
+A curated collection of 22 plugins for Claude Code — from codebase analysis to iOS debugging to ebook publishing.
+
+## Quick Start
 
 ```bash
+# Add the marketplace
 /plugin marketplace add aiocean/claude-plugins
+
+# Install any plugin
+/plugin install <plugin-name>@aiocean-plugins
 ```
 
-## worktree
+## Plugins
 
-Work on multiple features at the same time without constant branch switching. Create isolated workspaces where each AI agent operates on its own copy of the codebase. Perfect for parallel development - let one agent build the frontend while another handles the backend. Changes sync seamlessly when you're ready to merge. No more "please wait, I'm on another branch" interruptions.
+### Codebase & Architecture
 
-```bash
-/plugin install aio-worktree@aiocean-plugins
-```
+| Plugin | Description |
+|--------|-------------|
+| **aio-codebase-oracle** | Deep codebase analysis with parallel agent teams. Generates C4 diagrams, data models, API surfaces, dependency graphs. Three modes: Full Map, Investigate, Impact Analysis. Includes interactive HTML visualization. |
+| **aio-deep-plan** | Pre-coding analysis combining CocoIndex semantic search, Kai semantic graph, and LSP. Five skills: discover, map, snapshot, plan, review. |
+| **aio-debug** | Four-phase debug pipeline: understand context, investigate root cause, implement minimal fix, validate with code review. No guessing — evidence-based only. |
+| **aio-code-review** | Multi-phase code review: domain-specific skill detection, CodeWiki analytics, 4 core + 4 conditional parallel review agents, critic meta-review with confidence scoring. |
 
-## mental-models
+### Development Tools
 
-Think better with 50+ mental models from The Great Mental Models series. When you're stuck on a complex decision, facing a tricky debugging session, or designing system architecture, this skill helps you pick the right thinking tool. First principles breaks problems down to fundamentals. Inversion helps you avoid failure by thinking backwards. Second-order thinking reveals hidden consequences. Feedback loops explain why systems behave unexpectedly. Stop relying on gut feeling - use proven frameworks that the world's best thinkers use.
+| Plugin | Description |
+|--------|-------------|
+| **aio-worktree** | Git worktree management for parallel development. Create isolated workspaces, sync changes, merge branches, cleanup — no more branch switching. |
+| **aio-bun-fullstack-setup** | Scaffold Bun fullstack apps: single-port API + static frontend, Vite proxy for dev, env validation, PM2 config, multi-stage Docker build. |
+| **aio-claude-manager** | Enable/disable skills by project context. Switch presets (frontend, backend, ai) to reduce skill clutter and speed up responses. |
+| **aio-reflect** | Analyze past Claude Code sessions to extract patterns, corrections, and preferences. Turns insights into CLAUDE.md rules or new skills. |
+| **aio-feedback** | Submit bug reports, feature requests, and plugin ideas directly from Claude Code via GitHub Issues. Requires `gh` CLI. |
 
-```bash
-/plugin install aio-mental-models@aiocean-plugins
-```
+### Language & Framework
 
-## reflect
+| Plugin | Description |
+|--------|-------------|
+| **aio-golang-mastery** | Complete Go development: idiomatic patterns, concurrency, generics, testing (TDD, fuzzing, benchmarks), gRPC. Based on Google/Uber style guides. Go 1.25. |
+| **aio-xstate** | XState v5 strict ruleset: `setup().createMachine()` patterns, params-first typing, actor patterns, invoke vs spawnChild, React integration. |
+| **aio-react-minimal-effects** | Minimize `useEffect` in React 19. Covers React Compiler, `useActionState`, `useOptimistic`, ref as prop, and proper patterns. |
+| **aio-tui** | Go Bubbletea TUI guide: TEA architecture, lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tabs, scroll). |
 
-Every Claude Code session teaches you something, but most learnings disappear when the conversation ends. Reflect changes that. It analyzes your past sessions to find patterns - corrections you made, preferences you expressed, techniques that worked. Then it turns those insights into permanent CLAUDE.md rules or new skills. Your AI gets smarter over time, remembering that you prefer bun over npm, that you hate over-engineering, that you want Vietnamese comments. Stop repeating yourself session after session.
+### iOS
 
-```bash
-/plugin install aio-reflect@aiocean-plugins
-```
+| Plugin | Description |
+|--------|-------------|
+| **aio-ios-device-debug** | Debug iOS apps on physical devices from terminal. Build, install, launch, capture logs, pull crash reports, take screenshots (iOS 17+). |
 
-## remove-bg
+### Design & UI
 
-Remove backgrounds from any image in seconds. Drop in a logo and get a clean transparent PNG. Process product photos for e-commerce. Create cutouts for presentations. Works with simple mono images using fast threshold detection, or handles complex photos with AI-powered removal. Automatically trims transparent edges so your output is perfectly sized. No more wrestling with Photoshop or online tools with watermarks.
+| Plugin | Description |
+|--------|-------------|
+| **aio-neobrutalism** | Neobrutalism design system: bold borders, hard shadows, vibrant colors. Complete component library — buttons, cards, forms, dialogs. |
+| **aio-mermaid** | Generate shareable MinimalMermaid diagram URLs from mermaid code. |
+| **aio-grafana-diagram** | Mermaid diagrams with data binding in Grafana dashboards. Flowcharts, sequence diagrams, state diagrams with metric-driven coloring. |
 
-```bash
-/plugin install aio-remove-bg@aiocean-plugins
-```
+### Observability
 
-## epub-packing
+| Plugin | Description |
+|--------|-------------|
+| **aio-monitoring-observability** | Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry tracing, SLOs, dashboards, alerting. 7 automation scripts + production-ready templates. |
 
-Turn your Markdown files into professional EPUB ebooks. Write documentation, articles, or entire books in Markdown and get beautiful e-reader files with auto-generated neo-brutalism covers. Support for multi-chapter books, embedded images, code blocks with syntax highlighting, and tables. Choose from 7 color schemes or let it pick randomly. Your readers can enjoy your content on Kindle, Apple Books, or any e-reader - offline, distraction-free.
+### Content & Knowledge
 
-```bash
-/plugin install aio-epub-packing@aiocean-plugins
-```
+| Plugin | Description |
+|--------|-------------|
+| **aio-mental-models** | 50+ mental models from The Great Mental Models series. First principles, inversion, second-order thinking, feedback loops, and more. |
+| **aio-youtube** | Search YouTube, extract transcripts, summarize videos, compare sources, pull code snippets from tutorials. Uses yt-dlp. |
+| **aio-epub-packing** | Convert Markdown to professional EPUB ebooks with auto-generated neo-brutalism covers. Multi-chapter, images, code highlighting, 7 color schemes. |
+| **aio-gherkin-refine** | Convert vague requirements into structured Given/When/Then scenarios before writing code. Catch misunderstandings early. |
 
-## youtube
+### Integrations
 
-Research YouTube without actually watching videos. Search for topics and get relevant videos instantly. Extract full transcripts in any available language. Summarize hour-long tutorials into key points. Compare multiple videos on the same topic to find consensus and disagreements. Pull out code snippets from programming tutorials. Get chapter timestamps and linked resources. Perfect for learning quickly or gathering research without spending hours watching.
-
-```bash
-/plugin install aio-youtube@aiocean-plugins
-```
-
-## gherkin-refine
-
-Stop building the wrong thing. When requirements are vague or ambiguous, this skill converts them into clear Given/When/Then scenarios before you write a single line of code. "Add a delete button" becomes explicit scenarios covering admin permissions, confirmation dialogs, error handling, and edge cases. You and your AI align on exactly what needs to be built. Catch misunderstandings early, not after hours of wasted development.
-
-```bash
-/plugin install aio-gherkin-refine@aiocean-plugins
-```
-
-## claude-manager
-
-Too many skills slow you down. When you're working on a frontend project, you don't need backend skills cluttering your context. Claude Manager lets you enable only what's relevant. Switch to `frontend` preset and focus on UI work. Switch to `backend` for API development. Switch to `ai` for prompt engineering projects. Analyze which skills you actually use and disable the rest. Faster responses, less noise, more focus.
-
-```bash
-/plugin install aio-claude-manager@aiocean-plugins
-```
-
-## neobrutalism
-
-Build web interfaces that stand out. While everyone else uses the same boring rounded corners and subtle shadows, neobrutalism gives you bold black borders, hard drop shadows, and vibrant colors. Complete design system with buttons, cards, forms, dialogs, and more. Copy the base CSS and components directly into your project. Your UI will look confident, modern, and memorable - not like another Bootstrap clone.
-
-```bash
-/plugin install aio-neobrutalism@aiocean-plugins
-```
-
-## bun-fullstack-setup
-
-Ship fullstack applications with Bun the right way. Single port serves both your API and static frontend in production - no nginx configuration needed. Vite proxy handles development with hot reload. Environment validation catches missing config at startup, not runtime. PM2 config for local development. Multi-stage Docker build for lean production images. Stop copy-pasting boilerplate from Stack Overflow - get a proven setup that just works.
-
-```bash
-/plugin install aio-bun-fullstack-setup@aiocean-plugins
-```
-
-## monitoring-observability
-
-Build reliable systems that tell you when something is wrong before your users do. Comprehensive monitoring and observability skill covering metrics design (Golden Signals, RED/USE methods), distributed tracing with OpenTelemetry, alerting best practices, SLOs/SLIs/error budgets, dashboard design, log aggregation, and tool selection. Includes 7 automation scripts for metrics analysis, alert quality checking, SLO calculation, log analysis, dashboard generation, health check validation, and Datadog cost analysis. Production-ready templates for Prometheus alerts, OpenTelemetry collector config, and incident runbooks.
-
-```bash
-/plugin install aio-monitoring-observability@aiocean-plugins
-```
-
-## ios-device-debug
-
-Debug iOS apps on real hardware from your terminal. Build, install, and launch apps on physical devices. Capture live device logs filtered by your app. Pull crash reports and analyze symbolicated stack traces. Take screenshots on iOS 17+ devices. No more hunting through Xcode's device organizer - everything you need is one command away.
-
-```bash
-/plugin install aio-ios-device-debug@aiocean-plugins
-```
-
-## codebase-oracle
-
-Deep codebase analysis using specialized agent teams. Instead of one AI reading everything serially, codebase-oracle creates parallel analyst teammates - each focusing on their domain: structure analysts map architecture and dependencies, data analysts document models and schemas, flow analysts trace execution paths and APIs, product analysts capture user-facing behavior, and infra analysts map deployment and configuration. Tree-sitter static analysis provides accurate import graphs and function extraction. Three modes: Full Map generates complete architecture docs (C4 diagrams, data models, API surfaces, dependency graphs), Investigate answers targeted questions with evidence-based confidence tracking, and Impact analysis tells you exactly what breaks before you change something. Includes interactive visualization to explore your architecture as an HTML playground.
-
-```bash
-/plugin install aio-codebase-oracle@aiocean-plugins
-```
-
-## aio-debug
-
-Systematic debug & fix orchestrator. Four-phase pipeline: understand codebase context, investigate root cause (no guessing), implement the minimal fix, then validate with code review. Enforces evidence-based debugging — no fixes without confirmed root cause.
-
-```bash
-/plugin install aio-debug@aiocean-plugins
-```
-
-## cocoindex
-
-Index your codebase documents for fast semantic search with CocoIndex. Two skills work together: `cocoindex-setup` scaffolds a project-specific `.cocoindex/` directory with configuration, embedding pipeline, and search functions tailored to your stack. Once set up, `cocoindex` lets you search across indexed documents and maintain the index with incremental processing — only changed files get re-embedded. Perfect for large codebases where grep isn't enough and you need meaning-aware search across documentation, comments, and code.
-
-```bash
-/plugin install aio-cocoindex@aiocean-plugins
-```
-
-## feedback
-
-Found a bug? Have an idea for a new plugin? Want to improve an existing one? Submit feedback directly from Claude Code without opening a browser. Just describe what you want — bug report, feature request, or plugin idea — and it files a GitHub issue on the aiocean/claude-plugins repo with the right labels. Track your feedback via the returned issue URL. Requires `gh` CLI authenticated.
-
-```bash
-/plugin install aio-feedback@aiocean-plugins
-```
+| Plugin | Description |
+|--------|-------------|
+| **aio-jira** | Jira via MCP: issue management, sprint tracking, workflow transitions, JQL search, dev info. Auto-installs jira-mcp server. |
+| **aio-remove-bg** | Remove image backgrounds — threshold-based (fast) or AI-powered (rembg). Auto-trims transparent edges. |
 
 ## Workflows
 
-Plugins are designed to work independently, but they compose naturally into multi-step workflows.
+Plugins compose into multi-step workflows:
 
-### Feature Development
-Clarify requirements → understand the codebase → apply correct patterns → review before merge → update tickets.
-
+**Feature Development** — clarify requirements, understand codebase, apply patterns, review, update tickets:
 ```
-gherkin-refine → codebase-oracle → [xstate / react-minimal-effects] → code-review-ultra → jira
+gherkin-refine → codebase-oracle → [xstate / react-minimal-effects] → code-review → jira
 ```
 
-```bash
-/plugin install aio-gherkin-refine@aiocean-plugins
-/plugin install aio-codebase-oracle@aiocean-plugins
-/plugin install aio-xstate@aiocean-plugins
-/plugin install aio-code-review-ultra@aiocean-plugins
-/plugin install aio-jira@aiocean-plugins
-```
-
-### Debugging
-Investigate root cause → lint changed code → add observability → visualize metrics.
-
+**Debugging** — investigate, lint, add observability, visualize:
 ```
 aio-debug → ios-device-debug → monitoring-observability → grafana-diagram
 ```
 
-```bash
-/plugin install aio-debug@aiocean-plugins
-/plugin install aio-ios-device-debug@aiocean-plugins
-/plugin install aio-monitoring-observability@aiocean-plugins
-/plugin install aio-grafana-diagram@aiocean-plugins
+**Content & Docs** — research, think, document, publish:
+```
+youtube → mental-models → codebase-oracle → epub-packing
 ```
 
-### Content & Documentation
-Research external sources → apply thinking frameworks → document the codebase → publish.
-
-```
-youtube → mental-models → codebase-oracle → epub-packing / mermaid
-```
-
-```bash
-/plugin install aio-youtube@aiocean-plugins
-/plugin install aio-mental-models@aiocean-plugins
-/plugin install aio-codebase-oracle@aiocean-plugins
-/plugin install aio-epub-packing@aiocean-plugins
-```
-
-### Project Bootstrap
-Scaffold the project → apply design system → set up parallel dev environments → add observability → learn from sessions.
-
+**Project Bootstrap** — scaffold, design, parallelize, observe, learn:
 ```
 bun-fullstack-setup → neobrutalism → worktree → monitoring-observability → reflect
-```
-
-```bash
-/plugin install aio-bun-fullstack-setup@aiocean-plugins
-/plugin install aio-neobrutalism@aiocean-plugins
-/plugin install aio-worktree@aiocean-plugins
-/plugin install aio-monitoring-observability@aiocean-plugins
-/plugin install aio-reflect@aiocean-plugins
 ```
 
 ## License
