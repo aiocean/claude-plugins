@@ -18,12 +18,12 @@ No manual collection configuration needed. One project = one unified index.
 
 ## Workflow
 
-### Step 1: Resolve Boilerplate Path
+### Step 1: Locate Boilerplate
 
-```bash
-BP="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-cocoindex/*/skills/aio-cocoindex-setup/boilerplate 2>/dev/null | sort -V | tail -1)"
-ls $BP  # Should show: config.py  index.py  query.py  requirements.txt
-```
+The boilerplate files are in this skill's `boilerplate/` directory:
+- `config.py`, `index.py`, `query.py`, `requirements.txt`
+
+Copy these into the target project's `.cocoindex/` directory in Step 3.
 
 ### Step 2: Analyze Project
 
@@ -61,19 +61,13 @@ If user chooses **Gemini**, ask for their `GEMINI_API_KEY`.
 
 ### Step 4: Copy Boilerplate
 
-```bash
-mkdir -p .cocoindex
-cp $BP/index.py $BP/query.py $BP/requirements.txt .cocoindex/
-```
+Copy `index.py`, `query.py`, and `requirements.txt` from this skill's `boilerplate/` directory into the project's `.cocoindex/`.
 
 **Do NOT copy `config.py`** — write it fresh based on the project analysis.
 
 ### Step 5: Write `config.py`
 
-Read the boilerplate `config.py` for the full template with comments:
-```bash
-cat $BP/config.py
-```
+Read the boilerplate `boilerplate/config.py` (in this skill's directory) for the full template with comments.
 
 Then write a customized version to `.cocoindex/config.py` with:
 - Correct `PROJECT_NAME`
