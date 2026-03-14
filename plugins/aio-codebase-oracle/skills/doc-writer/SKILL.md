@@ -174,7 +174,7 @@ ls docs/codebase_map.json docs/dependency_graphs/ 2>/dev/null
 
 **If `codeindex` is not installed**, inform the user:
 ```
-CodeIndex is required. Install with: pip install -e codeindex/
+CodeIndex is required. Run /aio-codebase-oracle:aio-static-index to install.
 ```
 Do NOT proceed with manual analysis as a substitute — CodeIndex's static analysis provides the dependency graph, metrics, and community detection that Oracle builds on.
 
@@ -490,11 +490,6 @@ For detailed tool commands, comparison matrix, setup instructions, and usage gui
 
 **No CodeIndex static analysis:** Oracle MUST run `.codeindex/bin/codeindex generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
 
-**`codeindex` not found:** User needs to install into project-local venv. Run `/aio-codebase-oracle:aio-codebase-index` or:
-```bash
-python3 -m venv .codeindex
-PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
-.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
-```
+**`codeindex` not found:** Run `/aio-codebase-oracle:aio-static-index` to install. It copies the bundled `codeindex/` package from the plugin root into the project and installs into a local `.codeindex/` venv.
 
 **Stale static analysis:** Code changed since last CodeIndex run. Re-run: `.codeindex/bin/codeindex generate --verbose --no-cache`

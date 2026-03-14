@@ -9,37 +9,32 @@ Manages the bundled CodeIndex static analysis tool — install, update, run, and
 
 **IMPORTANT:** CodeIndex MUST be installed into a project-local `.codeindex/` virtual environment. Never use a globally installed codeindex. This prevents version conflicts between projects and ensures each project uses the correct codeindex version.
 
-## Path Resolution
+## Source Location
 
-```bash
-PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
-```
+The CodeIndex Python package is bundled in this plugin at:
 
-If `$PLUGIN_DIR` is empty, CodeIndex is not available. The plugin may not be installed correctly.
+- `codeindex/` — the Python package (relative to plugin root)
+- `pyproject.toml` — package metadata and dependencies (relative to plugin root)
+
+When installing, **copy** these into the target project. Do NOT use `pip install -e` (editable/link mode) — the project must have its own independent copy so plugin updates don't affect existing installs.
 
 ## Commands
 
 ### Install CodeIndex
 
+1. Copy `codeindex/` and `pyproject.toml` from the plugin root into the target project as `.codeindex-src/`
+2. Create a Python venv and install from the local copy:
+
 ```bash
-# Resolve the plugin path
-PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
-
-# Create project-local venv
 python3 -m venv .codeindex
-
-# Install into project-local venv
-.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
-
-# Verify installation
+.codeindex/bin/pip install .codeindex-src
 .codeindex/bin/codeindex --version
 ```
 
 **If pip install fails with dependency errors:**
 ```bash
-# Try with uv (faster, better dependency resolution)
 uv venv .codeindex
-uv pip install -e "$(dirname "$PLUGIN_DIR")" --python .codeindex/bin/python
+uv pip install .codeindex-src --python .codeindex/bin/python
 ```
 
 **Requirements:** Python >= 3.12
@@ -47,10 +42,7 @@ uv pip install -e "$(dirname "$PLUGIN_DIR")" --python .codeindex/bin/python
 ### Check Status
 
 ```bash
-# Check if project-local codeindex exists
 .codeindex/bin/codeindex --version 2>/dev/null && echo "installed" || echo "not installed"
-
-# Check installation details
 .codeindex/bin/pip show codeindex 2>/dev/null
 ```
 
@@ -59,10 +51,7 @@ uv pip install -e "$(dirname "$PLUGIN_DIR")" --python .codeindex/bin/python
 Always use the project-local binary:
 
 ```bash
-# Run analysis
 .codeindex/bin/codeindex generate --verbose
-
-# Custom output directory
 .codeindex/bin/codeindex generate --verbose -o docs/
 ```
 
@@ -73,51 +62,49 @@ Always use the project-local binary:
 
 ### Update CodeIndex
 
-When the plugin is updated, reinstall into the project-local venv:
+Re-copy source from the plugin root and reinstall:
+
+1. Remove old `.codeindex-src/`, copy fresh `codeindex/` and `pyproject.toml` from plugin root
+2. Reinstall:
 
 ```bash
-PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
-.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")" --force-reinstall --no-deps
+.codeindex/bin/pip install .codeindex-src --force-reinstall --no-deps
 .codeindex/bin/codeindex --version
 ```
 
 ### Uninstall
 
 ```bash
-rm -rf .codeindex
+rm -rf .codeindex .codeindex-src
 ```
 
 ## Troubleshooting
 
 ### `codeindex: command not found` or wrong version
 
-Do NOT install globally. Create the project-local venv:
+Do NOT install globally. Re-copy from plugin root and create the project-local venv:
 ```bash
 python3 -m venv .codeindex
-PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
-.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
+.codeindex/bin/pip install .codeindex-src
 ```
 
 ### `ModuleNotFoundError: No module named 'codeindex'`
 
-The venv may be corrupted or missing. Recreate it:
+The venv may be corrupted. Recreate it:
 ```bash
 rm -rf .codeindex
 python3 -m venv .codeindex
-PLUGIN_DIR="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/codeindex 2>/dev/null | sort -V | tail -1)"
-.codeindex/bin/pip install -e "$(dirname "$PLUGIN_DIR")"
+.codeindex/bin/pip install .codeindex-src
 ```
 
 ### `tree-sitter` build errors
 
-Some tree-sitter grammars need compilation. Try:
 ```bash
 .codeindex/bin/pip install --upgrade tree-sitter tree-sitter-language-pack
 ```
 
 ### Slow analysis on large codebases
 
-Use file filters:
 ```bash
 .codeindex/bin/codeindex generate --verbose --exclude "**/node_modules/**,**/vendor/**,**/.git/**"
 ```
