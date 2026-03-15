@@ -33,9 +33,38 @@ bun run $RF/extract-session.ts <project-path> --last 5 --diary
 # Full extraction with thinking blocks
 bun run $RF/extract-session.ts <project-path> --last 5 --verbose
 
+# Deep extraction with subagent conversations
+bun run $RF/extract-session.ts <project-path> --last 5 --full --verbose
+
 # JSON output for further processing
 bun run $RF/extract-session.ts <project-path> --last 5 --json
+
+# Stats only (cost, tokens, work mode, tasks)
+bun run $RF/extract-session.ts <project-path> --last 10 --stats-only
 ```
+
+## Data Extracted
+
+The extractor deeply understands Claude Code's JSONL format and storage:
+
+**Per session:**
+- Full conversation (noise-filtered: isSidechain skipped, system tags stripped, internal messages removed)
+- Token usage & estimated cost (model-specific pricing with long-context tiers, cache multipliers)
+- Work mode classification: Exploration (Read/Grep/Glob) vs Building (Write/Edit) vs Testing (Bash/Agent)
+- Subagent transcripts from `{uuid}/subagents/agent-*.jsonl`
+- Task reconstruction from TaskCreate/TaskUpdate tool calls + `~/.claude/tasks/{uuid}/`
+- Compaction events (auto/manual trigger, pre-compaction token count)
+- Session chaining (resumed sessions via leaf_uuid/slug)
+- File operations (reads, writes, edits with file paths)
+- Model distribution (Opus/Sonnet/Haiku usage counts)
+- Cache hit rates
+- Session titles (from summary messages, correctly distinguished from compaction)
+- Skills and agents invoked
+
+**Aggregate (multiple sessions):**
+- Total cost, tokens, duration, tool calls, subagents
+- Aggregate work mode distribution
+- Model distribution across sessions
 
 ## Workflow
 
@@ -327,11 +356,22 @@ date: [YYYY-MM-DD]
 
 ## Scripts Reference
 
-| Script                                                                                 | Purpose                               |
-| -------------------------------------------------------------------------------------- | ------------------------------------- |
-| `extract-session.ts <target> [--last N] [--json] [--verbose] [--stats-only] [--diary]` | Extract sessions with full context    |
-| `get-project-path.ts <path> [--check]`                                                 | Convert path & check sessions exist   |
-| `project-tree.ts [--stats] [--json]`                                                   | List all projects with session counts |
+| Script                                                                                          | Purpose                               |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `extract-session.ts <target> [--last N] [--json] [--verbose] [--stats-only] [--diary] [--full]` | Extract sessions with full context    |
+| `get-project-path.ts <path> [--check]`                                                          | Convert path & check sessions exist   |
+| `project-tree.ts [--stats] [--json]`                                                            | List all projects with session counts |
+
+### extract-session.ts Options
+
+| Flag           | Purpose                                                      |
+| -------------- | ------------------------------------------------------------ |
+| `--last N`     | Only process last N sessions (by date)                       |
+| `--json`       | Output as JSON (for piping to other tools)                   |
+| `--verbose`    | Include thinking blocks and compaction details               |
+| `--stats-only` | Only show statistics, not full conversation                  |
+| `--diary`      | Only show diary summary (task, files, cost, work mode)       |
+| `--full`       | Include subagent conversations and longer tool results       |
 
 ## Memory Directory
 

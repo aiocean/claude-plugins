@@ -88,8 +88,8 @@
     {
       "name": "aio-reflect",
       "source": "./plugins/aio-reflect",
-      "description": "Learn from Claude Code sessions to extract reusable knowledge. Analyzes corrections, preferences, and technical discoveries to build CLAUDE.md rules and new skills.",
-      "version": "1.0.3",
+      "description": "Learn from Claude Code sessions to extract reusable knowledge. Deep JSONL parsing extracts token usage, cost, work modes, subagents, tasks, compaction, session chains, and file operations for comprehensive reflection.",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
