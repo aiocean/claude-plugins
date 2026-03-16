@@ -1,6 +1,6 @@
 ---
 name: aio-editor-review
-description: Review and edit existing translations as a biên tập viên — check glossary consistency, tone, quality. Use when "review translation", "biên tập", "editor review", "check translation quality", "kiểm tra bản dịch", "chỉnh sửa bản dịch".
+description: This skill should be used when the user asks to review translation, biên tập, editor review, check translation quality, kiểm tra bản dịch, chỉnh sửa bản dịch, edit translation, or wants to do a quality pass on translated chapters. Acts as biên tập viên — checks glossary consistency, tone, completeness, and cross-chapter coherence.
 ---
 
 # Editor Review — Translation Quality Review & Editing
