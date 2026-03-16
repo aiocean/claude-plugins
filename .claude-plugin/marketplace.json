@@ -7,8 +7,8 @@
     {
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
-      "description": "AI-driven EPUB translation using jread CLI. Four opinionated skills: aio-epub-setup (project setup, unpack, mark), aio-epub-translate (chapter translation only), aio-editor-review (quality review and glossary consistency), aio-epub-package (export bilingual/clean EPUB).",
-      "version": "2.0.0",
+      "description": "AI-driven EPUB translation using jread CLI. Five opinionated skills: aio-epub-setup (project setup), aio-epub-research (book research, terminology, web search), aio-epub-translate (chapter translation), aio-editor-review (quality review), aio-epub-package (export).",
+      "version": "2.1.0",
       "author": {
         "name": "aiocean"
       }

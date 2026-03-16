@@ -161,5 +161,6 @@ When deciding what to focus on:
 ## Related Skills
 
 - **aio-epub-setup** — set up a new translation project
+- **aio-epub-research** — research book before translating
 - **aio-epub-translate** — translate chapters
 - **aio-epub-package** — export final EPUB files

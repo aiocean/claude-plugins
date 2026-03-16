@@ -86,7 +86,7 @@ Setup is complete when:
 
 ### Done
 
-Tell the user: "Setup complete. Use `aio-epub-translate` to start translating."
+Tell the user: "Setup complete. Run `aio-epub-research` to research the book before translating."
 
 ## Project Structure
 
@@ -99,6 +99,13 @@ my-book/
 │   └── [epub contents]
 └── output/                <- Export destination (created by aio-epub-package)
 ```
+
+## Related Skills
+
+- **aio-epub-research** — research the book before translating (run after this)
+- **aio-epub-translate** — translate chapters
+- **aio-editor-review** — review existing translations
+- **aio-epub-package** — export final EPUB files
 
 ## References
 
