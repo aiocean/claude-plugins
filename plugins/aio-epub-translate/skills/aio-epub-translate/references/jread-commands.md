@@ -136,7 +136,7 @@ Output:
     },
     {
       "id": "E3VaMFIXLmEmT75-",
-      "text": "Olympic gold is won in the margins.",
+      "text": "Olympic gold is won in the <em>margins</em>.",
       "hasTranslation": true,
       "translationId": "6fa840b1b60a2ad5"
     }
@@ -229,7 +229,7 @@ Show translation progress across all chapters.
 Flags:
 - `--incomplete` — only show chapters that still have untranslated items
 
-Each chapter entry includes `lastTranslatedIndex` (0-based index of the last translated item, `-1` if none). Use it with `jread list --from` to resume exactly where you left off.
+Each chapter entry includes `lastTranslatedId` (content ID of the last translated item, empty string if none).
 
 ```bash
 # Full overview
@@ -246,23 +246,16 @@ Output:
   "translated": 156,
   "progress": "7.5%",
   "chapters": [
-    { "file": "OEBPS/Text/chapter0001.html", "total": 41, "translated": 41, "lastTranslatedIndex": 40 },
-    { "file": "OEBPS/Text/chapter0002.html", "total": 14, "translated": 3, "lastTranslatedIndex": 4 }
+    { "file": "OEBPS/Text/chapter0001.html", "total": 41, "translated": 41, "lastTranslatedId": "E3VaMFIXLmEmT75-" },
+    { "file": "OEBPS/Text/chapter0002.html", "total": 14, "translated": 3, "lastTranslatedId": "Gjsbg3jOAD14QNrK" }
   ]
 }
 ```
 
-**Resume pattern** — after `jread stats`, pick up from where you stopped:
-```bash
-# lastTranslatedIndex was 4, so resume from index 5
-jread list workspace/OEBPS/Text/chapter0002.html --from=5 --limit=20
-```
-
 Use this to:
 - Track progress after each chapter
-- Find chapters with 0 translation (not started): `lastTranslatedIndex == -1`
+- Find chapters with 0 translation (not started): `lastTranslatedId == ""`
 - Verify a chapter is 100% before moving on: `translated == total`
-- Get exact resume point without `jq`
 
 ---
 
