@@ -27,7 +27,7 @@ This produces dramatically better results than paragraph-by-paragraph translatio
 
 ```
 1. SETUP     → unpack + mark + read CLAUDE.md
-2. PER CHAPTER → read all → update glossary → batch translate (15-20 paragraphs)
+2. PER CHAPTER → batch-list (20 items) → update glossary → batch translate → next batch
 3. FINISH    → pack bilingual + pack clean
 ```
 
@@ -58,7 +58,7 @@ Full conventions: `references/file-conventions.md`
 | `jread unpack <epub> <dir>` | Extract EPUB |
 | `jread info <dir>` | Metadata + spine |
 | `jread mark <dir>` | Add content IDs to all paragraphs |
-| `jread list <html>` | List all translatable elements |
+| `jread list <html>` | List translatable elements (use `jq '.items[0:20]'` to batch!) |
 | `jread get <html> <id>` | Get text + context (above/below) |
 | `jread set <html> <id> <text> [--lang=vi]` | Write translation |
 | `jread stats <dir>` | Progress per chapter |

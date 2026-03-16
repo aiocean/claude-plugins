@@ -134,10 +134,22 @@ Output:
 }
 ```
 
+**WARNING: Never pipe all items to output.** Chapters can have 100+ items. Always use `jq` slicing:
+```bash
+# First 20 items
+jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[0:20]'
+
+# Next 20
+jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[20:40]'
+
+# Only untranslated, batched
+jread list workspace/OEBPS/Text/chapter0001.html | jq '[.items[] | select(.hasTranslation == false)] | .[0:20]'
+```
+
 Use this to:
-- Get all IDs for a chapter before translating
+- Get IDs in batches of 20 for translation
 - Check which items still need translation (`hasTranslation: false`)
-- Batch: collect 15-20 IDs, then use `get` for each to build translation batch
+- Track progress: compare total vs untranslated count
 
 ---
 
@@ -272,20 +284,28 @@ Example: `rootDir = "workspace/OEBPS"`, `href = "Text/chapter0001.html"`
 
 ## Batch Translation Pattern
 
-The recommended way to translate a chapter efficiently:
+**IMPORTANT: Never list all items at once.** Chapters can have 100+ items which floods context. Always use `jq` slicing to process 20 items per batch.
 
 ```bash
-# 1. Get all IDs
-IDS=$(jread list workspace/OEBPS/Text/chapter0001.html | jq -r '.items[].id')
+# 1. Check chapter size
+jread list workspace/OEBPS/Text/chapter0001.html | jq '{total: (.items | length), untranslated: ([.items[] | select(.hasTranslation == false)] | length)}'
 
-# 2. Read all text for context (before translating any)
-jread list workspace/OEBPS/Text/chapter0001.html | jq -r '.items[].text'
+# 2. Read first batch of 20 items
+jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[0:20]'
 
-# 3. After translating batch in Claude's context, write each:
+# 3. Get untranslated items in current batch
+jread list workspace/OEBPS/Text/chapter0001.html | jq '[.items[] | select(.hasTranslation == false)] | .[0:20]'
+
+# 4. Translate the batch, write each:
 jread set workspace/OEBPS/Text/chapter0001.html <id1> "<translation1>"
 jread set workspace/OEBPS/Text/chapter0001.html <id2> "<translation2>"
 # ...
 
-# 4. Verify
+# 5. Next batch of untranslated items
+jread list workspace/OEBPS/Text/chapter0001.html | jq '[.items[] | select(.hasTranslation == false)] | .[0:20]'
+
+# 6. Repeat steps 4-5 until no untranslated items remain
+
+# 7. Verify chapter completion
 jread stats workspace/ | jq '.chapters[] | select(.file | contains("chapter0001"))'
 ```
