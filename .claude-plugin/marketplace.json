@@ -7,8 +7,8 @@
     {
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
-      "description": "AI-driven EPUB translation using jread CLI. Unpack EPUBs, mark content, translate with full context awareness, maintain glossaries, and export bilingual or clean EPUBs. Includes editor-review skill for quality review and glossary consistency checks.",
-      "version": "1.4.0",
+      "description": "AI-driven EPUB translation using jread CLI. Four opinionated skills: aio-epub-setup (project setup, unpack, mark), aio-epub-translate (chapter translation only), aio-editor-review (quality review and glossary consistency), aio-epub-package (export bilingual/clean EPUB).",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
