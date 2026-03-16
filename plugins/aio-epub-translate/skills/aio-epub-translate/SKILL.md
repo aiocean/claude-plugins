@@ -22,11 +22,16 @@ test -f CLAUDE.md && echo "OK" || echo "MISSING"
 
 If CLAUDE.md missing → **STOP**. Tell user: "No CLAUDE.md found. Run `aio-epub-setup` first."
 
-## Core Principle
+## Core Principles
 
 > Claude is NOT a translation API that processes one paragraph at a time.
 > Claude is the **translation director** who reads the batch first,
 > understands the author's voice, then translates with full awareness.
+
+> The goal is a translation that reads naturally in the target language.
+> You are free to add sentences, split paragraphs, restructure ideas, rephrase for flow,
+> use literary techniques native to the target language. What matters is preserving
+> meaning, tone, and emotional impact — not mirroring the source word-for-word.
 
 ## Before Translating
 

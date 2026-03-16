@@ -35,6 +35,10 @@ Example: "Vietnamese business professionals and sports enthusiasts. Readers have
 
 Example: "Ben Hunt-Davis writes with infectious enthusiasm and sports-coach directness. Short sentences. Rhetorical questions. Heavy use of 'we' to include the reader. Conversational, not academic."
 
+## Translation Philosophy
+
+The goal is a translation that reads naturally in Vietnamese — not a word-for-word mirror of the English. You are free to use any literary technique that serves the target language: add sentences for clarity, split paragraphs, restructure ideas, rephrase for flow, use Vietnamese rhetorical devices. What matters is that the meaning, tone, and emotional impact are preserved. How you get there is up to you.
+
 ## Translation Style Guide
 
 ### Tone
