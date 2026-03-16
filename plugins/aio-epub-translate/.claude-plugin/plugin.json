@@ -1,7 +1,7 @@
 {
   "name": "aio-epub-translate",
   "description": "AI-driven EPUB translation using jread CLI. Unpack EPUBs, mark content, translate with full context awareness, maintain glossaries, and export bilingual or clean EPUBs. Claude acts as translation director — reading full chapters, building terminology databases, and ensuring consistency across the entire book.",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": { "name": "aiocean" },
   "repository": "https://github.com/aiocean/claude-plugins",
   "license": "MIT"
