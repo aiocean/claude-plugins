@@ -24,10 +24,7 @@ jread info workspace/        # → note rootDir and spine
 jread mark workspace/        # → marks all translatable elements
 ```
 
-### Step 4: Create glossary.md
-Copy template from `glossary-guide.md`. Leave tables empty for now.
-
-### Step 5: Check progress
+### Step 4: Check progress
 ```bash
 jread stats workspace/       # → shows all chapters, 0% translated
 ```
@@ -72,7 +69,7 @@ For each batch, read the text and understand:
 - Are there ambiguous passages?
 
 ### Step 3: Update glossary before translating
-Before writing a single translation, update `glossary.md` with:
+Before writing a single translation, update the Glossary section in `CLAUDE.md` with:
 - New proper nouns (people, places, organizations)
 - New technical terms
 - Recurring phrases that should be consistent
@@ -105,8 +102,8 @@ jread stats workspace/ | jq '.chapters[] | select(.file | contains("chapter0001"
 
 Should show `total == translated`.
 
-### Step 5: Update translation-notes.md
-Note any decisions made, difficulties encountered, terms added to glossary.
+### Step 5: Update Translation Notes in CLAUDE.md
+Note any decisions made, difficulties encountered, terms added to the Glossary section.
 
 ---
 
@@ -115,7 +112,7 @@ Note any decisions made, difficulties encountered, terms added to glossary.
 After completing 3-5 chapters, do a consistency check:
 
 ### Glossary audit
-Read `glossary.md`. Are all terms actually being used consistently? If you find inconsistencies, use `jread get` to check specific paragraphs and `jread set` to correct them.
+Read the Glossary section in `CLAUDE.md`. Are all terms actually being used consistently? If you find inconsistencies, use `jread get` to check specific paragraphs and `jread set` to correct them.
 
 ### Export for review
 ```bash
@@ -152,7 +149,7 @@ Translate headings like regular text. The `mark` command skips headings that loo
 Each list item is marked separately. Translate each item independently but with awareness of the list as a whole.
 
 ### Block quotes
-Translate the quote AND verify the attribution (author name) against the glossary.
+Translate the quote AND verify the attribution (author name) against the Glossary section in CLAUDE.md.
 
 ### Footnotes / endnotes
 Translate the note text. Keep citation numbers unchanged.
@@ -176,7 +173,7 @@ Result: Inconsistent terminology, wrong tone choices, missed context.
 **❌ Translating one paragraph at a time via jread get**
 Result: Very slow, misses cross-paragraph context, unnatural flow.
 
-**❌ Never updating glossary.md**
+**❌ Never updating the Glossary section in CLAUDE.md**
 Result: The same English term translated 3 different ways across chapters.
 
 **❌ Not checking jread stats after each chapter**
@@ -191,8 +188,7 @@ Result: Broken EPUB structure, lost markers.
 
 If Claude starts a new session:
 
-1. Read `CLAUDE.md` — understand the book and style guide
-2. Read `glossary.md` — recall all established terminology
+1. Read `CLAUDE.md` — understand the book, style guide, glossary, and translation notes
 3. Run `jread stats workspace/` — see current progress
 4. Run `jread list <next-chapter.html>` — find where to continue
 5. Resume from first item with `hasTranslation: false`

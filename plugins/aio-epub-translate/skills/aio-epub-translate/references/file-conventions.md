@@ -5,23 +5,21 @@ Every translation project MUST follow this structure. Consistent structure lets 
 ## Directory Structure
 
 ```
-{book-slug}/                        ← Root: use kebab-case book title
-├── CLAUDE.md                       ← Translation guidelines (REQUIRED)
+{book-slug}/                        <- Root: use kebab-case book title
+├── CLAUDE.md                       <- Everything lives here (REQUIRED)
 ├── source/
-│   └── {book-slug}.epub            ← Original EPUB (NEVER modify)
-├── workspace/                      ← jread unpack output
+│   └── {book-slug}.epub            <- Original EPUB (NEVER modify)
+├── workspace/                      <- jread unpack output
 │   ├── META-INF/
 │   │   └── container.xml
-│   └── OEBPS/                      ← or similar, per EPUB structure
+│   └── OEBPS/                      <- or similar, per EPUB structure
 │       ├── content.opf
 │       └── Text/
 │           ├── chapter0001.html
 │           └── ...
-├── output/                         ← Final EPUBs
-│   ├── {book-slug}-bilingual.epub  ← Both languages
-│   └── {book-slug}-clean.epub      ← Translation only
-├── glossary.md                     ← Terminology database (REQUIRED)
-└── translation-notes.md            ← Per-chapter notes (optional)
+└── output/                         <- Final EPUBs
+    ├── {book-slug}-bilingual.epub  <- Both languages
+    └── {book-slug}-clean.epub      <- Translation only
 ```
 
 ## Naming Rules
@@ -33,40 +31,18 @@ Every translation project MUST follow this structure. Consistent structure lets 
 
 ## CLAUDE.md (Required)
 
-Every translation project MUST have a `CLAUDE.md` at the root. This file is what makes AI translation context-aware.
+Every translation project MUST have a `CLAUDE.md` at the root. This is the **single source of truth** for the entire translation project. It contains:
+
+1. Book metadata (title, author, source/target language)
+2. Translation style guide (voice, tone, audience)
+3. Glossary tables (terminology, recurring phrases, rejected translations)
+4. Translation notes (per-chapter decisions and issues)
+5. Do NOT rules (what to never translate or change)
+6. Project status
 
 See `claude-md-template.md` for the full template.
 
-**Minimum required sections:**
-1. Book metadata (title, author, source/target language)
-2. Translation style guide (voice, tone, audience)
-3. Critical glossary terms (the most important 10-20 terms)
-4. Do NOT rules (what to never translate or change)
-
-**Claude reads CLAUDE.md before every translation session.**
-
-## glossary.md (Required)
-
-A living document that grows as you translate. Must exist from day 1, even if empty.
-
-See `glossary-guide.md` for format and workflow.
-
-## translation-notes.md (Optional but Recommended)
-
-Track decisions and issues per chapter:
-
-```markdown
-# Translation Notes
-
-## Chapter 1 — Introduction
-- "Make the boat go faster" → "Làm cho thuyền đi nhanh hơn" (keep metaphor)
-- Several rowing terms introduced — see glossary
-- Status: COMPLETE
-
-## Chapter 2 — The Race
-- Note: The flashback structure is confusing in Vietnamese — added clarifying conjunctions
-- Status: IN PROGRESS
-```
+**Claude reads CLAUDE.md before every translation session.** No other files needed.
 
 ## What NOT to Put in workspace/
 
@@ -82,7 +58,7 @@ workspace/
 output/
 ```
 
-Commit: `source/`, `CLAUDE.md`, `glossary.md`, `translation-notes.md`
+Commit: `source/`, `CLAUDE.md`
 
 ## Multi-Book Setup
 

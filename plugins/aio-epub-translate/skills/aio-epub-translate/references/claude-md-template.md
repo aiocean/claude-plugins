@@ -60,13 +60,49 @@ Example:
 - **Business terms**: Translate fully
 - **Olympic/sports names**: Keep English (Sydney 2000, Ben Hunt-Davis)
 
-## Critical Terms
+## Glossary
 
-These terms MUST be translated consistently. See `glossary.md` for the full database.
+All terminology decisions live here. Update before and after each chapter. **Do NOT create a separate glossary file.**
 
-| English | Vietnamese | Rule |
-|---------|------------|------|
-| [term] | [translation] | [always/first-use-only/keep-English] |
+### People & Organizations
+
+| English | Vietnamese | Notes |
+|---------|------------|-------|
+| [Name] | [Name] | [keep as-is / phonetic / translated title] |
+
+### Domain Terms
+
+[Add subsections per domain: rowing, business, psychology, etc.]
+
+| English | Vietnamese | Context | Status |
+|---------|------------|---------|--------|
+| [term] | [translation] | [where used] | CONFIRMED / TENTATIVE |
+
+### Recurring Phrases
+
+| English | Vietnamese | Chapter first seen |
+|---------|------------|-------------------|
+| [phrase] | [translation] | Ch.N |
+
+### Author's Characteristic Expressions
+
+| English | Vietnamese | Usage pattern |
+|---------|------------|--------------|
+| [expression] | [translation] | [how author uses it] |
+
+### Rejected Translations
+
+Terms that were tried and changed, with reasons:
+
+| Term | First tried | Changed to | Reason |
+|------|-------------|------------|--------|
+| [term] | [old translation] | [new translation] | [why changed] |
+
+### Open Questions
+
+| Term | Context | Options | Decision needed |
+|------|---------|---------|----------------|
+| [term] | [where it appears] | A: ... / B: ... | [when to decide] |
 
 ## What NOT to Translate
 
@@ -80,12 +116,16 @@ These terms MUST be translated consistently. See `glossary.md` for the full data
 - Example: Do not add footnotes explaining British culture — the author's voice is direct, not pedagogical
 - Example: Do not soften the author's blunt coaching style
 
+## Translation Notes
+
+Track decisions and issues per chapter here:
+
+### Chapter 1 — [Title]
+- [decisions, difficulties, terms added]
+- Status: NOT STARTED
+
 ## Project Status
 
 - **Started**: [date]
 - **Target completion**: [date or "ongoing"]
 - **Current status**: [Not started / In progress (chapter N/total) / Complete]
-
-## Notes
-
-[Any other book-specific notes Claude should know]
