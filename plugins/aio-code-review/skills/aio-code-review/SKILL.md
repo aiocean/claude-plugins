@@ -1,11 +1,11 @@
 ---
 name: aio-code-review
-description: Multi-phase code review pipeline. Use when user says "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Runs domain-specific analysis (Go, iOS, React, XState, observability), CodeWiki static analytics, parallel review agents, and critic meta-review with confidence scoring.
+description: Multi-phase code review pipeline with deep codebase understanding. Use when user says "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Runs tool detection (Kai, CocoIndex, CodeWiki), domain-specific analysis (Go, iOS, React, XState, observability), three-layer analytics (Kai semantic graph, CocoIndex semantic search, CodeWiki static analysis), parallel review agents, and critic meta-review with confidence scoring.
 ---
 
 # Code Review Ultra
 
-Ultimate code review: domain detection, static analytics, parallel specialized agents, and adversarial meta-review.
+Ultimate code review: deep codebase understanding via Kai + CocoIndex + CodeWiki, domain detection, parallel specialized agents, and adversarial meta-review.
 
 ## When to Use
 
@@ -16,7 +16,47 @@ Ultimate code review: domain detection, static analytics, parallel specialized a
 
 ## Workflow
 
-### Phase 0: Detect Language/Domain and Invoke Specialist Skills
+### Phase 0: Detect Tools and Language/Domain
+
+#### 0.1 Tool Availability Detection (Run First)
+
+Before starting analytics, detect which tools are available. The review adapts based on what's installed.
+
+```bash
+# 1. Kai (semantic graph — symbols, dependencies, impact)
+kai_status() 2>/dev/null && echo "kai: YES" || echo "kai: NO"
+# Check: .kai/ directory exists
+
+# 2. CocoIndex (semantic search — cross-cutting patterns)
+ls .cocoindex/query.py 2>/dev/null && echo "cocoindex: YES" || echo "cocoindex: NO"
+
+# 3. CodeWiki (static analysis — module structure, metrics)
+which codewiki 2>/dev/null && echo "codewiki: YES" || echo "codewiki: NO"
+```
+
+**Decision matrix:**
+
+| Tool | Status | Impact on Review |
+|------|--------|-----------------|
+| Kai | Available | Symbol inventory, dependency tracking, blast radius via `kai_impact` |
+| Kai | Missing | Fall back to CodeWiki dependency graphs + manual grep for impact |
+| CocoIndex | Available | Semantic pattern discovery, cross-cutting concern detection |
+| CocoIndex | Missing | Skip pattern analysis — review still works but misses design pattern context |
+| CodeWiki | Available | Module clustering, metrics, dependency graphs |
+| CodeWiki | Missing | Skip module mapping — use Kai dependencies or file-path grouping |
+
+**Report available tools to user:**
+
+```
+Code Review Tools:
+✓ Kai — semantic graph (symbols, dependencies, impact)
+✓ CocoIndex — semantic search (cross-cutting patterns)
+✓ CodeWiki — static analysis (module structure, metrics)
+```
+
+Proceed with whatever tools are available. All three together give the richest review; any subset still works.
+
+#### 0.2 Detect Language/Domain and Invoke Specialist Skills
 
 Scan the project and changed files to invoke domain-specific static analysis **before** the general review agents run. Each skill brings specialized linters and pattern checks that general agents cannot replicate.
 
@@ -40,29 +80,9 @@ if changed files touch infra/, deploy/, monitoring/, or include logging/metrics/
   → invoke /monitoring-observability (Golden Signals, OpenTelemetry, SLO compliance)
 ```
 
-**Why:** Domain skills have specialized static analysis tools and pattern knowledge that catch language/framework-specific issues before general review agents run. This grounds the review in domain-specific best practices.
+**Why:** Domain skills have specialized static analysis tools and pattern knowledge that catch language/framework-specific issues before general review agents run.
 
-### Phase 1: Generate Static Analytics
-
-Run CodeWiki in analysis-only mode to produce dependency graphs, metrics, and module structure without LLM calls. This is fast and gives agents concrete data to work with.
-
-```bash
-codewiki generate --no-cache --analysis-only --output docs/
-```
-
-**What this produces in `docs/`:**
-
-| File | Content | How agents use it |
-|------|---------|-------------------|
-| `module_tree.json` | Module hierarchy and clustering | Understand code organization, identify which modules changed files belong to |
-| `first_module_tree.json` | Initial module clustering | See how code is grouped before refinement |
-| `temp/dependency_graphs/*.json` | Import/dependency graphs per module | Identify blast radius of changes, find circular dependencies, trace impact paths |
-
-**If codewiki is not installed**, skip Phase 1 and proceed to Phase 2 without analytics context. The review still works, just without structural grounding.
-
-**If docs/ already has fresh analytics** (modified within last hour), reuse them — no need to regenerate.
-
-### Phase 2: Determine Review Scope
+### Phase 1: Determine Review Scope
 
 Identify what to review:
 
@@ -77,17 +97,125 @@ git diff --cached --name-only
 git diff HEAD~1 --name-only
 ```
 
-Map changed files to modules using `module_tree.json`:
-1. Read `docs/module_tree.json`
-2. For each changed file, find its parent module
-3. Group changes by module — this tells agents which dependency graphs to consult
+Store the list of changed files — all subsequent phases operate on these files.
+
+### Phase 2: Three-Layer Analytics
+
+Run analytics tools in order of depth. Each layer enriches the context that review agents receive.
+
+#### Layer 1: Kai — Semantic Graph (run first)
+
+Kai provides the deepest structural understanding: what symbols exist, what depends on what, and what breaks if something changes.
+
+**For each changed file, run in parallel:**
+
+```
+# Symbol inventory — understand what's in each changed file
+kai_symbols(file, kind="function", signatures=true)
+
+# What does this file depend on?
+kai_dependencies(file)
+
+# What depends on this file? (blast radius starts here)
+kai_dependents(file)
+```
+
+**For files with 3+ dependents (hub files), additionally run:**
+
+```
+# Transitive impact — how far do changes ripple?
+kai_impact(file, max_depth=3)
+
+# Full context for critical files
+kai_context(file, depth=2)
+```
+
+**Collect into structured data:**
+
+```
+kai_analytics = {
+  symbols: { file → [function signatures] },
+  dependencies: { file → [imports] },
+  dependents: { file → [importers] },
+  hub_files: [files with 3+ dependents],
+  impact: { hub_file → { affected_files, affected_tests, depth } }
+}
+```
+
+**If Kai is unavailable**, skip this layer and note in report: "Kai unavailable — blast radius analysis is approximate."
+
+#### Layer 2: CocoIndex — Semantic Search (run second)
+
+CocoIndex finds cross-cutting patterns and design concerns related to the changes. This catches issues that static analysis misses — like inconsistent error handling across the codebase or divergent retry strategies.
+
+**Generate search queries from changed files:**
+
+```bash
+# Analyze changed code to identify key concepts, then search for related patterns
+# Example queries based on what the changed code does:
+
+# If changes touch error handling:
+.venv-cocoindex/bin/python .cocoindex/query.py "error handling strategy" --top-k 5 --json
+
+# If changes touch API endpoints:
+.venv-cocoindex/bin/python .cocoindex/query.py "request validation pattern" --top-k 5 --json
+
+# If changes touch data access:
+.venv-cocoindex/bin/python .cocoindex/query.py "database query pattern" --top-k 5 --json
+
+# If changes touch authentication/authorization:
+.venv-cocoindex/bin/python .cocoindex/query.py "authentication authorization flow" --top-k 5 --json
+
+# Always: search for similar patterns to detect inconsistency
+.venv-cocoindex/bin/python .cocoindex/query.py "{primary concept from changed code}" --top-k 5 --json
+```
+
+**How to generate queries:** Read the changed files, identify the 2-3 primary concerns (e.g., "retry logic", "input validation", "state management"), and search for each. The goal is to find existing patterns in the codebase that the changes should be consistent with.
+
+**Collect into structured data:**
+
+```
+cocoindex_analytics = {
+  patterns_found: [
+    { query: "error handling", matches: [file:chunk pairs], consistency: "consistent|divergent" },
+    ...
+  ],
+  consistency_issues: [cases where changed code diverges from existing patterns]
+}
+```
+
+**If CocoIndex is unavailable**, skip this layer and note in report: "CocoIndex unavailable — pattern consistency analysis skipped."
+
+#### Layer 3: CodeWiki — Static Analysis (run third)
+
+CodeWiki provides module structure, metrics, and dependency graphs for organizational context.
+
+```bash
+codewiki generate --no-cache --analysis-only --output docs/
+```
+
+**What this produces in `docs/`:**
+
+| File | Content | How agents use it |
+|------|---------|-------------------|
+| `module_tree.json` | Module hierarchy and clustering | Understand code organization, map changed files to modules |
+| `first_module_tree.json` | Initial module clustering | See how code is grouped before refinement |
+| `temp/dependency_graphs/*.json` | Import/dependency graphs per module | Supplement Kai with module-level dependency view |
+
+**If CodeWiki is unavailable**, group files by directory path as a fallback module mapping.
+
+**If docs/ already has fresh analytics** (modified within last hour), reuse them.
+
+#### Map changed files to modules
+
+Using the best available source:
+1. `module_tree.json` from CodeWiki (preferred)
+2. Kai `kai_dependencies` grouping (fallback)
+3. Directory-path grouping (last resort)
 
 ### Phase 3: Parallel Review Agents
 
-Spawn specialized review agents in parallel. Each agent receives:
-- The changed files relevant to their domain
-- The module mapping from `module_tree.json`
-- The dependency graphs from `docs/temp/dependency_graphs/` for affected modules
+Spawn specialized review agents in parallel. Each agent receives the enriched analytics context from all available tools.
 
 #### Agent Lineup
 
@@ -97,11 +225,11 @@ OMC internal agents are spawned via `Task(subagent_type=...)`. External agents a
 
 | Agent | Type | Model | Focus | Uses analytics for |
 |-------|------|-------|-------|-------------------|
-| `oh-my-claudecode:security-reviewer` | OMC | sonnet | OWASP Top 10, secrets, auth, injection | Dependency graphs to trace untrusted input paths |
-| `oh-my-claudecode:quality-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | Module structure to assess coupling and cohesion |
+| `oh-my-claudecode:security-reviewer` | OMC | sonnet | OWASP Top 10, secrets, auth, injection | Kai impact paths to trace untrusted input; CocoIndex auth patterns for consistency |
+| `oh-my-claudecode:quality-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | Kai dependents for coupling; CocoIndex patterns for consistency; CodeWiki metrics |
 | `@feature-dev:code-reviewer` | External | sonnet | Feature-level review: requirement completeness, implementation correctness, edge case coverage | Changed files mapped to feature scope |
 | `@superpowers:code-reviewer` | External | sonnet | Superpowers-based comprehensive review, verification before completion | Module boundaries and dependency graphs for contract violations |
-| `@code-simplifier:code-simplifier` | External | opus | Clarity, consistency, maintainability, simplification | Module structure to identify over-engineered areas |
+| `@code-simplifier:code-simplifier` | External | opus | Clarity, consistency, maintainability, simplification | Kai symbols for dead code; CocoIndex for duplicate patterns |
 
 **Conditional agents (spawn based on scope and content):**
 
@@ -123,34 +251,63 @@ OMC internal agents are spawned via `Task(subagent_type=...)`. External agents a
 Each agent gets this context block prepended to their review task:
 
 ```
-STATIC ANALYTICS CONTEXT
-=========================
+CODEBASE ANALYTICS CONTEXT
+============================
 
-You have access to CodeWiki static analysis data in docs/:
+You have access to multi-layer analytics data for this review.
 
-1. MODULE STRUCTURE (docs/module_tree.json):
-   - Shows how the codebase is organized into modules
-   - Use this to understand where changed files sit in the architecture
-   - Check if changes cross module boundaries (higher risk)
+1. KAI SEMANTIC GRAPH (if available):
+   Symbols in changed files:
+   {kai_symbols_summary}
 
-2. DEPENDENCY GRAPHS (docs/temp/dependency_graphs/):
-   - JSON files showing import relationships per module
-   - Use this to assess blast radius: what depends on changed code?
-   - Look for circular dependencies involving changed files
-   - Trace data flow paths through the dependency chain
+   Dependencies (what changed files import):
+   {kai_dependencies_summary}
 
-3. CHANGED FILES MAPPED TO MODULES:
+   Dependents (what imports changed files — blast radius):
+   {kai_dependents_summary}
+
+   Hub files (3+ dependents) with transitive impact:
+   {kai_impact_summary}
+
+   USE THIS DATA TO:
+   - Assess blast radius: how many files are affected by each change
+   - Trace data flow: follow dependency chains to find impact paths
+   - Identify hub files: changes to these are highest risk
+   - Check function signatures: do changes break callers?
+
+2. COCOINDEX PATTERN ANALYSIS (if available):
+   Existing patterns in codebase related to changes:
+   {cocoindex_patterns_summary}
+
+   Consistency issues detected:
+   {cocoindex_consistency_issues}
+
+   USE THIS DATA TO:
+   - Check if changes follow existing codebase patterns
+   - Flag divergent implementations (e.g., different error handling strategy)
+   - Identify missing patterns (e.g., no retry logic where similar code has it)
+
+3. CODEWIKI MODULE STRUCTURE (if available):
+   Module mapping for changed files:
    {changed_files_by_module}
 
-HOW TO USE THIS DATA:
-- Read the dependency graph for each affected module BEFORE reviewing its files
-- When you find an issue, check the dependency graph to assess its blast radius
-- Reference module boundaries when flagging coupling concerns
-- Use dependency chains to identify downstream impact of bugs
-- Include blast radius assessment (low/medium/high) with each finding
+   Dependency graphs available in docs/temp/dependency_graphs/
 
-Your review should be GROUNDED in this data. Don't just flag issues —
-show their structural impact using the dependency and module information.
+   USE THIS DATA TO:
+   - Understand where changed files sit in the architecture
+   - Check if changes cross module boundaries (higher risk)
+   - Assess coupling and cohesion at the module level
+
+4. CHANGED FILES:
+   {changed_files_list}
+
+HOW TO USE THIS DATA:
+- Start with Kai dependents to understand blast radius BEFORE reviewing code
+- Check CocoIndex patterns to assess consistency with existing code
+- Reference module structure when flagging architectural concerns
+- Include blast radius assessment (low/medium/high) with each finding
+- Ground every finding in analytics data — don't just flag issues,
+  show their structural impact
 ```
 
 #### Spawning Pattern
@@ -223,20 +380,28 @@ CODE REVIEW REPORT (Analytics-Backed)
 ======================================
 
 Scope: {N} files across {M} modules
-Analytics: CodeWiki static analysis (dependency graphs, module map)
+Tools: {Kai ✓/✗} | {CocoIndex ✓/✗} | {CodeWiki ✓/✗}
 
 ARCHITECTURE IMPACT
 -------------------
-Modules affected: [list from module_tree.json]
+Modules affected: [list from module mapping]
 Cross-module changes: [yes/no — higher risk if yes]
-Blast radius: [low/medium/high based on dependency graph fan-out]
+Blast radius: [low/medium/high — from Kai kai_impact or CodeWiki fan-out]
+Hub files touched: [list with dependent counts from Kai]
+
+PATTERN CONSISTENCY (from CocoIndex)
+-------------------------------------
+Patterns analyzed: [list of queries run]
+Consistent with codebase: [list]
+Divergent from codebase: [list — these need justification or alignment]
 
 FINDINGS BY SEVERITY
 --------------------
 
 CRITICAL (must fix before merge)
   1. {file}:{line} — {issue}
-     Blast radius: {high/medium/low} — {N} downstream dependents
+     Blast radius: {high/medium/low} — {N} downstream dependents (Kai)
+     Pattern context: {consistent/divergent with existing code} (CocoIndex)
      Fix: {recommendation}
 
 HIGH (should fix before merge)
@@ -251,7 +416,7 @@ LOW (suggestions)
 DEPENDENCY CONCERNS
 -------------------
 - Circular dependencies detected: [list]
-- High fan-out modules affected: [list]
+- High fan-out files (hub files): [list with Kai impact data]
 - Cross-boundary violations: [list]
 
 ARCHITECTURE REVIEW (if architect agent ran)
@@ -307,23 +472,30 @@ RECOMMENDATION: {APPROVE | REQUEST CHANGES | COMMENT}
 ## Rules
 
 ALWAYS:
-- Run Phase 0 domain detection — invoke matching specialist skills (golang-mastery, ios-mastery, react-minimal-effects, xstate, monitoring-observability)
-- Run `codewiki generate --no-cache --analysis-only` before spawning review agents
-- Map changed files to modules using `module_tree.json`
-- Include dependency graph context in every agent prompt
-- Show blast radius for CRITICAL and HIGH findings
+- Run Phase 0.1 tool detection — report which tools are available
+- Run Phase 0.2 domain detection — invoke matching specialist skills (golang-mastery, ios-mastery, react-minimal-effects, xstate, monitoring-observability)
+- Run Kai analytics first (symbols, dependencies, impact) when available
+- Run CocoIndex pattern search second (consistency checks) when available
+- Run CodeWiki static analysis third (module structure) when available
+- Include all available analytics in every agent prompt
+- Show blast radius for CRITICAL and HIGH findings (prefer Kai `kai_impact` data)
+- Show pattern consistency for findings where CocoIndex found related patterns
 - Spawn core review agents in parallel for speed
 - Spawn conditional agents when their criteria are met
 - Run the critic meta-review after all other agents complete
 - Produce a single unified report with all sections
 - Include review confidence score from critic
+- Gracefully degrade when tools are missing — proceed with available tools
 
 NEVER:
-- Skip the static analysis phase (unless codewiki unavailable)
-- Skip Phase 0 domain detection
-- Review without knowing which modules are affected
-- Report findings without blast radius context
+- Skip tool detection in Phase 0.1
+- Skip Phase 0.2 domain detection
+- Skip Kai analytics when Kai is available
+- Skip CocoIndex pattern search when CocoIndex is available
+- Review without knowing which modules are affected (use best available source)
+- Report findings without blast radius context (use Kai, CodeWiki, or manual grep)
 - Run agents sequentially when they can run in parallel
 - Let one agent's failure block the entire review
 - Present findings without critic validation
 - Skip conditional agents when their trigger criteria are clearly met
+- Require all three tools — the review works with any subset
