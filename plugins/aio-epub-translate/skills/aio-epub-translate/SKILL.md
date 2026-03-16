@@ -125,5 +125,6 @@ If starting a new session:
 ## Related Skills
 
 - **aio-epub-setup** — set up a new translation project
+- **aio-epub-research** — research book before translating
 - **aio-editor-review** — review and edit existing translations
 - **aio-epub-package** — export final EPUB files
