@@ -1,10 +1,6 @@
 ---
 name: aio-epub-setup
-description: |
-  Use when user wants to set up a new EPUB translation project, says "setup translation",
-  "setup epub", "tạo project dịch", "setup workspace", "install jread", "unpack epub",
-  "mark epub", "chuẩn bị dịch", or needs to create project structure, unpack an EPUB,
-  mark content, or create CLAUDE.md for translation.
+description: Set up a new EPUB translation project — unpack, mark, create CLAUDE.md. Use when "setup translation", "setup epub", "tạo project dịch", "unpack epub", "mark epub", "chuẩn bị dịch", "install jread".
 ---
 
 # EPUB Setup — Translation Project Setup

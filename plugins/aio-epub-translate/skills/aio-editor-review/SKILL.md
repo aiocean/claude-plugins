@@ -1,10 +1,6 @@
 ---
 name: aio-editor-review
-description: |
-  Use when user wants to review or edit existing translations, says "review translation",
-  "biên tập", "editor review", "check translation quality", "review chapter",
-  "kiểm tra bản dịch", "chỉnh sửa bản dịch", "edit translation", or wants to
-  check glossary consistency, fix translation issues, or do a quality pass on translated chapters.
+description: Review and edit existing translations as a biên tập viên — check glossary consistency, tone, quality. Use when "review translation", "biên tập", "editor review", "check translation quality", "kiểm tra bản dịch", "chỉnh sửa bản dịch".
 ---
 
 # Editor Review — Translation Quality Review & Editing
