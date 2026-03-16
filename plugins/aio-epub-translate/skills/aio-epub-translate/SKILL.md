@@ -42,12 +42,12 @@ my-book/
 │   └── book.epub          ← Original file (never modified)
 ├── workspace/             ← Unpacked EPUB — jread works here
 │   └── [epub contents]
-├── output/                ← Export destination
-│   ├── book-bilingual.epub
-│   └── book-clean.epub
-├── glossary.md            ← Living terminology database
-└── translation-notes.md  ← Per-chapter decisions & issues
+└── output/                ← Export destination
+    ├── book-bilingual.epub
+    └── book-clean.epub
 ```
+
+Everything (glossary, translation notes, style guide) lives in `CLAUDE.md`. No separate files needed.
 
 Full conventions: `references/file-conventions.md`
 
@@ -73,12 +73,11 @@ Full reference with examples: `references/jread-commands.md`
 1. Create project directory and `source/` subfolder
 2. Place EPUB in `source/`
 3. Create `CLAUDE.md` from template: `references/claude-md-template.md`
-4. Create `glossary.md` from template: `references/glossary-guide.md`
-5. Run setup commands:
+4. Run setup commands:
    ```bash
    jread unpack source/book.epub workspace/
    jread info workspace/
    jread mark workspace/
    ```
-6. Read CLAUDE.md to understand translation guidelines
-7. Begin translation chapter by chapter
+5. Read CLAUDE.md to understand translation guidelines
+6. Begin translation chapter by chapter
