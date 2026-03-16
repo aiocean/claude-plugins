@@ -1,7 +1,7 @@
 {
   "name": "aio-code-review",
-  "description": "Ultimate code review with multi-phase pipeline: domain-specific skill detection (Go, iOS, React, XState, observability), CodeWiki static analytics, 4 core + 4 conditional parallel review agents, and a critic meta-review that eliminates false positives and provides confidence scoring.",
-  "version": "2.2.0",
+  "description": "Ultimate code review with three-layer analytics (Kai semantic graph, CocoIndex semantic search, CodeWiki static analysis), domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
+  "version": "3.0.0",
   "author": {
     "name": "aiocean"
   }
