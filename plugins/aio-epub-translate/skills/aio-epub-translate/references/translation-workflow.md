@@ -43,32 +43,50 @@ You're ready to translate.
 
 Why: Translation context is cumulative. The meaning of paragraph 3 often depends on what was said in paragraph 1. If you translate sequentially without reading ahead, you'll make choices in paragraph 3 that contradict paragraph 15.
 
-### Step 1: Read the full chapter
+### Step 1: Get chapter overview
 ```bash
-jread list workspace/OEBPS/Text/chapter0001.html | jq -r '.items[].text'
+# Check total items in the chapter
+jread list workspace/OEBPS/Text/chapter0001.html | jq '{total: (.items | length), untranslated: ([.items[] | select(.hasTranslation == false)] | length)}'
 ```
 
-Read ALL the text. Understand:
-- What is this chapter about?
-- What new terms are introduced?
-- What is the author's tone here (energetic? reflective? technical)?
-- Are there any ambiguous passages?
+### Step 2: Read in batches of 20 items
+**NEVER dump all items at once.** Use `jq` slicing to read 20 items per batch:
 
-### Step 2: Update glossary before translating
+```bash
+# Batch 1: items 0-19
+jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[0:20]'
+
+# Batch 2: items 20-39
+jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[20:40]'
+
+# Batch 3: items 40-59
+jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[40:60]'
+
+# Continue until all items are covered...
+```
+
+For each batch, read the text and understand:
+- What is happening in this section?
+- What new terms are introduced?
+- What is the author's tone (energetic? reflective? technical)?
+- Are there ambiguous passages?
+
+### Step 3: Update glossary before translating
 Before writing a single translation, update `glossary.md` with:
 - New proper nouns (people, places, organizations)
 - New technical terms
 - Recurring phrases that should be consistent
 - Any terms you're uncertain about (mark as [TENTATIVE])
 
-### Step 3: Translate in batches of 15-20 paragraphs
+### Step 4: Translate each batch
 
-Get the IDs:
+For untranslated items only, use slicing:
 ```bash
-jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[] | select(.hasTranslation == false) | .id'
+# Get untranslated items, first 20
+jread list workspace/OEBPS/Text/chapter0001.html | jq '[.items[] | select(.hasTranslation == false)] | .[0:20]'
 ```
 
-For each batch, translate all paragraphs in Claude's context simultaneously — not one at a time. This allows:
+Translate all items in the batch simultaneously in Claude's context — not one at a time. This allows:
 - Forward reference (a term in para 5 clarified in para 12)
 - Consistent pronoun choices across the batch
 - Natural flow between consecutive sentences
@@ -77,6 +95,8 @@ Write translations:
 ```bash
 jread set workspace/OEBPS/Text/chapter0001.html <id> "<translation>" --lang=vi
 ```
+
+Then move to the next batch of 20 until the chapter is complete.
 
 ### Step 4: Verify chapter completion
 ```bash
@@ -146,6 +166,9 @@ Table cells that are prose are marked. Column headers may or may not be marked d
 ---
 
 ## Common Mistakes
+
+**❌ Listing all items at once with `jq '.'` or `jq '.items[]'`**
+Result: Chapters with 100+ items flood the context window. Always use `jq '.items[0:20]'` to batch.
 
 **❌ Translating without reading the chapter first**
 Result: Inconsistent terminology, wrong tone choices, missed context.
