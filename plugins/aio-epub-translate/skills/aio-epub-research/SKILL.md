@@ -35,11 +35,12 @@ Skipping research leads to:
 ## Research Workflow
 
 ```
-1. BOOK CONTEXT     → metadata, author, genre, audience
-2. SAMPLE READING   → read first 2-3 chapters to understand style
-3. DOMAIN RESEARCH  → search for terminology conventions online
-4. VIETNAMESE CONVENTIONS → find how similar books were translated
-5. POPULATE CLAUDE.md → glossary, style guide, do-not rules
+1. METADATA        → jread info, read CLAUDE.md
+2. SAMPLE READING  → read 2-3 chapters to understand style
+3. FACET DECOMPOSE → break research into 4 parallel facets
+4. PARALLEL SEARCH → run all facets concurrently via web search
+5. SYNTHESIZE      → merge findings into structured report
+6. POPULATE        → update CLAUDE.md with evidence-backed decisions
 ```
 
 ## Phase 1: Book Context
@@ -49,134 +50,158 @@ Skipping research leads to:
 jread info workspace/
 ```
 
-Note: title, author, language, publisher.
+Note: title, author, language, publisher, genre.
 
-### Step 2: Search for the book online
-
-Use web search to find:
-- **Book summary and reviews** — what is this book about? What do readers say?
-- **Author background** — who is this person? What's their writing style known for?
-- **Genre conventions** — how are books in this genre typically written?
-- **Target audience** — who reads this book? Academics? General public? Professionals?
-
-Search queries:
-- `"{book title}" {author} review`
-- `"{book title}" summary`
-- `{author} writing style`
-
-### Step 3: Check if Vietnamese translation exists
-
-Search for existing Vietnamese translations or discussions:
-- `"{book title}" tiếng Việt` or `"{book title}" bản dịch`
-- `"{book title}" Vietnamese translation`
-- `{author} dịch tiếng Việt`
-
-If a Vietnamese edition exists:
-- Note the translated title — this is the market-established name
-- Note the publisher and translator
-- Check reviews of the Vietnamese edition for quality feedback
-- **Do NOT copy the translation** — but learn from terminology choices
+### Step 2: Read CLAUDE.md
+Read existing CLAUDE.md to see what's already filled in from setup.
 
 ## Phase 2: Sample Reading
 
-### Step 4: Read first 2-3 chapters
+### Step 3: Read first 2-3 chapters
 
 ```bash
 # Chapter 1 — first 20 items
 jread list workspace/OEBPS/Text/chapter0001.html --limit=20
 
-# Continue reading
+# Continue
 jread list workspace/OEBPS/Text/chapter0001.html --from=20 --limit=20
 ```
 
 While reading, note:
-- **Author's voice**: Short sentences? Long flowing prose? Rhetorical questions? Direct or indirect?
-- **Sentence structure patterns**: Simple or complex? Active or passive?
+- **Author's voice**: Short sentences? Long flowing prose? Rhetorical questions?
+- **Sentence structure**: Simple or complex? Active or passive?
 - **Tone**: Academic? Conversational? Inspirational? Technical?
 - **Pronoun usage**: First person? Second person? Collective "we"?
 - **Recurring phrases**: Catchphrases, mottos, repeated expressions
 - **Domain-specific terms**: List every technical or specialized term
 
-### Step 5: Read a middle chapter for contrast
+### Step 4: Read a middle chapter for contrast
 
-Pick a chapter from the middle of the book to check if tone/style changes:
+Pick a chapter from the middle to check if tone/style shifts:
 ```bash
 jread list workspace/OEBPS/Text/chapter0010.html --limit=20
 ```
 
-## Phase 3: Domain Research
+## Phase 3: Faceted Web Research
 
-### Step 6: Research domain terminology
+### Step 5: Decompose into research facets
 
-For each domain-specific term found, search for Vietnamese conventions:
+Based on what you learned from sample reading, define 4 research facets:
 
-Search queries:
-- `"{english term}" tiếng Việt là gì`
-- `"{english term}" thuật ngữ tiếng Việt`
-- `"{english term}" Vietnamese equivalent`
-- `{domain} terminology Vietnamese` (e.g., "rowing terminology Vietnamese")
+**Facet 1: Existing Vietnamese translation**
+- Search Tiki, Fahasa, Goodreads for Vietnamese editions
+- Check if any translation exists in any language
+- Note translated title, publisher, translator if found
 
-For each term, determine:
-- Is there an established Vietnamese equivalent?
-- Is the English term commonly used as-is in Vietnamese? (e.g., "marketing", "startup")
-- Are there multiple Vietnamese options? Which is most common?
+**Facet 2: Vietnamese translation style for this genre**
+- How do major publishers (Alpha Books, NXB Trẻ, First News) handle this genre?
+- What translation framework do they follow? (e.g., Alpha Books: Đúng/Hay/Đẹp)
+- Common terminology decisions (keep English vs translate)
 
-### Step 7: Research Vietnamese translation conventions for the genre
+**Facet 3: Benchmark books — similar books already translated to Vietnamese**
+- Find 2-3 books in the same genre that have Vietnamese translations
+- How were they received? What did readers praise/criticize about the translation?
+- What can we learn from their translator's approach?
 
-Search for how similar books in this genre have been translated:
+**Facet 4: Domain terminology conventions**
+- How are the book's domain-specific terms handled in Vietnamese?
+- Are there established Vietnamese equivalents or do professionals use English?
+- Any translator community discussions about this domain?
+
+### Step 6: Run all facets via web search
+
+Run web searches for all 4 facets. Search queries per facet:
+
+**Facet 1:**
+- `"{book title}" tiếng Việt` / `"{book title}" bản dịch`
+- `"{book title}" Vietnamese translation`
+- `"{book title}" Tiki` / `"{book title}" Fahasa`
+
+**Facet 2:**
 - `dịch sách {genre} tiếng Việt` (e.g., "dịch sách self-help tiếng Việt")
-- `quy ước dịch thuật {domain}` (e.g., "quy ước dịch thuật kinh doanh")
-- `cách dịch {specific challenge}` (e.g., "cách dịch đại từ nhân xưng tiếng Anh sang tiếng Việt")
+- `Alpha Books phong cách dịch` / `NXB Trẻ cách dịch`
+- `quy ước dịch thuật {domain}`
 
-Key questions to answer:
-- How are English pronouns (I/you/we) typically rendered in this genre?
-- Should technical terms be kept in English, transliterated, or translated?
-- What tone do Vietnamese readers expect for this genre?
+**Facet 3:**
+- `sách {genre} hay tiếng Việt` (e.g., "sách self-help hay tiếng Việt")
+- `"{similar book title}" bản dịch review`
+- `dịch giả {translator name} phong cách`
 
-## Phase 4: Populate CLAUDE.md
+**Facet 4:**
+- `"{english term}" tiếng Việt là gì`
+- `{domain} terminology Vietnamese`
+- `cách dịch {specific challenge}` (e.g., "cách dịch đại từ nhân xưng")
 
-### Step 8: Update CLAUDE.md with research findings
+## Phase 4: Synthesize Findings
 
-Now update every section in CLAUDE.md with informed decisions:
+### Step 7: Structure research into a report
 
-**Book Summary** — write 2-3 sentences based on your research, not just metadata.
+Present findings to the user in this format:
 
-**Target Audience** — specific Vietnamese reader profile based on genre research.
+**Quick answer**: Does a Vietnamese translation exist? Yes/No.
 
-**Author's Voice** — concrete description based on sample reading (not generic).
+**Benchmark books**: 2-3 comparable Vietnamese translations with:
+- Title (Vietnamese + English)
+- Publisher, translator
+- Reader reception — what worked, what didn't
+- What we can learn for our translation
 
-**Translation Style Guide** — informed by Vietnamese genre conventions:
-- Tone (backed by research on how similar books are translated)
-- Sentence structure (based on author's actual patterns)
-- Cultural adaptation rules (based on what Vietnamese readers expect)
-- Pronoun choices (based on genre conventions)
+**Terminology table**: Key terms with Vietnamese conventions:
 
-**Technical Vocabulary Decisions** — for each domain, state the rule:
-- Which terms keep English?
+| English Term | Vietnamese Convention | Source/Evidence |
+|-------------|---------------------|----------------|
+| [term] | [keep English / translate to X] | [which publisher/book uses this] |
+
+**Key findings**: 3-5 bullet points of the most important discoveries.
+
+**Gaps in CLAUDE.md**: What's missing or needs updating based on research.
+
+## Phase 5: Populate CLAUDE.md
+
+### Step 8: Update CLAUDE.md with evidence-backed decisions
+
+Update every section with findings:
+
+**Book Summary** — informed by reviews and context, not just metadata.
+
+**Target Audience** — specific Vietnamese reader profile.
+
+**Author's Voice** — concrete description from actual sample reading.
+
+**Translation Style Guide**:
+- Tone (backed by genre research and benchmark comparisons)
+- Sentence structure (when to split long English sentences, when to keep)
+- Rhetorical questions handling
+- Cultural adaptation rules
+- Pronoun choices (backed by genre conventions)
+- Quality criteria (e.g., Alpha Books Đúng/Hay/Đẹp framework if applicable)
+
+**Technical Vocabulary Decisions** — per-domain rules with evidence:
+- Which terms keep English? (with evidence: "Alpha Books keeps 'coaching'")
 - Which terms get translated? To what?
-- Which terms get English + Vietnamese gloss?
+- Which terms get English + Vietnamese gloss on first use?
 
-**Glossary** — populate with all terms found during research:
-- People & Organizations (from the book)
-- Domain Terms (with researched Vietnamese equivalents and status)
+**Glossary** — populate with researched terms:
+- People & Organizations
+- Domain Terms (with Vietnamese equivalents and CONFIRMED/TENTATIVE status)
 - Recurring Phrases (from sample reading)
 
-**Do NOT rules** — based on understanding what would break the author's voice.
+**Do NOT rules** — based on what would break the author's voice + benchmark learnings.
 
 ### Step 9: Verify completeness
 
 Check that CLAUDE.md has:
-- [ ] Book Summary (not placeholder)
-- [ ] Target Audience (specific)
+- [ ] Book Summary (evidence-based, not placeholder)
+- [ ] Target Audience (specific Vietnamese reader profile)
 - [ ] Author's Voice (concrete, from actual reading)
-- [ ] Translation Style Guide (all subsections filled)
-- [ ] Technical Vocabulary Decisions (per-domain rules)
-- [ ] Glossary with at least 10+ terms
-- [ ] Do NOT rules (at least 2-3 specific rules)
+- [ ] Translation Style Guide (all subsections, with benchmark references)
+- [ ] Technical Vocabulary Decisions (per-domain, with evidence)
+- [ ] Glossary with 10+ terms (researched Vietnamese equivalents)
+- [ ] Do NOT rules (3+ specific rules from research)
 
 ## Done
 
-Tell the user: "Research complete. CLAUDE.md is populated with glossary and style guide. Ready to translate — use `aio-epub-translate`."
+Tell the user: "Research complete. CLAUDE.md populated with evidence-backed glossary and style guide. Ready to translate — use `aio-epub-translate`."
 
 ## Related Skills
 
