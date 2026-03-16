@@ -78,6 +78,13 @@ Translate all items in the batch simultaneously — not one at a time. This allo
 - Consistent pronoun choices
 - Natural flow between consecutive sentences
 
+**HTML Preservation Rule:** The `text` field from `jread list` contains innerHTML — it may include inline tags like `<em>`, `<strong>`, `<a href="...">`, `<span>`, etc. You MUST preserve all HTML tags in the translation. Only translate the visible text content, never alter or remove tags, attributes, or structure.
+
+Example:
+- Source: `He was <em>absolutely</em> certain.`
+- Correct: `Anh ta <em>hoàn toàn</em> chắc chắn.`
+- Wrong: `Anh ta hoàn toàn chắc chắn.` ← lost `<em>`
+
 Write translations:
 ```bash
 jread set workspace/OEBPS/Text/chapter0001.html <id> "<translation>" --lang=vi
