@@ -42,24 +42,21 @@ Why: Translation context is cumulative. The meaning of paragraph 3 often depends
 
 ### Step 1: Get chapter overview
 ```bash
-# Check total items in the chapter
-jread list workspace/OEBPS/Text/chapter0001.html | jq '{total: (.items | length), untranslated: ([.items[] | select(.hasTranslation == false)] | length)}'
+# Check total items and find resume point
+jread stats workspace/ --incomplete
+# → shows lastTranslatedIndex per chapter; -1 means not started
 ```
 
 ### Step 2: Read in batches of 20 items
-**NEVER dump all items at once.** Use `jq` slicing to read 20 items per batch:
+**NEVER dump all items at once.** Use `--limit` to read 20 items per batch:
 
 ```bash
-# Batch 1: items 0-19
-jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[0:20]'
+# Batch 1: first 20 untranslated items
+jread list workspace/OEBPS/Text/chapter0001.html --untranslated --limit=20
 
-# Batch 2: items 20-39
-jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[20:40]'
-
-# Batch 3: items 40-59
-jread list workspace/OEBPS/Text/chapter0001.html | jq '.items[40:60]'
-
-# Continue until all items are covered...
+# Batch 2: next 20 (after translating the first batch)
+jread list workspace/OEBPS/Text/chapter0001.html --untranslated --limit=20
+# (--untranslated automatically skips already-translated items, no manual offset needed)
 ```
 
 For each batch, read the text and understand:
@@ -77,10 +74,9 @@ Before writing a single translation, update the Glossary section in `CLAUDE.md` 
 
 ### Step 4: Translate each batch
 
-For untranslated items only, use slicing:
+For untranslated items only:
 ```bash
-# Get untranslated items, first 20
-jread list workspace/OEBPS/Text/chapter0001.html | jq '[.items[] | select(.hasTranslation == false)] | .[0:20]'
+jread list workspace/OEBPS/Text/chapter0001.html --untranslated --limit=20
 ```
 
 Translate all items in the batch simultaneously in Claude's context — not one at a time. This allows:
@@ -97,10 +93,9 @@ Then move to the next batch of 20 until the chapter is complete.
 
 ### Step 4: Verify chapter completion
 ```bash
-jread stats workspace/ | jq '.chapters[] | select(.file | contains("chapter0001"))'
+jread stats workspace/ --incomplete
+# chapter0001 should no longer appear when translated == total
 ```
-
-Should show `total == translated`.
 
 ### Step 5: Update Translation Notes in CLAUDE.md
 Note any decisions made, difficulties encountered, terms added to the Glossary section.
@@ -129,7 +124,7 @@ When all chapters are 100% translated:
 
 ```bash
 # Check 100% completion
-jread stats workspace/ | jq '{total, translated, progress}'
+jread stats workspace/
 
 # Export bilingual (for reference / learning)
 jread pack workspace/ output/book-bilingual.epub
@@ -164,8 +159,8 @@ Table cells that are prose are marked. Column headers may or may not be marked d
 
 ## Common Mistakes
 
-**❌ Listing all items at once with `jq '.'` or `jq '.items[]'`**
-Result: Chapters with 100+ items flood the context window. Always use `jq '.items[0:20]'` to batch.
+**❌ Listing all items at once without `--limit`**
+Result: Chapters with 100+ items flood the context window. Always use `--limit=20`.
 
 **❌ Translating without reading the chapter first**
 Result: Inconsistent terminology, wrong tone choices, missed context.
@@ -189,6 +184,5 @@ Result: Broken EPUB structure, lost markers.
 If Claude starts a new session:
 
 1. Read `CLAUDE.md` — understand the book, style guide, glossary, and translation notes
-3. Run `jread stats workspace/` — see current progress
-4. Run `jread list <next-chapter.html>` — find where to continue
-5. Resume from first item with `hasTranslation: false`
+2. Run `jread stats workspace/ --incomplete` — see which chapters still need work and their `lastTranslatedIndex`
+3. Resume: `jread list <next-chapter.html> --untranslated --limit=20`

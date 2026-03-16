@@ -11,15 +11,21 @@ description: |
 
 Act as a **biên tập viên** (editor) who reviews existing translations for quality, consistency, and adherence to the style guide in CLAUDE.md.
 
-## Prerequisites
-
-- Translation project already set up (workspace exists, chapters have translations)
-- `CLAUDE.md` exists with Glossary and Translation Style Guide sections
+## Gate: Verify Setup & Translations
 
 ```bash
-which jread || echo "NOT INSTALLED"
 jread stats workspace/
 ```
+
+If this fails → **STOP**. Tell user: "Project not set up. Run `aio-epub-setup` first."
+
+If no chapters have translations → **STOP**. Tell user: "No translations found. Run `aio-epub-translate` first."
+
+```bash
+test -f CLAUDE.md && echo "OK" || echo "MISSING"
+```
+
+If CLAUDE.md missing → **STOP**. Tell user: "No CLAUDE.md found. Run `aio-epub-setup` first."
 
 ## Core Principle
 
@@ -49,7 +55,7 @@ Read the entire CLAUDE.md. Internalize:
 
 ### Step 2: Check progress
 ```bash
-jread stats workspace/ | jq '.chapters[] | select(.translated > 0)'
+jread stats workspace/
 ```
 
 Pick the chapter to review (user specifies, or first translated chapter).
@@ -58,11 +64,11 @@ Pick the chapter to review (user specifies, or first translated chapter).
 
 ### Step 3: Batch review — 20 items at a time
 
-**NEVER dump all items.** Always batch with jq slicing:
+**NEVER dump all items.** Always use `--limit`:
 
 ```bash
-# Get translated items, first 20
-jread list workspace/OEBPS/Text/chapter0001.html | jq '[.items[] | select(.hasTranslation == true)] | .[0:20]'
+# Get first 20 items (translated or not)
+jread list workspace/OEBPS/Text/chapter0001.html --limit=20
 ```
 
 For each item in the batch, use `jread get` to see the original text, context, and current translation:
@@ -95,8 +101,8 @@ jread set workspace/OEBPS/Text/chapter0001.html <id> "<corrected translation>" -
 
 ### Step 6: Next batch
 ```bash
-# Next 20 translated items
-jread list workspace/OEBPS/Text/chapter0001.html | jq '[.items[] | select(.hasTranslation == true)] | .[20:40]'
+# Next 20 items
+jread list workspace/OEBPS/Text/chapter0001.html --from=20 --limit=20
 ```
 
 Repeat Steps 4-6 until all translated items in the chapter are reviewed.
@@ -151,3 +157,9 @@ When deciding what to focus on:
 **Do NOT edit for personal style preference.** Edit for consistency with CLAUDE.md guidelines. If the style guide says casual, don't make it formal just because you prefer formal.
 
 **Do NOT skip the glossary update.** Every review session must end with CLAUDE.md updates.
+
+## Related Skills
+
+- **aio-epub-setup** — set up a new translation project
+- **aio-epub-translate** — translate chapters
+- **aio-epub-package** — export final EPUB files
