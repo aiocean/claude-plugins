@@ -1,6 +1,6 @@
 ---
 name: aio-epub-package
-description: Export translated EPUB — bilingual, clean, or language-only. Use when "pack epub", "export epub", "đóng gói", "xuất epub", "export bilingual", "export clean", "song ngữ", "package translation".
+description: This skill should be used when the user asks to pack epub, export epub, đóng gói, xuất epub, export bilingual, export clean, song ngữ, package translation, or wants to create final output files from a translation project. Exports bilingual or clean EPUB.
 ---
 
 # EPUB Package — Export Translated Books

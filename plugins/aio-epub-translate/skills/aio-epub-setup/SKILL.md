@@ -1,6 +1,6 @@
 ---
 name: aio-epub-setup
-description: Set up a new EPUB translation project — unpack, mark, create CLAUDE.md. Use when "setup translation", "setup epub", "tạo project dịch", "unpack epub", "mark epub", "chuẩn bị dịch", "install jread".
+description: This skill should be used when the user asks to setup translation, setup epub, tạo project dịch, unpack epub, mark epub, chuẩn bị dịch, install jread, or needs to create a new EPUB translation project. Unpacks EPUB, marks translatable content, and generates CLAUDE.md with style guide template.
 ---
 
 # EPUB Setup — Translation Project Setup
