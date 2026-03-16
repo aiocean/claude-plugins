@@ -1,6 +1,6 @@
 ---
 name: review
-description: Use after implementation to review changes — semantic diff via Kai, duplication check via CocoIndex, type safety via LSP. Catches issues before committing. Trigger words — "review", "check my changes", "before I commit", "did I miss anything".
+description: This skill should be used when the user asks to "check my changes", "before I commit", "did I miss anything", "review implementation", or needs post-implementation validation. Part of the aio-deep-plan pipeline — run snapshot before coding, then review after. Uses aio-cocoindex for duplication check and Kai for semantic diff. For full code review, use aio-code-review instead.
 ---
 
 # Review — Post-Implementation Check

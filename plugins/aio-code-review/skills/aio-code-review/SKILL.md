@@ -1,6 +1,6 @@
 ---
 name: aio-code-review
-description: Multi-phase code review pipeline with deep codebase understanding. Use when user says "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Runs tool detection (Kai, CocoIndex, CodeWiki), domain-specific analysis (Go, iOS, React, XState, observability), three-layer analytics (Kai semantic graph, CocoIndex semantic search, CodeWiki static analysis), parallel review agents, and critic meta-review with confidence scoring.
+description: This skill should be used when the user asks to "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Multi-phase review pipeline with domain-specific analysis and codebase understanding. Use after implementing changes from aio-deep-plan pipeline, or to validate work before merging. Complements doc-writer for architecture-level review.
 ---
 
 # Code Review Ultra

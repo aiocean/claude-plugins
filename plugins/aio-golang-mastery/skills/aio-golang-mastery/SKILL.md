@@ -1,6 +1,6 @@
 ---
 name: aio-golang-mastery
-description: Complete Go development skill covering idiomatic patterns, error handling, concurrency, interfaces, generics, testing (TDD, fuzzing, benchmarks), project structure, production hardening, and gRPC. Based on Google Go Style Guide, Uber Go Style Guide, Effective Go. Updated for Go 1.25. Use when writing, reviewing, or refactoring Go code, building HTTP/gRPC servers, designing concurrent systems, or optimizing performance.
+description: This skill should be used when the user asks to "write Go code", "review Go code", "refactor Go", "Go best practices", "Go concurrency", "Go error handling", "Go testing", "gRPC server", or mentions Go, Golang, goroutines, channels. Covers idiomatic patterns, concurrency, generics, TDD, and production hardening based on Google/Uber style guides. For Go TUI apps, combine with aio-tui.
 ---
 
 # Go Mastery

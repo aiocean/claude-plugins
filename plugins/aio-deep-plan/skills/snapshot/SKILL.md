@@ -1,6 +1,6 @@
 ---
 name: snapshot
-description: Use before starting implementation to create a Kai baseline snapshot. Enables semantic diffing after coding to see what changed at the symbol level. Trigger words — "snapshot", "baseline", "before I start coding".
+description: This skill should be used when the user asks to "create snapshot", "baseline", "before I start coding", or needs a Kai baseline before implementation. Enables semantic diffing in the review skill after coding to see what changed at the symbol level. Part of the aio-deep-plan pipeline.
 ---
 
 # Snapshot — Create Baseline
