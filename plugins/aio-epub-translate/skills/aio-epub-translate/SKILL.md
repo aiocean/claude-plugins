@@ -1,11 +1,6 @@
 ---
 name: aio-epub-translate
-description: |
-  Use when user wants to translate chapters, says "dịch sách", "translate epub",
-  "translate chapter", "dịch chapter", "dịch tiếp", "continue translating",
-  or wants to translate content in an already-set-up EPUB project.
-  This skill ONLY translates — for setup use aio-epub-setup, for review use aio-editor-review,
-  for export use aio-epub-package.
+description: Translate EPUB chapters using jread CLI. Use when "dịch sách", "translate epub", "translate chapter", "dịch chapter", "dịch tiếp", "continue translating". Requires aio-epub-setup first.
 ---
 
 # EPUB Translate — Chapter Translation

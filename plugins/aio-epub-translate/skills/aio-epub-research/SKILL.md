@@ -1,12 +1,6 @@
 ---
 name: aio-epub-research
-description: |
-  Use when user wants to research a book before translating, says "research sách",
-  "tìm hiểu sách", "research book", "nghiên cứu trước khi dịch", "prepare translation",
-  "tìm thuật ngữ", "research terminology", "find Vietnamese equivalents",
-  or needs to understand a book's context, author style, domain terminology,
-  and Vietnamese translation conventions before starting translation.
-  Run after aio-epub-setup, before aio-epub-translate.
+description: Research book context, author style, domain terminology, and Vietnamese translation conventions via web search. Use when "research sách", "tìm hiểu sách", "research book", "nghiên cứu trước khi dịch", "tìm thuật ngữ". Run after aio-epub-setup, before aio-epub-translate.
 ---
 
 # EPUB Research — Pre-Translation Book Research

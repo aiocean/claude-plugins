@@ -1,10 +1,6 @@
 ---
 name: aio-epub-package
-description: |
-  Use when user wants to export, pack, or package translated EPUB, says "pack epub",
-  "export epub", "đóng gói", "xuất epub", "export bilingual", "export clean",
-  "export pdf", "song ngữ", "chỉ tiếng việt", "package translation",
-  or wants to create final output files from a translation project.
+description: Export translated EPUB — bilingual, clean, or language-only. Use when "pack epub", "export epub", "đóng gói", "xuất epub", "export bilingual", "export clean", "song ngữ", "package translation".
 ---
 
 # EPUB Package — Export Translated Books
