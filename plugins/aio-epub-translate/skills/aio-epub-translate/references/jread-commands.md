@@ -114,17 +114,12 @@ Flags:
 - `--from=N` — skip first N items (useful to paginate or resume)
 - `--limit=N` — cap output to N items
 
-Each item includes an `index` field (0-based position in the full list).
-
 ```bash
 # Get first 20 untranslated items
 jread list workspace/OEBPS/Text/chapter0001.html --untranslated --limit=20
 
-# Next page of untranslated (after processing 20)
+# Next page: use nextFrom from the previous response
 jread list workspace/OEBPS/Text/chapter0001.html --untranslated --from=20 --limit=20
-
-# Resume from where stats says last translated index was (e.g. lastTranslatedIndex=14 → start at 15)
-jread list workspace/OEBPS/Text/chapter0001.html --from=15 --limit=20
 ```
 
 Output:
@@ -132,15 +127,14 @@ Output:
 {
   "file": "workspace/OEBPS/Text/chapter0001.html",
   "total": 41,
+  "nextFrom": 20,
   "items": [
     {
-      "index": 0,
       "id": "Gjsbg3jOAD14QNrK",
       "text": "The idea for this book came from a simple question...",
       "hasTranslation": false
     },
     {
-      "index": 2,
       "id": "E3VaMFIXLmEmT75-",
       "text": "Olympic gold is won in the margins.",
       "hasTranslation": true,
@@ -151,10 +145,11 @@ Output:
 ```
 
 `total` always reflects the full chapter size regardless of filters.
+`nextFrom` is the value to pass to `--from` to fetch the next page.
 
 Use this to:
 - Get untranslated IDs in batches of 20 for translation
-- Resume mid-chapter using `--from` with `lastTranslatedIndex` from `jread stats`
+- Paginate by passing `nextFrom` as `--from` in the next call
 - Track progress: compare `total` vs items returned by `--untranslated`
 
 ---
@@ -311,18 +306,18 @@ Example: `rootDir = "workspace/OEBPS"`, `href = "Text/chapter0001.html"`
 ```bash
 # 1. Check chapter size and find resume point
 jread stats workspace/ --incomplete
-# → shows lastTranslatedIndex per chapter
 
 # 2. Get first batch of untranslated items
 jread list workspace/OEBPS/Text/chapter0001.html --untranslated --limit=20
+# → response includes "nextFrom": 20
 
-# 3. Translate the batch, write each:
+# 3. Translate the batch, write each using the "id" field:
 jread set workspace/OEBPS/Text/chapter0001.html <id1> "<translation1>"
 jread set workspace/OEBPS/Text/chapter0001.html <id2> "<translation2>"
 # ...
 
-# 4. Next batch of untranslated items
-jread list workspace/OEBPS/Text/chapter0001.html --untranslated --limit=20
+# 4. Next batch — pass nextFrom from the previous response
+jread list workspace/OEBPS/Text/chapter0001.html --untranslated --from=20 --limit=20
 
 # 5. Repeat steps 3-4 until no items are returned (chapter complete)
 
