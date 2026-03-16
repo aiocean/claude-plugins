@@ -1,7 +1,7 @@
 {
   "name": "aio-codebase-oracle",
   "description": "Comprehensive codebase analysis and documentation: CodeIndex static analysis combined with CocoIndex semantic search, Kai semantic graph, and LSP precision tools. All four tools are required. Oracle writes architecture docs (C4 diagrams, dependency graphs, key flows), module docs, and interactive HTML viewers from scratch.",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "author": {
     "name": "aiocean"
   }

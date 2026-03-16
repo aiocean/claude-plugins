@@ -1,6 +1,6 @@
 ---
 name: discover
-description: Use when starting a new feature, investigating a bug, or needing to understand how something works. Runs CocoIndex semantic search across the codebase to find all relevant code before planning or coding. Trigger words — "discover", "find code", "how does X work", "where is", "what handles".
+description: This skill should be used when the user asks to "discover", "find code", "how does X work", "where is", "what handles", or needs to understand how something works before planning or coding. First step in the aio-deep-plan pipeline — follow with map, then plan. Requires aio-cocoindex for semantic search.
 ---
 
 # Discover — Find Relevant Code

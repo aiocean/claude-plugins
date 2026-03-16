@@ -1,6 +1,6 @@
 ---
 name: aio-xstate
-description: Implement, refactor, and review XState v5 state machines in TypeScript with strict setup().createMachine() ruleset, design-first planning, params-first typing, anti-god-machine enforcement, and canonical actor patterns (fromPromise, fromCallback, fromObservable, fromTransition). Covers invoke vs spawnChild boundaries, hierarchical/parallel states, delayed transitions, cleanup patterns, and real-world patterns like SDK bridging with fromCallback actors and Promise-bridge for async external events. Use when building state machines, actors, statecharts, finite state logic, actor systems, or reviewing/refactoring XState code.
+description: This skill should be used when the user asks to "create state machine", "implement XState", "refactor XState", "review XState", "add actor", "design statechart", or mentions XState, state machines, actors, statecharts, finite state logic, actor systems, fromPromise, fromCallback. Covers XState v5 strict patterns with setup().createMachine(), actor patterns, and TypeScript typing. Use aio-code-review for reviewing XState implementations in context.
 ---
 
 # XState v5 Strict Skill

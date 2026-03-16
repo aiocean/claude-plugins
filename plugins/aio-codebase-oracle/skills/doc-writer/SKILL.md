@@ -1,6 +1,6 @@
 ---
 name: doc-writer
-description: Deep codebase analysis and architecture documentation. Use when user says "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Combines CodeIndex static analysis with CocoIndex semantic search, Kai semantic graph, and LSP precision tools. All four tools are required.
+description: This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Generates comprehensive architecture documentation by combining aio-static-index (CodeIndex) with aio-cocoindex (semantic search). Run aio-cocoindex-setup and aio-static-index first if not yet configured.
 ---
 
 # Codebase Oracle

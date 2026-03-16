@@ -1,6 +1,6 @@
 ---
 name: map
-description: Use after /discover to build a structural map of relevant files — symbols, dependencies, and references. Combines Kai semantic graph with LSP for precise caller/reference tracing. Trigger words — "map", "structure", "dependencies", "who calls", "blast radius".
+description: This skill should be used when the user asks to "map dependencies", "show structure", "who calls this", "blast radius", "trace references", or needs a structural map of symbols and dependencies. Second step in the aio-deep-plan pipeline — run discover first, then follow with plan. Uses Kai semantic graph and LSP for precision.
 ---
 
 # Map — Structural Analysis

@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Use after /discover and /map to synthesize findings into a concrete implementation plan. Checks for duplicates and conventions via CocoIndex. Produces structured plan with files, changes, risks. Trigger words — "plan", "how should I implement", "approach", "strategy".
+description: This skill should be used when the user asks to "plan implementation", "how should I implement", "approach", "strategy", or needs a concrete implementation plan with files, changes, and risks. Third step in the aio-deep-plan pipeline — run discover and map first. Uses aio-cocoindex to check for duplicates and conventions.
 ---
 
 # Plan — Implementation Planning
