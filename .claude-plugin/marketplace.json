@@ -228,6 +228,78 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "aio-confluence",
+      "source": "./plugins/aio-confluence",
+      "description": "Confluence CLI/MCP for page management, CQL search, content operations, comments, and space listing via confluence-mcp.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-github",
+      "source": "./plugins/aio-github",
+      "description": "GitHub CLI/MCP for repository, pull request, issue management, code review, and file operations via github-mcp.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-gitlab",
+      "source": "./plugins/aio-gitlab",
+      "description": "GitLab CLI/MCP for merge requests, pipelines, jobs, branch protection, and git flow operations via gitlab-mcp.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-rag-kit",
+      "source": "./plugins/aio-rag-kit",
+      "description": "RAG Kit CLI/MCP for Qdrant vector database operations: create collections, index content, and semantic search via rag-kit.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-research-kit",
+      "source": "./plugins/aio-research-kit",
+      "description": "Structured 10-phase research framework CLI. Initialize research projects, validate structure, and execute systematic research via research-cli.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-tanca",
+      "source": "./plugins/aio-tanca",
+      "description": "Tanca CLI/MCP for employee timekeeping, shift management, check-in/check-out, and clock logs via tanca-mcp.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-x",
+      "source": "./plugins/aio-x",
+      "description": "X/Twitter CLI/MCP for tweets, threads, search, engagement, moderation, and list operations via x-mcp.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-google-workspace",
+      "source": "./plugins/aio-google-workspace",
+      "description": "Google Workspace operations via gws CLI. Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat, and cross-service workflows (standup, meeting prep, weekly digest).",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }
