@@ -1,0 +1,6 @@
+{
+  "name": "aio-x",
+  "description": "X/Twitter CLI for tweet management, user interactions, engagement, moderation, and list operations via x-mcp.",
+  "version": "1.0.0",
+  "author": "aiocean"
+}

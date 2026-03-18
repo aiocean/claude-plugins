@@ -76,13 +76,13 @@ Beyond layer violations, detect these structural anti-patterns:
 
 | Smell | Indicator | Impact | Detection |
 |---|---|---|---|
-| **God service** | One module with 30+ exported functions, 500+ importers | Single point of failure, impossible to modify safely | CodeIndex metrics: highest fan-in + highest function count |
+| **God service** | One module with 30+ exported functions, 500+ importers | Single point of failure, impossible to modify safely | GitNexus graph: highest fan-in + highest function count |
 | **Chatty API** | Sequence diagrams show 10+ calls between two services for one operation | Latency multiplication, fragile coupling | Trace request flows, count inter-service calls per operation |
 | **Shared database** | Multiple services read/write same tables | Hidden coupling, schema changes break multiple services | Grep for table names across service boundaries |
 | **Distributed monolith** | All services must deploy together, shared libraries everywhere | Worst of both worlds: distributed complexity without independent deployment | Check deploy scripts — if one service change triggers full redeploy |
-| **Circular dependency** | A → B → C → A at service or module level | Cannot deploy, test, or reason about independently | CodeIndex circular_dependencies metric, or Kai dependency graph |
+| **Circular dependency** | A → B → C → A at service or module level | Cannot deploy, test, or reason about independently | GitNexus graph edges: detect cycles in dependency graph |
 | **Data gravity** | One database accumulates all data regardless of domain | Performance bottleneck, schema becomes unmaintainable | Count tables per database, check if tables span multiple bounded contexts |
-| **Missing abstraction** | Same 5-10 lines of code repeated across 4+ files | Fragile — bug fix must touch all copies | CocoIndex semantic search for similar patterns, or CodeIndex duplication metrics |
+| **Missing abstraction** | Same 5-10 lines of code repeated across 4+ files | Fragile — bug fix must touch all copies | GitNexus hybrid search for similar patterns |
 
 When documenting smells, include:
 - **Severity:** How much risk does this create? (Low/Medium/High/Critical)
@@ -492,23 +492,23 @@ flowchart TD
 
 ## Oracle Integration Architecture
 
-### Static Analysis + Direct Documentation Model
+### GitNexus Knowledge Graph + Direct Documentation Model
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Phase 0: CodeIndex (Static Analysis Only)                        │
+│ Phase 0: GitNexus Knowledge Graph                               │
 │                                                                 │
-│   .codeindex/bin/codeindex generate --verbose                     │
+│   npx gitnexus analyze                                          │
 │   ↓                                                             │
 │   Produces:                                                     │
-│   - docs/codebase_map.json (components, edges, metrics, hubs) │
-│   - (graph.html.tpl lives in skill dir, not CodeIndex)         │
-│   - docs/dependency_graphs/*.json (detailed dependency data)   │
-│   - docs/templates/*.tpl (doc structure templates)             │
+│   - Nodes (functions, classes, methods with file:line)          │
+│   - Edges (imports, calls, inheritance, type usage)             │
+│   - Clusters (functional communities with cohesion scores)      │
+│   - Flows (execution paths from entry points)                   │
+│   - Hybrid search index (BM25 + semantic)                       │
 │                                                                 │
 │   Does NOT produce:                                             │
 │   - ❌ Module .md files (Oracle writes those)                   │
-│   - ❌ module_tree.json (not in static-only mode)              │
 │   - ❌ LLM-generated documentation                              │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
@@ -517,27 +517,25 @@ flowchart TD
 │                                                                 │
 │   /codebase-oracle                                              │
 │   ↓                                                             │
-│   1. Ingest CodeIndex static analysis data                      │
-│   2. Read actual source code for each module/community         │
-│   3. Analyze: structure, dependencies, patterns, rationale     │
-│   4. Write all documentation from scratch                      │
+│   1. Ingest GitNexus knowledge graph                            │
+│   2. Enrich with LSP (type info, references, diagnostics)       │
+│   3. Read actual source code for each cluster                   │
+│   4. Analyze: structure, dependencies, patterns, rationale      │
+│   5. Write all documentation from scratch                       │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │ Output: Oracle-Written Documentation                            │
 │                                                                 │
 │   docs/                                                         │
-│   ├── CODEBASE_MAP.md          (Oracle-written index)          │
-│   ├── {module}.md              (Oracle-written module docs)    │
-│   │   ├── Evidence inline (path:line references throughout)    │
-│   │   ├── Failure Modes & Recovery                             │
-│   │   ├── Blast Radius & Safe Change Plan                      │
-│   │   ├── Design Rationale & Trade-offs                        │
-│   │   └── <!-- ORACLE-META --> compact footer                  │
-│   ├── codebase_map.json        (CodeIndex static analysis)     │
-│   ├── graph.html               (AI-generated from skill's graph.html.tpl) │
-│   ├── dependency_graphs/       (CodeIndex dependency data)     │
-│   └── templates/               (CodeIndex doc templates)       │
+│   ├── CODEBASE_MAP.md          (Oracle-written index)           │
+│   ├── {module}.md              (Oracle-written module docs)     │
+│   │   ├── Evidence inline (path:line references throughout)     │
+│   │   ├── Failure Modes & Recovery                              │
+│   │   ├── Blast Radius & Safe Change Plan                       │
+│   │   ├── Design Rationale & Trade-offs                         │
+│   │   └── <!-- ORACLE-META --> compact footer                   │
+│   └── graph.html               (Interactive D3 viewer)          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

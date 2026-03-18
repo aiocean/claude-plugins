@@ -1,14 +1,30 @@
 # Codebase Oracle
 
-Comprehensive codebase analysis and visualization using specialized analyst teams.
+Comprehensive codebase analysis and visualization powered by GitNexus knowledge graph.
 
-**Two skills included:**
+**Skills included:**
 
-1. **codebase-oracle** — Produces a full `docs/` directory with multi-document architecture docs (C4 diagrams, ERD, API maps, sequence diagrams, dependency graphs, and more)
+1. **doc-writer** — Produces a full `docs/` directory with multi-document architecture docs (C4 diagrams, ERD, API maps, sequence diagrams, dependency graphs, and more)
 
-2. **codebase-viz** — Turns architecture docs into interactive HTML playgrounds with 5 tabs: Overview, Architecture, Dependencies, Flows, and Modules
+## How It Works
 
-All diagrams use Mermaid for native markdown rendering.
+Oracle uses **GitNexus** to build a knowledge graph of the codebase, then combines it with **LSP** for type-aware precision analysis. GitNexus handles structure parsing, dependency resolution, clustering, flow tracing, and hybrid search — all in one tool with zero infrastructure requirements.
+
+### Tool Stack
+
+| Tool | Role | Infrastructure |
+|------|------|---------------|
+| **GitNexus** (MCP) | Knowledge graph: structure, dependencies, clustering, flow tracing, hybrid search | Zero — runs via `npx gitnexus analyze` |
+| **LSP** | Type-aware references, caller tracing, diagnostics | Language servers |
+
+### What GitNexus Provides (6-Phase Pipeline)
+
+1. **Structure** — File tree and folder relationships
+2. **Parsing** — Tree-sitter AST: functions, classes, methods, interfaces
+3. **Resolution** — Cross-file import/call resolution
+4. **Clustering** — Functional community detection with cohesion scoring
+5. **Flow Tracing** — Execution paths from entry points
+6. **Indexing** — Hybrid search (BM25 + semantic)
 
 ## Output
 
@@ -22,58 +38,28 @@ All diagrams use Mermaid for native markdown rendering.
 | `dependency-graph.md` | Module dependencies, hub analysis, blast radius | Always |
 | `product-requirements.md` | Reverse-engineered features, mindmap | README or user-facing code found |
 | `infrastructure.md` | Deployment topology, CI/CD, env config | Docker/CI/k8s config found |
-
-## Modes
-
-| Mode | Use When | Output |
-|------|----------|--------|
-| **Full Map** | New codebase, onboarding | `docs/` directory with architecture docs |
-| **Investigate** | Targeted questions | Findings with confidence assessment |
-| **Impact** | Before changes | Dependency graph + blast radius |
-| **Visualize** | Explore architecture interactively | Interactive HTML playground |
-
-## Specialized Analysts
-
-Uses 5 domain-specific analysts working in parallel:
-
-- **structure-analyst** — code architecture, layers, modules, C4 diagrams
-- **data-analyst** — data models, schemas, ERD
-- **flow-analyst** — execution paths, APIs, sequence diagrams
-- **product-analyst** — user-facing features, requirements
-- **infra-analyst** — deployment, CI/CD, infrastructure
-
-For small codebases (<30 files), analysts are combined. For large codebases, extra analysts are spawned.
+| `graph.html` | Interactive D3 force-directed graph viewer | Always |
 
 ## Installation
 
 ```bash
 /plugin marketplace add aiocean/claude-plugins
-/plugin install codebase-oracle@aiocean-plugins
+/plugin install aio-codebase-oracle@aiocean-plugins
 ```
+
+### Prerequisites
+
+- **GitNexus**: `npm install -g gitnexus` or use via `npx gitnexus analyze`
+- **GitNexus MCP server**: Configure in your MCP settings for Claude Code integration
 
 ## Usage
 
-**Analyze codebase:**
 - "map this codebase"
 - "analyze the architecture"
 - "document this project"
 - "what would break if I change X?"
 - "how does authentication work?"
 
-**Visualize architecture:**
-- "visualize this codebase"
-- "show me an interactive architecture view"
-- "create an architecture playground"
+## Language Support
 
-## Static Analysis with Tree-sitter
-
-The skill uses Tree-sitter for precise AST-based static analysis:
-
-- **Accurate import extraction** — distinguishes imports from strings/comments
-- **Function/class discovery** — with exact line numbers
-- **Call graph construction** — for dependency analysis
-- **Export identification** — for API surface mapping
-
-**Supported languages:** Python, JavaScript, TypeScript/TSX, Go, Rust, Java, Ruby
-
-Tree-sitter analysis runs automatically when UV is available (auto-installs all dependencies).
+12+ languages via tree-sitter: TypeScript, Python, Rust, Go, Java, C++, and more.

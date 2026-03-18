@@ -1,37 +1,37 @@
 ---
 name: map
-description: This skill should be used when the user asks to "map dependencies", "show structure", "who calls this", "blast radius", "trace references", or needs a structural map of symbols and dependencies. Second step in the aio-deep-plan pipeline — run discover first, then follow with plan. Uses Kai semantic graph and LSP for precision.
+description: This skill should be used when the user asks to "map dependencies", "show structure", "who calls this", "blast radius", "trace references", or needs a structural map of symbols and dependencies. Second step in the aio-deep-plan pipeline — run discover first, then follow with plan. Uses GitNexus knowledge graph and LSP for precision.
 ---
 
 # Map — Structural Analysis
 
-Build a dependency and symbol map for files identified by `/discover`. Uses Kai for overview, LSP for precision.
+Build a dependency and symbol map for files identified by `/discover`. Uses GitNexus for overview, LSP for precision.
 
 ## Prerequisites
 
-- Kai initialized in project (`.kai/` directory) — run `kai_refresh()` if needed
+- GitNexus indexed (`npx gitnexus analyze`) — verify with `npx gitnexus status`
 - LSP servers running (TypeScript/Rust)
 
 ## Workflow
 
-### Step 1: Symbol inventory (Kai) — run in parallel
+### Step 1: Symbol inventory (GitNexus) — run in parallel
 
-For each relevant file from discovery:
-
-```
-kai_symbols(file, kind="function", signatures=true)
-```
-
-Fast overview without reading the file.
-
-### Step 2: File dependencies (Kai) — run in parallel
+For each relevant file from discovery, use the GitNexus MCP `context` tool:
 
 ```
-kai_dependencies(file)  → what does this file import?
-kai_dependents(file)    → what imports this file?
+context(file)
 ```
 
-**Note:** Kai tracks TS imports well. For Rust modules, fall back to LSP.
+Fast overview of symbols and dependencies without reading the full file.
+
+### Step 2: File dependencies (GitNexus) — run in parallel
+
+```
+context(file)  → imports and dependents for the file
+impact(file)   → what does changing this file affect?
+```
+
+**Note:** GitNexus tracks TS imports well. For Rust modules, fall back to LSP.
 
 ### Step 3: Precise references (LSP)
 
@@ -43,7 +43,7 @@ lsp_goto_definition(file, line, character)  → where defined
 lsp_hover(file, line, character)            → type info
 ```
 
-LSP is authoritative — always trust LSP over Kai for caller/callee data.
+LSP is authoritative — always trust LSP over GitNexus for caller/callee data.
 
 ### Step 4: Output structural map
 
@@ -70,7 +70,7 @@ Run `/plan` to synthesize into implementation plan.
 
 ## Tool priority
 
-1. **Kai `kai_symbols`** — fast file overview (always works)
-2. **Kai `kai_dependencies`** — file-level imports (TS only)
+1. **GitNexus `context`** — fast file overview (always works)
+2. **GitNexus `impact`** — blast radius / downstream effects
 3. **LSP `lsp_find_references`** — precise function-level tracing
 4. **LSP `lsp_hover`** — type information when needed
