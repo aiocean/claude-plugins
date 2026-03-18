@@ -1,6 +1,6 @@
 ---
 name: plan
-description: This skill should be used when the user asks to "plan implementation", "how should I implement", "approach", "strategy", or needs a concrete implementation plan with files, changes, and risks. Third step in the aio-deep-plan pipeline — run discover and map first. Uses aio-cocoindex to check for duplicates and conventions.
+description: This skill should be used when the user asks to "plan implementation", "how should I implement", "approach", "strategy", or needs a concrete implementation plan with files, changes, and risks. Third step in the aio-deep-plan pipeline — run discover and map first. Uses GitNexus to check for duplicates and conventions.
 ---
 
 # Plan — Implementation Planning
@@ -10,37 +10,36 @@ Synthesize discovery and mapping results into a concrete, actionable implementat
 ## Prerequisites
 
 - Run `/discover` and `/map` first (or have equivalent understanding)
-- CocoIndex available for convention/duplication checks
-- Kai available for context enrichment
+- GitNexus indexed (`npx gitnexus analyze`) for convention/duplication checks
 
 ## Workflow
 
-### Step 1: Duplication check (CocoIndex)
+### Step 1: Duplication check (GitNexus)
 
-Search if similar features already exist:
+Search if similar features already exist using the GitNexus MCP `query` tool:
 
-```bash
-.venv-cocoindex/bin/python .cocoindex/query.py "similar feature or pattern" --top-k 3
+```
+query("similar feature or pattern")
 ```
 
 Prevents building what already exists.
 
-### Step 2: Convention check (CocoIndex)
+### Step 2: Convention check (GitNexus)
 
 Search for existing patterns to follow:
 
-```bash
-.venv-cocoindex/bin/python .cocoindex/query.py "how are [similar things] implemented" --top-k 3
+```
+query("how are [similar things] implemented")
 ```
 
 Examples: "tauri command structure", "hook cleanup pattern", "error handling in rust"
 
-### Step 3: Context enrichment (Kai)
+### Step 3: Context enrichment (GitNexus)
 
 For each file you plan to modify, get full context:
 
 ```
-kai_context(file, depth=2)
+context(file)
 ```
 
 This reveals dependencies, dependents, and all symbols — helps identify:
@@ -51,7 +50,7 @@ This reveals dependencies, dependents, and all symbols — helps identify:
 For the most critical change, check impact:
 
 ```
-kai_impact(file, max_depth=3)
+impact(file)
 ```
 
 ### Step 4: Write the plan

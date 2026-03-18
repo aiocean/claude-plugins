@@ -82,7 +82,7 @@ Never mix these modes in the same section. A component list should not include t
 **Consistent terminology:**
 - Pick one term per concept and use it everywhere. Don't alternate "service" / "handler" / "processor" for the same component.
 - Define domain terms on first use: "The circuit breaker (a pattern that stops cascading failures) trips after 5 consecutive errors."
-- Keep CodeIndex's terminology when it's correct — consistency between CodeIndex and Oracle output matters.
+- Keep GitNexus's terminology when it's correct — consistency between GitNexus and Oracle output matters.
 
 ## Structure Rules
 
@@ -123,7 +123,7 @@ Write docs that age well:
 - **Use semantic quantities.** "Handles ~1000 req/s under current load" not "Handles 1000 req/s" — the tilde signals this is measured, not guaranteed.
 - **Reference behavior, not implementation.** "The auth module validates JWT tokens and rejects expired ones" survives refactors better than "Line 42 of auth.go calls jwt.Parse()".
 - **Mark volatile sections.** If a section describes something likely to change (feature flags, migration state), add: `<!-- VOLATILE: re-verify after [condition] -->`.
-- **Prefer computed over hardcoded.** "See CodeIndex metrics for current counts" rather than "Contains 47 files" — numbers change, the tool query stays valid.
+- **Prefer computed over hardcoded.** "See GitNexus graph for current counts" rather than "Contains 47 files" — numbers change, the tool query stays valid.
 
 ### Cross-Referencing Strategy
 

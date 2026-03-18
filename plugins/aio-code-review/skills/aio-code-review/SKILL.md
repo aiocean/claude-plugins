@@ -5,7 +5,7 @@ description: This skill should be used when the user asks to "review code", "cod
 
 # Code Review Ultra
 
-Ultimate code review: deep codebase understanding via Kai + CocoIndex + CodeWiki, domain detection, parallel specialized agents, and adversarial meta-review.
+Ultimate code review: deep codebase understanding via GitNexus + CodeWiki, domain detection, parallel specialized agents, and adversarial meta-review.
 
 ## When to Use
 
@@ -23,14 +23,10 @@ Ultimate code review: deep codebase understanding via Kai + CocoIndex + CodeWiki
 Before starting analytics, detect which tools are available. The review adapts based on what's installed.
 
 ```bash
-# 1. Kai (semantic graph — symbols, dependencies, impact)
-kai_status() 2>/dev/null && echo "kai: YES" || echo "kai: NO"
-# Check: .kai/ directory exists
+# 1. GitNexus (knowledge graph — hybrid search, symbol context, blast radius)
+npx gitnexus status 2>/dev/null && echo "gitnexus: YES" || echo "gitnexus: NO"
 
-# 2. CocoIndex (semantic search — cross-cutting patterns)
-ls .cocoindex/query.py 2>/dev/null && echo "cocoindex: YES" || echo "cocoindex: NO"
-
-# 3. CodeWiki (static analysis — module structure, metrics)
+# 2. CodeWiki (static analysis — module structure, metrics)
 which codewiki 2>/dev/null && echo "codewiki: YES" || echo "codewiki: NO"
 ```
 
@@ -38,23 +34,20 @@ which codewiki 2>/dev/null && echo "codewiki: YES" || echo "codewiki: NO"
 
 | Tool | Status | Impact on Review |
 |------|--------|-----------------|
-| Kai | Available | Symbol inventory, dependency tracking, blast radius via `kai_impact` |
-| Kai | Missing | Fall back to CodeWiki dependency graphs + manual grep for impact |
-| CocoIndex | Available | Semantic pattern discovery, cross-cutting concern detection |
-| CocoIndex | Missing | Skip pattern analysis — review still works but misses design pattern context |
+| GitNexus | Available | Hybrid search, symbol context, dependency tracking, blast radius via `impact` |
+| GitNexus | Missing | Fall back to CodeWiki dependency graphs + manual grep for impact |
 | CodeWiki | Available | Module clustering, metrics, dependency graphs |
-| CodeWiki | Missing | Skip module mapping — use Kai dependencies or file-path grouping |
+| CodeWiki | Missing | Skip module mapping — use GitNexus context or file-path grouping |
 
 **Report available tools to user:**
 
 ```
 Code Review Tools:
-✓ Kai — semantic graph (symbols, dependencies, impact)
-✓ CocoIndex — semantic search (cross-cutting patterns)
+✓ GitNexus — knowledge graph (hybrid search, symbol context, blast radius)
 ✓ CodeWiki — static analysis (module structure, metrics)
 ```
 
-Proceed with whatever tools are available. All three together give the richest review; any subset still works.
+Proceed with whatever tools are available. Both together give the richest review; either subset still works.
 
 #### 0.2 Detect Language/Domain and Invoke Specialist Skills
 
@@ -99,75 +92,54 @@ git diff HEAD~1 --name-only
 
 Store the list of changed files — all subsequent phases operate on these files.
 
-### Phase 2: Three-Layer Analytics
+### Phase 2: Two-Layer Analytics
 
 Run analytics tools in order of depth. Each layer enriches the context that review agents receive.
 
-#### Layer 1: Kai — Semantic Graph (run first)
+#### Layer 1: GitNexus — Knowledge Graph (run first)
 
-Kai provides the deepest structural understanding: what symbols exist, what depends on what, and what breaks if something changes.
+GitNexus provides deep structural understanding via hybrid search (BM25 + semantic), symbol context, and blast radius analysis.
 
-**For each changed file, run in parallel:**
+**For each changed file, run in parallel using GitNexus MCP tools:**
 
 ```
-# Symbol inventory — understand what's in each changed file
-kai_symbols(file, kind="function", signatures=true)
+# Symbol context — understand what's in each changed file and its relationships
+context(symbol=<primary symbol in file>, depth=2)
 
-# What does this file depend on?
-kai_dependencies(file)
+# Blast radius — what breaks if this file changes?
+impact(file=<changed file>)
 
-# What depends on this file? (blast radius starts here)
-kai_dependents(file)
+# Detect changes — map git-diff to affected symbols
+detect_changes(diff=<git diff output>)
 ```
 
 **For files with 3+ dependents (hub files), additionally run:**
 
 ```
-# Transitive impact — how far do changes ripple?
-kai_impact(file, max_depth=3)
-
-# Full context for critical files
-kai_context(file, depth=2)
+# Deeper impact — how far do changes ripple?
+impact(file=<hub file>, max_depth=3)
 ```
 
-**Collect into structured data:**
+**Semantic pattern search — identify cross-cutting concerns:**
 
 ```
-kai_analytics = {
-  symbols: { file → [function signatures] },
-  dependencies: { file → [imports] },
-  dependents: { file → [importers] },
-  hub_files: [files with 3+ dependents],
-  impact: { hub_file → { affected_files, affected_tests, depth } }
-}
-```
-
-**If Kai is unavailable**, skip this layer and note in report: "Kai unavailable — blast radius analysis is approximate."
-
-#### Layer 2: CocoIndex — Semantic Search (run second)
-
-CocoIndex finds cross-cutting patterns and design concerns related to the changes. This catches issues that static analysis misses — like inconsistent error handling across the codebase or divergent retry strategies.
-
-**Generate search queries from changed files:**
-
-```bash
 # Analyze changed code to identify key concepts, then search for related patterns
 # Example queries based on what the changed code does:
 
 # If changes touch error handling:
-.venv-cocoindex/bin/python .cocoindex/query.py "error handling strategy" --top-k 5 --json
+query("error handling strategy", top_k=5)
 
 # If changes touch API endpoints:
-.venv-cocoindex/bin/python .cocoindex/query.py "request validation pattern" --top-k 5 --json
+query("request validation pattern", top_k=5)
 
 # If changes touch data access:
-.venv-cocoindex/bin/python .cocoindex/query.py "database query pattern" --top-k 5 --json
+query("database query pattern", top_k=5)
 
 # If changes touch authentication/authorization:
-.venv-cocoindex/bin/python .cocoindex/query.py "authentication authorization flow" --top-k 5 --json
+query("authentication authorization flow", top_k=5)
 
 # Always: search for similar patterns to detect inconsistency
-.venv-cocoindex/bin/python .cocoindex/query.py "{primary concept from changed code}" --top-k 5 --json
+query("<primary concept from changed code>", top_k=5)
 ```
 
 **How to generate queries:** Read the changed files, identify the 2-3 primary concerns (e.g., "retry logic", "input validation", "state management"), and search for each. The goal is to find existing patterns in the codebase that the changes should be consistent with.
@@ -175,7 +147,12 @@ CocoIndex finds cross-cutting patterns and design concerns related to the change
 **Collect into structured data:**
 
 ```
-cocoindex_analytics = {
+gitnexus_analytics = {
+  symbols: { file → [function signatures from context()] },
+  dependencies: { file → [imports from context()] },
+  dependents: { file → [importers from context()] },
+  hub_files: [files with 3+ dependents],
+  impact: { hub_file → { affected_files, affected_tests, depth } },
   patterns_found: [
     { query: "error handling", matches: [file:chunk pairs], consistency: "consistent|divergent" },
     ...
@@ -184,9 +161,9 @@ cocoindex_analytics = {
 }
 ```
 
-**If CocoIndex is unavailable**, skip this layer and note in report: "CocoIndex unavailable — pattern consistency analysis skipped."
+**If GitNexus is unavailable**, skip this layer and note in report: "GitNexus unavailable — blast radius analysis is approximate, pattern consistency analysis skipped."
 
-#### Layer 3: CodeWiki — Static Analysis (run third)
+#### Layer 2: CodeWiki — Static Analysis (run second)
 
 CodeWiki provides module structure, metrics, and dependency graphs for organizational context.
 
@@ -200,7 +177,7 @@ codewiki generate --no-cache --analysis-only --output docs/
 |------|---------|-------------------|
 | `module_tree.json` | Module hierarchy and clustering | Understand code organization, map changed files to modules |
 | `first_module_tree.json` | Initial module clustering | See how code is grouped before refinement |
-| `temp/dependency_graphs/*.json` | Import/dependency graphs per module | Supplement Kai with module-level dependency view |
+| `temp/dependency_graphs/*.json` | Import/dependency graphs per module | Supplement GitNexus with module-level dependency view |
 
 **If CodeWiki is unavailable**, group files by directory path as a fallback module mapping.
 
@@ -210,7 +187,7 @@ codewiki generate --no-cache --analysis-only --output docs/
 
 Using the best available source:
 1. `module_tree.json` from CodeWiki (preferred)
-2. Kai `kai_dependencies` grouping (fallback)
+2. GitNexus `context` grouping (fallback)
 3. Directory-path grouping (last resort)
 
 ### Phase 3: Parallel Review Agents
@@ -225,11 +202,11 @@ OMC internal agents are spawned via `Task(subagent_type=...)`. External agents a
 
 | Agent | Type | Model | Focus | Uses analytics for |
 |-------|------|-------|-------|-------------------|
-| `oh-my-claudecode:security-reviewer` | OMC | sonnet | OWASP Top 10, secrets, auth, injection | Kai impact paths to trace untrusted input; CocoIndex auth patterns for consistency |
-| `oh-my-claudecode:quality-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | Kai dependents for coupling; CocoIndex patterns for consistency; CodeWiki metrics |
+| `oh-my-claudecode:security-reviewer` | OMC | sonnet | OWASP Top 10, secrets, auth, injection | GitNexus impact paths to trace untrusted input; GitNexus auth patterns for consistency |
+| `oh-my-claudecode:quality-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | GitNexus dependents for coupling; GitNexus patterns for consistency; CodeWiki metrics |
 | `@feature-dev:code-reviewer` | External | sonnet | Feature-level review: requirement completeness, implementation correctness, edge case coverage | Changed files mapped to feature scope |
 | `@superpowers:code-reviewer` | External | sonnet | Superpowers-based comprehensive review, verification before completion | Module boundaries and dependency graphs for contract violations |
-| `@code-simplifier:code-simplifier` | External | opus | Clarity, consistency, maintainability, simplification | Kai symbols for dead code; CocoIndex for duplicate patterns |
+| `@code-simplifier:code-simplifier` | External | opus | Clarity, consistency, maintainability, simplification | GitNexus symbols for dead code; GitNexus query for duplicate patterns |
 
 **Conditional agents (spawn based on scope and content):**
 
@@ -256,18 +233,18 @@ CODEBASE ANALYTICS CONTEXT
 
 You have access to multi-layer analytics data for this review.
 
-1. KAI SEMANTIC GRAPH (if available):
-   Symbols in changed files:
-   {kai_symbols_summary}
+1. GITNEXUS KNOWLEDGE GRAPH (if available):
+   Symbols in changed files (from context()):
+   {gitnexus_symbols_summary}
 
    Dependencies (what changed files import):
-   {kai_dependencies_summary}
+   {gitnexus_dependencies_summary}
 
    Dependents (what imports changed files — blast radius):
-   {kai_dependents_summary}
+   {gitnexus_dependents_summary}
 
-   Hub files (3+ dependents) with transitive impact:
-   {kai_impact_summary}
+   Hub files (3+ dependents) with transitive impact (from impact()):
+   {gitnexus_impact_summary}
 
    USE THIS DATA TO:
    - Assess blast radius: how many files are affected by each change
@@ -275,12 +252,12 @@ You have access to multi-layer analytics data for this review.
    - Identify hub files: changes to these are highest risk
    - Check function signatures: do changes break callers?
 
-2. COCOINDEX PATTERN ANALYSIS (if available):
-   Existing patterns in codebase related to changes:
-   {cocoindex_patterns_summary}
+2. GITNEXUS PATTERN ANALYSIS (if available):
+   Existing patterns in codebase related to changes (from query()):
+   {gitnexus_patterns_summary}
 
    Consistency issues detected:
-   {cocoindex_consistency_issues}
+   {gitnexus_consistency_issues}
 
    USE THIS DATA TO:
    - Check if changes follow existing codebase patterns
@@ -302,8 +279,8 @@ You have access to multi-layer analytics data for this review.
    {changed_files_list}
 
 HOW TO USE THIS DATA:
-- Start with Kai dependents to understand blast radius BEFORE reviewing code
-- Check CocoIndex patterns to assess consistency with existing code
+- Start with GitNexus impact() to understand blast radius BEFORE reviewing code
+- Check GitNexus query() patterns to assess consistency with existing code
 - Reference module structure when flagging architectural concerns
 - Include blast radius assessment (low/medium/high) with each finding
 - Ground every finding in analytics data — don't just flag issues,
@@ -380,17 +357,17 @@ CODE REVIEW REPORT (Analytics-Backed)
 ======================================
 
 Scope: {N} files across {M} modules
-Tools: {Kai ✓/✗} | {CocoIndex ✓/✗} | {CodeWiki ✓/✗}
+Tools: {GitNexus ✓/✗} | {CodeWiki ✓/✗}
 
 ARCHITECTURE IMPACT
 -------------------
 Modules affected: [list from module mapping]
 Cross-module changes: [yes/no — higher risk if yes]
-Blast radius: [low/medium/high — from Kai kai_impact or CodeWiki fan-out]
-Hub files touched: [list with dependent counts from Kai]
+Blast radius: [low/medium/high — from GitNexus impact() or CodeWiki fan-out]
+Hub files touched: [list with dependent counts from GitNexus]
 
-PATTERN CONSISTENCY (from CocoIndex)
--------------------------------------
+PATTERN CONSISTENCY (from GitNexus query())
+--------------------------------------------
 Patterns analyzed: [list of queries run]
 Consistent with codebase: [list]
 Divergent from codebase: [list — these need justification or alignment]
@@ -400,8 +377,8 @@ FINDINGS BY SEVERITY
 
 CRITICAL (must fix before merge)
   1. {file}:{line} — {issue}
-     Blast radius: {high/medium/low} — {N} downstream dependents (Kai)
-     Pattern context: {consistent/divergent with existing code} (CocoIndex)
+     Blast radius: {high/medium/low} — {N} downstream dependents (GitNexus)
+     Pattern context: {consistent/divergent with existing code} (GitNexus)
      Fix: {recommendation}
 
 HIGH (should fix before merge)
@@ -416,7 +393,7 @@ LOW (suggestions)
 DEPENDENCY CONCERNS
 -------------------
 - Circular dependencies detected: [list]
-- High fan-out files (hub files): [list with Kai impact data]
+- High fan-out files (hub files): [list with GitNexus impact data]
 - Cross-boundary violations: [list]
 
 ARCHITECTURE REVIEW (if architect agent ran)
@@ -474,12 +451,11 @@ RECOMMENDATION: {APPROVE | REQUEST CHANGES | COMMENT}
 ALWAYS:
 - Run Phase 0.1 tool detection — report which tools are available
 - Run Phase 0.2 domain detection — invoke matching specialist skills (golang-mastery, ios-mastery, react-minimal-effects, xstate, monitoring-observability)
-- Run Kai analytics first (symbols, dependencies, impact) when available
-- Run CocoIndex pattern search second (consistency checks) when available
-- Run CodeWiki static analysis third (module structure) when available
+- Run GitNexus analytics first (context, impact, query) when available
+- Run CodeWiki static analysis second (module structure) when available
 - Include all available analytics in every agent prompt
-- Show blast radius for CRITICAL and HIGH findings (prefer Kai `kai_impact` data)
-- Show pattern consistency for findings where CocoIndex found related patterns
+- Show blast radius for CRITICAL and HIGH findings (prefer GitNexus `impact` data)
+- Show pattern consistency for findings where GitNexus query found related patterns
 - Spawn core review agents in parallel for speed
 - Spawn conditional agents when their criteria are met
 - Run the critic meta-review after all other agents complete
@@ -490,12 +466,11 @@ ALWAYS:
 NEVER:
 - Skip tool detection in Phase 0.1
 - Skip Phase 0.2 domain detection
-- Skip Kai analytics when Kai is available
-- Skip CocoIndex pattern search when CocoIndex is available
+- Skip GitNexus analytics when GitNexus is available
 - Review without knowing which modules are affected (use best available source)
-- Report findings without blast radius context (use Kai, CodeWiki, or manual grep)
+- Report findings without blast radius context (use GitNexus, CodeWiki, or manual grep)
 - Run agents sequentially when they can run in parallel
 - Let one agent's failure block the entire review
 - Present findings without critic validation
 - Skip conditional agents when their trigger criteria are clearly met
-- Require all three tools — the review works with any subset
+- Require both tools — the review works with any subset

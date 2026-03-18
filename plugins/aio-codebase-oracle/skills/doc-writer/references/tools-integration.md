@@ -1,90 +1,71 @@
 # Tools Integration Reference
 
-Detailed commands, comparison matrix, and usage guidelines for all four Oracle tools: CodeIndex, CocoIndex, Kai, and LSP.
+Detailed commands, comparison matrix, and usage guidelines for Oracle tools: GitNexus and LSP.
 
 ## Tool Comparison — What Each Adds to Oracle
 
-| Capability | CodeIndex | CocoIndex | Kai | LSP |
-|---|---|---|---|---|
-| **Community/module detection** | Yes (primary) | — | — | — |
-| **Dependency graphs** | Yes (static) | — | Yes (file-level imports) | — |
-| **Metrics & complexity** | Yes | — | — | — |
-| **Semantic concept search** | — | Yes (best for "how does X work?") | — | — |
-| **Symbol inventory** | tree-sitter based | — | Yes (fast, no file read) | Yes (type-aware) |
-| **Caller/callee tracing** | — | — | Partial (TS only) | Yes (precise, all languages) |
-| **Impact/blast radius** | Fan-in count | — | Transitive graph walk | Reference count per function |
-| **Type information** | — | — | Signatures only | Full type resolution |
-| **Snapshot diffing** | — | — | Yes (before/after) | — |
-| **Cross-cutting patterns** | — | Yes ("retry pattern" across codebase) | — | — |
-| **Diagnostics/errors** | — | — | — | Yes (type errors, warnings) |
+| Capability | GitNexus | LSP |
+|---|---|---|
+| **Community/cluster detection** | Yes (primary, with cohesion scores) | — |
+| **Dependency graphs** | Yes (imports, calls, inheritance, type usage) | — |
+| **Symbol inventory** | Yes (tree-sitter AST: functions, classes, methods) | Yes (type-aware) |
+| **Caller/callee tracing** | Yes (call edges in graph) | Yes (precise, all languages) |
+| **Impact/blast radius** | Yes (transitive graph walk, flow tracing) | Reference count per function |
+| **Type information** | — | Full type resolution |
+| **Execution flow tracing** | Yes (entry point to leaf) | — |
+| **Hybrid search (BM25 + semantic)** | Yes | — |
+| **Cross-cutting pattern discovery** | Yes (semantic search) | — |
+| **Diagnostics/errors** | — | Yes (type errors, warnings) |
+| **Snapshot diffing** | — | — |
 
-## CocoIndex — Semantic Search
+## GitNexus — Knowledge Graph Engine
 
-Best for: discovering related code by concept, finding cross-cutting patterns, tracing design intent when naming is inconsistent.
+Best for: structural analysis, dependency tracking, cluster detection, flow tracing, and semantic search across the codebase.
+
+### Setup
 
 ```bash
-# Check availability
-ls .cocoindex/query.py 2>/dev/null
+# Install globally
+npm install -g gitnexus
 
-# Semantic search
-.venv-cocoindex/bin/python .cocoindex/query.py "authentication flow" --top-k 5
+# Or use via npx (no install needed)
+npx gitnexus analyze
 
-# Broader exploration
-.venv-cocoindex/bin/python .cocoindex/query.py "error handling strategy" --top-k 10
+# Configure as MCP server for Claude Code integration
+# Add to .mcp.json or settings
 ```
 
-**When to use during Oracle analysis:**
+### Commands
 
-| Task | Use CocoIndex? |
+```bash
+# Build the knowledge graph
+npx gitnexus analyze
+
+# The graph is then queryable via MCP tools or JSON output
+```
+
+### What GitNexus Produces (6-Phase Pipeline)
+
+1. **Structure** — File tree, folder relationships
+2. **Parsing** — Tree-sitter AST: every function, class, method, interface with file:line
+3. **Resolution** — Cross-file import/call resolution with language-aware logic
+4. **Clustering** — Functional community detection with cohesion scoring
+5. **Flow Tracing** — Execution paths from entry points
+6. **Indexing** — Hybrid search (BM25 + semantic) over the graph
+
+### When to Use During Oracle Analysis
+
+| Task | Use GitNexus? |
 |---|---|
-| Find code by concept ("how does auth work?") | Yes |
-| Discover undocumented design patterns | Yes — `"retry logic"`, `"caching strategy"` |
-| Trace cross-module data flows (naming varies) | Yes |
-| Find exact imports of a module | No — use Grep |
-| Read a specific file | No — use Read |
-
-**Setup:** CocoIndex is required. If missing, stop and instruct user to run `/aio-cocoindex:aio-cocoindex-setup`. Oracle will not proceed without it.
-
-## Kai — Semantic Graph
-
-Best for: fast symbol overview without reading files, file-level dependency tracking, impact analysis, and snapshot-based change tracking.
-
-```
-# Check availability
-kai_status()  → shows if index exists and is fresh
-
-# Symbol inventory (parallel for all files in a module)
-kai_symbols(file, kind="function", signatures=true)
-
-# Dependency tracking
-kai_dependencies(file)  → what this file imports
-kai_dependents(file)    → what imports this file
-
-# Full context for hub files
-kai_context(file, depth=2)  → symbols + deps + dependents + tests
-
-# Blast radius analysis
-kai_impact(file, max_depth=3)  → transitive downstream files + tests
-
-# Snapshot for change tracking (before/after documentation updates)
-kai_refresh()  → creates snapshot, returns snapshot_id
-kai_diff(base="id1", head="id2")  → semantic diff between snapshots
-```
-
-**When to use during Oracle analysis:**
-
-| Task | Use Kai? |
-|---|---|
-| Get all functions in a file without reading it | Yes — `kai_symbols` |
-| Check what files import a module | Yes — `kai_dependents` |
-| Assess blast radius of hub changes | Yes — `kai_impact` |
-| Track what changed after doc updates | Yes — `kai_diff` |
-| Precise caller tracing for a specific function | No — use LSP |
-| Type information | No — use LSP |
-
-**Setup:** Kai is required. If `.kai/` directory doesn't exist, run `kai_refresh()` to initialize. If Kai MCP server is not configured, stop and instruct user to add it to their MCP config. Oracle will not proceed without it.
-
-**Limitations:** Kai's caller/callee tracking may return empty for some language combinations (e.g., Rust modules). Use LSP `lsp_find_references` for precise caller tracing in those cases.
+| Get all functions/classes in a file | Yes — graph nodes |
+| Check what files import a module | Yes — graph edges |
+| Find functional communities/clusters | Yes — clustering phase |
+| Trace execution flow from entry point | Yes — flow tracing |
+| Discover cross-cutting patterns | Yes — hybrid search |
+| Assess blast radius of changes | Yes — transitive graph walk |
+| Precise type information | No — use LSP |
+| Exact reference count for a function | No — use LSP |
+| Type error detection | No — use LSP |
 
 ## LSP — Language Server Protocol
 
@@ -111,38 +92,41 @@ lsp_diagnostics(file)
 lsp_diagnostics_directory(directory)
 ```
 
-**When to use during Oracle analysis:**
+### When to Use During Oracle Analysis
 
 | Task | Use LSP? |
 |---|---|
 | Exact caller count for a hub function | Yes — `lsp_find_references` |
 | Type information for interfaces/contracts | Yes — `lsp_hover` |
 | Check for type errors across module | Yes — `lsp_diagnostics_directory` |
-| Bulk symbol listing for many files | No — Kai handles this (faster, parallel) |
-| Semantic concept search | No — use CocoIndex |
+| Bulk symbol listing for many files | No — GitNexus handles this faster |
+| Semantic concept search | No — use GitNexus hybrid search |
+| Dependency graph | No — use GitNexus edges |
 
-**Setup:** LSP is required. Language servers must be running. If `lsp_servers()` returns empty, stop and instruct user to configure a language server. Oracle will not proceed without it. Common setups:
-- TypeScript: `typescript-language-server` (usually auto-started by editors)
+**Setup:** LSP is required. Language servers must be running. If `lsp_servers()` returns empty, stop and instruct user to configure a language server. Common setups:
+- TypeScript: `typescript-language-server`
 - Rust: `rust-analyzer`
 - Go: `gopls`
 - Python: `pyright` or `pylsp`
 
 ## Phase 2 Detailed Tool Commands
 
-### Kai Analysis Block
+### GitNexus Analysis Block
 
-Run in parallel for all module files:
+Query the knowledge graph for each cluster:
 
 ```
-# Get symbol inventory for each file — fast overview without reading
-kai_symbols(file, kind="function", signatures=true)
+# Get all nodes (functions, classes) in a cluster
+# → Graph query for nodes matching cluster ID
 
-# Get file dependency graph
-kai_dependencies(file)  → what this file imports
-kai_dependents(file)    → what imports this file
+# Get edges (imports, calls, inheritance) for cluster files
+# → Graph query for edges where source or target is in cluster
 
-# Get full context for hub files (high-connectivity)
-kai_context(file, depth=2)  → symbols + deps + dependents + tests
+# Get execution flows through this cluster
+# → Flow tracing from entry points that pass through cluster
+
+# Hybrid search for cross-cutting patterns
+# → "error handling strategy", "retry pattern", "caching"
 ```
 
 ### LSP Analysis Block
@@ -163,65 +147,32 @@ lsp_hover(file, line, character)
 lsp_diagnostics(file)
 ```
 
-### Supplementary Tools Block
-
-Structure analyst prompt for module analysis:
-
-```
-You are the structure-analyst for module: {module_name}
-
-Tools to use:
-- Kai for symbol inventory and dependency tracking
-- LSP for precise type-aware references and diagnostics
-- scripts/tree-sitter-analyze.py for bulk AST analysis
-- Read tool for source file reading
-- Grep for quick symbol lookup
-
-Data sources:
-- codebase_map.json communities and edges for this module
-- dependency_graphs/{module}.json for detailed dependencies
-- Actual source files
-```
-
-### CocoIndex Commands
-
-Pattern discovery for cross-cutting concerns:
-
-```bash
-.venv-cocoindex/bin/python .cocoindex/query.py "error handling strategy" --top-k 5
-.venv-cocoindex/bin/python .cocoindex/query.py "retry and resilience pattern" --top-k 5
-.venv-cocoindex/bin/python .cocoindex/query.py "authentication authorization flow" --top-k 5
-```
-
 ### Enhanced Blast Radius
 
-For hub files identified by CodeIndex (5+ importers), use Kai and LSP for precise impact data:
+For hub nodes (5+ dependents), use GitNexus + LSP for precise impact data:
 
 ```
-# Kai: transitive impact analysis (walks dependency graph)
-kai_impact(file, max_depth=3)  → all affected files + tests
+# GitNexus: transitive impact via graph walk
+# Query edges transitively from hub node → all affected nodes + test files
 
 # LSP: precise reference count for specific exported functions
 lsp_find_references(file, line, char)  → exact call sites with line numbers
 ```
 
-This produces much richer blast radius documentation than CodeIndex alone:
-- CodeIndex: "file X has 12 importers" (static count)
-- Kai: "changing file X affects 18 files transitively, including 3 test files"
-- LSP: "function `handleAuth` at line 42 is called from 7 specific locations"
+This produces rich blast radius documentation:
+- GitNexus: "Changing file X affects 18 files transitively, including 3 test files"
+- LSP: "Function `handleAuth` at line 42 is called from 7 specific locations"
 
 ## Unified Analysis Workflow (Phase 2)
 
-When all tools are available, Oracle uses them in combination:
+When both tools are available, Oracle uses them in combination:
 
 ```
-1. CodeIndex codebase_map.json    → identify communities, hubs, metrics
-2. Kai kai_symbols (parallel)     → fast symbol inventory for all files
-3. Kai kai_dependencies           → file-level import graph
-4. CocoIndex semantic search      → discover cross-cutting patterns
-5. LSP lsp_find_references        → precise caller tracing for hubs
-6. LSP lsp_diagnostics            → catch type errors and warnings
-7. Read + Grep                    → fill gaps, read actual implementations
+1. GitNexus knowledge graph      → identify clusters, hubs, flows, dependencies
+2. GitNexus hybrid search        → discover cross-cutting patterns
+3. LSP lsp_find_references       → precise caller tracing for hubs
+4. LSP lsp_diagnostics           → catch type errors and warnings
+5. Read + Grep                   → fill gaps, read actual implementations
 ```
 
-All four tools work together to produce the richest possible documentation.
+Both tools work together to produce the richest possible documentation.

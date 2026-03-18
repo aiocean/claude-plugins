@@ -124,8 +124,8 @@
     {
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
-      "description": "Comprehensive codebase analysis and documentation: CodeIndex static analysis combined with CocoIndex semantic search, Kai semantic graph, and LSP precision tools. All four tools are required. Oracle writes architecture docs, module docs, and interactive HTML viewers.",
-      "version": "4.1.3",
+      "description": "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interactive HTML viewers.",
+      "version": "5.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -169,8 +169,8 @@
     {
       "name": "aio-code-review",
       "source": "./plugins/aio-code-review",
-      "description": "Ultimate code review with three-layer analytics (Kai semantic graph, CocoIndex semantic search, CodeWiki static analysis), domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
-      "version": "3.0.0",
+      "description": "Ultimate code review with GitNexus knowledge graph analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
+      "version": "4.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -223,8 +223,8 @@
     {
       "name": "aio-deep-plan",
       "source": "./plugins/aio-deep-plan",
-      "description": "Deep planning toolkit combining CocoIndex semantic search, Kai semantic graph, and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning), review (post-implementation check).",
-      "version": "1.0.0",
+      "description": "Deep planning toolkit combining GitNexus knowledge graph and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning), review (post-implementation check).",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -296,6 +296,15 @@
       "name": "aio-google-workspace",
       "source": "./plugins/aio-google-workspace",
       "description": "Google Workspace operations via gws CLI. Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat, and cross-service workflows (standup, meeting prep, weekly digest).",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-install",
+      "source": "./plugins/aio-install",
+      "description": "Install, enable, disable, and list aiocean plugins for the current project via settings.local.json.",
       "version": "1.0.0",
       "author": {
         "name": "aiocean"
