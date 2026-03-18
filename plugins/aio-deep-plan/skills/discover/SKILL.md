@@ -1,18 +1,16 @@
 ---
 name: discover
-description: This skill should be used when the user asks to "discover", "find code", "how does X work", "where is", "what handles", or needs to understand how something works before planning or coding. First step in the aio-deep-plan pipeline — follow with map, then plan. Requires aio-cocoindex for semantic search.
+description: This skill should be used when the user asks to "discover", "find code", "how does X work", "where is", "what handles", or needs to understand how something works before planning or coding. First step in the aio-deep-plan pipeline — follow with map, then plan. Requires GitNexus for hybrid search.
 ---
 
 # Discover — Find Relevant Code
 
-Semantic search across the entire codebase using CocoIndex. Use BEFORE planning or coding to understand what exists.
+Hybrid search across the entire codebase using GitNexus. Use BEFORE planning or coding to understand what exists.
 
 ## Prerequisites
 
-- CocoIndex set up in project (`.cocoindex/` directory + `.venv-cocoindex/`)
-  - If missing, tell user to run `/aio-cocoindex:aio-cocoindex-setup` first
-- Kai MCP server configured (`.kai/` directory)
-  - If missing, run `kai_refresh()` to initialize
+- GitNexus indexed in project — run `npx gitnexus analyze` if not yet indexed
+  - Verify with `npx gitnexus status`
 
 ## Workflow
 
@@ -23,15 +21,21 @@ From the user's request, generate diverse queries covering different angles:
 - **Functional**: "how does [feature] work"
 - **Structural**: "[component type] for [domain]"
 - **Cross-cutting**: "[pattern] across frontend and backend"
-- **Vietnamese OK**: Gemini embeddings handle multilingual
+- **Vietnamese OK**: GitNexus hybrid search handles multilingual
 
 ### Step 2: Run searches in parallel
 
-```bash
-.venv-cocoindex/bin/python .cocoindex/query.py "query here" --top-k 5
+Use the GitNexus MCP `query` tool for each search:
+
+```
+query("query here")
 ```
 
-Run 3-5 searches as separate parallel Bash calls. Use `--top-k 3` for focused, `--top-k 7` for broad.
+Run 3-5 searches as separate parallel MCP tool calls. Alternatively use the CLI:
+
+```bash
+npx gitnexus analyze
+```
 
 ### Step 3: Score and filter
 
@@ -41,20 +45,20 @@ Run 3-5 searches as separate parallel Bash calls. Use `--top-k 3` for focused, `
 | 0.55–0.65 | Related — worth knowing |
 | <0.55 | Tangential — skip unless desperate |
 
-### Step 4: Enrich with Kai (parallel)
+### Step 4: Enrich with GitNexus context (parallel)
 
 For each highly relevant file found, get symbol overview:
 
 ```
-kai_symbols(file, kind="function", signatures=true)
+context(file)
 ```
 
 This adds function names and signatures without reading the full file. Run in parallel for all relevant files.
 
-Optionally, get full context for the most important file:
+Optionally, get full context for the most important symbol:
 
 ```
-kai_context(file, symbol="main_function", depth=2)
+context(file, symbol="main_function")
 ```
 
 ### Step 5: Output discovery map
@@ -64,9 +68,9 @@ kai_context(file, symbol="main_function", depth=2)
 
 ### Highly Relevant (>0.65)
 - `path/file.ts` — [what it does]
-  Functions: fn1, fn2, fn3 (from Kai)
+  Functions: fn1, fn2, fn3 (from GitNexus context)
 - `path/file.rs` — [what it does]
-  Functions: fn1, fn2 (from Kai)
+  Functions: fn1, fn2 (from GitNexus context)
 
 ### Related (0.55–0.65)
 - `path/file.tsx` — [tangential but worth knowing]

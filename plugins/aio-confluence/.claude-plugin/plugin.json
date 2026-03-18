@@ -1,0 +1,6 @@
+{
+  "name": "aio-confluence",
+  "description": "Confluence CLI for page management, search, and content operations. Search pages with CQL, get/create/update pages, manage comments, and list spaces.",
+  "version": "1.0.0",
+  "author": "aiocean"
+}

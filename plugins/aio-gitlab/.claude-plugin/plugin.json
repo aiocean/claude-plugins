@@ -1,0 +1,6 @@
+{
+  "name": "aio-gitlab",
+  "description": "GitLab CLI for project management, merge requests, pipelines, jobs, and git flow operations via gitlab-mcp.",
+  "version": "1.0.0",
+  "author": "aiocean"
+}

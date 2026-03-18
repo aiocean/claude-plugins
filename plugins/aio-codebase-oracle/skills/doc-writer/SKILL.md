@@ -1,15 +1,17 @@
 ---
 name: doc-writer
-description: This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Generates comprehensive architecture documentation by combining aio-static-index (CodeIndex) with aio-cocoindex (semantic search). Run aio-cocoindex-setup and aio-static-index first if not yet configured.
+description: This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Generates comprehensive architecture documentation powered by GitNexus knowledge graph and LSP precision tools.
 ---
 
 # Codebase Oracle
 
-Comprehensive architecture documentation: CodeIndex static analysis combined with Oracle direct documentation writing and specialized analyst teams.
+Comprehensive architecture documentation powered by GitNexus knowledge graph combined with Oracle direct documentation writing and LSP precision analysis.
 
-**Core Philosophy:** Oracle **writes all documentation from scratch** using CodeIndex's static analysis data (codebase map, dependency graphs, metrics, communities) combined with direct source code reading. CodeIndex provides the quantitative foundation; Oracle provides the qualitative analysis and writes every doc.
+**Core Philosophy:** Oracle **writes all documentation from scratch** using GitNexus's knowledge graph (structure, dependencies, clusters, flows, hybrid search) combined with LSP type-aware analysis and direct source code reading.
 
-**What CodeIndex Provides:** Static analysis output — `codebase_map.json` (components, edges, metrics, communities, hubs), `dependency_graphs/*.json` (detailed dependency data), and `.tpl` templates for doc structure.
+**What GitNexus Provides:** A precomputed knowledge graph — nodes (functions, classes, modules), edges (imports, calls, inheritance), clusters (functional communities with cohesion scores), execution flows from entry points, and hybrid search (BM25 + semantic). All from a single `npx gitnexus analyze`.
+
+**What LSP Provides:** Type-aware precision — hover info, exact reference counts, caller tracing, diagnostics, rename safety.
 
 **What Oracle Provides:** All written documentation — module docs, architecture analysis, key flows, dependency narratives, failure modes, design rationale, and decision guidance.
 
@@ -30,7 +32,7 @@ Every non-trivial claim must be represented as:
 
 1. `Claim` - factual statement.
 2. `Evidence` - one or more `path:line` references.
-3. `Confidence` - `▓░░░░` to `▓▓▓▓▓`.
+3. `Confidence` - `░░░░░` to `▓▓▓▓▓`.
 4. `Impact` - why this matters to decisions.
 
 Unknowns must be written as `Unknown` with a concrete verification step. Never present assumptions as facts.
@@ -68,17 +70,13 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 Before starting any phase, detect which analysis tools are available. Oracle adapts its workflow based on what's installed.
 
 ```bash
-# 1. CodeIndex (REQUIRED — static analysis foundation)
-.codeindex/bin/codeindex --version 2>/dev/null && echo "codeindex: YES" || echo "codeindex: NO — run /aio-codebase-oracle:aio-codebase-index to install"
+# 1. GitNexus (REQUIRED — knowledge graph engine)
+npx gitnexus --version 2>/dev/null && echo "gitnexus: YES" || echo "gitnexus: NO — install with: npm install -g gitnexus"
 
-# 2. CocoIndex (REQUIRED — semantic search)
-ls .cocoindex/query.py 2>/dev/null && echo "cocoindex: YES" || { echo "cocoindex: NO — REQUIRED. Run /aio-cocoindex:aio-cocoindex-setup to install"; exit 1; }
+# 2. GitNexus MCP (RECOMMENDED — enables graph queries from Claude Code)
+# Check if GitNexus MCP tools are available in tool list
 
-# 3. Kai (REQUIRED — semantic graph, symbols, dependencies)
-kai_status() 2>/dev/null || { echo "kai: NO — REQUIRED. Initialize with kai_refresh() or configure Kai MCP server"; exit 1; }
-# Check: .kai/ directory exists
-
-# 4. LSP (REQUIRED — precise type-aware references)
+# 3. LSP (REQUIRED — precise type-aware references)
 # Must have LSP MCP tools configured (lsp_servers, lsp_hover, etc.)
 ```
 
@@ -86,46 +84,41 @@ kai_status() 2>/dev/null || { echo "kai: NO — REQUIRED. Initialize with kai_re
 
 | Tool | Status | Impact on Oracle |
 |------|--------|-----------------|
-| CodeIndex | Required | Static analysis foundation — will not proceed without it |
-| CocoIndex | Required | Semantic search for concept discovery, cross-cutting concerns |
-| Kai | Required | Symbol inventory, file dependencies, impact analysis, snapshot diffing |
+| GitNexus | Required | Knowledge graph foundation — structure, deps, clusters, flows, search |
+| GitNexus MCP | Recommended | Enables graph queries directly; fallback: read JSON output |
 | LSP | Required | Precise type info, caller tracing, diagnostics |
 
-**If any tool is missing**, stop and inform the user:
+**If GitNexus is missing**, stop and inform the user:
 
 ```
 Tools detected:
-✓ CodeIndex — static analysis ready
-✗ CocoIndex — MISSING (install: /aio-cocoindex:aio-cocoindex-setup)
-✓ Kai — semantic graph available
-✗ LSP — MISSING (configure language servers)
+✗ GitNexus — MISSING (install: npm install -g gitnexus)
+✓ LSP — language servers available
 
-ERROR: All 4 tools are required. Install missing tools before proceeding.
+ERROR: GitNexus is required. Install it before proceeding.
 ```
 
-Oracle will NOT proceed until all tools are available.
+Oracle will NOT proceed until GitNexus is available.
 
 ## Integration Architecture
 
-CodeIndex runs static analysis (Phase 0) → Oracle reads source + analyzes (Phases 1-2) → Oracle writes all docs (Phase 3). See [references/architecture-analysis.md](references/architecture-analysis.md) for detailed architecture diagrams.
+GitNexus builds knowledge graph (Phase 0) → Oracle reads graph + analyzes with LSP (Phases 1-2) → Oracle writes all docs (Phase 3). See [references/architecture-analysis.md](references/architecture-analysis.md) for detailed architecture diagrams.
 
-**Key principle:** CodeIndex provides quantitative data (metrics, deps, communities). Oracle provides qualitative analysis and writes every doc.
+**Key principle:** GitNexus provides the knowledge graph (structure, dependencies, clusters, flows). Oracle provides qualitative analysis and writes every doc.
 
-## CodeIndex Static Analysis Output
+## GitNexus Knowledge Graph Output
+
+After running `npx gitnexus analyze`, GitNexus produces a knowledge graph with:
 
 ```
-docs/
-├── codebase_map.json            # Components, edges, metrics, communities, hubs
-├── dependency_graphs/           # Per-module dependency JSON files
-└── templates/                   # Doc structure templates (.tpl)
+Nodes:    Functions, classes, methods, interfaces (with file:line locations)
+Edges:    Import references, function calls, class inheritance, type usage
+Clusters: Functional communities with cohesion scores
+Flows:    Execution paths from entry points
+Search:   Hybrid BM25 + semantic search across the graph
 ```
 
-**What CodeIndex does NOT output in static-only mode:**
-- ❌ `{module}.md` files - Oracle writes these
-- ❌ `module_tree.json` - Not produced without `--use-agent-sdk`
-- ❌ `.codeindex-cache/` - Does not exist
-- ❌ `metadata.json` - Not produced
-- ❌ `overview.md` - Not produced
+**MCP Integration:** When GitNexus MCP server is configured, Oracle queries the graph directly using MCP tools. When not available, Oracle reads the JSON output from `npx gitnexus analyze`.
 
 ## Workflow: Documentation Generation
 
@@ -135,69 +128,52 @@ docs/
 
 | User Request | Run These Phases |
 |--------------|------------------|
-| "Analyze codebase" / "Full analysis" | All phases (0-4) |
+| "Analyze codebase" / "Full analysis" | All phases (0-3) |
 | "Find missing docs" / "What's not documented?" | Phase 0, 1 only |
-| "Update docs" / "Refresh docs" | Phase 0-4 (full re-run) |
-| "Quick check" / "Is this up to date?" | Phase 1 only (review static analysis data) |
+| "Update docs" / "Refresh docs" | Phase 0-3 (full re-run) |
+| "Quick check" / "Is this up to date?" | Phase 1 only (review graph data) |
 
-### Phase 0: Run CodeIndex Static Analysis (MANDATORY first step)
+### Phase 0: Build GitNexus Knowledge Graph (MANDATORY first step)
 
-**You MUST run CodeIndex before any manual analysis.** Do not skip this step. Do not substitute with manual file reading. CodeIndex generates static analysis data that Oracle uses as the quantitative foundation for documentation.
+**You MUST run GitNexus before any manual analysis.** Do not skip this step. Do not substitute with manual file reading. GitNexus generates the knowledge graph that Oracle uses as the foundation for documentation.
 
 ```bash
-# Check if CodeIndex static analysis already exists and is recent
-ls docs/codebase_map.json docs/dependency_graphs/ 2>/dev/null
+# Run GitNexus analysis from the project root
+npx gitnexus analyze
 
-# If static analysis doesn't exist OR user requested fresh analysis → run CodeIndex
-.codeindex/bin/codeindex generate --verbose --no-cache
-
-# If static analysis exists and user just wants to update → still run with cache
-.codeindex/bin/codeindex generate --verbose
+# If GitNexus MCP server is configured, the graph is queryable via MCP tools
+# Otherwise, read the output JSON directly
 ```
 
-**Flags explained:**
-- `--verbose`: Shows progress so user can track generation
-- `--no-cache`: Forces fresh analysis (use when no static analysis exists or code has changed)
+**Do NOT skip GitNexus and fall back to manual file reading** — GitNexus provides dependency resolution, clustering, and flow tracing that manual analysis cannot replicate efficiently.
 
-**Do NOT use `--use-agent-sdk`** — Oracle writes all documentation directly. CodeIndex runs in static analysis mode only.
-
-**Do NOT use globally installed `codeindex`** — Always use the project-local `.codeindex/bin/codeindex`. This prevents version conflicts between projects.
-
-**When to use `--no-cache`:**
-- First run (no existing static analysis)
-- User explicitly asks for fresh/full analysis
-- Code has changed significantly since last run
-
-**When to skip `--no-cache`:**
-- Static analysis exists and codebase hasn't changed
-- User says "update docs" and only wants Oracle to re-generate written docs
-
-**If `codeindex` is not installed**, inform the user:
+**If `gitnexus` is not installed**, inform the user:
 ```
-CodeIndex is required. Run /aio-codebase-oracle:aio-static-index to install.
+GitNexus is required. Install with: npm install -g gitnexus
 ```
-Do NOT proceed with manual analysis as a substitute — CodeIndex's static analysis provides the dependency graph, metrics, and community detection that Oracle builds on.
 
-### Phase 1: Scope and Static Analysis Ingestion
+### Phase 1: Scope and Knowledge Graph Ingestion
 
 **Decision: What mode to run?**
 - User wants "quick check only" → Run only Phase 1 (review data), report findings
-- User wants "find gaps" → Run Phase 1, identify undocumented modules/communities
+- User wants "find gaps" → Run Phase 1, identify undocumented modules/clusters
 - User wants "full analysis" → Run all phases (default)
 
-#### 1.1 Ingest CodeIndex Static Analysis
+#### 1.1 Ingest GitNexus Knowledge Graph
 
-Read and parse CodeIndex's static analysis output:
+Read and parse GitNexus's knowledge graph output:
 
-1. **Parse `codebase_map.json`**: Extract components, edges, metrics, communities, and hubs
-2. **Parse `dependency_graphs/*.json`**: Extract detailed per-module dependency data
-3. **Note `graph.html.tpl`**: Available in this skill's directory for generating an interactive graph viewer in Phase 3
+1. **Extract nodes**: Functions, classes, methods with file:line locations
+2. **Extract edges**: Import references, function calls, inheritance, type usage
+3. **Extract clusters**: Functional communities with cohesion scores (these become module docs)
+4. **Extract flows**: Execution paths from entry points
+5. **Identify hubs**: High-connectivity nodes (these need blast radius analysis)
 
-From `codebase_map.json`, identify:
-- **Communities**: Groups of related components (these become module docs)
-- **Hubs**: High-connectivity components (these need blast radius analysis)
-- **Edges**: Dependency relationships between components
-- **Metrics**: File counts, complexity indicators, coupling scores
+From the knowledge graph, identify:
+- **Clusters/Communities**: Groups of related components (these become module docs)
+- **Hubs**: High fan-in nodes (these need blast radius analysis)
+- **Entry points**: Where execution flows begin
+- **Edges**: All relationship types between components
 
 #### 1.2 Detect Missing Context (Infrastructure, Serverless, Multi-lang)
 
@@ -234,27 +210,27 @@ Document these findings in `CODEBASE_MAP.md` under "Infrastructure & Runtime Con
 
 ### Phase 2: Analysis Pass (Structure + Meaning)
 
-Oracle reads actual source code and builds its understanding. Run parallel analysis agents per module/community.
+Oracle reads actual source code and builds its understanding. Run parallel analysis agents per module/cluster.
 
 #### 2.1 Code Structure Analysis
 
-**Method:** Use all required tools in order of precision.
+**Method:** Use GitNexus graph + LSP in order of precision.
 
 | Priority | Tool | Purpose |
 |----------|------|---------|
-| 1st | **Kai** `kai_symbols` / `kai_dependencies` / `kai_dependents` | Symbol inventory + dependency graph |
-| 2nd | **LSP** `lsp_document_symbols` / `lsp_find_references` | Type-aware symbols + precise caller tracing |
-| 3rd | **CocoIndex** semantic search | Cross-cutting patterns |
+| 1st | **GitNexus** graph queries | Node inventory, edges, clusters, flows, hub detection |
+| 2nd | **GitNexus** hybrid search | Cross-cutting patterns, semantic concept discovery |
+| 3rd | **LSP** `lsp_document_symbols` / `lsp_find_references` | Type-aware symbols + precise caller tracing |
 | 4th | **Read + Grep** | Fill gaps, read implementations |
 
 For detailed tool commands and usage patterns, see [references/tools-integration.md](references/tools-integration.md).
 
-Steps for each file:
-1. Read codebase_map.json, extract components in this module's community
-2. Get symbols via Kai (`kai_symbols`), enrich with LSP (`lsp_document_symbols`)
-3. Map dependencies via Kai (`kai_dependencies` / `kai_dependents`)
-4. For hub files: Kai `kai_impact` + LSP `lsp_find_references` for blast radius
-5. CocoIndex semantic search for cross-cutting patterns
+Steps for each cluster:
+1. Query GitNexus graph for nodes in this cluster (functions, classes, deps)
+2. Enrich with LSP (`lsp_document_symbols`) for type-aware hierarchy
+3. Map dependencies from GitNexus edges (imports, calls, inheritance)
+4. For hub nodes: GitNexus flow tracing + LSP `lsp_find_references` for blast radius
+5. GitNexus hybrid search for cross-cutting patterns ("error handling", "retry logic")
 6. Read + Grep to fill gaps
 7. Build comprehensive module understanding with evidence (path:line)
 
@@ -293,9 +269,9 @@ For each module, build decision-support context:
 6. **Runtime context** (for serverless/Lambda): cold start implications, timeout risks, concurrency limits
 7. **Infrastructure dependencies**: required IAM permissions, VPC config, external service dependencies
 
-**Enhanced blast radius:** For hub files (5+ importers), use `kai_impact(file, max_depth=3)` for transitive impact and `lsp_find_references` for exact call sites. See [references/tools-integration.md](references/tools-integration.md) for commands and interpretation.
+**Enhanced blast radius:** For hub nodes (5+ dependents), use GitNexus flow tracing for transitive impact and `lsp_find_references` for exact call sites. See [references/tools-integration.md](references/tools-integration.md) for commands and interpretation.
 
-**Pattern discovery:** Use CocoIndex semantic search to find cross-cutting patterns ("error handling strategy", "retry and resilience pattern"). Document discovered patterns in module docs under "Design Patterns".
+**Pattern discovery:** Use GitNexus hybrid search to find cross-cutting patterns ("error handling strategy", "retry and resilience pattern"). Document discovered patterns in module docs under "Design Patterns".
 
 ### Phase 3: Write Documentation
 
@@ -303,14 +279,14 @@ Oracle writes all documentation from scratch using analysis data from Phase 2.
 
 #### Templates
 
-All 18 templates live in `codeindex/templates/`. Use them as structural guides — Oracle fills with analysis data from `codebase_map.json` and direct source code reading.
+All 17 doc templates live in this skill's `templates/` directory. Use them as structural guides — Oracle fills with analysis data from GitNexus graph and direct source code reading.
 
 **Structure & analysis:**
 - `overview.md.tpl` — project overview, health dashboard, module map
 - `module.md.tpl` — per-module: components, hubs, deps, quality metrics
 - `architecture.md.tpl` — C4 diagrams, layer map, community detection, design decisions
 - `component.md.tpl` — per-component: signature, metrics, dependencies
-- `dependencies.md.tpl` — dependency graph, hubs, blast radius, circular deps, temporal coupling
+- `dependencies.md.tpl` — dependency graph, hubs, blast radius, circular deps
 - `quality.md.tpl` — complexity hotspots, maintainability index, violations
 
 **Cross-cutting concerns:**
@@ -330,13 +306,13 @@ All 18 templates live in `codeindex/templates/`. Use them as structural guides �
 
 #### Writing each module doc
 
-For each module/community identified in Phase 1:
+For each module/cluster identified in Phase 1:
 
 **Step 1: Write the module doc from scratch** using:
-- `codeindex/templates/module.md.tpl` as structural guide (components table, hub analysis, deps, quality metrics)
-- Static analysis data from `codebase_map.json` (metrics, dependencies, communities, hubs)
+- Templates from `templates/` directory as structural guides
+- GitNexus cluster data (nodes, edges, cohesion scores, flows)
+- LSP type information and reference counts
 - Direct source code reading from Phase 2
-- Match template to doc type — all 18 templates in `codeindex/templates/` cover: overview, module, architecture (with C4), component, dependencies (with blast radius), quality, key-flows, api-surface, data-model, infrastructure, testing, observability, security, onboarding, adr, product-requirements, CODEBASE_MAP
 
 **Step 2: Add evidence inline.** Sprinkle `path:line` references throughout, not in a separate table. Example:
 - "The handler validates the request payload (`internal/handler/create.go:45`)"
@@ -365,7 +341,7 @@ Only metadata goes at the bottom:
 ```markdown
 <!-- ORACLE-META
 Written by codebase-oracle | {timestamp}
-Data: CodeIndex static analysis + direct source reading
+Data: GitNexus knowledge graph + LSP + direct source reading
 Audience: {audience} | Confidence: {overall}%
 Unknowns: {N} items pending verification
 -->
@@ -373,22 +349,22 @@ Unknowns: {N} items pending verification
 
 **Step 6: Generate interactive graph viewer (`graph.html`).**
 
-The `graph.html.tpl` template lives in this skill's directory (not in codeindex). It produces a self-contained D3 force-directed graph with module clustering, convex hulls, colored links, search, tooltips, minimap, and keyboard shortcuts.
+The `graph.html.tpl` template lives in this skill's directory. It produces a self-contained D3 force-directed graph with module clustering, convex hulls, colored links, search, tooltips, minimap, and keyboard shortcuts.
 
 **How to generate:**
 
 1. **Read the template** `graph.html.tpl` from this skill's directory.
 
-2. **Read `docs/codebase_map.json`** — this is the data source.
+2. **Read GitNexus graph data** — nodes, edges, clusters.
 
-3. **Copy the template to `docs/graph.html`** and fill in the 4 JavaScript data blocks near the top of `<script>`. All data comes from `codebase_map.json`:
+3. **Copy the template to `docs/graph.html`** and fill in the JavaScript data blocks near the top of `<script>`. Map GitNexus graph data to:
 
 | Data block | Source | Description |
 |---|---|---|
-| `filesData` | `nodes[]` | Object keyed by file path. Each: `{functions, max_complexity, hub_count, community_ids, function_names}` |
-| `edgesData` | `edges[]` | Array of `{source, target, weight}` |
-| `summaryData` | `summary_metrics` | `{total_nodes, total_edges, hub_files, circular_dependencies}` |
-| `moduleConfig` | Inferred from communities/dirs | `{"Module Name": {color: "#hex", files: [...]}}` per community |
+| `filesData` | GitNexus nodes | Object keyed by file path. Each: `{functions, max_complexity, hub_count, community_ids, function_names}` |
+| `edgesData` | GitNexus edges | Array of `{source, target, weight}` |
+| `summaryData` | Graph metrics | `{total_nodes, total_edges, hub_files, circular_dependencies}` |
+| `moduleConfig` | GitNexus clusters | `{"Module Name": {color: "#hex", files: [...]}}` per cluster |
 
 4. **Replace the title** — Change `<title>` and `<h1>` to the actual project name.
 
@@ -419,9 +395,9 @@ Do not flatten everything into a single overview diagram. Each diagram answers a
 ## Rules
 
 ALWAYS:
-- **Write all documentation from scratch** — Oracle is the sole author, not an editor of CodeIndex output
-- **Use CodeIndex static analysis as quantitative foundation** (metrics, dependencies, communities, hubs)
-- **Read actual source code for all qualitative claims** — never rely solely on static analysis data
+- **Write all documentation from scratch** — Oracle is the sole author
+- **Use GitNexus knowledge graph as the foundation** (structure, dependencies, clusters, flows, search)
+- **Read actual source code for all qualitative claims** — never rely solely on graph data
 - **Add evidence inline** (`path:line`) throughout the content, not in a separate table
 - **Insert sections where they belong** — failure modes near flows, blast radius near dependencies
 - Produce one coherent document that reads naturally
@@ -437,9 +413,7 @@ NEVER:
 - **Append a "validation report" section** — there is nothing to validate against
 - **Duplicate information** — don't repeat content in both the doc body and a footer table
 - Create separate validation docs alongside module docs
-- Reference `.codeindex-cache/` - does not exist
-- Reference `module_tree.json` - not produced in static-only mode
-- Use `--use-agent-sdk` flag — CodeIndex runs static analysis only
+- Reference `.codeindex-cache/`, `module_tree.json`, `codebase_map.json` — these are from the old CodeIndex system
 - Write high-confidence claims without evidence
 - Leave generic summaries that do not help decisions
 - Hide uncertainty when evidence is incomplete
@@ -461,35 +435,29 @@ For full gate definitions and manual check commands, see [references/quality-gat
 ```
 docs/
 ├── CODEBASE_MAP.md              # Oracle-written index with priorities and unknowns
-├── {module}.md                  # Oracle-written module docs (one per community)
-│   ├── Structure from CodeIndex templates
-│   ├── Data from codebase_map.json + source code reading
+├── {module}.md                  # Oracle-written module docs (one per cluster)
+│   ├── Data from GitNexus graph + LSP + source code reading
 │   ├── Evidence (path:line) throughout
 │   ├── Decision-support sections (failure modes, blast radius, rationale)
 │   └── <!-- ORACLE-META --> compact footer
-├── codebase_map.json            # CodeIndex static analysis (unchanged)
-├── graph.html                   # AI-generated interactive viewer (from skill's graph.html.tpl)
-├── dependency_graphs/           # CodeIndex dependency data (unchanged)
-└── templates/                   # CodeIndex doc templates (unchanged)
+└── graph.html                   # Interactive D3 viewer (from skill's graph.html.tpl)
 ```
 
 ## External Tools Integration
 
-Oracle requires all four tools for comprehensive analysis. Each provides a unique dimension.
+Oracle requires GitNexus + LSP for comprehensive analysis. Each provides a unique dimension.
 
 | Tool | Primary Use |
 |------|------------|
-| CodeIndex | Community detection, metrics, dependency graphs |
-| CocoIndex | Semantic concept search, cross-cutting patterns |
-| Kai | Symbol inventory, file dependencies, impact analysis |
+| GitNexus | Knowledge graph: structure, dependencies, clusters, flows, hybrid search |
 | LSP | Precise type info, caller tracing, diagnostics |
 
 For detailed tool commands, comparison matrix, setup instructions, and usage guidelines, see [references/tools-integration.md](references/tools-integration.md).
 
 ## Troubleshooting
 
-**No CodeIndex static analysis:** Oracle MUST run `.codeindex/bin/codeindex generate --verbose --no-cache` itself in Phase 0. Do not skip to manual analysis.
+**GitNexus not installed:** Install with `npm install -g gitnexus` or use `npx gitnexus analyze`.
 
-**`codeindex` not found:** Run `/aio-codebase-oracle:aio-static-index` to install. It copies the bundled `codeindex/` package from the plugin root into the project and installs into a local `.codeindex/` venv.
+**GitNexus MCP not configured:** Oracle can still work by reading GitNexus JSON output directly. MCP integration is recommended for interactive graph queries.
 
-**Stale static analysis:** Code changed since last CodeIndex run. Re-run: `.codeindex/bin/codeindex generate --verbose --no-cache`
+**LSP not available:** Configure language servers for your project's languages. Without LSP, Oracle loses type-aware analysis but can still produce docs from GitNexus graph + source reading.
