@@ -1,47 +1,46 @@
 ---
 name: review
-description: This skill should be used when the user asks to "check my changes", "before I commit", "did I miss anything", "review implementation", or needs post-implementation validation. Part of the aio-deep-plan pipeline — run snapshot before coding, then review after. Uses aio-cocoindex for duplication check and Kai for semantic diff. For full code review, use aio-code-review instead.
+description: This skill should be used when the user asks to "check my changes", "before I commit", "did I miss anything", "review implementation", or needs post-implementation validation. Part of the aio-deep-plan pipeline — run snapshot before coding, then review after. Uses GitNexus for duplication check and change detection. For full code review, use aio-code-review instead.
 ---
 
 # Review — Post-Implementation Check
 
-Review completed work using semantic diff, duplication detection, and type checking.
+Review completed work using change detection, duplication detection, and type checking.
 
 ## Prerequisites
 
-- Baseline snapshot from `/snapshot` (snapshot_id)
-- CocoIndex available for duplication check
+- Baseline snapshot from `/snapshot`
+- GitNexus indexed (`npx gitnexus analyze`) for duplication check
 - LSP for diagnostics
 
 ## Workflow
 
-### Step 1: Semantic diff (Kai)
+### Step 1: Change detection (GitNexus)
 
 ```
-kai_refresh()  → new_snapshot_id
-kai_diff(base="[baseline_id]", head="[new_snapshot_id]")
+detect_changes()
 ```
 
-For each changed file, get symbol changes:
+For each changed file, get symbol context:
 
 ```
-kai_symbols(file, kind="function", signatures=true)
+context(file)
 ```
 
-### Step 2: Duplication check (CocoIndex)
+### Step 2: Duplication check (GitNexus)
 
-For each new function or significant code block:
+For each new function or significant code block, use the GitNexus MCP `query` tool:
 
-```bash
-.venv-cocoindex/bin/python .cocoindex/query.py "description of new code" --top-k 3
+```
+query("description of new code")
 ```
 
 Flag if similarity >0.75 — potential duplication or missed reuse.
 
-### Step 3: Convention check (CocoIndex)
+### Step 3: Convention check (GitNexus)
 
-```bash
-.venv-cocoindex/bin/python .cocoindex/query.py "pattern used in new code" --top-k 3
+```
+query("pattern used in new code")
 ```
 
 Verify new code follows existing conventions.
@@ -58,7 +57,7 @@ lsp_diagnostics_directory(dir)  → broader check
 ```
 ## Review: [what was implemented]
 
-### Changes (from kai_diff)
+### Changes (from detect_changes)
 - `file-a.ts`: Added `fnX`, modified `fnY`
 - `file-b.rs`: Added struct `Z`, new command `cmd`
 
@@ -82,7 +81,7 @@ lsp_diagnostics_directory(dir)  → broader check
 
 ## Quick Review (small changes, <3 files)
 
-Skip Kai diff. Just run:
+Skip change detection. Just run:
 1. `lsp_diagnostics` on changed files
-2. One CocoIndex duplication search
+2. One GitNexus duplication search via `query`
 3. Quick convention check
