@@ -1,6 +1,8 @@
 ---
 name: aio-plan
 description: This skill should be used when the user asks to "plan implementation", "how should I implement", "approach", "strategy", or needs a concrete implementation plan with files, changes, and risks. Third step in the aio-deep-plan pipeline — run discover and map first. Uses GitNexus to check for duplicates and conventions.
+context: fork
+agent: Plan
 ---
 
 # Plan — Implementation Planning

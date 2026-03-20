@@ -1,6 +1,7 @@
 ---
 name: aio-debug
 description: This skill should be used when the user asks to "debug", "fix bug", "fixbug", "investigate error", "troubleshoot", "why is this broken", "not working", "failing test", "unexpected behavior", or encounters any bug, error, or test failure. Orchestrates systematic debugging with codebase understanding, code review, and quality verification for maximum fix effectiveness.
+context: fork
 ---
 
 # DebugFix - Systematic Debug & Fix Orchestrator
