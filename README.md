@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-A curated collection of 22 plugins for Claude Code — from codebase analysis to iOS debugging to ebook publishing.
+A curated collection of 23 plugins for Claude Code — from codebase analysis to iOS debugging to ebook publishing.
 
 ## Quick Start
 
@@ -77,6 +77,7 @@ A curated collection of 22 plugins for Claude Code — from codebase analysis to
 |--------|-------------|
 | **aio-jira** | Jira via MCP: issue management, sprint tracking, workflow transitions, JQL search, dev info. Auto-installs jira-mcp server. |
 | **aio-remove-bg** | Remove image backgrounds — threshold-based (fast) or AI-powered (rembg). Auto-trims transparent edges. |
+| **aio-rookie** | Extract browser cookies with rookiepy, export Netscape cookie files, and replay authenticated requests from local browser sessions. |
 
 ## Workflows
 

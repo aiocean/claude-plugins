@@ -309,6 +309,15 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "aio-rookie",
+      "source": "./plugins/aio-rookie",
+      "description": "Extract browser cookies with rookiepy, export Netscape cookie files, and replay authenticated requests from local browser sessions.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }
