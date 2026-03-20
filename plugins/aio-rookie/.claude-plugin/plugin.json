@@ -1,0 +1,10 @@
+{
+  "name": "aio-rookie",
+  "description": "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  },
+  "repository": "https://github.com/aiocean/claude-plugins",
+  "license": "MIT"
+}
