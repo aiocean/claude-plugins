@@ -2,7 +2,7 @@
 name: aio-doc-writer
 description: This skill should be used when the user asks to "analyze codebase", "map architecture", "understand this project", "document architecture", "explore codebase", "what does this codebase do", "codebase map", or "codebase oracle". Generates comprehensive architecture documentation powered by GitNexus knowledge graph and LSP precision tools.
 context: fork
-agent: Explore
+agent: aio-architect
 ---
 
 # Codebase Oracle
