@@ -1,5 +1,5 @@
 ---
-name: discover
+name: aio-discover
 description: This skill should be used when the user asks to "discover", "find code", "how does X work", "where is", "what handles", or needs to understand how something works before planning or coding. First step in the aio-deep-plan pipeline — follow with map, then plan. Requires GitNexus for hybrid search.
 ---
 
