@@ -7,12 +7,13 @@ description: This skill should be used when the user asks to "manage skills", "d
 
 Manages skills, agents, and provides usage analytics to optimize Claude Code workflow.
 
-## Script
+## Environment
 
-Before calling any script, resolve the scripts directory (version may vary):
-```bash
-CM="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-claude-manager/*/skills/aio-claude-manager 2>/dev/null | sort -V | tail -1)"
-```
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-claude-manager/*/skills/aio-claude-manager 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+
+Set `CM` to the Scripts path shown above.
+
+## Script
 
 ```bash
 $CM/manage.sh [command] [args]

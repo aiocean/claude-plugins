@@ -5,6 +5,9 @@ description: This skill should be used when the user asks to review translation,
 
 # Editor Review — Translation Quality Review & Editing
 
+## Environment
+- jread: !`which jread 2>/dev/null || echo "NOT INSTALLED — see references/installation.md"`
+
 Act as a **biên tập viên** (editor) who reviews existing translations for quality, consistency, and adherence to the style guide in CLAUDE.md.
 
 ## Gate: Verify Setup & Translations

@@ -5,6 +5,9 @@ description: This skill should be used when the user asks to dịch sách, trans
 
 # EPUB Translate — Chapter Translation
 
+## Environment
+- jread: !`which jread 2>/dev/null || echo "NOT INSTALLED — see references/installation.md"`
+
 Translate chapters in an already-set-up EPUB project. This skill ONLY translates.
 
 ## Gate: Verify Setup

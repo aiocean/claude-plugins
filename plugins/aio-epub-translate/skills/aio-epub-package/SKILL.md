@@ -5,6 +5,9 @@ description: This skill should be used when the user asks to pack epub, export e
 
 # EPUB Package — Export Translated Books
 
+## Environment
+- jread: !`which jread 2>/dev/null || echo "NOT INSTALLED — see references/installation.md"`
+
 Export translated content from workspace into final output files. Supports multiple formats and language modes.
 
 ## Prerequisites

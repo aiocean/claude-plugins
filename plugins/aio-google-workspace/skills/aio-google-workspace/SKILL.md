@@ -13,6 +13,10 @@ description: |
 
 # Google Workspace (gws CLI)
 
+## Environment
+- gws: !`which gws 2>/dev/null || echo "NOT INSTALLED"`
+- gws auth: !`gws auth status 2>/dev/null || echo "NOT AUTHENTICATED — run: gws auth login"`
+
 Interact with Google Workspace services using the `gws` CLI tool.
 
 ## Prerequisites

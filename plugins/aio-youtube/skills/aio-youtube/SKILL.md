@@ -5,9 +5,14 @@ description: This skill should be used when the user asks to "search YouTube", "
 
 # YouTube
 
-Before calling any script, resolve the scripts directory (version may vary):
+## Environment
+- yt-dlp: !`which yt-dlp 2>/dev/null || echo "NOT INSTALLED"`
+- jq: !`which jq 2>/dev/null || echo "NOT INSTALLED"`
+- curl: !`which curl 2>/dev/null || echo "NOT INSTALLED"`
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-youtube/*/skills/aio-youtube/scripts 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+
 ```bash
-YT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-youtube/*/skills/aio-youtube/scripts | sort -V | tail -1)"
+YT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-youtube/*/skills/aio-youtube/scripts 2>/dev/null | sort -V | tail -1)"
 ```
 
 Then call scripts as: `$YT/yt-search "query"`

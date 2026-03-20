@@ -5,9 +5,12 @@ description: This skill should be used when the user asks to extract browser coo
 
 # Rookie
 
-Use this skill to extract cookies from local browsers with `rookiepy`, export them as JSON or Netscape, or replay an authenticated request with the extracted session.
+## Environment
+- python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
+- rookiepy: !`python3 -c "import rookiepy" 2>/dev/null && echo "installed" || echo "NOT INSTALLED — pip3 install -U rookiepy"`
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-rookie/*/skills/aio-rookie 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
 
-Before calling any script, resolve the installed skill path:
+Use this skill to extract cookies from local browsers with `rookiepy`, export them as JSON or Netscape, or replay an authenticated request with the extracted session.
 
 ```bash
 ROOKIE="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-rookie/*/skills/aio-rookie 2>/dev/null | sort -V | tail -1)"

@@ -5,15 +5,11 @@ description: This skill should be used when the user asks to setup translation, 
 
 # EPUB Setup — Translation Project Setup
 
+## Environment
+- jread: !`which jread 2>/dev/null || echo "NOT INSTALLED — see references/installation.md"`
+- bun: !`which bun 2>/dev/null || echo "NOT INSTALLED"`
+
 Set up a new EPUB translation project. Creates project structure, unpacks the EPUB, marks content, and generates CLAUDE.md with glossary and style guide.
-
-## Prerequisites
-
-```bash
-which jread || echo "NOT INSTALLED — see references/installation.md"
-```
-
-If missing → see `references/installation.md`
 
 ## What This Skill Does
 

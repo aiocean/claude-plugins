@@ -5,6 +5,12 @@ description: This skill should be used when the user asks to "setup gitnexus", "
 
 # GitNexus Manager
 
+## Environment
+- node: !`node --version 2>/dev/null || echo "NOT INSTALLED (requires >= 18)"`
+- npx: !`which npx 2>/dev/null || echo "NOT INSTALLED"`
+- gitnexus: !`npx gitnexus --version 2>/dev/null || echo "NOT INSTALLED (will be fetched via npx)"`
+- .mcp.json: !`[ -f ".mcp.json" ] && echo "present" || echo "NOT FOUND"`
+
 Manages the GitNexus zero-server code intelligence engine — install, setup MCP, run analysis, check status, and troubleshoot.
 
 GitNexus turns any codebase into a knowledge graph (nodes, edges, clusters, flows) with hybrid search (BM25 + semantic). Zero infrastructure — no databases, no Docker, no API keys required.

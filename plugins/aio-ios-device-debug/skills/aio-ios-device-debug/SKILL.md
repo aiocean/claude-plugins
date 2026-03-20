@@ -5,6 +5,14 @@ description: This skill should be used when the user asks to "debug on device", 
 
 # iOS Device Debug
 
+## Environment
+- xcode-select: !`xcode-select -p 2>/dev/null || echo "NOT INSTALLED"`
+- idevicesyslog: !`which idevicesyslog 2>/dev/null || echo "NOT INSTALLED — brew install libimobiledevice"`
+- idevicecrashreport: !`which idevicecrashreport 2>/dev/null || echo "NOT INSTALLED — brew install libimobiledevice"`
+- python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
+- pymobiledevice3: !`python3 -c "import pymobiledevice3" 2>/dev/null && echo "installed" || echo "NOT INSTALLED — pip3 install pymobiledevice3"`
+- Connected devices: !`idevice_id -l 2>/dev/null || echo "none detected (or idevice_id missing)"`
+
 Debug iOS apps on physical devices: build, install, launch, capture logs, pull crash reports, and analyze crashes — all from the terminal without Xcode GUI.
 
 ## Prerequisites

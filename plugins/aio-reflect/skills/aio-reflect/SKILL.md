@@ -5,6 +5,11 @@ description: This skill should be used when the user asks to "reflect on session
 
 # Reflect
 
+## Environment
+- bun: !`which bun 2>/dev/null || echo "NOT INSTALLED"`
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-reflect/*/skills/aio-reflect/scripts 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Memory dir: !`[ -d "$HOME/.claude/aio-reflect/memory" ] && echo "$HOME/.claude/aio-reflect/memory" || echo "NOT CREATED (will be created on first run)"`
+
 **Purpose**: Turn transient learnings into permanent improvements. What separates growth from stagnation is the ability to learn from experience.
 
 ## Core Principles
@@ -17,7 +22,6 @@ description: This skill should be used when the user asks to "reflect on session
 
 ## Quick Start
 
-Before calling any script, resolve the scripts directory (version may vary):
 ```bash
 RF="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-reflect/*/skills/aio-reflect/scripts 2>/dev/null | sort -V | tail -1)"
 MEMORY="$HOME/.claude/aio-reflect/memory"

@@ -5,6 +5,15 @@ description: This skill should be used when the user asks to "create an ebook", 
 
 # EPUB Generator Skill
 
+## Environment
+- python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-epub-packing/*/skills/aio-epub-packing 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- ebooklib: !`python3 -c "import ebooklib" 2>/dev/null && echo "installed" || echo "NOT INSTALLED — run: pip3 install -r requirements.txt"`
+
+```bash
+EP="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-epub-packing/*/skills/aio-epub-packing 2>/dev/null | sort -V | tail -1)"
+```
+
 Convert Markdown documents into professional EPUB ebooks with auto-generated neo-brutalism covers and embedded images.
 
 ## Simple Single-Document EPUB

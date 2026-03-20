@@ -5,6 +5,9 @@ description: This skill should be used when the user asks to research sách, tì
 
 # EPUB Research — Pre-Translation Book Research
 
+## Environment
+- jread: !`which jread 2>/dev/null || echo "NOT INSTALLED — see references/installation.md"`
+
 Research the book thoroughly before translating. Understand the author, domain, terminology, and Vietnamese translation conventions. Populates CLAUDE.md with informed glossary and style guide.
 
 ## Gate: Verify Setup

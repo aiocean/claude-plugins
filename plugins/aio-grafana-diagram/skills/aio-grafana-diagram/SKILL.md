@@ -5,6 +5,9 @@ description: This skill should be used when the user asks to "create grafana dia
 
 # Grafana Diagram Plugin Guide
 
+## Environment
+- grafana-cli: !`which grafana-cli 2>/dev/null || echo "NOT INSTALLED"`
+
 The **grafana-diagram** plugin (marketplace: `jdbranham-diagram-panel`) enables creating dynamic, data-driven diagrams in Grafana using Mermaid.js syntax.
 
 ## Installation

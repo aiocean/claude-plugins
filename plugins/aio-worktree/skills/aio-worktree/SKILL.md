@@ -7,14 +7,14 @@ description: This skill should be used when the user asks to "create a worktree"
 
 Manages git worktrees for parallel development workflows.
 
+## Environment
+
+- git: !`which git 2>/dev/null || echo "NOT INSTALLED"`
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-worktree/*/skills/aio-worktree 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+
+Set `WT` to the Scripts path shown above. Then call scripts as `$WT/script-name`.
+
 ## Available Scripts
-
-Before calling any script, resolve the scripts directory (version may vary):
-```bash
-WT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-worktree/*/skills/aio-worktree 2>/dev/null | sort -V | tail -1)"
-```
-
-Then call scripts as `$WT/script-name`.
 
 | Script                         | Purpose                              |
 | ------------------------------ | ------------------------------------ |

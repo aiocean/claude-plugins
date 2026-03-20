@@ -23,6 +23,10 @@ Determine the action:
 - **disable/remove** — set plugin(s) to `false` or remove from `enabledPlugins`
 - **search** — filter plugins by keyword
 
+## Environment
+
+- Marketplace: !`cat ~/.claude/plugins/marketplaces/aiocean-plugins/.claude-plugin/marketplace.json 2>/dev/null | head -1 || echo "NOT FOUND"`
+
 ## Step 2: Get Available Plugins
 
 Read the marketplace manifest to get all available plugins:

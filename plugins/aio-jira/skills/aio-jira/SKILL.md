@@ -7,29 +7,40 @@ description: This skill should be used when the user asks to "create a Jira issu
 
 Jira operations through MCP tools. Depends on [nguyenvanduocit/jira-mcp](https://github.com/nguyenvanduocit/jira-mcp).
 
-## Step 1: Check MCP Availability
+## Environment
 
-Before any Jira operation, check if the jira MCP tools are available:
+- Go: !`which go 2>/dev/null || echo "NOT INSTALLED"`
+- jira-mcp: !`which jira-mcp 2>/dev/null || echo "NOT INSTALLED"`
+- ATLASSIAN_HOST: !`echo ${ATLASSIAN_HOST:-NOT SET}`
+- ATLASSIAN_EMAIL: !`echo ${ATLASSIAN_EMAIL:-NOT SET}`
+- ATLASSIAN_TOKEN: !`[ -n "$ATLASSIAN_TOKEN" ] && echo "SET" || echo "NOT SET"`
+- MCP configured: !`cat .mcp.json 2>/dev/null | grep -q jira && echo "YES" || echo "NO"`
 
-1. Use `ToolSearch("jira")` to look for tools prefixed with `jira_` (e.g. `jira_get_issue`, `jira_search_issue`)
-2. If jira tools are found → skip to **Step 3: Use Jira Tools**
-3. If no jira tools found → proceed to **Step 2: Auto-Install**
-
-## Step 2: Auto-Install jira-mcp Server
-
-If jira MCP tools are not available, install automatically:
-
-### 2a. Install the binary
+## Install (skip if already installed above)
 
 ```bash
 go install github.com/nguyenvanduocit/jira-mcp@latest
 ```
 
-If `go` is not available, use Docker instead (see 2c below).
+Docker alternative (if Go not available):
 
-### 2b. Configure MCP in project settings
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i",
+        "-e", "ATLASSIAN_HOST=https://your-company.atlassian.net",
+        "-e", "ATLASSIAN_EMAIL=your-email@company.com",
+        "-e", "ATLASSIAN_TOKEN=your-api-token",
+        "ghcr.io/nguyenvanduocit/jira-mcp:latest"
+      ]
+    }
+  }
+}
+```
 
-Add the jira MCP server to `.mcp.json` in the project root:
+Add to `.mcp.json`:
 
 ```json
 {
@@ -46,84 +57,20 @@ Add the jira MCP server to `.mcp.json` in the project root:
 }
 ```
 
-**Ask the user for these three values:**
-- `ATLASSIAN_HOST` — their Atlassian URL (e.g. `https://company.atlassian.net`)
-- `ATLASSIAN_EMAIL` — their Atlassian account email
-- `ATLASSIAN_TOKEN` — API token from https://id.atlassian.com/manage-profile/security/api-tokens
+Values needed: `ATLASSIAN_HOST` (e.g. `https://company.atlassian.net`), `ATLASSIAN_EMAIL`, `ATLASSIAN_TOKEN` from https://id.atlassian.com/manage-profile/security/api-tokens. Restart Claude Code after configuring.
 
-### 2c. Docker alternative (if Go not available)
-
-```json
-{
-  "mcpServers": {
-    "jira": {
-      "command": "docker",
-      "args": [
-        "run", "--rm", "-i",
-        "-e", "ATLASSIAN_HOST=https://your-company.atlassian.net",
-        "-e", "ATLASSIAN_EMAIL=your-email@company.com",
-        "-e", "ATLASSIAN_TOKEN=your-api-token",
-        "ghcr.io/nguyenvanduocit/jira-mcp:latest"
-      ]
-    }
-  }
-}
-```
-
-### 2d. After configuration
-
-Tell the user to restart Claude Code for the MCP server to be picked up, then retry the Jira operation.
-
-## Step 3: Use Jira Tools
-
-All tools are prefixed with `jira_`.
+## MCP Tools (prefix: `jira_`)
 
 ### Issue Management
 
-#### Get Issue Details
-```
-jira_get_issue(issue_key: "PROJ-123")
-```
-Returns: status, assignee, description, subtasks, and **available transitions** (required for transitioning).
-
-#### Create Issue
-```
-jira_create_issue(
-  project_key: "PROJ",
-  summary: "Fix login bug",
-  description: "Users cannot login on Safari",
-  issue_type: "Bug"
-)
-```
-Common issue types: `Bug`, `Task`, `Story`, `Epic`
-
-#### Create Subtask
-```
-jira_create_child_issue(
-  parent_issue_key: "PROJ-100",
-  summary: "Write unit tests",
-  description: "Cover edge cases for login flow"
-)
-```
-
-#### Update Issue
-```
-jira_update_issue(
-  issue_key: "PROJ-123",
-  summary: "Updated title",
-  description: "Updated description"
-)
-```
-
-#### Delete Issue
-```
-jira_delete_issue(issue_key: "PROJ-123")
-```
-
-#### List Issue Types
-```
-jira_list_issue_types(project_key: "PROJ")
-```
+| Tool | Usage |
+|------|-------|
+| `jira_get_issue` | `(issue_key: "PROJ-123")` — returns status, assignee, description, subtasks, transitions |
+| `jira_create_issue` | `(project_key, summary, description, issue_type)` — types: Bug, Task, Story, Epic |
+| `jira_create_child_issue` | `(parent_issue_key: "PROJ-100", summary, description)` |
+| `jira_update_issue` | `(issue_key, summary, description)` |
+| `jira_delete_issue` | `(issue_key: "PROJ-123")` |
+| `jira_list_issue_types` | `(project_key: "PROJ")` |
 
 ### Search (JQL)
 
@@ -135,21 +82,10 @@ jira_search_issue(jql: "project = PROJ AND created >= -7d")
 
 ### Workflow Transitions
 
-**Two-step process:**
-
-1. Get available transitions:
-   ```
-   jira_get_issue(issue_key: "PROJ-123")  # Returns transitions list
-   ```
-
-2. Apply transition:
-   ```
-   jira_transition_issue(
-     issue_key: "PROJ-123",
-     transition_id: "31",
-     comment: "Ready for QA"
-   )
-   ```
+Two-step: get transitions via `jira_get_issue`, then apply:
+```
+jira_transition_issue(issue_key: "PROJ-123", transition_id: "31", comment: "Ready for QA")
+```
 
 ### Sprint Management
 
@@ -170,53 +106,29 @@ jira_get_comments(issue_key: "PROJ-123")
 ### Issue Relationships
 
 ```
-jira_link_issues(
-  inward_issue_key: "PROJ-100",
-  outward_issue_key: "PROJ-101",
-  link_type: "blocks"
-)
+jira_link_issues(inward_issue_key: "PROJ-100", outward_issue_key: "PROJ-101", link_type: "blocks")
 jira_get_related_issues(issue_key: "PROJ-100")
 ```
 
 Common link types: `blocks`, `is blocked by`, `relates to`, `duplicates`
 
-### Worklog (Time Tracking)
+### Worklog
 
 ```
-jira_add_worklog(
-  issue_key: "PROJ-123",
-  time_spent: "2h 30m",
-  comment: "Code review and testing"
-)
+jira_add_worklog(issue_key: "PROJ-123", time_spent: "2h 30m", comment: "Code review and testing")
 ```
 
-### Development Information
-
-Get linked PRs, branches, and commits:
-```
-jira_get_development_information(issue_key: "PROJ-123")
-```
-
-### History & Audit
+### Other Tools
 
 ```
+jira_get_development_information(issue_key: "PROJ-123")  # linked PRs, branches, commits
 jira_get_issue_history(issue_key: "PROJ-123")
-```
-
-### Version Management
-
-```
 jira_list_project_versions(project_key: "PROJ")
 jira_get_version(version_id: "10042")
-```
-
-### Status List
-
-```
 jira_list_statuses(project_key: "PROJ")
 ```
 
-## Common Workflows
+## Workflows
 
 ### Complete Bug Fix Flow
 1. `jira_search_issue(jql: "status = 'In Progress' AND assignee = currentUser()")`
