@@ -1,7 +1,7 @@
 {
   "name": "aio-reflect",
   "description": "Learn from Claude Code sessions to extract reusable knowledge. Analyzes corrections, preferences, and technical discoveries to build CLAUDE.md rules and new skills.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": { "name": "aiocean" },
   "license": "MIT"
 }

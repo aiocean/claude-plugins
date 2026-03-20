@@ -5,9 +5,14 @@ description: This skill should be used when the user asks to "remove background"
 
 # remove-bg
 
+## Environment
+- python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
+- rembg: !`python3 -c "import rembg" 2>/dev/null && echo "installed" || echo "NOT INSTALLED"`
+- opencv: !`python3 -c "import cv2" 2>/dev/null && echo "installed" || echo "NOT INSTALLED"`
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-remove-bg/*/skills/aio-remove-bg 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+
 Remove image backgrounds using threshold (fast, for mono/simple images) or rembg AI (complex images). Automatically trims transparent edges.
 
-Before calling any script, resolve the scripts directory (version may vary):
 ```bash
 RB="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-remove-bg/*/skills/aio-remove-bg 2>/dev/null | sort -V | tail -1)"
 ```

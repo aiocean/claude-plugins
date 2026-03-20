@@ -1,173 +1,80 @@
 ---
 name: aio-confluence
-description: This skill should be used when the user asks to search confluence, get page, create page, update page, list spaces, get comments, or mentions confluence, wiki, atlassian pages, CQL. Provides Confluence operations through CLI or MCP. Auto-installs confluence-mcp if missing.
+description: This skill should be used when the user asks to search confluence, get page, create page, update page, list spaces, get comments, or mentions confluence, wiki, atlassian pages, CQL. Provides Confluence operations through CLI or MCP.
 ---
 
-# Confluence Skill
+# Confluence
 
-Confluence operations via [nguyenvanduocit/confluence-mcp](https://github.com/nguyenvanduocit/confluence-mcp).
+Source: [nguyenvanduocit/confluence-mcp](https://github.com/nguyenvanduocit/confluence-mcp)
 
-## Step 1: Check Availability
+## Environment
 
-Check if confluence tools are available:
+- Go: !`which go 2>/dev/null || echo "NOT INSTALLED"`
+- confluence-mcp: !`which confluence-mcp 2>/dev/null || echo "NOT INSTALLED"`
+- confluence-cli: !`which confluence-cli 2>/dev/null || echo "NOT INSTALLED"`
+- ATLASSIAN_HOST: !`echo ${ATLASSIAN_HOST:-NOT SET}`
+- ATLASSIAN_EMAIL: !`echo ${ATLASSIAN_EMAIL:-NOT SET}`
+- ATLASSIAN_TOKEN: !`[ -n "$ATLASSIAN_TOKEN" ] && echo "SET" || echo "NOT SET"`
+- MCP configured: !`cat .mcp.json 2>/dev/null | grep -q confluence && echo "YES" || echo "NO"`
 
-1. Use `ToolSearch("confluence")` to look for tools prefixed with `confluence_` (e.g. `confluence_search_page`, `confluence_get_page`)
-2. If confluence tools are found → skip to **Step 3: Use Tools**
-3. If no tools found → check if `confluence-cli` binary exists: `which confluence-cli`
-4. If CLI exists → skip to **Step 4: Use CLI**
-5. If neither found → proceed to **Step 2: Install**
-
-## Step 2: Install
-
-### 2a. Install via Go
+## Install (skip if already installed above)
 
 ```bash
-# MCP server (for MCP integration)
+# Via Go
 go install github.com/nguyenvanduocit/confluence-mcp@latest
-
-# CLI (for direct command-line use)
 go install github.com/nguyenvanduocit/confluence-mcp/cmd/confluence-cli@latest
-```
 
-### 2b. Install via Homebrew
-
-```bash
+# Or via Homebrew
 brew install nguyenvanduocit/tap/confluence-mcp
 ```
 
-### 2c. Environment Variables
+Env vars needed: `ATLASSIAN_HOST`, `ATLASSIAN_EMAIL`, `ATLASSIAN_TOKEN` (get token from https://id.atlassian.com/manage-profile/security/api-tokens).
 
-**Ask the user for these three values:**
-
-- `ATLASSIAN_HOST` — Confluence instance URL (e.g. `https://company.atlassian.net`)
-- `ATLASSIAN_EMAIL` — Atlassian account email
-- `ATLASSIAN_TOKEN` — API token from https://id.atlassian.com/manage-profile/security/api-tokens
-
-Set them in a `.env` file or export them:
-
-```bash
-export ATLASSIAN_HOST="https://company.atlassian.net"
-export ATLASSIAN_EMAIL="user@company.com"
-export ATLASSIAN_TOKEN="your-api-token"
-```
-
-### 2d. Configure as MCP Server (optional)
-
-Add to `.mcp.json` in the project root:
-
+MCP config (`.mcp.json`):
 ```json
 {
   "mcpServers": {
     "confluence": {
       "command": "confluence-mcp",
       "env": {
-        "ATLASSIAN_HOST": "https://company.atlassian.net",
-        "ATLASSIAN_EMAIL": "user@company.com",
-        "ATLASSIAN_TOKEN": "your-api-token"
+        "ATLASSIAN_HOST": "",
+        "ATLASSIAN_EMAIL": "",
+        "ATLASSIAN_TOKEN": ""
       }
     }
   }
 }
 ```
 
-Tell the user to restart Claude Code for MCP to be picked up.
+Restart Claude Code after adding MCP config.
 
-## Step 3: Use MCP Tools
+## MCP Tools (prefix: `confluence_`)
 
-All tools are prefixed with `confluence_`.
+| Tool | Usage |
+|------|-------|
+| search_page | `confluence_search_page(query: "type = page AND space = DEV AND text ~ 'deploy'")` |
+| get_page | `confluence_get_page(page_id: "12345")` |
+| create_page | `confluence_create_page(space_key: "DEV", title: "Title", content: "<p>HTML</p>", parent_id: "123")` |
+| update_page | `confluence_update_page(page_id: "123", title: "Title", content: "<p>HTML</p>", version: N+1)` |
+| get_comments | `confluence_get_comments(page_id: "12345")` |
+| list_spaces | `confluence_list_spaces()` |
 
-### Search Pages (CQL)
+Note: `update_page` requires `version` = current version + 1. Get current from `get_page` first.
 
-```
-confluence_search_page(query: "type = page AND space = DEV AND text ~ 'deployment'")
-confluence_search_page(query: "label = architecture AND space = TEAM")
-```
-
-### Get Page
-
-```
-confluence_get_page(page_id: "12345")
-```
-
-Returns: title, content (HTML), version, space info, metadata.
-
-### Create Page
-
-```
-confluence_create_page(
-  space_key: "DEV",
-  title: "Deployment Guide",
-  content: "<h1>Guide</h1><p>Steps to deploy...</p>",
-  parent_id: "12345"
-)
-```
-
-### Update Page
-
-```
-confluence_update_page(
-  page_id: "12345",
-  title: "Updated Title",
-  content: "<h1>Updated</h1><p>New content...</p>",
-  version: 2
-)
-```
-
-Note: `version` must be current version + 1. Get current version from `get_page` first.
-
-### Get Comments
-
-```
-confluence_get_comments(page_id: "12345")
-```
-
-### List Spaces
-
-```
-confluence_list_spaces()
-```
-
-## Step 4: Use CLI
-
-If using the CLI directly instead of MCP:
+## CLI (fallback if MCP not configured)
 
 ```bash
-# Search pages with CQL
-confluence-cli search-page --query "type = page AND text ~ 'deploy'" --env .env
-
-# Get page content
+confluence-cli search-page --query "CQL" --env .env
 confluence-cli get-page --page-id 12345 --env .env
-
-# Create page
-confluence-cli create-page --space-key DEV --title "New Page" --content "<p>Content</p>" --env .env
-
-# Update page
-confluence-cli update-page --page-id 12345 --title "Updated" --content "<p>New</p>" --version 2 --env .env
-
-# Get comments
+confluence-cli create-page --space-key DEV --title "Title" --content "<p>HTML</p>" --env .env
+confluence-cli update-page --page-id 12345 --title "Title" --content "<p>HTML</p>" --version 2 --env .env
 confluence-cli get-comments --page-id 12345 --env .env
-
-# List spaces
 confluence-cli list-spaces --env .env
 ```
 
-### CLI Flags
+Flags: `--env` (path to .env file), `--output` (`text` or `json`).
 
-| Flag | Description |
-|------|-------------|
-| `--env` | Path to .env file with credentials |
-| `--output` | Output format: `text` (default) or `json` |
+## Workflows
 
-## Common Workflows
-
-### Find and Update a Page
-
-1. Search: `confluence_search_page(query: "title = 'Release Notes'")`
-2. Get current: `confluence_get_page(page_id: "found-id")`
-3. Update: `confluence_update_page(page_id: "found-id", title: "Release Notes", content: "...", version: current+1)`
-
-### Create Documentation Hierarchy
-
-1. Create parent: `confluence_create_page(space_key: "DEV", title: "API Docs")`
-2. Create child: `confluence_create_page(space_key: "DEV", title: "Auth API", parent_id: "parent-id")`
-3. Create child: `confluence_create_page(space_key: "DEV", title: "User API", parent_id: "parent-id")`
+**Find and update:** search → get_page (note version) → update_page (version+1)
+**Doc hierarchy:** create parent page → create children with `parent_id`

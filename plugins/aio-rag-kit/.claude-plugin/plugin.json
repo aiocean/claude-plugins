@@ -1,6 +1,6 @@
 {
   "name": "aio-rag-kit",
   "description": "RAG Kit CLI for vector database operations with Qdrant. Create collections, index content, and perform semantic search via rag-kit.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "aiocean"
 }

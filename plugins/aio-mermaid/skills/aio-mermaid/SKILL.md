@@ -5,6 +5,10 @@ description: This skill should be used when the user asks to "share a mermaid di
 
 # MinimalMermaid URL Generator
 
+## Environment
+- bun: !`which bun 2>/dev/null || echo "NOT INSTALLED"`
+- node: !`which node 2>/dev/null || echo "NOT INSTALLED"`
+
 Base URL: `https://mimaid.aiocean.dev/`
 
 ## 🚨 CRITICAL: NO MARKDOWN IN MERMAID CODE

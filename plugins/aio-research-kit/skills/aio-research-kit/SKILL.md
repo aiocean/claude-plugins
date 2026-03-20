@@ -5,6 +5,11 @@ description: This skill should be used when the user asks to start research, res
 
 # Research Kit Skill
 
+## Environment
+- research: !`which research 2>/dev/null || echo "NOT INSTALLED"`
+- uv: !`which uv 2>/dev/null || echo "NOT INSTALLED"`
+- python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
+
 Structured 10-phase research framework via [nguyenvanduocit/research-kit](https://github.com/nguyenvanduocit/research-kit).
 
 ## Step 1: Check Availability

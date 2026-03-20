@@ -5,13 +5,12 @@ description: This skill should be used when the user asks to "submit feedback", 
 
 # Feedback — Submit Issues for aiocean Plugins
 
+## Environment
+- gh: !`which gh 2>/dev/null || echo "NOT INSTALLED — brew install gh"`
+- gh auth: !`gh auth status 2>/dev/null | grep -q "Logged in" && echo "authenticated" || echo "NOT AUTHENTICATED — run: gh auth login"`
+- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-feedback/*/skills/feedback/scripts 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+
 Submit bug reports, feature requests, and plugin requests directly to the aiocean/claude-plugins repository without leaving Claude Code.
-
-## Prerequisites
-
-- `gh` CLI installed and authenticated (`gh auth login`)
-
-## Resolve Script Path
 
 ```bash
 SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-feedback/*/skills/feedback/scripts 2>/dev/null | sort -V | tail -1)"
