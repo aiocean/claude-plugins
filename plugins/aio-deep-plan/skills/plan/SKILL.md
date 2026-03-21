@@ -94,6 +94,24 @@ impact(file)
 
 Run `/snapshot` before starting implementation.
 
+### Step 6: Execution handoff
+
+After the plan is approved, choose an execution strategy:
+
+| Strategy | When | Skill to invoke |
+|----------|------|----------------|
+| **Subagent-driven** (recommended for complex) | Multi-file, 5+ steps | `/superpowers:subagent-driven-development` — fresh agent per task with inter-task reviews |
+| **Inline execution** | Simple, 2-4 steps | `/superpowers:executing-plans` — batched tasks in current session |
+| **Manual** | User wants control | Hand the plan to the user |
+
+For both automated strategies, the plan transitions through:
+```
+/plan → /superpowers:writing-plans (detailed plan)
+      → /superpowers:subagent-driven-development (execute)
+      → /superpowers:verification-before-completion (verify)
+      → /superpowers:finishing-a-development-branch (wrap up)
+```
+
 ## Principles
 
 - Each business logic exists in ONE place only (SSOT)

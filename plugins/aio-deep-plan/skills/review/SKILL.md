@@ -86,3 +86,14 @@ Skip change detection. Just run:
 1. `lsp_diagnostics` on changed files
 2. One GitNexus duplication search via `query`
 3. Quick convention check
+
+## Skill Graph — What to invoke next
+
+After review completes:
+
+| Result | Next skill |
+|--------|-----------|
+| Review clean, ready to merge | `/superpowers:verification-before-completion` → `/superpowers:finishing-a-development-branch` |
+| Issues found, needs fixes | Fix issues → re-run `/review` |
+| Needs full code review (security, architecture) | `/aio-code-review` — multi-agent review with OMC agents |
+| Want to extract learnings | `/aio-reflect` — capture knowledge from this session |

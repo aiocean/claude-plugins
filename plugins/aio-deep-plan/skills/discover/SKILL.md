@@ -84,6 +84,15 @@ context(file, symbol="main_function")
 Run `/map` on the highly relevant files for structural analysis.
 ```
 
+## Skill Graph — What to invoke next
+
+| Need | Next skill |
+|------|-----------|
+| Structural analysis (dependencies, blast radius) | `/map` — second step in deep-plan pipeline |
+| Deeper understanding, need to interview user | `/oh-my-claudecode:deep-interview` — Socratic questioning to clarify requirements |
+| Want architecture-level understanding | `/oh-my-claudecode:deep-dive` — comprehensive analysis |
+| Ready to plan implementation | `/plan` — third step in deep-plan pipeline |
+
 ## Tips
 
 - If results are weak (<0.55), rephrase with more technical terms

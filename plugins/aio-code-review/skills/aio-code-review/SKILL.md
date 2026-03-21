@@ -470,3 +470,12 @@ NEVER:
 - Present findings without critic validation
 - Skip conditional agents when their trigger criteria are clearly met
 - Require both tools — the review works with any subset
+
+## Skill Graph — What to invoke next
+
+| After review result | Next skill |
+|--------------------|-----------|
+| APPROVE — ready to merge | `/superpowers:finishing-a-development-branch` — finalize branch |
+| REQUEST CHANGES — needs fixes | Fix issues → re-run `/aio-code-review` |
+| Want to extract learnings | `/aio-reflect` — capture session knowledge |
+| Before review, need verification | `/superpowers:verification-before-completion` — evidence-based check |
