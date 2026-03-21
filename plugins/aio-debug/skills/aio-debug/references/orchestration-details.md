@@ -45,6 +45,53 @@ Phase 4 (review) is complete when:
 - All critical issues from review are addressed
 - The fix is verified to not introduce new problems
 
+## Circuit Breaker — Detailed Protocol
+
+The circuit breaker is the most important safety mechanism in debugging. It prevents the "just one more try" trap that leads to hours of wasted effort and regression-introducing patches.
+
+### How to Track Attempts
+
+Maintain an explicit counter. After each failed Phase 3 attempt:
+
+```
+Attempt 1/3: [What was tried] → [Why it failed]
+Attempt 2/3: [What was tried] → [Why it failed]
+Attempt 3/3: [What was tried] → [Why it failed]
+⚡ CIRCUIT BREAKER TRIGGERED
+```
+
+A "failed attempt" means:
+- The fix didn't resolve the original bug
+- The fix resolved the bug but introduced new failures
+- The fix resolved some symptoms but not all
+- The fix required additional "patches on patches" to work
+
+A "failed attempt" does NOT mean:
+- A test that was supposed to fail did fail (that's TDD RED phase, not a fix attempt)
+- You discovered more information and refined your hypothesis (that's still Phase 2)
+
+### Re-anchor After Circuit Breaker
+
+When the circuit breaker triggers, perform a full context reset:
+
+1. **Re-read the original bug report** — what did the user actually say? Not your interpretation.
+2. **Re-read Phase 1 evidence** — what files, what data flow, what dependencies?
+3. **Re-read Phase 2 evidence** — what hypotheses were tested, what was ruled out?
+4. **List what you know for certain** (observed facts, not interpretations)
+5. **List what you assumed** — challenge each assumption
+
+This fresh-eyes review often reveals the root cause was misidentified. The fix attempts failed not because the fix was wrong, but because the diagnosis was wrong.
+
+### Architecture Questions Checklist
+
+When questioning the architecture after circuit breaker:
+
+- [ ] Is the bug in the right layer? (e.g., fixing frontend when the issue is backend validation)
+- [ ] Is the abstraction appropriate? (e.g., fighting a framework's design instead of using its intended pattern)
+- [ ] Is there a simpler design? (e.g., the component does too much and should be split)
+- [ ] Is there a known pattern for this? (search codebase for similar solved problems)
+- [ ] Would a different approach sidestep the problem entirely?
+
 ## Edge Cases
 
 ### Bug Cannot Be Reproduced

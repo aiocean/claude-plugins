@@ -187,8 +187,8 @@
     {
       "name": "aio-debug",
       "source": "./plugins/aio-debug",
-      "description": "Systematic debug & fix orchestrator. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation.",
-      "version": "2.2.0",
+      "description": "Systematic debug & fix orchestrator. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation. Circuit breaker escalation after 3 failed attempts.",
+      "version": "2.3.0",
       "author": {
         "name": "aiocean"
       }
@@ -223,8 +223,8 @@
     {
       "name": "aio-deep-plan",
       "source": "./plugins/aio-deep-plan",
-      "description": "Deep planning toolkit combining GitNexus knowledge graph and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning), review (post-implementation check).",
-      "version": "3.2.0",
+      "description": "Deep planning toolkit combining GitNexus knowledge graph and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning with re-anchoring protocol), review (post-implementation check).",
+      "version": "3.3.0",
       "author": {
         "name": "aiocean"
       }

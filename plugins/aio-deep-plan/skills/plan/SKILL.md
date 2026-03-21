@@ -112,6 +112,23 @@ For both automated strategies, the plan transitions through:
       → /superpowers:finishing-a-development-branch (wrap up)
 ```
 
+### Re-anchoring Protocol
+
+**Before starting each task** in the plan, re-anchor to prevent context drift and scope creep:
+
+1. **Re-read the plan** — go back to the Step 4 plan document and re-read the current task's specification (file path, changes, reason)
+2. **Check scope** — ask: "Does what I'm about to do match exactly what the plan says?" If you've drifted into adjacent concerns, stop and refocus
+3. **Verify assumptions** — if significant time has passed or multiple tasks are done, re-run `context(file)` on the file about to be changed to catch any changes from prior tasks
+4. **No unplanned changes** — if you discover something that needs fixing but is NOT in the plan, document it as a follow-up item in the "NOT Doing" section. Do not act on it.
+
+**When to re-anchor** (mandatory):
+- Before each numbered task in the Changes section
+- After any interruption or context switch
+- After a subagent returns results (verify it stayed on-plan)
+- When you catch yourself thinking "while I'm here, I should also..."
+
+Re-anchoring adds ~10 seconds per task but prevents the #1 cause of plan failure: gradual scope creep where each task drifts slightly until the final result doesn't match the original intent.
+
 ## Principles
 
 - Each business logic exists in ONE place only (SSOT)
