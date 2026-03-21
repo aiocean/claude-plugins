@@ -1,7 +1,7 @@
 {
   "name": "aio-deep-plan",
   "description": "Deep planning toolkit combining GitNexus hybrid search/knowledge graph and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning), review (post-implementation check).",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": { "name": "aiocean" },
   "repository": "https://github.com/aiocean/claude-plugins",
   "license": "MIT"

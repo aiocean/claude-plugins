@@ -170,7 +170,7 @@
       "name": "aio-code-review",
       "source": "./plugins/aio-code-review",
       "description": "Ultimate code review with GitNexus knowledge graph analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
-      "version": "6.0.0",
+      "version": "6.1.0",
       "author": {
         "name": "aiocean"
       }
@@ -188,7 +188,7 @@
       "name": "aio-debug",
       "source": "./plugins/aio-debug",
       "description": "Systematic debug & fix orchestrator. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation.",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "author": {
         "name": "aiocean"
       }
@@ -224,7 +224,7 @@
       "name": "aio-deep-plan",
       "source": "./plugins/aio-deep-plan",
       "description": "Deep planning toolkit combining GitNexus knowledge graph and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning), review (post-implementation check).",
-      "version": "3.1.0",
+      "version": "3.2.0",
       "author": {
         "name": "aiocean"
       }
