@@ -1,6 +1,8 @@
 ---
 name: aio-code-review
 description: This skill should be used when the user asks to "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Multi-phase review pipeline with domain-specific analysis and codebase understanding. Use after implementing changes from aio-deep-plan pipeline, or to validate work before merging. Complements doc-writer for architecture-level review.
+context: fork
+agent: oh-my-claudecode:critic
 ---
 
 # Code Review Ultra
@@ -198,15 +200,14 @@ Spawn specialized review agents in parallel. Each agent receives the enriched an
 
 **Core agents (always run):**
 
-OMC internal agents are spawned via `Task(subagent_type=...)`. External agents are invoked via `@agent-name`.
+Agents from installed plugins (OMC + Superpowers). Spawned in parallel.
 
-| Agent | Type | Model | Focus | Uses analytics for |
-|-------|------|-------|-------|-------------------|
-| `oh-my-claudecode:security-reviewer` | OMC | sonnet | OWASP Top 10, secrets, auth, injection | GitNexus impact paths to trace untrusted input; GitNexus auth patterns for consistency |
-| `oh-my-claudecode:quality-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | GitNexus dependents for coupling; GitNexus patterns for consistency; CodeWiki metrics |
-| `@feature-dev:code-reviewer` | External | sonnet | Feature-level review: requirement completeness, implementation correctness, edge case coverage | Changed files mapped to feature scope |
-| `@superpowers:code-reviewer` | External | sonnet | Superpowers-based comprehensive review, verification before completion | Module boundaries and dependency graphs for contract violations |
-| `@code-simplifier:code-simplifier` | External | opus | Clarity, consistency, maintainability, simplification | GitNexus symbols for dead code; GitNexus query for duplicate patterns |
+| Agent | Source | Model | Focus | Uses analytics for |
+|-------|--------|-------|-------|-------------------|
+| `oh-my-claudecode:security-reviewer` | OMC | opus | OWASP Top 10, secrets scanning, dependency audit, exploitability scoring | GitNexus impact paths to trace untrusted input; GitNexus auth patterns for consistency |
+| `oh-my-claudecode:verifier` | OMC | sonnet | Evidence-based completion validation — runs tests, type-check, build | Fresh command output, not cached results |
+| `oh-my-claudecode:code-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | GitNexus dependents for coupling; GitNexus patterns for consistency; CodeWiki metrics |
+| `superpowers:code-reviewer` | Superpowers | sonnet | Comprehensive review, verification before completion | Module boundaries and dependency graphs for contract violations |
 
 **Conditional agents (spawn based on scope and content):**
 
@@ -221,7 +222,7 @@ OMC internal agents are spawned via `Task(subagent_type=...)`. External agents a
 
 | Agent | Model | When to spawn | Focus |
 |-------|-------|---------------|-------|
-| `oh-my-claudecode:critic` | opus | Always, after Phase 3 agents finish | Challenge findings, eliminate false positives, identify blind spots, ensure no groupthink |
+| `oh-my-claudecode:critic` | opus | Always, after Phase 3 agents finish | Pre-commitment prediction, multi-perspective analysis, false positive elimination, escalation protocol, confidence scoring |
 
 #### Agent Prompt Template
 
@@ -290,25 +291,18 @@ HOW TO USE THIS DATA:
 #### Spawning Pattern
 
 ```
-# Spawn core agents in parallel (always)
+# Spawn core agents in parallel (always — from installed plugins)
 
-# OMC internal agents via Task()
-Task(subagent_type="oh-my-claudecode:security-reviewer", model="sonnet",
-  prompt="<analytics context>\n\nReview these files for security: {files}")
+Task(subagent_type="oh-my-claudecode:security-reviewer", model="opus",
+  prompt="<analytics context>\n\nSecurity review these files. OWASP Top 10, secrets scan, dependency audit: {files}")
 
-Task(subagent_type="oh-my-claudecode:quality-reviewer", model="sonnet",
-  prompt="<analytics context>\n\nReview these files for quality and performance: {files}")
+Task(subagent_type="oh-my-claudecode:verifier", model="sonnet",
+  prompt="<analytics context>\n\nVerify all changes with fresh test/type-check/build output: {files}")
 
-# External agents via @ invocation — trigger alongside OMC agents
-@feature-dev:code-reviewer — Review these files for feature completeness and implementation correctness:
-  <analytics context>
-  Files: {files}
+Task(subagent_type="oh-my-claudecode:code-reviewer", model="sonnet",
+  prompt="<analytics context>\n\nReview these files for quality, logic, and performance: {files}")
 
 @superpowers:code-reviewer — Comprehensive review with verification, API contracts, backward compatibility:
-  <analytics context>
-  Files: {files}
-
-@code-simplifier:code-simplifier — Review these files for clarity, consistency, and simplification opportunities:
   <analytics context>
   Files: {files}
 
@@ -332,10 +326,12 @@ if touches_docs or touches_readme or touches_jsdoc:
 
 ### Phase 3.5: Meta-Review (Critic)
 
-After all Phase 3 agents complete, spawn a critic agent that receives ALL findings from every agent. The critic's job is to:
+After all Phase 3 agents complete, spawn `oh-my-claudecode:critic` that receives ALL findings from every agent. The critic's job is to:
 
-1. **Eliminate false positives** — flag findings that are incorrect or don't apply
-2. **Identify blind spots** — what did all agents miss?
+1. **Pre-commitment prediction** — predict verdict before reading findings (reduces bias)
+2. **Multi-perspective analysis** — security engineer, new-hire, ops engineer lenses
+3. **Eliminate false positives** — flag findings that are incorrect or don't apply
+4. **Identify blind spots** — what did all agents miss?
 3. **Challenge severity ratings** — are CRITICALs really critical? Are LOWs actually HIGH?
 4. **Cross-reference findings** — do multiple agents flag the same root cause differently?
 5. **Final confidence score** — rate overall review quality (0-100%)
@@ -345,7 +341,7 @@ After all Phase 3 agents complete, spawn a critic agent that receives ALL findin
 all_findings = collect_all_agent_findings()
 
 Task(subagent_type="oh-my-claudecode:critic", model="opus",
-  prompt="You are the meta-reviewer. All review agents have completed. Here are their combined findings:\n\n{all_findings}\n\nYour job:\n1. Identify false positives and mark them\n2. Flag blind spots — what did reviewers miss?\n3. Challenge severity ratings — upgrade or downgrade as needed\n4. Cross-reference duplicate findings from different agents\n5. Provide a confidence score (0-100%) for this review\n\nBe adversarial. Assume reviewers made mistakes.")
+  prompt="You are the adversarial meta-reviewer. All review agents have completed.\n\nFindings:\n{all_findings}\n\nYour job:\n1. Pre-commitment prediction (predict verdict before reading)\n2. Multi-perspective analysis (security engineer, new-hire, ops engineer)\n3. Verify every CRITICAL/HIGH against actual code\n4. Hunt for blind spots (what is ABSENT)\n5. Escalation protocol (adversarial mode if critical found)\n6. Severity calibration self-audit\n7. Strongest counterargument for opposite verdict\n8. Final verdict: REJECT/REVISE/ACCEPT-WITH-RESERVATIONS/ACCEPT\n9. Confidence score with breakdown")
 ```
 
 ### Phase 4: Synthesize Report
@@ -474,3 +470,12 @@ NEVER:
 - Present findings without critic validation
 - Skip conditional agents when their trigger criteria are clearly met
 - Require both tools — the review works with any subset
+
+## Skill Graph — What to invoke next
+
+| After review result | Next skill |
+|--------------------|-----------|
+| APPROVE — ready to merge | `/superpowers:finishing-a-development-branch` — finalize branch |
+| REQUEST CHANGES — needs fixes | Fix issues → re-run `/aio-code-review` |
+| Want to extract learnings | `/aio-reflect` — capture session knowledge |
+| Before review, need verification | `/superpowers:verification-before-completion` — evidence-based check |

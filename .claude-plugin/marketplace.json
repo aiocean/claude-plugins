@@ -8,7 +8,7 @@
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
       "description": "AI-driven EPUB translation using jread CLI. Five opinionated skills: aio-epub-setup (project setup), aio-epub-research (book research, terminology, web search), aio-epub-translate (chapter translation), aio-editor-review (quality review), aio-epub-package (export).",
-      "version": "2.4.0",
+      "version": "2.5.0",
       "author": {
         "name": "aiocean"
       }
@@ -98,7 +98,7 @@
       "name": "aio-reflect",
       "source": "./plugins/aio-reflect",
       "description": "Learn from Claude Code sessions to extract reusable knowledge. Deep JSONL parsing extracts token usage, cost, work modes, subagents, tasks, compaction, session chains, and file operations for comprehensive reflection.",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "author": {
         "name": "aiocean"
       }
@@ -125,7 +125,7 @@
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
       "description": "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interactive HTML viewers.",
-      "version": "5.1.0",
+      "version": "6.1.0",
       "author": {
         "name": "aiocean"
       }
@@ -170,7 +170,7 @@
       "name": "aio-code-review",
       "source": "./plugins/aio-code-review",
       "description": "Ultimate code review with GitNexus knowledge graph analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
-      "version": "4.0.0",
+      "version": "6.1.0",
       "author": {
         "name": "aiocean"
       }
@@ -188,7 +188,7 @@
       "name": "aio-debug",
       "source": "./plugins/aio-debug",
       "description": "Systematic debug & fix orchestrator. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation.",
-      "version": "1.0.0",
+      "version": "2.2.0",
       "author": {
         "name": "aiocean"
       }
@@ -224,7 +224,7 @@
       "name": "aio-deep-plan",
       "source": "./plugins/aio-deep-plan",
       "description": "Deep planning toolkit combining GitNexus knowledge graph and LSP for thorough pre-coding analysis. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning), review (post-implementation check).",
-      "version": "2.0.0",
+      "version": "3.2.0",
       "author": {
         "name": "aiocean"
       }
@@ -269,7 +269,7 @@
       "name": "aio-research-kit",
       "source": "./plugins/aio-research-kit",
       "description": "Structured 10-phase research framework CLI. Initialize research projects, validate structure, and execute systematic research via research-cli.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "aiocean"
       }

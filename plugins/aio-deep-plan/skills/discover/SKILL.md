@@ -1,6 +1,8 @@
 ---
 name: aio-discover
 description: This skill should be used when the user asks to "discover", "find code", "how does X work", "where is", "what handles", or needs to understand how something works before planning or coding. First step in the aio-deep-plan pipeline — follow with map, then plan. Requires GitNexus for hybrid search.
+context: fork
+agent: oh-my-claudecode:explore
 ---
 
 # Discover — Find Relevant Code
@@ -81,6 +83,15 @@ context(file, symbol="main_function")
 ### Next Step
 Run `/map` on the highly relevant files for structural analysis.
 ```
+
+## Skill Graph — What to invoke next
+
+| Need | Next skill |
+|------|-----------|
+| Structural analysis (dependencies, blast radius) | `/map` — second step in deep-plan pipeline |
+| Deeper understanding, need to interview user | `/oh-my-claudecode:deep-interview` — Socratic questioning to clarify requirements |
+| Want architecture-level understanding | `/oh-my-claudecode:deep-dive` — comprehensive analysis |
+| Ready to plan implementation | `/plan` — third step in deep-plan pipeline |
 
 ## Tips
 

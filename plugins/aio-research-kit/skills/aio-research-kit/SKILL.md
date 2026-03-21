@@ -1,6 +1,8 @@
 ---
 name: aio-research-kit
 description: This skill should be used when the user asks to start research, research a topic, create research project, validate research, structured research, or mentions research-kit, research workflow, systematic research, 10-phase research. Provides structured research framework via research-cli. Auto-installs if missing.
+context: fork
+agent: Explore
 ---
 
 # Research Kit Skill

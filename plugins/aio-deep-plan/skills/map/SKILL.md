@@ -1,6 +1,8 @@
 ---
 name: aio-map
 description: This skill should be used when the user asks to "map dependencies", "show structure", "who calls this", "blast radius", "trace references", or needs a structural map of symbols and dependencies. Second step in the aio-deep-plan pipeline — run discover first, then follow with plan. Uses GitNexus knowledge graph and LSP for precision.
+context: fork
+agent: oh-my-claudecode:explore
 ---
 
 # Map — Structural Analysis
