@@ -1,33 +1,38 @@
 ---
 name: aio-debug
 description: This skill should be used when the user asks to "debug", "fix bug", "fixbug", "investigate error", "troubleshoot", "why is this broken", "not working", "failing test", "unexpected behavior", or encounters any bug, error, or test failure. Orchestrates systematic debugging with codebase understanding, code review, and quality verification for maximum fix effectiveness.
+context: fork
+agent: oh-my-claudecode:debugger
 ---
 
 # DebugFix - Systematic Debug & Fix Orchestrator
 
 Orchestrate four specialized skills in sequence to maximize debugging effectiveness. Each phase builds on the previous, ensuring root cause is found before any code changes, and all changes are reviewed before completion.
 
-## Orchestration Flow
+## Orchestration Flow — Skill Graph
 
 ```
-Phase 1: Understand Context (feature-dev exploration)
-    |
-Phase 2: Investigate Root Cause (systematic-debugging)
-    |
-Phase 3: Implement Fix (with verification)
-    |
-Phase 4: Review & Validate (code review)
+Phase 1: Understand Context
+    /discover (AIO) + /deep-dive (OMC)
+         |
+Phase 2: Investigate Root Cause
+    /superpowers:systematic-debugging + /oh-my-claudecode:trace
+         |
+Phase 3: Implement Fix
+    /superpowers:test-driven-development (TDD)
+         |
+Phase 4: Verify & Review
+    /superpowers:verification-before-completion → /aio-code-review
 ```
 
 ## Phase 1: Understand Context
 
-Before debugging, understand the surrounding codebase. Invoke the feature-dev skill's exploration capabilities:
+Before debugging, understand the surrounding codebase using discovery skills:
 
-1. Invoke `/feature-dev:feature-dev` with the bug description
-2. Focus on **Phase 1 (Discovery)** and **Phase 2 (Codebase Exploration)** only
-3. Skip architecture design and implementation phases - the goal is understanding, not building
-4. Identify: affected files, data flow, dependencies, recent changes to the area
-5. Map the execution path from input to where the bug manifests
+1. Invoke `/discover` with the bug description — finds relevant files via GitNexus
+2. For complex bugs spanning multiple modules, also invoke `/oh-my-claudecode:deep-dive` for deeper analysis
+3. Identify: affected files, data flow, dependencies, recent changes to the area
+4. Map the execution path from input to where the bug manifests
 
 **Exit criteria**: Clear understanding of the code area, its patterns, and its dependencies.
 
@@ -35,7 +40,7 @@ Before debugging, understand the surrounding codebase. Invoke the feature-dev sk
 
 With codebase context established, apply systematic debugging rigor:
 
-1. Invoke `/systematic-debugging`
+1. Invoke `/superpowers:systematic-debugging` — the gold standard 4-phase debugging methodology
 2. Follow its iron law: **NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST**
 3. Execute all four phases:
    - **Root Cause Investigation**: Read errors, reproduce, check recent changes, trace data flow
@@ -43,7 +48,9 @@ With codebase context established, apply systematic debugging rigor:
    - **Hypothesis and Testing**: Form specific hypothesis, test minimally (one variable at a time)
    - **Implementation Planning**: Plan the single fix addressing root cause
 
-**Critical constraints from systematic-debugging**:
+4. For complex causal chains, additionally invoke `/oh-my-claudecode:trace` — evidence-driven causal analysis with hypothesis ranking and disconfirmation
+
+**Critical constraints**:
 - Never guess. Gather evidence first
 - One change at a time. Never shotgun multiple fixes
 - If 3+ fix attempts fail, question the architecture
@@ -55,31 +62,32 @@ With codebase context established, apply systematic debugging rigor:
 
 With root cause confirmed and fix identified:
 
-1. Create a failing test that reproduces the bug (when testable)
-2. Implement the single fix addressing the root cause
-3. Verify the fix resolves the failing test
-4. Run the full test suite to check for regressions
-5. Type-check the changes (Swift: build, TS: `tsc --noEmit`, etc.)
+1. Follow `/superpowers:test-driven-development` — RED-GREEN-REFACTOR:
+   - **RED**: Create a failing test that reproduces the bug
+   - **GREEN**: Implement the single fix addressing root cause
+   - **REFACTOR**: Clean up only what the fix touched
+2. Run the full test suite to check for regressions
+3. Type-check the changes (Swift: build, TS: `tsc --noEmit`, etc.)
 
 **Constraints**:
 - Fix only the root cause. Do not refactor surrounding code
 - Do not add "while I'm here" improvements
 - Keep the diff minimal and focused
 
-## Phase 4: Review & Validate
+## Phase 4: Verify & Review
 
-After implementation, run code review to catch issues:
+After implementation, verify with evidence then review:
 
-1. Invoke `/review` to launch parallel code-reviewer agents
-2. Review checks for:
-   - Bugs and logic errors in the fix
-   - Security vulnerabilities introduced
-   - Code quality and convention adherence
-   - Regression risks
+1. Invoke `/superpowers:verification-before-completion` — NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
+   - Run tests, type-check, build — capture actual output
+   - No hedging language ("should work", "probably fixed")
+2. Then invoke `/aio-code-review` to launch parallel review agents
+   - Security, quality, architecture checks via OMC agents
+   - Critic meta-review with confidence scoring
 3. If reviewers find critical issues, loop back to Phase 3
 4. If reviewers find minor issues, fix them inline
 
-**Exit criteria**: All critical review findings addressed. Fix is clean, minimal, and correct.
+**Exit criteria**: All verification passes with fresh evidence. All critical review findings addressed.
 
 ## Completion Summary
 

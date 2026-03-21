@@ -1,7 +1,7 @@
 {
   "name": "aio-debug",
   "description": "Systematic debug & fix orchestrator. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation.",
-  "version": "1.0.0",
+  "version": "2.2.0",
   "author": { "name": "aiocean" },
   "repository": "https://github.com/aiocean/claude-plugins",
   "license": "MIT"

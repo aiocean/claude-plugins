@@ -1,6 +1,8 @@
 ---
 name: aio-plan
 description: This skill should be used when the user asks to "plan implementation", "how should I implement", "approach", "strategy", or needs a concrete implementation plan with files, changes, and risks. Third step in the aio-deep-plan pipeline — run discover and map first. Uses GitNexus to check for duplicates and conventions.
+context: fork
+agent: oh-my-claudecode:planner
 ---
 
 # Plan — Implementation Planning
@@ -91,6 +93,24 @@ impact(file)
 ### Step 5: Create baseline
 
 Run `/snapshot` before starting implementation.
+
+### Step 6: Execution handoff
+
+After the plan is approved, choose an execution strategy:
+
+| Strategy | When | Skill to invoke |
+|----------|------|----------------|
+| **Subagent-driven** (recommended for complex) | Multi-file, 5+ steps | `/superpowers:subagent-driven-development` — fresh agent per task with inter-task reviews |
+| **Inline execution** | Simple, 2-4 steps | `/superpowers:executing-plans` — batched tasks in current session |
+| **Manual** | User wants control | Hand the plan to the user |
+
+For both automated strategies, the plan transitions through:
+```
+/plan → /superpowers:writing-plans (detailed plan)
+      → /superpowers:subagent-driven-development (execute)
+      → /superpowers:verification-before-completion (verify)
+      → /superpowers:finishing-a-development-branch (wrap up)
+```
 
 ## Principles
 

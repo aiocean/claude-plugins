@@ -1,6 +1,7 @@
 ---
 name: aio-review
 description: This skill should be used when the user asks to "check my changes", "before I commit", "did I miss anything", "review implementation", or needs post-implementation validation. Part of the aio-deep-plan pipeline — run snapshot before coding, then review after. Uses GitNexus for duplication check and change detection. For full code review, use aio-code-review instead.
+context: fork
 ---
 
 # Review — Post-Implementation Check
@@ -85,3 +86,14 @@ Skip change detection. Just run:
 1. `lsp_diagnostics` on changed files
 2. One GitNexus duplication search via `query`
 3. Quick convention check
+
+## Skill Graph — What to invoke next
+
+After review completes:
+
+| Result | Next skill |
+|--------|-----------|
+| Review clean, ready to merge | `/superpowers:verification-before-completion` → `/superpowers:finishing-a-development-branch` |
+| Issues found, needs fixes | Fix issues → re-run `/review` |
+| Needs full code review (security, architecture) | `/aio-code-review` — multi-agent review with OMC agents |
+| Want to extract learnings | `/aio-reflect` — capture knowledge from this session |
