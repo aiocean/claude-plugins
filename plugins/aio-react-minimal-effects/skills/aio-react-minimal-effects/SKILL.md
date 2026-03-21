@@ -3,6 +3,9 @@ name: aio-react-minimal-effects
 description: This skill should be used when the user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop. Provides proper patterns to minimize useEffect usage in React 19.
 ---
 
+## Environment
+- tsc: !`tsc --version 2>/dev/null || echo "NOT INSTALLED"`
+
 # React 19 Minimal Effects
 
 Most `useEffect` usage is wrong. Effects are for **synchronizing with external systems**, not for:

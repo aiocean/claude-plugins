@@ -3,6 +3,9 @@ name: aio-monitoring-observability
 description: This skill should be used when the user asks to "set up monitoring", "design metrics", "create alerts", "build dashboards", "calculate SLOs", "analyze performance", "compare monitoring tools", "migrate from Datadog", or mentions Prometheus, Grafana, Loki, OpenTelemetry, Four Golden Signals, RED/USE methods, error budgets, distributed tracing.
 ---
 
+## Environment
+- python3: !`python3 --version 2>/dev/null || echo "NOT INSTALLED"`
+
 # Monitoring & Observability
 
 ## Overview

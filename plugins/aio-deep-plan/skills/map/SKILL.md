@@ -5,6 +5,9 @@ context: fork
 agent: oh-my-claudecode:explore
 ---
 
+## Environment
+- GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
+
 # Map — Structural Analysis
 
 Build a dependency and symbol map for files identified by `/discover`. Uses GitNexus for overview, LSP for precision.
