@@ -2,7 +2,7 @@
 name: aio-code-review
 description: This skill should be used when the user asks to "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Multi-phase review pipeline with domain-specific analysis and codebase understanding. Use after implementing changes from aio-deep-plan pipeline, or to validate work before merging. Complements doc-writer for architecture-level review.
 context: fork
-agent: aio-critic
+agent: oh-my-claudecode:critic
 ---
 
 # Code Review Ultra
@@ -200,20 +200,20 @@ Spawn specialized review agents in parallel. Each agent receives the enriched an
 
 **Core agents (always run):**
 
-AIO built-in agents (preferred — no external dependencies). Fall back to OMC/external agents if installed.
+Agents from installed plugins (OMC + Superpowers). Spawned in parallel.
 
-| Agent | Type | Model | Focus | Uses analytics for |
-|-------|------|-------|-------|-------------------|
-| `aio-security-reviewer` | AIO built-in | opus | OWASP Top 10, secrets scanning, dependency audit, exploitability scoring | GitNexus impact paths to trace untrusted input; GitNexus auth patterns for consistency |
-| `aio-verifier` | AIO built-in | sonnet | Evidence-based completion validation — runs tests, type-check, build | Fresh command output, not cached results |
-| `oh-my-claudecode:quality-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | GitNexus dependents for coupling; GitNexus patterns for consistency; CodeWiki metrics |
-| `@superpowers:code-reviewer` | External | sonnet | Superpowers-based comprehensive review, verification before completion | Module boundaries and dependency graphs for contract violations |
+| Agent | Source | Model | Focus | Uses analytics for |
+|-------|--------|-------|-------|-------------------|
+| `oh-my-claudecode:security-reviewer` | OMC | opus | OWASP Top 10, secrets scanning, dependency audit, exploitability scoring | GitNexus impact paths to trace untrusted input; GitNexus auth patterns for consistency |
+| `oh-my-claudecode:verifier` | OMC | sonnet | Evidence-based completion validation — runs tests, type-check, build | Fresh command output, not cached results |
+| `oh-my-claudecode:code-reviewer` | OMC | sonnet | Logic defects, complexity, anti-patterns, performance, SOLID | GitNexus dependents for coupling; GitNexus patterns for consistency; CodeWiki metrics |
+| `superpowers:code-reviewer` | Superpowers | sonnet | Comprehensive review, verification before completion | Module boundaries and dependency graphs for contract violations |
 
 **Conditional agents (spawn based on scope and content):**
 
 | Agent | Model | When to spawn | Focus |
 |-------|-------|---------------|-------|
-| `aio-architect` | opus | Changes touch 3+ modules or cross module boundaries | Architectural impact, system boundaries, coupling assessment |
+| `oh-my-claudecode:architect` | opus | Changes touch 3+ modules or cross module boundaries | Architectural impact, system boundaries, coupling assessment |
 | `oh-my-claudecode:test-engineer` | sonnet | Changes touch core logic or public APIs | Test coverage gaps, missing edge cases, test quality |
 | `oh-my-claudecode:designer` | sonnet | Changes touch UI components, CSS, or templates | Accessibility (WCAG), interaction patterns, responsive design, UX consistency |
 | `oh-my-claudecode:writer` | haiku | Changes touch README, docs/, JSDoc, or API descriptions | Documentation accuracy, clarity, completeness, broken links |
@@ -222,7 +222,7 @@ AIO built-in agents (preferred — no external dependencies). Fall back to OMC/e
 
 | Agent | Model | When to spawn | Focus |
 |-------|-------|---------------|-------|
-| `aio-critic` | opus | Always, after Phase 3 agents finish | Pre-commitment prediction, multi-perspective analysis, false positive elimination, escalation protocol, confidence scoring |
+| `oh-my-claudecode:critic` | opus | Always, after Phase 3 agents finish | Pre-commitment prediction, multi-perspective analysis, false positive elimination, escalation protocol, confidence scoring |
 
 #### Agent Prompt Template
 
@@ -291,18 +291,16 @@ HOW TO USE THIS DATA:
 #### Spawning Pattern
 
 ```
-# Spawn core agents in parallel (always)
+# Spawn core agents in parallel (always — from installed plugins)
 
-# AIO built-in agents (preferred — no external dependencies)
-Task(subagent_type="aio-security-reviewer", model="opus",
+Task(subagent_type="oh-my-claudecode:security-reviewer", model="opus",
   prompt="<analytics context>\n\nSecurity review these files. OWASP Top 10, secrets scan, dependency audit: {files}")
 
-Task(subagent_type="aio-verifier", model="sonnet",
+Task(subagent_type="oh-my-claudecode:verifier", model="sonnet",
   prompt="<analytics context>\n\nVerify all changes with fresh test/type-check/build output: {files}")
 
-# OMC/External agents (if installed — gracefully skip if unavailable)
-Task(subagent_type="oh-my-claudecode:quality-reviewer", model="sonnet",
-  prompt="<analytics context>\n\nReview these files for quality and performance: {files}")
+Task(subagent_type="oh-my-claudecode:code-reviewer", model="sonnet",
+  prompt="<analytics context>\n\nReview these files for quality, logic, and performance: {files}")
 
 @superpowers:code-reviewer — Comprehensive review with verification, API contracts, backward compatibility:
   <analytics context>
@@ -310,7 +308,7 @@ Task(subagent_type="oh-my-claudecode:quality-reviewer", model="sonnet",
 
 # Conditional agents (spawn only when criteria met)
 if crosses_module_boundaries or affected_modules >= 3:
-  Task(subagent_type="aio-architect", model="opus",
+  Task(subagent_type="oh-my-claudecode:architect", model="opus",
     prompt="<analytics context>\n\nAssess architectural impact of these changes. Focus on module boundary violations, coupling changes, and system design implications: {files}")
 
 if touches_core_logic or touches_public_api:
@@ -328,7 +326,7 @@ if touches_docs or touches_readme or touches_jsdoc:
 
 ### Phase 3.5: Meta-Review (Critic)
 
-After all Phase 3 agents complete, spawn `aio-critic` that receives ALL findings from every agent. The critic's job is to:
+After all Phase 3 agents complete, spawn `oh-my-claudecode:critic` that receives ALL findings from every agent. The critic's job is to:
 
 1. **Pre-commitment prediction** — predict verdict before reading findings (reduces bias)
 2. **Multi-perspective analysis** — security engineer, new-hire, ops engineer lenses
@@ -342,8 +340,8 @@ After all Phase 3 agents complete, spawn `aio-critic` that receives ALL findings
 # Wait for all Phase 3 agents to complete, collect their findings
 all_findings = collect_all_agent_findings()
 
-Task(subagent_type="aio-critic", model="opus",
-  prompt="You are the adversarial meta-reviewer. All review agents have completed.\n\nFindings:\n{all_findings}\n\nFollow the full aio-critic protocol:\n1. Pre-commitment prediction (predict verdict before reading)\n2. Multi-perspective analysis (security engineer, new-hire, ops engineer)\n3. Verify every CRITICAL/HIGH against actual code\n4. Hunt for blind spots (what is ABSENT)\n5. Escalation protocol (adversarial mode if critical found)\n6. Severity calibration self-audit\n7. Strongest counterargument for opposite verdict\n8. Final verdict: REJECT/REVISE/ACCEPT-WITH-RESERVATIONS/ACCEPT\n9. Confidence score with breakdown")
+Task(subagent_type="oh-my-claudecode:critic", model="opus",
+  prompt="You are the adversarial meta-reviewer. All review agents have completed.\n\nFindings:\n{all_findings}\n\nYour job:\n1. Pre-commitment prediction (predict verdict before reading)\n2. Multi-perspective analysis (security engineer, new-hire, ops engineer)\n3. Verify every CRITICAL/HIGH against actual code\n4. Hunt for blind spots (what is ABSENT)\n5. Escalation protocol (adversarial mode if critical found)\n6. Severity calibration self-audit\n7. Strongest counterargument for opposite verdict\n8. Final verdict: REJECT/REVISE/ACCEPT-WITH-RESERVATIONS/ACCEPT\n9. Confidence score with breakdown")
 ```
 
 ### Phase 4: Synthesize Report
