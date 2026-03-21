@@ -1,7 +1,7 @@
 {
   "name": "aio-code-review",
   "description": "Ultimate code review with two-layer analytics (GitNexus knowledge graph with hybrid search + blast radius, CodeWiki static analysis), domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "author": {
     "name": "aiocean"
   }
