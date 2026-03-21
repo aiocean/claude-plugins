@@ -3,6 +3,9 @@ name: aio-snapshot
 description: This skill should be used when the user asks to "create snapshot", "baseline", "before I start coding", or needs a GitNexus baseline before implementation. Enables change detection in the review skill after coding to see what changed at the symbol level. Part of the aio-deep-plan pipeline.
 ---
 
+## Environment
+- GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
+
 # Snapshot — Create Baseline
 
 Create a GitNexus baseline before coding so you can detect changes after.

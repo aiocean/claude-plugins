@@ -3,6 +3,11 @@ name: aio-golang-mastery
 description: This skill should be used when the user asks to "write Go code", "review Go code", "refactor Go", "Go best practices", "Go concurrency", "Go error handling", "Go testing", "gRPC server", or mentions Go, Golang, goroutines, channels. Covers idiomatic patterns, concurrency, generics, TDD, and production hardening based on Google/Uber style guides. For Go TUI apps, combine with aio-tui.
 ---
 
+## Environment
+- go: !`go version 2>/dev/null || echo "NOT INSTALLED"`
+- golangci-lint: !`golangci-lint version --short 2>/dev/null || echo "NOT INSTALLED"`
+- govulncheck: !`which govulncheck 2>/dev/null || echo "NOT INSTALLED"`
+
 # Go Mastery
 
 Production-grade Go patterns from Google, Uber, and the Go team. Updated for Go 1.25.

@@ -3,6 +3,9 @@ name: aio-xstate
 description: This skill should be used when the user asks to "create state machine", "implement XState", "refactor XState", "review XState", "add actor", "design statechart", or mentions XState, state machines, actors, statecharts, finite state logic, actor systems, fromPromise, fromCallback. Covers XState v5 strict patterns with setup().createMachine(), actor patterns, and TypeScript typing. Use aio-code-review for reviewing XState implementations in context.
 ---
 
+## Environment
+- tsc: !`tsc --version 2>/dev/null || echo "NOT INSTALLED"`
+
 # XState v5 Strict Skill
 
 > **XState v5 ONLY.** Requires TypeScript 5.0+. Never use v4 patterns.

@@ -5,6 +5,9 @@ context: fork
 agent: oh-my-claudecode:explore
 ---
 
+## Environment
+- GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
+
 # Discover — Find Relevant Code
 
 Hybrid search across the entire codebase using GitNexus. Use BEFORE planning or coding to understand what exists.
