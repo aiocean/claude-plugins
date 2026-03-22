@@ -8,7 +8,7 @@
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
       "description": "AI-driven EPUB translation using jread CLI. Five opinionated skills: aio-epub-setup (project setup), aio-epub-research (book research, terminology, web search), aio-epub-translate (chapter translation), aio-editor-review (quality review), aio-epub-package (export).",
-      "version": "2.5.0",
+      "version": "2.4.0",
       "author": {
         "name": "aiocean"
       }
@@ -80,7 +80,7 @@
       "name": "aio-bun-fullstack-setup",
       "source": "./plugins/aio-bun-fullstack-setup",
       "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "aiocean"
       }
@@ -98,7 +98,7 @@
       "name": "aio-reflect",
       "source": "./plugins/aio-reflect",
       "description": "Learn from Claude Code sessions to extract reusable knowledge. Deep JSONL parsing extracts token usage, cost, work modes, subagents, tasks, compaction, session chains, and file operations for comprehensive reflection.",
-      "version": "2.2.0",
+      "version": "2.1.0",
       "author": {
         "name": "aiocean"
       }
@@ -107,7 +107,7 @@
       "name": "aio-monitoring-observability",
       "source": "./plugins/aio-monitoring-observability",
       "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "author": {
         "name": "aiocean"
       }
@@ -125,7 +125,7 @@
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
       "description": "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interactive HTML viewers.",
-      "version": "6.1.0",
+      "version": "5.1.1",
       "author": {
         "name": "aiocean"
       }
@@ -152,7 +152,7 @@
       "name": "aio-react-minimal-effects",
       "source": "./plugins/aio-react-minimal-effects",
       "description": "Minimize useEffect in React 19. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns.",
-      "version": "3.0.2",
+      "version": "3.0.4",
       "author": {
         "name": "aiocean"
       }
@@ -170,7 +170,7 @@
       "name": "aio-code-review",
       "source": "./plugins/aio-code-review",
       "description": "Ultimate code review with GitNexus knowledge graph analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
-      "version": "6.1.0",
+      "version": "3.1.1",
       "author": {
         "name": "aiocean"
       }
@@ -179,7 +179,7 @@
       "name": "aio-xstate",
       "source": "./plugins/aio-xstate",
       "description": "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCallback, fromObservable, fromTransition), invoke vs spawnChild, and React integration.",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "author": {
         "name": "aiocean"
       }
@@ -197,7 +197,7 @@
       "name": "aio-golang-mastery",
       "source": "./plugins/aio-golang-mastery",
       "description": "Complete Go development skill covering idiomatic patterns, error handling, concurrency, interfaces, generics, testing (TDD, fuzzing, benchmarks), project structure, production hardening, and gRPC. Based on Google Go Style Guide, Uber Go Style Guide, and Effective Go. Updated for Go 1.25.",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "author": {
         "name": "aiocean"
       }
@@ -215,7 +215,7 @@
       "name": "aio-tui",
       "source": "./plugins/aio-tui",
       "description": "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hover, delta tracking), and critical gotchas.",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "author": {
         "name": "aiocean"
       }
@@ -269,7 +269,7 @@
       "name": "aio-research-kit",
       "source": "./plugins/aio-research-kit",
       "description": "Structured 10-phase research framework CLI. Initialize research projects, validate structure, and execute systematic research via research-cli.",
-      "version": "1.2.0",
+      "version": "1.1.0",
       "author": {
         "name": "aiocean"
       }

@@ -5,6 +5,9 @@ context: fork
 agent: oh-my-claudecode:planner
 ---
 
+## Environment
+- GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
+
 # Plan — Implementation Planning
 
 Synthesize discovery and mapping results into a concrete, actionable implementation plan.

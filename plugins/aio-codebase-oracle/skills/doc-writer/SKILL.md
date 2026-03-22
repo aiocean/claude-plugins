@@ -5,6 +5,9 @@ context: fork
 agent: oh-my-claudecode:architect
 ---
 
+## Environment
+- GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
+
 # Codebase Oracle
 
 Comprehensive architecture documentation powered by GitNexus knowledge graph combined with Oracle direct documentation writing and LSP precision analysis.
@@ -70,17 +73,6 @@ Architecture docs must be **clear, scannable, and decision-useful**. Full guide:
 ## Tool Availability Detection (Run First)
 
 Before starting any phase, detect which analysis tools are available. Oracle adapts its workflow based on what's installed.
-
-```bash
-# 1. GitNexus (REQUIRED — knowledge graph engine)
-npx gitnexus --version 2>/dev/null && echo "gitnexus: YES" || echo "gitnexus: NO — install with: npm install -g gitnexus"
-
-# 2. GitNexus MCP (RECOMMENDED — enables graph queries from Claude Code)
-# Check if GitNexus MCP tools are available in tool list
-
-# 3. LSP (REQUIRED — precise type-aware references)
-# Must have LSP MCP tools configured (lsp_servers, lsp_hover, etc.)
-```
 
 **Decision matrix:**
 
