@@ -3,6 +3,10 @@ name: aio-monitoring-observability
 description: This skill should be used when the user asks to "set up monitoring", "design metrics", "create alerts", "build dashboards", "calculate SLOs", "analyze performance", "compare monitoring tools", "migrate from Datadog", or mentions Prometheus, Grafana, Loki, OpenTelemetry, Four Golden Signals, RED/USE methods, error budgets, distributed tracing.
 ---
 
+```bash
+SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-monitoring-observability/*/skills/aio-monitoring-observability/scripts 2>/dev/null | sort -V | tail -1)"
+```
+
 ## Environment
 - python3: !`python3 --version 2>/dev/null || echo "NOT INSTALLED"`
 
@@ -97,13 +101,13 @@ Detect anomalies and trends in your metrics:
 
 ```bash
 # Analyze Prometheus metrics for anomalies
-python3 scripts/analyze_metrics.py prometheus \
+python3 $SCRIPTS/analyze_metrics.py prometheus \
   --endpoint http://localhost:9090 \
   --query 'rate(http_requests_total[5m])' \
   --hours 24
 
 # Analyze CloudWatch metrics
-python3 scripts/analyze_metrics.py cloudwatch \
+python3 $SCRIPTS/analyze_metrics.py cloudwatch \
   --namespace AWS/EC2 \
   --metric CPUUtilization \
   --dimensions InstanceId=i-1234567890abcdef0 \
@@ -163,13 +167,13 @@ Analyze logs for errors, patterns, and anomalies:
 
 ```bash
 # Analyze log file for patterns
-python3 scripts/log_analyzer.py application.log
+python3 $SCRIPTS/log_analyzer.py application.log
 
 # Show error lines with context
-python3 scripts/log_analyzer.py application.log --show-errors
+python3 $SCRIPTS/log_analyzer.py application.log --show-errors
 
 # Extract stack traces
-python3 scripts/log_analyzer.py application.log --show-traces
+python3 $SCRIPTS/log_analyzer.py application.log --show-traces
 ```
 
 **→ Script**: [scripts/log_analyzer.py](scripts/log_analyzer.py)
@@ -232,10 +236,10 @@ Audit your alert rules against best practices:
 
 ```bash
 # Check single file
-python3 scripts/alert_quality_checker.py alerts.yml
+python3 $SCRIPTS/alert_quality_checker.py alerts.yml
 
 # Check all rules in directory
-python3 scripts/alert_quality_checker.py /path/to/prometheus/rules/
+python3 $SCRIPTS/alert_quality_checker.py /path/to/prometheus/rules/
 ```
 
 **Checks for**:
@@ -309,19 +313,19 @@ Automatically generate dashboards from templates:
 
 ```bash
 # Web application dashboard
-python3 scripts/dashboard_generator.py webapp \
+python3 $SCRIPTS/dashboard_generator.py webapp \
   --title "My API Dashboard" \
   --service my_api \
   --output dashboard.json
 
 # Kubernetes dashboard
-python3 scripts/dashboard_generator.py kubernetes \
+python3 $SCRIPTS/dashboard_generator.py kubernetes \
   --title "K8s Production" \
   --namespace production \
   --output k8s-dashboard.json
 
 # Database dashboard
-python3 scripts/dashboard_generator.py database \
+python3 $SCRIPTS/dashboard_generator.py database \
   --title "PostgreSQL" \
   --db-type postgres \
   --instance db.example.com:5432 \
@@ -365,17 +369,17 @@ Calculate compliance, error budgets, and burn rates:
 
 ```bash
 # Show SLO reference table
-python3 scripts/slo_calculator.py --table
+python3 $SCRIPTS/slo_calculator.py --table
 
 # Calculate availability SLO
-python3 scripts/slo_calculator.py availability \
+python3 $SCRIPTS/slo_calculator.py availability \
   --slo 99.9 \
   --total-requests 1000000 \
   --failed-requests 1500 \
   --period-days 30
 
 # Calculate burn rate
-python3 scripts/slo_calculator.py burn-rate \
+python3 $SCRIPTS/slo_calculator.py burn-rate \
   --slo 99.9 \
   --errors 50 \
   --requests 10000 \
@@ -490,12 +494,12 @@ Automatically analyze your Datadog usage and find cost optimization opportunitie
 
 ```bash
 # Analyze Datadog usage (requires API key and APP key)
-python3 scripts/datadog_cost_analyzer.py \
+python3 $SCRIPTS/datadog_cost_analyzer.py \
   --api-key $DD_API_KEY \
   --app-key $DD_APP_KEY
 
 # Show detailed breakdown by category
-python3 scripts/datadog_cost_analyzer.py \
+python3 $SCRIPTS/datadog_cost_analyzer.py \
   --api-key $DD_API_KEY \
   --app-key $DD_APP_KEY \
   --show-details
@@ -687,10 +691,10 @@ Validate health check endpoints against best practices:
 
 ```bash
 # Check single endpoint
-python3 scripts/health_check_validator.py https://api.example.com/health
+python3 $SCRIPTS/health_check_validator.py https://api.example.com/health
 
 # Check multiple endpoints
-python3 scripts/health_check_validator.py \
+python3 $SCRIPTS/health_check_validator.py \
   https://api.example.com/health \
   https://api.example.com/readiness \
   --verbose

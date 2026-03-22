@@ -3,6 +3,10 @@ name: aio-ios-device-debug
 description: This skill should be used when the user asks to "debug on device", "deploy to iPhone", "get crash logs", "check device logs", "install on device", "run on phone", "pull crash report", "analyze crash", "why is my app crashing", "syslog", "device logs", "take screenshot", "capture screenshot", "screenshot from device", "device screenshot", or when debugging iOS app crashes on physical devices. Covers the full workflow from build, install, launch, log capture, screenshot capture, crash report extraction, and crash analysis.
 ---
 
+```bash
+SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-ios-device-debug/*/skills/aio-ios-device-debug/scripts 2>/dev/null | sort -V | tail -1)"
+```
+
 # iOS Device Debug
 
 ## Environment
@@ -39,12 +43,12 @@ The debug workflow follows this sequence:
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/device-list.sh` | List connected devices with both devicectl and xcodebuild IDs |
-| `scripts/build-install.sh` | Build scheme and install on device |
-| `scripts/launch-and-log.sh` | Launch app, capture syslog, check for crashes |
-| `scripts/pull-crash-reports.sh` | Pull .ips crash reports from device |
-| `scripts/analyze-crash.sh` | Parse .ips file into human-readable analysis |
-| `scripts/screenshot.sh` | Capture screenshot from device (iOS 17+ compatible) |
+| `$SCRIPTS/device-list.sh` | List connected devices with both devicectl and xcodebuild IDs |
+| `$SCRIPTS/build-install.sh` | Build scheme and install on device |
+| `$SCRIPTS/launch-and-log.sh` | Launch app, capture syslog, check for crashes |
+| `$SCRIPTS/pull-crash-reports.sh` | Pull .ips crash reports from device |
+| `$SCRIPTS/analyze-crash.sh` | Parse .ips file into human-readable analysis |
+| `$SCRIPTS/screenshot.sh` | Capture screenshot from device (iOS 17+ compatible) |
 
 ## Step-by-Step Debug Process
 
@@ -82,7 +86,7 @@ On iOS 17+, `idevicescreenshot` and the deprecated `pymobiledevice3 developer sc
 
 ```bash
 # Using the script (recommended)
-bash scripts/screenshot.sh /tmp/device_screenshot.png
+bash $SCRIPTS/screenshot.sh /tmp/device_screenshot.png
 
 # Manual command
 python3 -m pymobiledevice3 developer dvt screenshot --tunnel "" /tmp/device_screenshot.png
@@ -115,7 +119,7 @@ xcrun devicectl device install app --device <DEVICECTL_UUID> /path/to/App.app
 
 Or use the combined script:
 ```bash
-bash scripts/build-install.sh <Scheme> <XCODEBUILD_DEVICE_ID>
+bash $SCRIPTS/build-install.sh <Scheme> <XCODEBUILD_DEVICE_ID>
 ```
 
 ### 3. Launch & Capture Logs
@@ -140,7 +144,7 @@ kill $SYSLOG_PID
 
 Or use the combined script:
 ```bash
-bash scripts/launch-and-log.sh <BUNDLE_ID> <DEVICECTL_UUID> 20
+bash $SCRIPTS/launch-and-log.sh <BUNDLE_ID> <DEVICECTL_UUID> 20
 ```
 
 ### 4. Analyze Logs
@@ -174,7 +178,7 @@ idevicecrashreport -e /tmp/crashes/
 ls /tmp/crashes/ | grep -i AppName
 
 # Analyze the latest crash
-bash scripts/analyze-crash.sh /tmp/crashes/AppName-2026-02-09-173322.ips
+bash $SCRIPTS/analyze-crash.sh /tmp/crashes/AppName-2026-02-09-173322.ips
 ```
 
 The analyze script outputs: exception type, signal, faulting thread, stack trace with app frames highlighted, and a diagnosis based on the signal type.

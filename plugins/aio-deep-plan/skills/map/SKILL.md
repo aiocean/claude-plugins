@@ -1,6 +1,9 @@
 ---
 name: aio-map
-description: This skill should be used when the user asks to "map dependencies", "show structure", "who calls this", "blast radius", "trace references", or needs a structural map of symbols and dependencies. Second step in the aio-deep-plan pipeline — run discover first, then follow with plan. Uses GitNexus knowledge graph and LSP for precision.
+description: |
+  PROACTIVE planning — second step in the aio-deep-plan pipeline. Use when the user needs structural analysis before implementing changes: "map dependencies", "show structure", "who calls this", "blast radius", "trace references", "impact analysis", or needs a structural map of symbols and dependencies. Run discover first, then follow with plan.
+  NOT for fixing bugs or debugging errors — use aio-debug instead.
+  Uses GitNexus knowledge graph and LSP for precision.
 context: fork
 agent: oh-my-claudecode:explore
 ---

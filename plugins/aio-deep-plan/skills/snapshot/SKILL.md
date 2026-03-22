@@ -1,6 +1,9 @@
 ---
 name: aio-snapshot
-description: This skill should be used when the user asks to "create snapshot", "baseline", "before I start coding", or needs a GitNexus baseline before implementation. Enables change detection in the review skill after coding to see what changed at the symbol level. Part of the aio-deep-plan pipeline.
+description: |
+  PROACTIVE planning — baseline step in the aio-deep-plan pipeline. Use when the user is about to start coding and wants change tracking: "create snapshot", "baseline", "before I start coding", or needs a GitNexus baseline before implementation. Enables change detection in the review skill after coding.
+  NOT for fixing bugs or debugging errors — use aio-debug instead.
+  Part of the aio-deep-plan pipeline.
 ---
 
 ## Environment
