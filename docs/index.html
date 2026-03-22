@@ -801,34 +801,18 @@ function getSelectedPlugins() {
 function generateCommands() {
   const plugins = getSelectedPlugins();
   if (plugins.length <= 3) {
-    // Individual commands for small selections
-    let out = '# Install aiocean plugins\n';
-    plugins.forEach(name => {
-      out += buildCmd(name) + '\n';
-    });
-    return out;
+    return plugins.map(name => buildCmd(name)).join('\n') + '\n';
   }
-  // Bulk command for larger selections
-  return '# Install aiocean plugins\n' + buildBulkCmd() + '\n';
+  return buildBulkCmd() + '\n';
 }
 
 function generateScript() {
   const plugins = getSelectedPlugins();
   const flags = getFlags();
-  let out = '#!/bin/bash\n';
-  out += '# aiocean Claude Code Plugin Installer\n';
-  out += `# Generated: ${new Date().toISOString().slice(0, 10)}\n`;
-  out += `# Plugins: ${plugins.length}\n`;
-  out += `# Scope: ${document.getElementById('scopeSelect').value}\n`;
-  out += '#\n';
-  out += '# Usage: bash install.sh\n\n';
-  out += 'set -e\n\n';
-  out += 'echo "Installing ${plugins.length} aiocean plugin(s)..."\n\n';
+  let out = '#!/bin/bash\nset -e\n\n';
   plugins.forEach(name => {
     out += `npx skills add ${REPO} -s ${name}${flags} -y\n`;
   });
-  out += '\necho ""\n';
-  out += 'echo "Done."\n';
   return out;
 }
 
