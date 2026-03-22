@@ -1,7 +1,7 @@
 {
   "name": "aio-debug",
   "description": "REACTIVE debugging — systematic debug & fix orchestrator for bugs, errors, and test failures. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation. Circuit breaker escalation after 3 failed attempts. NOT for planning new features — use aio-deep-plan instead.",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": { "name": "aiocean" },
   "repository": "https://github.com/aiocean/claude-plugins",
   "license": "MIT"

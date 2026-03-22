@@ -72,7 +72,7 @@
       "name": "aio-neobrutalism",
       "source": "./plugins/aio-neobrutalism",
       "description": "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": {
         "name": "aiocean"
       }
@@ -90,7 +90,7 @@
       "name": "aio-mental-models",
       "source": "./plugins/aio-mental-models",
       "description": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": {
         "name": "aiocean"
       }
@@ -135,7 +135,7 @@
       "name": "aio-grafana-diagram",
       "source": "./plugins/aio-grafana-diagram",
       "description": "Dashboard diagram generator. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic metric-driven coloring.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": {
         "name": "aiocean"
       }
@@ -189,7 +189,7 @@
       "name": "aio-debug",
       "source": "./plugins/aio-debug",
       "description": "REACTIVE debugging — systematic debug & fix orchestrator for bugs, errors, and test failures. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation. Circuit breaker escalation after 3 failed attempts. NOT for planning new features — use aio-deep-plan instead.",
-      "version": "2.3.0",
+      "version": "2.3.1",
       "author": {
         "name": "aiocean"
       }
@@ -225,7 +225,7 @@
       "name": "aio-deep-plan",
       "source": "./plugins/aio-deep-plan",
       "description": "PROACTIVE planning toolkit — use before writing code to understand codebase structure and plan changes. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning with re-anchoring protocol), review (post-implementation check). Combines GitNexus hybrid search/knowledge graph and LSP. NOT for debugging bugs — use aio-debug instead.",
-      "version": "3.3.0",
+      "version": "3.3.1",
       "author": {
         "name": "aiocean"
       }
@@ -297,7 +297,7 @@
       "name": "aio-google-workspace",
       "source": "./plugins/aio-google-workspace",
       "description": "Google Workspace operations via gws CLI. Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat, and cross-service workflows (standup, meeting prep, weekly digest).",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "aiocean"
       }
@@ -306,7 +306,7 @@
       "name": "aio-install",
       "source": "./plugins/aio-install",
       "description": "Install, enable, disable, and list aiocean plugins for the current project via settings.local.json.",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "aiocean"
       }

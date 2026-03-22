@@ -1,7 +1,7 @@
 {
   "name": "aio-deep-plan",
   "description": "PROACTIVE planning toolkit — use before writing code to understand codebase structure and plan changes. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning with re-anchoring protocol), review (post-implementation check). Combines GitNexus hybrid search/knowledge graph and LSP. NOT for debugging bugs — use aio-debug instead.",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "author": { "name": "aiocean" },
   "repository": "https://github.com/aiocean/claude-plugins",
   "license": "MIT"
