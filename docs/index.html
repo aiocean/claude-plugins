@@ -495,6 +495,35 @@
     color: var(--amber);
   }
 
+  /* Search */
+  .search-bar {
+    margin-bottom: 0.75rem;
+  }
+
+  .search-bar input {
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.12s;
+  }
+
+  .search-bar input::placeholder {
+    color: var(--text-3);
+  }
+
+  .search-bar input:focus {
+    border-color: var(--accent);
+  }
+
+  .category.hidden { display: none; }
+  .plugin.hidden { display: none; }
+
   @media (max-width: 640px) {
     .container { padding: 2rem 1rem 3rem; }
     header h1 { font-size: 1.4rem; }
@@ -513,6 +542,10 @@
     <h1>Plugin Marketplace</h1>
     <p>Select plugins, configure scope, generate install script.</p>
   </header>
+
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="search plugins..." oninput="filterPlugins()">
+  </div>
 
   <div class="config-bar">
     <div class="left">
@@ -855,6 +888,22 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function filterPlugins() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.querySelectorAll('.category').forEach(catEl => {
+    const plugins = catEl.querySelectorAll('.plugin');
+    let visible = 0;
+    plugins.forEach(p => {
+      const name = p.querySelector('.plugin-name').textContent.toLowerCase();
+      const desc = p.querySelector('.plugin-desc').textContent.toLowerCase();
+      const match = !q || name.includes(q) || desc.includes(q);
+      p.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    catEl.classList.toggle('hidden', visible === 0);
+  });
 }
 
 document.getElementById('modal').addEventListener('click', e => {
