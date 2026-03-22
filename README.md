@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-A curated collection of 23 plugins for Claude Code — from codebase analysis to iOS debugging to ebook publishing.
+A curated collection of 34 plugins for Claude Code — from codebase analysis to iOS debugging to ebook translation.
 
 ## Quick Start
 
@@ -8,7 +8,11 @@ A curated collection of 23 plugins for Claude Code — from codebase analysis to
 # Add the marketplace
 /plugin marketplace add aiocean/claude-plugins
 
-# Install any plugin
+# Browse available plugins
+/plugin install aio-install@aiocean-plugins
+/aio-install
+
+# Install any plugin directly
 /plugin install <plugin-name>@aiocean-plugins
 ```
 
@@ -16,92 +20,122 @@ A curated collection of 23 plugins for Claude Code — from codebase analysis to
 
 ### Codebase & Architecture
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-codebase-oracle** | Deep codebase analysis with parallel agent teams. Generates C4 diagrams, data models, API surfaces, dependency graphs. Three modes: Full Map, Investigate, Impact Analysis. Includes interactive HTML visualization. |
-| **aio-deep-plan** | Pre-coding analysis combining CocoIndex semantic search, Kai semantic graph, and LSP. Five skills: discover, map, snapshot, plan, review. |
-| **aio-debug** | Four-phase debug pipeline: understand context, investigate root cause, implement minimal fix, validate with code review. No guessing — evidence-based only. |
-| **aio-code-review** | Multi-phase code review: domain-specific skill detection, CodeWiki analytics, 4 core + 4 conditional parallel review agents, critic meta-review with confidence scoring. |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-codebase-oracle** | 5.1.2 | Deep codebase analysis powered by GitNexus knowledge graph and LSP. Generates architecture docs (C4 diagrams, dependency graphs), module docs, and interactive HTML viewers. |
+| **aio-deep-plan** | 3.3.0 | PROACTIVE planning — understand codebase structure before writing code. Five skills: discover, map, snapshot, plan (with re-anchoring), review. GitNexus + LSP powered. |
+| **aio-debug** | 2.3.0 | REACTIVE debugging — four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation. Circuit breaker after 3 failed attempts. |
+| **aio-code-review** | 3.1.1 | Multi-agent code review: GitNexus analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional agents, critic meta-review with confidence scoring. |
 
 ### Development Tools
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-worktree** | Git worktree management for parallel development. Create isolated workspaces, sync changes, merge branches, cleanup — no more branch switching. |
-| **aio-bun-fullstack-setup** | Scaffold Bun fullstack apps: single-port API + static frontend, Vite proxy for dev, env validation, PM2 config, multi-stage Docker build. |
-| **aio-claude-manager** | Enable/disable skills by project context. Switch presets (frontend, backend, ai) to reduce skill clutter and speed up responses. |
-| **aio-reflect** | Analyze past Claude Code sessions to extract patterns, corrections, and preferences. Turns insights into CLAUDE.md rules or new skills. |
-| **aio-feedback** | Submit bug reports, feature requests, and plugin ideas directly from Claude Code via GitHub Issues. Requires `gh` CLI. |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-worktree** | 1.1.0 | Git worktree management for parallel development. Create isolated workspaces, sync changes, merge branches, cleanup. |
+| **aio-bun-fullstack-setup** | 1.1.0 | Scaffold Bun fullstack apps. **Scaffold mode** detects existing files and generates only what's missing: single-port server, Vite proxy, PM2 config, Docker build. |
+| **aio-claude-manager** | 1.1.0 | Enable/disable skills by project context. Switch presets (frontend, backend, ai) to reduce skill clutter. |
+| **aio-reflect** | 2.2.0 | Analyze past Claude Code sessions to extract patterns, corrections, and preferences. Turns insights into CLAUDE.md rules or new skills. |
+| **aio-feedback** | 1.1.0 | Submit bug reports, feature requests, and plugin ideas directly from Claude Code via GitHub Issues. |
+| **aio-install** | 1.1.0 | Browse, install, enable/disable aiocean plugins for the current project. |
 
 ### Language & Framework
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-golang-mastery** | Complete Go development: idiomatic patterns, concurrency, generics, testing (TDD, fuzzing, benchmarks), gRPC. Based on Google/Uber style guides. Go 1.25. |
-| **aio-xstate** | XState v5 strict ruleset: `setup().createMachine()` patterns, params-first typing, actor patterns, invoke vs spawnChild, React integration. |
-| **aio-react-minimal-effects** | Minimize `useEffect` in React 19. Covers React Compiler, `useActionState`, `useOptimistic`, ref as prop, and proper patterns. |
-| **aio-tui** | Go Bubbletea TUI guide: TEA architecture, lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tabs, scroll). |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-golang-mastery** | 1.1.0 | Complete Go development with **lint mode**: 7-step tooling chain (build → vet → golangci-lint → govulncheck → nilaway → deadcode → race detection). Based on Google/Uber style guides. Go 1.25. |
+| **aio-react-minimal-effects** | 3.1.0 | Minimize `useEffect` in React 19. **Scan mode** finds and classifies problematic effects in existing code with file:line references. Covers React Compiler, `useActionState`, `useOptimistic`. |
+| **aio-xstate** | 1.0.4 | XState v5 strict ruleset: `setup().createMachine()` patterns, design-first workflow, actor types, invoke vs spawnChild, React integration. |
+| **aio-tui** | 1.0.2 | Go Bubbletea TUI guide: TEA architecture, lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tabs, scroll). |
 
 ### iOS
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-ios-device-debug** | Debug iOS apps on physical devices from terminal. Build, install, launch, capture logs, pull crash reports, take screenshots (iOS 17+). |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-ios-device-debug** | 1.1.1 | Debug iOS apps on physical devices from terminal. Build, install, launch, capture logs, pull crash reports, take screenshots (iOS 17+). 6 automation scripts. |
 
-### Design & UI
+### Design & Visualization
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-neobrutalism** | Neobrutalism design system: bold borders, hard shadows, vibrant colors. Complete component library — buttons, cards, forms, dialogs. |
-| **aio-mermaid** | Generate shareable MinimalMermaid diagram URLs from mermaid code. |
-| **aio-grafana-diagram** | Mermaid diagrams with data binding in Grafana dashboards. Flowcharts, sequence diagrams, state diagrams with metric-driven coloring. |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-neobrutalism** | 2.0.0 | Neobrutalism **design system bootstrapper**. Detects tech stack, generates CSS tokens, and transforms existing UI components. Bold borders, hard shadows, vibrant colors. |
+| **aio-mermaid** | 1.2.0 | Generate shareable MinimalMermaid diagram URLs from mermaid code. |
+| **aio-grafana-diagram** | 2.0.0 | **Dashboard diagram generator**. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana. |
 
 ### Observability
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-monitoring-observability** | Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry tracing, SLOs, dashboards, alerting. 7 automation scripts + production-ready templates. |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-monitoring-observability** | 1.0.4 | Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry tracing, SLOs, dashboards, alerting. 7 automation scripts + production-ready templates. |
 
 ### Content & Knowledge
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-mental-models** | 50+ mental models from The Great Mental Models series. First principles, inversion, second-order thinking, feedback loops, and more. |
-| **aio-youtube** | Search YouTube, extract transcripts, summarize videos, compare sources, pull code snippets from tutorials. Uses yt-dlp. |
-| **aio-epub-packing** | Convert Markdown to professional EPUB ebooks with auto-generated neo-brutalism covers. Multi-chapter, images, code highlighting, 7 color schemes. |
-| **aio-gherkin-refine** | Convert vague requirements into structured Given/When/Then scenarios before writing code. Catch misunderstandings early. |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-mental-models** | 2.0.0 | **Decision advisor** using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing — not just a reference. |
+| **aio-youtube** | 1.1.0 | Search YouTube and extract video transcripts using yt-dlp. 7 scripts. |
+| **aio-epub-packing** | 1.1.0 | Convert Markdown to professional EPUB ebooks with auto-generated neo-brutalism covers. |
+| **aio-epub-translate** | 2.5.0 | AI-driven EPUB translation pipeline. Five skills: setup → research (terminology, web search) → translate → editor review → package. |
+| **aio-gherkin-refine** | 1.0.3 | Convert vague requirements into structured Given/When/Then scenarios before writing code. |
+| **aio-research-kit** | 1.2.0 | Structured 10-phase research framework. Initialize projects, validate structure, and execute systematic research. |
 
 ### Integrations
 
-| Plugin | Description |
-|--------|-------------|
-| **aio-jira** | Jira via MCP: issue management, sprint tracking, workflow transitions, JQL search, dev info. Auto-installs jira-mcp server. |
-| **aio-remove-bg** | Remove image backgrounds — threshold-based (fast) or AI-powered (rembg). Auto-trims transparent edges. |
-| **aio-rookie** | Extract browser cookies with rookiepy, export Netscape cookie files, and replay authenticated requests from local browser sessions. |
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-jira** | 2.1.0 | Jira via MCP: issue management, sprint tracking, workflow transitions, JQL search. Auto-installs jira-mcp. |
+| **aio-github** | 1.1.0 | GitHub via MCP: repos, PRs, issues, code review, file operations. |
+| **aio-gitlab** | 1.1.0 | GitLab via MCP: merge requests, pipelines, jobs, branch protection, git flow. |
+| **aio-confluence** | 1.1.0 | Confluence via MCP: page management, CQL search, comments, space listing. |
+| **aio-google-workspace** | 1.1.0 | Google Workspace via MCP: Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat + cross-service workflows. |
+| **aio-x** | 1.1.0 | X/Twitter via MCP: tweets, threads, search, engagement, moderation, lists. |
+| **aio-tanca** | 1.1.0 | Tanca via MCP: employee timekeeping, shifts, check-in/check-out, clock logs. |
+| **aio-rag-kit** | 1.1.0 | RAG Kit via MCP: Qdrant vector database — create collections, index content, semantic search. |
+| **aio-browser-cookie** | 2.0.0 | Extract browser cookies with rookiepy. Export Netscape files, replay authenticated requests. Supports Chrome, Firefox, Safari, Brave, Edge, and more. |
+
+### Deprecated
+
+| Plugin | Version | Note |
+|--------|---------|------|
+| ~~aio-remove-bg~~ | 1.1.1 | Use ImageMagick or `rembg` CLI directly. |
 
 ## Workflows
 
 Plugins compose into multi-step workflows:
 
-**Feature Development** — clarify requirements, understand codebase, apply patterns, review, update tickets:
+**Feature Development** — clarify → understand → implement → review → track:
 ```
-gherkin-refine → codebase-oracle → [xstate / react-minimal-effects] → code-review → jira
-```
-
-**Debugging** — investigate, lint, add observability, visualize:
-```
-aio-debug → ios-device-debug → monitoring-observability → grafana-diagram
+gherkin-refine → deep-plan → [xstate / react-minimal-effects] → code-review → jira
 ```
 
-**Content & Docs** — research, think, document, publish:
+**Debugging** — investigate → fix → observe → visualize:
+```
+debug → ios-device-debug → monitoring-observability → grafana-diagram
+```
+
+**Content Pipeline** — research → think → document → publish:
 ```
 youtube → mental-models → codebase-oracle → epub-packing
 ```
 
-**Project Bootstrap** — scaffold, design, parallelize, observe, learn:
+**Project Bootstrap** — scaffold → design → parallelize → observe → learn:
 ```
 bun-fullstack-setup → neobrutalism → worktree → monitoring-observability → reflect
 ```
+
+**Translation Pipeline** — setup → research → translate → review → export:
+```
+epub-setup → epub-research → epub-translate → editor-review → epub-package
+```
+
+## Validation
+
+Run the marketplace validator to check all plugins:
+
+```bash
+bash scripts/validate-marketplace.sh
+```
+
+Checks: plugin.json fields, folder naming, SKILL.md frontmatter, script references, resolver blocks, marketplace.json version sync.
 
 ## License
 
