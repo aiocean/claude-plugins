@@ -11,6 +11,7 @@ Jira operations through MCP tools. Depends on [nguyenvanduocit/jira-mcp](https:/
 
 - Go: !`which go 2>/dev/null || echo "NOT INSTALLED"`
 - jira-mcp: !`which jira-mcp 2>/dev/null || echo "NOT INSTALLED"`
+- jira-cli: !`which jira-cli 2>/dev/null || echo "NOT INSTALLED"`
 - ATLASSIAN_HOST: !`echo ${ATLASSIAN_HOST:-NOT SET}`
 - ATLASSIAN_EMAIL: !`echo ${ATLASSIAN_EMAIL:-NOT SET}`
 - ATLASSIAN_TOKEN: !`[ -n "$ATLASSIAN_TOKEN" ] && echo "SET" || echo "NOT SET"`
@@ -20,6 +21,7 @@ Jira operations through MCP tools. Depends on [nguyenvanduocit/jira-mcp](https:/
 
 ```bash
 go install github.com/nguyenvanduocit/jira-mcp@latest
+go install github.com/nguyenvanduocit/jira-mcp/cmd/jira-cli@latest
 ```
 
 Docker alternative (if Go not available):
@@ -127,6 +129,35 @@ jira_list_project_versions(project_key: "PROJ")
 jira_get_version(version_id: "10042")
 jira_list_statuses(project_key: "PROJ")
 ```
+
+## CLI (fallback if MCP not configured)
+
+```bash
+jira-cli get-issue --issue-key PROJ-123 --env .env
+jira-cli search-issues --jql "project = PROJ AND status = 'In Progress'" --env .env
+jira-cli create-issue --project-key PROJ --summary "Bug title" --issue-type Bug --env .env
+jira-cli create-child-issue --parent-issue-key PROJ-100 --summary "Subtask" --env .env
+jira-cli update-issue --issue-key PROJ-123 --summary "Updated title" --env .env
+jira-cli delete-issue --issue-key PROJ-123 --env .env
+jira-cli list-issue-types --project-key PROJ --env .env
+jira-cli get-active-sprint --project-key PROJ --env .env
+jira-cli list-sprints --project-key PROJ --env .env
+jira-cli search-sprint --name "Sprint 23" --project-key PROJ --env .env
+jira-cli add-comment --issue-key PROJ-123 --comment "Fixed in PR #456" --env .env
+jira-cli get-comments --issue-key PROJ-123 --env .env
+jira-cli get-transitions --issue-key PROJ-123 --env .env
+jira-cli transition-issue --issue-key PROJ-123 --transition-id 31 --env .env
+jira-cli add-worklog --issue-key PROJ-123 --time-spent "2h 30m" --env .env
+jira-cli link-issues --inward-issue-key PROJ-100 --outward-issue-key PROJ-101 --link-type blocks --env .env
+jira-cli get-related-issues --issue-key PROJ-100 --env .env
+jira-cli get-development-info --issue-key PROJ-123 --env .env
+jira-cli get-issue-history --issue-key PROJ-123 --env .env
+jira-cli list-project-versions --project-key PROJ --env .env
+jira-cli list-statuses --project-key PROJ --env .env
+jira-cli download-attachment --issue-key PROJ-123 --env .env
+```
+
+Flags: `--env` (path to .env with credentials), `--output text|json`
 
 ## Workflows
 
