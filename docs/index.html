@@ -3,184 +3,260 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>aiocean — Claude Code Plugin Marketplace</title>
+<title>aiocean — Claude Code Plugins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #e6edf3;
-    --text-muted: #8b949e;
-    --accent: #58a6ff;
-    --accent-hover: #79c0ff;
-    --green: #3fb950;
-    --orange: #d29922;
-    --purple: #bc8cff;
-    --red: #f85149;
-    --radius: 8px;
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface-2: #1a1a1a;
+    --border: #262626;
+    --border-hover: #333;
+    --text: #ededed;
+    --text-2: #a1a1a1;
+    --text-3: #666;
+    --accent: #00e5a0;
+    --accent-dim: rgba(0, 229, 160, 0.08);
+    --accent-border: rgba(0, 229, 160, 0.25);
+    --blue: #3b82f6;
+    --amber: #f59e0b;
+    --mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --radius: 6px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-family: var(--sans);
     background: var(--bg);
     color: var(--text);
     line-height: 1.6;
-    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
 
   .container {
-    max-width: 960px;
+    max-width: 880px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
+    padding: 3rem 1.5rem 4rem;
   }
 
+  /* Header */
   header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
   }
 
   header h1 {
-    font-size: 2rem;
+    font-family: var(--sans);
+    font-size: 1.75rem;
     font-weight: 700;
+    letter-spacing: -0.03em;
     margin-bottom: 0.5rem;
   }
 
-  header h1 span { color: var(--accent); }
-
   header p {
-    color: var(--text-muted);
-    font-size: 1.05rem;
+    color: var(--text-2);
+    font-size: 0.9rem;
   }
 
-  /* Sticky install bar */
-  .install-bar {
+  /* Config bar */
+  .config-bar {
     position: sticky;
     top: 0;
     z-index: 100;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    margin-bottom: 2rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
-    backdrop-filter: blur(12px);
+    flex-wrap: wrap;
+    backdrop-filter: blur(16px);
+    background: rgba(20, 20, 20, 0.9);
   }
 
-  .install-bar .count {
-    font-size: 0.95rem;
-    color: var(--text-muted);
+  .config-bar .left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .config-bar .count {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text-2);
     white-space: nowrap;
   }
 
-  .install-bar .count strong {
+  .config-bar .count strong {
     color: var(--accent);
-    font-variant-numeric: tabular-nums;
   }
 
-  .install-bar .actions {
+  .separator {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+
+  .config-group {
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .config-group label {
+    font-size: 0.75rem;
+    color: var(--text-3);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  select {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    appearance: auto;
+  }
+
+  select:hover { border-color: var(--border-hover); }
+
+  .config-bar .actions {
+    display: flex;
+    gap: 0.4rem;
     flex-shrink: 0;
   }
 
+  /* Buttons */
   button {
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
     cursor: pointer;
     border: 1px solid var(--border);
     background: var(--surface);
-    color: var(--text);
-    transition: all 0.15s;
+    color: var(--text-2);
+    transition: all 0.12s;
+    letter-spacing: 0.01em;
   }
 
-  button:hover { border-color: var(--text-muted); }
+  button:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+  }
 
   button.primary {
     background: var(--accent);
-    color: #0d1117;
+    color: #0a0a0a;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  button.primary:hover {
+    background: #00ffb2;
+    border-color: #00ffb2;
+  }
+
+  button.primary:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--accent);
     border-color: var(--accent);
   }
 
-  button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-
-  button.primary:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+  button.ghost {
+    background: transparent;
+    border-color: transparent;
   }
 
-  button.small {
-    font-size: 0.8rem;
-    padding: 0.35rem 0.75rem;
+  button.ghost:hover {
+    background: var(--surface-2);
+    border-color: var(--border);
   }
 
-  /* Category */
+  /* Categories */
   .category {
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
   }
 
   .category-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 0;
+    margin-bottom: 0.25rem;
   }
 
   .category-header h2 {
-    font-size: 1.1rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .category-header button {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-color: transparent;
+    background: transparent;
   }
 
-  /* Plugin card */
+  /* Plugin rows */
   .plugin {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    border: 1px solid transparent;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
     border-radius: var(--radius);
-    transition: all 0.15s;
     cursor: pointer;
+    transition: all 0.12s;
+    border: 1px solid transparent;
   }
 
   .plugin:hover {
     background: var(--surface);
-    border-color: var(--border);
   }
 
   .plugin.selected {
-    background: rgba(88, 166, 255, 0.06);
-    border-color: rgba(88, 166, 255, 0.3);
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
   }
 
   .plugin input[type="checkbox"] {
     appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--border);
-    border-radius: 4px;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--border-hover);
+    border-radius: 3px;
     margin-top: 2px;
     flex-shrink: 0;
     cursor: pointer;
     position: relative;
-    transition: all 0.15s;
+    transition: all 0.12s;
+    background: var(--bg);
   }
 
   .plugin input[type="checkbox"]:checked {
@@ -191,35 +267,41 @@
   .plugin input[type="checkbox"]:checked::after {
     content: '';
     position: absolute;
-    left: 4px;
-    top: 1px;
+    left: 3.5px;
+    top: 0.5px;
     width: 5px;
     height: 9px;
-    border: solid #0d1117;
+    border: solid #0a0a0a;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
   }
 
   .plugin-info { flex: 1; min-width: 0; }
 
+  .plugin-top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
   .plugin-name {
+    font-family: var(--mono);
     font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--accent);
+    font-size: 0.85rem;
+    color: var(--text);
   }
 
   .plugin-version {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-left: 0.5rem;
-    font-weight: 400;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-3);
   }
 
   .plugin-desc {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 0.15rem;
-    line-height: 1.5;
+    font-size: 0.82rem;
+    color: var(--text-2);
+    margin-top: 0.1rem;
+    line-height: 1.45;
   }
 
   /* Modal */
@@ -227,11 +309,12 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.75);
     z-index: 200;
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
+    backdrop-filter: blur(4px);
   }
 
   .modal-overlay.open { display: flex; }
@@ -239,9 +322,9 @@
   .modal {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 8px;
     width: 100%;
-    max-width: 700px;
+    max-width: 680px;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
@@ -251,72 +334,109 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--border);
   }
 
   .modal-header h3 {
-    font-size: 1.1rem;
+    font-family: var(--mono);
+    font-size: 0.9rem;
     font-weight: 600;
   }
 
-  .modal-header button {
+  .modal-header .close {
     background: none;
     border: none;
-    color: var(--text-muted);
-    font-size: 1.3rem;
+    color: var(--text-3);
+    font-size: 1.2rem;
     cursor: pointer;
     padding: 0;
     line-height: 1;
   }
 
+  .modal-header .close:hover { color: var(--text); }
+
   .modal-body {
-    padding: 1.5rem;
+    padding: 1.25rem;
     overflow-y: auto;
     flex: 1;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    background: none;
+    color: var(--text-3);
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    transition: all 0.12s;
+    letter-spacing: 0;
+  }
+
+  .tab:hover { color: var(--text-2); }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--text-3);
+    margin-bottom: 0.75rem;
   }
 
   .modal-body pre {
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1.25rem;
-    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-    font-size: 0.82rem;
-    line-height: 1.7;
+    padding: 1rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.75;
     overflow-x: auto;
     white-space: pre;
     color: var(--text);
   }
 
-  .modal-body .hint {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 1rem;
-    line-height: 1.5;
+  .modal-body pre .comment {
+    color: var(--text-3);
   }
 
   .modal-footer {
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     border-top: 1px solid var(--border);
   }
 
+  /* Toast */
   .toast {
     position: fixed;
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%) translateY(20px);
-    background: var(--green);
-    color: #0d1117;
-    padding: 0.6rem 1.25rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    background: var(--accent);
+    color: #0a0a0a;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
     font-weight: 600;
     opacity: 0;
-    transition: all 0.3s;
+    transition: all 0.25s;
     z-index: 300;
     pointer-events: none;
   }
@@ -326,50 +446,58 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* Tabs in modal */
-  .tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 0.5rem 1rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    background: var(--bg);
-    color: var(--text-muted);
-    border: none;
-    border-radius: 0;
-    transition: all 0.15s;
-  }
-
-  .tab:not(:last-child) { border-right: 1px solid var(--border); }
-  .tab.active { background: var(--surface); color: var(--accent); }
-  .tab:hover { color: var(--text); }
-
+  /* Footer */
   footer {
-    text-align: center;
-    padding: 2rem 0;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-3);
   }
 
-  footer a { color: var(--accent); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
+  footer a {
+    font-family: var(--mono);
+    color: var(--text-2);
+    text-decoration: none;
+  }
+
+  footer a:hover { color: var(--accent); }
+
+  /* Quick install hint */
+  .quick-hint {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .quick-hint code {
+    color: var(--text);
+    background: var(--bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.78rem;
+  }
+
+  .quick-hint .flag {
+    color: var(--amber);
+  }
 
   @media (max-width: 640px) {
-    .container { padding: 1.25rem 1rem 3rem; }
-    header h1 { font-size: 1.5rem; }
-    .install-bar { flex-direction: column; align-items: stretch; text-align: center; }
-    .install-bar .actions { justify-content: center; }
+    .container { padding: 2rem 1rem 3rem; }
+    header h1 { font-size: 1.4rem; }
+    .config-bar { padding: 0.6rem 0.75rem; gap: 0.5rem; }
+    .config-bar .left { flex-wrap: wrap; }
+    .separator { display: none; }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
   }
 </style>
 </head>
@@ -377,23 +505,53 @@
 
 <div class="container">
   <header>
-    <h1><span>aiocean</span> Plugin Marketplace</h1>
-    <p>Select plugins and generate an install script for Claude Code</p>
+    <div class="logo">aiocean/claude-plugins</div>
+    <h1>Plugin Marketplace</h1>
+    <p>Select plugins, configure scope, generate install script.</p>
   </header>
 
-  <div class="install-bar">
-    <div class="count"><strong id="selectedCount">0</strong> plugin(s) selected</div>
+  <div class="quick-hint">
+    <code>npx skills add aiocean/claude-plugins</code>
+    &mdash; interactive install &nbsp;|&nbsp;
+    <code class="flag">-g</code> global &nbsp;
+    <code class="flag">-s</code> pick skills &nbsp;
+    <code class="flag">-y</code> skip prompts
+  </div>
+
+  <div class="config-bar">
+    <div class="left">
+      <span class="count"><strong id="selectedCount">0</strong> selected</span>
+      <div class="separator"></div>
+      <div class="config-group">
+        <label>scope</label>
+        <select id="scopeSelect" onchange="updateOutput()">
+          <option value="project">project</option>
+          <option value="global">global (-g)</option>
+        </select>
+      </div>
+      <div class="config-group">
+        <label>agent</label>
+        <select id="agentSelect" onchange="updateOutput()">
+          <option value="">auto-detect</option>
+          <option value="claude-code">claude-code</option>
+          <option value="cursor">cursor</option>
+          <option value="codex">codex</option>
+          <option value="*">all agents</option>
+        </select>
+      </div>
+    </div>
     <div class="actions">
-      <button onclick="selectAll()">Select All</button>
-      <button onclick="clearAll()">Clear</button>
-      <button class="primary" id="generateBtn" onclick="openModal()" disabled>Generate Install Script</button>
+      <button class="ghost" onclick="selectAll()">all</button>
+      <button class="ghost" onclick="clearAll()">clear</button>
+      <button class="primary" id="generateBtn" onclick="openModal()" disabled>generate</button>
     </div>
   </div>
 
   <div id="pluginList"></div>
 
   <footer>
-    <a href="https://github.com/aiocean/claude-plugins">aiocean/claude-plugins</a> &middot; MIT License
+    <a href="https://github.com/aiocean/claude-plugins">github.com/aiocean/claude-plugins</a>
+    <span>MIT</span>
   </footer>
 </div>
 
@@ -401,39 +559,41 @@
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-header">
-      <h3>Install Script</h3>
-      <button onclick="closeModal()">&times;</button>
+      <h3>install script</h3>
+      <button class="close" onclick="closeModal()">&times;</button>
     </div>
     <div class="modal-body">
       <div class="tabs">
-        <button class="tab active" data-tab="npx" onclick="switchTab('npx')">npx skills</button>
-        <button class="tab" data-tab="script" onclick="switchTab('script')">Shell Script</button>
-        <button class="tab" data-tab="curl" onclick="switchTab('curl')">One-liner</button>
+        <button class="tab active" data-tab="commands" onclick="switchTab('commands')">commands</button>
+        <button class="tab" data-tab="script" onclick="switchTab('script')">shell script</button>
+        <button class="tab" data-tab="oneliner" onclick="switchTab('oneliner')">one-liner</button>
       </div>
-      <div id="tab-npx">
-        <p class="hint">Run these commands in your terminal:</p>
-        <pre id="npxOutput"></pre>
+      <div id="tab-commands">
+        <p class="hint">Run in your terminal:</p>
+        <pre id="commandsOutput"></pre>
       </div>
       <div id="tab-script" style="display:none">
-        <p class="hint">Save as <code>install-plugins.sh</code> and run with <code>bash install-plugins.sh</code>:</p>
+        <p class="hint">Save and run with <code>bash install.sh</code>:</p>
         <pre id="scriptOutput"></pre>
       </div>
-      <div id="tab-curl" style="display:none">
-        <p class="hint">Run this one-liner in your terminal:</p>
-        <pre id="curlOutput"></pre>
+      <div id="tab-oneliner" style="display:none">
+        <p class="hint">Single command:</p>
+        <pre id="onelinerOutput"></pre>
       </div>
     </div>
     <div class="modal-footer">
-      <button onclick="closeModal()">Close</button>
-      <button class="primary" onclick="copyScript()">Copy to Clipboard</button>
-      <button onclick="downloadScript()">Download .sh</button>
+      <button onclick="closeModal()">close</button>
+      <button onclick="downloadScript()">download .sh</button>
+      <button class="primary" onclick="copyScript()">copy</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast">Copied!</div>
+<div class="toast" id="toast">copied</div>
 
 <script>
+const REPO = 'aiocean/claude-plugins';
+
 const PLUGINS = [
   {
     category: "Codebase & Architecture",
@@ -512,7 +672,28 @@ const PLUGINS = [
 ];
 
 const selected = new Set();
-let activeTab = 'npx';
+let activeTab = 'commands';
+
+function getFlags() {
+  const scope = document.getElementById('scopeSelect').value;
+  const agent = document.getElementById('agentSelect').value;
+  let flags = '';
+  if (scope === 'global') flags += ' -g';
+  if (agent) flags += ` -a ${agent}`;
+  return flags;
+}
+
+function buildCmd(skillName) {
+  const flags = getFlags();
+  return `npx skills add ${REPO} -s ${skillName}${flags} -y`;
+}
+
+function buildBulkCmd() {
+  const plugins = getSelectedPlugins();
+  const flags = getFlags();
+  const skills = plugins.map(n => n).join(' ');
+  return `npx skills add ${REPO} -s ${skills}${flags} -y`;
+}
 
 function render() {
   const container = document.getElementById('pluginList');
@@ -520,16 +701,16 @@ function render() {
     <div class="category">
       <div class="category-header">
         <h2>${cat.category}</h2>
-        <button class="small" onclick="toggleCategory('${cat.category}')">Toggle all</button>
+        <button class="ghost" onclick="toggleCategory('${cat.category}')">toggle</button>
       </div>
       ${cat.plugins.map(p => `
         <label class="plugin ${selected.has(p.name) ? 'selected' : ''}" id="card-${p.name}">
           <input type="checkbox" ${selected.has(p.name) ? 'checked' : ''}
                  onchange="toggle('${p.name}')">
           <div class="plugin-info">
-            <div>
+            <div class="plugin-top">
               <span class="plugin-name">${p.name}</span>
-              <span class="plugin-version">v${p.version}</span>
+              <span class="plugin-version">${p.version}</span>
             </div>
             <div class="plugin-desc">${p.desc}</div>
           </div>
@@ -574,6 +755,13 @@ function updateBar() {
   document.getElementById('generateBtn').disabled = selected.size === 0;
 }
 
+function updateOutput() {
+  // Re-generate if modal is open
+  if (document.getElementById('modal').classList.contains('open')) {
+    populateOutputs();
+  }
+}
+
 function getSelectedPlugins() {
   const ordered = [];
   PLUGINS.forEach(cat => cat.plugins.forEach(p => {
@@ -582,45 +770,53 @@ function getSelectedPlugins() {
   return ordered;
 }
 
-function generateNpx() {
+function generateCommands() {
   const plugins = getSelectedPlugins();
-  let out = '# Install selected aiocean plugins\n';
-  plugins.forEach(name => {
-    out += `npx skills install aiocean/claude-plugins/${name}\n`;
-  });
-  return out;
+  if (plugins.length <= 3) {
+    // Individual commands for small selections
+    let out = '# Install aiocean plugins\n';
+    plugins.forEach(name => {
+      out += buildCmd(name) + '\n';
+    });
+    return out;
+  }
+  // Bulk command for larger selections
+  return '# Install aiocean plugins\n' + buildBulkCmd() + '\n';
 }
 
 function generateScript() {
   const plugins = getSelectedPlugins();
+  const flags = getFlags();
   let out = '#!/bin/bash\n';
   out += '# aiocean Claude Code Plugin Installer\n';
   out += `# Generated: ${new Date().toISOString().slice(0, 10)}\n`;
   out += `# Plugins: ${plugins.length}\n`;
+  out += `# Scope: ${document.getElementById('scopeSelect').value}\n`;
   out += '#\n';
-  out += '# Usage: bash install-plugins.sh\n\n';
+  out += '# Usage: bash install.sh\n\n';
   out += 'set -e\n\n';
-  out += 'echo "Installing aiocean plugins for Claude Code..."\n';
-  out += 'echo ""\n\n';
+  out += 'echo "Installing ${plugins.length} aiocean plugin(s)..."\n\n';
   plugins.forEach(name => {
-    out += `npx skills install aiocean/claude-plugins/${name}\n`;
+    out += `npx skills add ${REPO} -s ${name}${flags} -y\n`;
   });
   out += '\necho ""\n';
-  out += `echo "Done! ${plugins.length} plugin(s) installed."\n`;
+  out += 'echo "Done."\n';
   return out;
 }
 
-function generateCurl() {
-  const plugins = getSelectedPlugins();
-  const cmds = plugins.map(n => `npx skills install aiocean/claude-plugins/${n}`);
-  return cmds.join(' && ');
+function generateOneliner() {
+  return buildBulkCmd();
+}
+
+function populateOutputs() {
+  document.getElementById('commandsOutput').textContent = generateCommands();
+  document.getElementById('scriptOutput').textContent = generateScript();
+  document.getElementById('onelinerOutput').textContent = generateOneliner();
 }
 
 function openModal() {
   if (selected.size === 0) return;
-  document.getElementById('npxOutput').textContent = generateNpx();
-  document.getElementById('scriptOutput').textContent = generateScript();
-  document.getElementById('curlOutput').textContent = generateCurl();
+  populateOutputs();
   document.getElementById('modal').classList.add('open');
   switchTab(activeTab);
 }
@@ -631,27 +827,29 @@ function closeModal() {
 
 function switchTab(tab) {
   activeTab = tab;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.getElementById('tab-npx').style.display = tab === 'npx' ? '' : 'none';
-  document.getElementById('tab-script').style.display = tab === 'script' ? '' : 'none';
-  document.getElementById('tab-curl').style.display = tab === 'curl' ? '' : 'none';
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === tab)
+  );
+  ['commands', 'script', 'oneliner'].forEach(id => {
+    document.getElementById('tab-' + id).style.display = id === tab ? '' : 'none';
+  });
 }
 
 function getActiveContent() {
-  if (activeTab === 'npx') return generateNpx();
+  if (activeTab === 'commands') return generateCommands();
   if (activeTab === 'script') return generateScript();
-  return generateCurl();
+  return generateOneliner();
 }
 
 function copyScript() {
-  navigator.clipboard.writeText(getActiveContent()).then(() => showToast('Copied!'));
+  navigator.clipboard.writeText(getActiveContent()).then(() => showToast('copied'));
 }
 
 function downloadScript() {
   const blob = new Blob([generateScript()], { type: 'text/x-shellscript' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'install-plugins.sh';
+  a.download = 'install-aiocean-plugins.sh';
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -660,15 +858,13 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-// Close modal on overlay click
 document.getElementById('modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-// Close modal on Escape
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
 });
