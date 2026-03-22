@@ -1,9 +1,6 @@
 ---
 name: aio-install
-description: |
-  This skill should be used when the user asks to "install plugin", "add plugin", "enable plugin",
-  "disable plugin", "remove plugin", "list plugins", "available plugins", "show plugins",
-  or mentions installing/managing aiocean plugins in the current project.
+description: This skill should be used when the user asks to "install plugin", "add plugin", "enable plugin", "disable plugin", "remove plugin", "list plugins", "available plugins", "show plugins", or mentions installing/managing aiocean plugins in the current project.
 ---
 
 # Plugin Installer (aiocean-plugins)

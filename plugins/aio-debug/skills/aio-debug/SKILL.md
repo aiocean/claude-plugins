@@ -1,9 +1,6 @@
 ---
 name: aio-debug
-description: |
-  REACTIVE debugging — use when something is broken and needs fixing. Triggers: "debug", "fix bug", "fixbug", "investigate error", "troubleshoot", "why is this broken", "not working", "failing test", "unexpected behavior", runtime error, stack trace, crash, regression, or any bug/error/test failure to investigate and fix.
-  NOT for planning new features, refactors, or pre-coding analysis — use aio-deep-plan skills (discover, map, plan) instead.
-  Orchestrates systematic debugging: codebase context → root cause investigation → minimal fix → code review validation.
+description: REACTIVE debugging — use when something is broken and needs fixing. Triggers: "debug", "fix bug", "fixbug", "investigate error", "troubleshoot", "why is this broken", "not working", "failing test", "unexpected behavior", runtime error, stack trace, crash, regression, or any bug/error/test failure to investigate and fix. NOT for planning new features — use aio-deep-plan instead. Orchestrates codebase context → root cause investigation → minimal fix → code review validation.
 context: fork
 agent: oh-my-claudecode:debugger
 ---

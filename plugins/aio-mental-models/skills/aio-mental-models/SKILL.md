@@ -1,11 +1,6 @@
 ---
 name: aio-mental-models
-description: |
-  Use when facing decisions, evaluating trade-offs, solving complex problems, or needing
-  structured thinking frameworks. Actively guides you through model selection and application
-  — not just a reference. Triggers: decision, trade-off, mental model, think through,
-  evaluate options, strategic thinking, problem-solving, structured reasoning, second-order,
-  first principles, inversion.
+description: Use when facing decisions, evaluating trade-offs, solving complex problems, or needing structured thinking frameworks. Actively guides you through model selection and application. Triggers: decision, trade-off, mental model, think through, evaluate options, strategic thinking, problem-solving, structured reasoning, second-order, first principles, inversion.
 ---
 
 # Mental Models Decision Advisor
