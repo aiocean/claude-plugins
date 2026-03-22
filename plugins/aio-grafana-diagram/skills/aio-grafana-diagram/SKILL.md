@@ -1,28 +1,86 @@
 ---
 name: aio-grafana-diagram
-description: This skill should be used when the user asks to "create grafana diagram", "mermaid in grafana", "diagram panel", "data-driven diagram", "dynamic diagram", or wants flowcharts, sequence/state/ER diagrams in Grafana dashboards. Covers the jdbranham-diagram-panel plugin with metric-driven node coloring. For standalone Mermaid diagrams outside Grafana, use aio-mermaid instead. Pairs with aio-monitoring-observability for dashboard design.
+description: |
+  Use when creating Grafana diagrams for system visualization. Analyzes codebase to auto-generate Mermaid diagrams with metric binding. Also use as Grafana diagram plugin reference.
+  Trigger phrases: "create grafana diagram", "mermaid in grafana", "diagram panel", "data-driven diagram", "dynamic diagram", flowcharts, sequence/state/ER diagrams in Grafana dashboards.
+  For standalone Mermaid diagrams outside Grafana, use aio-mermaid instead. Pairs with aio-monitoring-observability for dashboard design.
 ---
 
-# Grafana Diagram Plugin Guide
+# Grafana Dashboard Diagram Generator
 
 ## Environment
 - grafana-cli: !`which grafana-cli 2>/dev/null || echo "NOT INSTALLED"`
 
-The **grafana-diagram** plugin (marketplace: `jdbranham-diagram-panel`) enables creating dynamic, data-driven diagrams in Grafana using Mermaid.js syntax.
+## Objective Workflow
 
-## Installation
+### Phase 1: DISCOVER — Analyze Codebase Architecture
+
+Scan the project to identify system components:
+
+1. **Services**: Find service entry points, main files, Dockerfiles, docker-compose services
+2. **APIs**: Identify HTTP routes, gRPC definitions, GraphQL schemas
+3. **Data flows**: Trace database connections, message queues, cache layers, external API calls
+4. **Infrastructure**: Load balancers, CDNs, monitoring endpoints from config/infra files
 
 ```bash
-# Via Grafana CLI
-grafana-cli plugins install jdbranham-diagram-panel
-
-# Or install from Grafana.com marketplace
-# Settings > Plugins > Search "diagram"
+# Example discovery commands
+ls docker-compose*.yml Dockerfile* k8s/ infra/ 2>/dev/null
+# Look for service definitions, route handlers, DB connection strings
 ```
 
-Restart Grafana after installation.
+Output a component inventory: `[service_name, type, connections[], metrics_available[]]`
 
-## Using in JSON Dashboard
+### Phase 2: GENERATE — Create Mermaid Diagram Code
+
+Based on discovered components, generate Mermaid syntax:
+
+1. Choose diagram type: `graph LR` (service flow), `graph TB` (layered arch), `sequenceDiagram` (request flow)
+2. Create nodes with meaningful IDs matching metric naming conventions (underscores, no special chars)
+3. Use subgraphs to group related services (Frontend, Backend, Data, Infrastructure)
+4. Add edge labels for protocol/relationship types (HTTP, gRPC, TCP, pub/sub)
+5. Keep to 10-15 nodes max for readability
+
+### Phase 3: BIND — Map Metrics to Diagram Nodes
+
+For each node, identify and bind a relevant metric:
+
+1. Match node IDs to available Prometheus/datasource metric aliases
+2. Generate query targets with `format: "time_series"` (required for diagram binding)
+3. Ensure every query includes a `time` field — nodes without time series will not update
+4. Set thresholds: Green (healthy), Yellow (degraded), Red (critical)
+5. Use metric composites when a node health depends on multiple signals
+
+### Phase 4: OUTPUT — Generate Importable Grafana Panel JSON
+
+Produce a complete panel JSON block ready to paste into a Grafana dashboard:
+
+```json
+{
+  "type": "jdbranham-diagram-panel",
+  "title": "<generated title>",
+  "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+  "targets": [ /* generated queries */ ],
+  "options": { "display": { "diagramDefinition": "<generated mermaid>" } },
+  "fieldConfig": { "defaults": { "thresholds": { /* generated thresholds */ } } }
+}
+```
+
+Also output the raw Mermaid code separately so the user can preview at [mermaid.live](https://mermaid.live).
+
+---
+
+## Reference Material
+
+### Installation
+
+The **grafana-diagram** plugin (marketplace: `jdbranham-diagram-panel`) enables dynamic, data-driven diagrams in Grafana using Mermaid.js syntax.
+
+```bash
+grafana-cli plugins install jdbranham-diagram-panel
+# Restart Grafana after installation
+```
+
+### Using in JSON Dashboard
 
 **Panel type ID:** `jdbranham-diagram-panel`
 
@@ -47,19 +105,12 @@ Restart Grafana after installation.
 }
 ```
 
-**Key fields:**
-- `type`: Always `jdbranham-diagram-panel`
-- `options.display.diagramDefinition`: Mermaid syntax string
-- `targets`: Your data queries matching node IDs
+### Adding Diagram Panel via UI
 
-## Adding Diagram Panel via UI
+1. Open dashboard > Click **Add panel** (+ button)
+2. Search for `diagram`, select **Diagram** (by jdbranham)
 
-1. Open dashboard → Click **Add panel** (+ button)
-2. In panel search box, type: `diagram`
-3. Select **Diagram** (by jdbranham)
-4. Panel editor opens on right side
-
-## Quick Start
+### Quick Start
 
 ### Basic Mermaid Diagram
 

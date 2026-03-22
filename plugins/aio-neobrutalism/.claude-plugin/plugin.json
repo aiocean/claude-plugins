@@ -1,7 +1,7 @@
 {
   "name": "aio-neobrutalism",
-  "description": "Apply neobrutalism design patterns to web UI. Bold borders, hard shadows, vibrant colors.",
-  "version": "1.0.2",
+  "description": "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors.",
+  "version": "2.0.0",
   "author": { "name": "aiocean" },
   "license": "MIT"
 }

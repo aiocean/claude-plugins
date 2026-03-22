@@ -71,8 +71,8 @@
     {
       "name": "aio-neobrutalism",
       "source": "./plugins/aio-neobrutalism",
-      "description": "Apply neobrutalism design patterns to web UI. Bold borders, hard shadows, vibrant colors.",
-      "version": "1.0.2",
+      "description": "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors.",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -80,8 +80,8 @@
     {
       "name": "aio-bun-fullstack-setup",
       "source": "./plugins/aio-bun-fullstack-setup",
-      "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
-      "version": "1.0.3",
+      "description": "Scaffold and setup Bun fullstack projects. Scaffold mode detects existing files and generates only what is missing. Single port API + static frontend with Vite proxy in dev.",
+      "version": "1.1.0",
       "author": {
         "name": "aiocean"
       }
@@ -89,8 +89,8 @@
     {
       "name": "aio-mental-models",
       "source": "./plugins/aio-mental-models",
-      "description": "Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.",
-      "version": "1.0.3",
+      "description": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -134,8 +134,8 @@
     {
       "name": "aio-grafana-diagram",
       "source": "./plugins/aio-grafana-diagram",
-      "description": "Guide for using grafana-diagram plugin to create Mermaid diagrams with data binding in Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic metric-driven coloring.",
-      "version": "1.1.0",
+      "description": "Dashboard diagram generator. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic metric-driven coloring.",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -152,8 +152,8 @@
     {
       "name": "aio-react-minimal-effects",
       "source": "./plugins/aio-react-minimal-effects",
-      "description": "Minimize useEffect in React 19. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns.",
-      "version": "3.0.4",
+      "description": "Minimize useEffect in React 19. Scan mode finds and fixes problematic effects in existing code. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns.",
+      "version": "3.1.0",
       "author": {
         "name": "aiocean"
       }
@@ -197,8 +197,8 @@
     {
       "name": "aio-golang-mastery",
       "source": "./plugins/aio-golang-mastery",
-      "description": "Complete Go development skill covering idiomatic patterns, error handling, concurrency, interfaces, generics, testing (TDD, fuzzing, benchmarks), project structure, production hardening, and gRPC. Based on Google Go Style Guide, Uber Go Style Guide, and Effective Go. Updated for Go 1.25.",
-      "version": "1.0.3",
+      "description": "Complete Go development skill with lint mode (7-step tooling chain: build, vet, golangci-lint, govulncheck, nilaway, deadcode, race detection). Covers idiomatic patterns, error handling, concurrency, interfaces, generics, testing, project structure, production hardening, and gRPC. Based on Google/Uber style guides. Updated for Go 1.25.",
+      "version": "1.1.0",
       "author": {
         "name": "aiocean"
       }

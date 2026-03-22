@@ -1,47 +1,37 @@
 ---
 name: aio-mental-models
-description: This skill should be used when the user faces complex decisions, problem-solving, debugging, system design, strategic thinking, or needs structured reasoning. Comprehensive mental models framework with 50+ models covering first principles, second-order thinking, inversion, feedback loops, and more.
+description: |
+  Use when facing decisions, evaluating trade-offs, solving complex problems, or needing
+  structured thinking frameworks. Actively guides you through model selection and application
+  — not just a reference. Triggers: decision, trade-off, mental model, think through,
+  evaluate options, strategic thinking, problem-solving, structured reasoning, second-order,
+  first principles, inversion.
 ---
 
-# The Great Mental Models - Complete Reference
+# Mental Models Decision Advisor
 
 > "The quality of our thinking is largely influenced by our mental models."
 > — Shane Parrish
 
-## List Available Models
+## Workflow: How to Use This Skill
 
-Before calling any script, resolve the scripts directory (version may vary):
-```bash
-MM="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-mental-models/*/skills/aio-mental-models/scripts 2>/dev/null | sort -V | tail -1)"
-```
+When this skill is triggered, follow these five steps. Do NOT just dump model descriptions — actively guide the user through their specific problem.
 
-Then use the script to browse and search models:
+### Step 1: ASK — Understand the Decision
 
-```bash
-# List all 54 models grouped by volume
-$MM/list-models.sh
+Before selecting any models, ask the user (if not already clear):
+- What specific decision or problem are you facing?
+- What are the options you're considering?
+- What constraints or context matter (timeline, resources, stakes, reversibility)?
+- What have you already tried or considered?
 
-# Filter by volume (1-4)
-$MM/list-models.sh --volume 1
+If the user's message already contains enough context, proceed directly to Step 2.
 
-# Search by keyword
-$MM/list-models.sh --search "thinking"
+### Step 2: SELECT — Pick 2-3 Relevant Models
 
-# Quick count
-$MM/list-models.sh --count
-```
+Based on the user's context, select 2-3 models from the catalog below. Use this routing:
 
-**Volumes:**
-- Volume 1: General Thinking (First Principles, Inversion, etc.)
-- Volume 2: Physics, Chemistry & Biology (Leverage, Catalysts, etc.)
-- Volume 3: Systems & Mathematics (Feedback Loops, Compounding, etc.)
-- Volume 4: Economics & Art (Incentives, Opportunity Cost, etc.)
-
-## Quick Model Selector
-
-### By Problem Type
-
-| Problem                                | Recommended Models                                                         |
+| Context                                | Start With                                                                 |
 | -------------------------------------- | -------------------------------------------------------------------------- |
 | **Not understanding the real problem** | First Principles, Map vs Territory, Circle of Competence                   |
 | **Making a big decision**              | Second-Order Thinking, Inversion, Probabilistic Thinking, Opportunity Cost |
@@ -54,7 +44,54 @@ $MM/list-models.sh --count
 | **Change management**                  | Inertia, Activation Energy, Equilibrium                                    |
 | **Innovation/Disruption**              | Creative Destruction, First Principles, Niches                             |
 
+State which models you selected and why they fit this situation.
+
+### Step 3: APPLY — Walk Through Each Model
+
+For each selected model, apply it directly to the user's situation:
+- Name the model and its core principle (one sentence)
+- Show what it reveals about the user's specific problem
+- State the concrete insight or implication
+
+### Step 4: SYNTHESIZE — Combine Into a Recommendation
+
+Merge the insights from all applied models into:
+- A clear recommendation or ranked options
+- Key factors that tipped the balance
+- Conditions under which the recommendation changes
+
+### Step 5: CHALLENGE — Stress-Test With an Opposing Model
+
+Pick one model that argues against the recommendation. Apply it honestly:
+- What does this counter-model reveal?
+- Does the recommendation survive the challenge, or does it need adjustment?
+- State final confidence level and any caveats
+
 ---
+
+## Scripts
+
+Before calling any script, resolve the scripts directory (version may vary):
+```bash
+MM="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-mental-models/*/skills/aio-mental-models/scripts 2>/dev/null | sort -V | tail -1)"
+```
+
+```bash
+$MM/list-models.sh                    # List all 54 models grouped by volume
+$MM/list-models.sh --volume 1         # Filter by volume (1-4)
+$MM/list-models.sh --search "thinking" # Search by keyword
+$MM/list-models.sh --count            # Quick count
+```
+
+---
+
+## Model Catalog
+
+**Volumes:**
+- Volume 1: General Thinking (First Principles, Inversion, etc.)
+- Volume 2: Physics, Chemistry & Biology (Leverage, Catalysts, etc.)
+- Volume 3: Systems & Mathematics (Feedback Loops, Compounding, etc.)
+- Volume 4: Economics & Art (Incentives, Opportunity Cost, etc.)
 
 ## Volume 1: General Thinking Concepts
 
@@ -172,81 +209,6 @@ _Models for understanding value, markets, and human expression_
 | [Frame](./volume-4-economics-art/11-frame.md)                | Context shapes meaning           | Presentation          |
 | [Contrast](./volume-4-economics-art/12-contrast.md)          | Difference creates emphasis      | Design, communication |
 | [Chekhov's Gun](./volume-4-economics-art/13-chekhovs-gun.md) | Every element must serve purpose | Editing, design       |
-
----
-
-## How to Use This Skill
-
-### Step 1: Identify the Problem Category
-
-Ask yourself:
-
-- Is this about **understanding** something? → Volume 1 models
-- Is this about **change/energy/adaptation**? → Volume 2 models
-- Is this about **systems/patterns**? → Volume 3 models
-- Is this about **value/communication**? → Volume 4 models
-
-### Step 2: Select 2-3 Relevant Models
-
-Don't use just one model. Combine multiple perspectives:
-
-- Start with First Principles to understand the core
-- Use Inversion to identify what to avoid
-- Apply Second-Order Thinking to check consequences
-
-### Step 3: Apply and Iterate
-
-1. State the problem clearly
-2. Apply each selected model
-3. Look for conflicts between model outputs
-4. Synthesize into actionable insight
-
-### Example: Should I take this new job?
-
-**First Principles:** What do I fundamentally want from work? (income, growth, meaning, flexibility)
-
-**Second-Order Thinking:**
-
-- 1st order: Higher salary
-- 2nd order: More stress, less time for family
-- 3rd order: Possible burnout, career reset needed
-
-**Inversion:** What would make this job the worst decision? Long commute, toxic culture, dead-end role → Check if these exist
-
-**Opportunity Cost:** What am I giving up? Current relationships, learning trajectory, unvested equity
-
-**Circle of Competence:** Am I qualified, or will I be struggling outside my expertise?
-
----
-
-## Mental Model Combinations
-
-### For Problem Diagnosis
-
-1. Map is Not the Territory → Check if you understand reality
-2. First Principles → Break down to fundamentals
-3. Circle of Competence → Assess your ability to judge
-
-### For Decision Making
-
-1. Second-Order Thinking → Trace consequences
-2. Inversion → Identify failure modes
-3. Probabilistic Thinking → Estimate likelihoods
-4. Margin of Safety → Add buffer
-
-### For System Design
-
-1. Feedback Loops → Design self-correction
-2. Bottlenecks → Identify constraints
-3. Emergence → Expect unexpected behaviors
-4. Gall's Law → Start simple
-
-### For Growth/Scaling
-
-1. Compounding → Think long-term
-2. Leverage → Find force multipliers
-3. Diminishing Returns → Know when to stop
-4. Critical Mass → Aim for tipping point
 
 ---
 

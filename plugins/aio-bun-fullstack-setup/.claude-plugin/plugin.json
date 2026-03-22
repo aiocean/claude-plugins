@@ -1,7 +1,7 @@
 {
   "name": "aio-bun-fullstack-setup",
-  "description": "Setup Bun server serving both API and static frontend on single port with Vite proxy in dev.",
-  "version": "1.0.3",
+  "description": "Scaffold and setup Bun fullstack projects. Scaffold mode detects existing files and generates only what is missing. Single port API + static frontend with Vite proxy in dev.",
+  "version": "1.1.0",
   "author": { "name": "aiocean" },
   "license": "MIT"
 }
