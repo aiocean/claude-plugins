@@ -1,9 +1,6 @@
 ---
 name: aio-map
-description: |
-  PROACTIVE planning — second step in the aio-deep-plan pipeline. Use when the user needs structural analysis before implementing changes: "map dependencies", "show structure", "who calls this", "blast radius", "trace references", "impact analysis", or needs a structural map of symbols and dependencies. Run discover first, then follow with plan.
-  NOT for fixing bugs or debugging errors — use aio-debug instead.
-  Uses GitNexus knowledge graph and LSP for precision.
+description: PROACTIVE planning — second step in the aio-deep-plan pipeline. Use when the user needs structural analysis: "map dependencies", "show structure", "who calls this", "blast radius", "trace references", "impact analysis". Run discover first, then follow with plan. NOT for debugging — use aio-debug instead.
 context: fork
 agent: oh-my-claudecode:explore
 ---

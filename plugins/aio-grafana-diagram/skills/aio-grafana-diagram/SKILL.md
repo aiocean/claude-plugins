@@ -1,9 +1,6 @@
 ---
 name: aio-grafana-diagram
-description: |
-  Use when creating Grafana diagrams for system visualization. Analyzes codebase to auto-generate Mermaid diagrams with metric binding. Also use as Grafana diagram plugin reference.
-  Trigger phrases: "create grafana diagram", "mermaid in grafana", "diagram panel", "data-driven diagram", "dynamic diagram", flowcharts, sequence/state/ER diagrams in Grafana dashboards.
-  For standalone Mermaid diagrams outside Grafana, use aio-mermaid instead. Pairs with aio-monitoring-observability for dashboard design.
+description: Use when creating Grafana diagrams for system visualization. Analyzes codebase to auto-generate Mermaid diagrams with metric binding. Triggers: "create grafana diagram", "mermaid in grafana", "diagram panel", "data-driven diagram", "dynamic diagram", flowcharts, sequence/state/ER diagrams in Grafana dashboards. For standalone Mermaid diagrams use aio-mermaid instead.
 ---
 
 # Grafana Dashboard Diagram Generator

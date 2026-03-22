@@ -1,8 +1,6 @@
 ---
 name: aio-neobrutalism
-description: |
-  Use when applying neobrutalism design to a web project. Detects tech stack, generates CSS tokens, and transforms existing UI components. Also use as neobrutalism design reference.
-  Trigger phrases: "apply neobrutalism", "create brutalist design", "add bold borders", "use hard shadows", neobrutalism, brutalist, bold design, high-contrast aesthetic.
+description: Use when applying neobrutalism design to a web project. Detects tech stack, generates CSS tokens, and transforms existing UI components. Triggers: "apply neobrutalism", "create brutalist design", "add bold borders", "use hard shadows", neobrutalism, brutalist, bold design, high-contrast aesthetic.
 ---
 
 # Neobrutalism Design System Bootstrapper
