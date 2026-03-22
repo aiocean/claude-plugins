@@ -106,39 +106,6 @@
     color: var(--accent);
   }
 
-  .separator {
-    width: 1px;
-    height: 20px;
-    background: var(--border);
-  }
-
-  .config-group {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .config-group label {
-    font-size: 0.75rem;
-    color: var(--text-3);
-    font-family: var(--mono);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  select {
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    padding: 0.3rem 0.5rem;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    cursor: pointer;
-    appearance: auto;
-  }
-
-  select:hover { border-color: var(--border-hover); }
 
   .config-bar .actions {
     display: flex;
@@ -552,24 +519,6 @@
   <div class="config-bar">
     <div class="left">
       <span class="count"><strong id="selectedCount">0</strong> selected</span>
-      <div class="separator"></div>
-      <div class="config-group">
-        <label>scope</label>
-        <select id="scopeSelect" onchange="updateOutput()">
-          <option value="project">project</option>
-          <option value="global">global (-g)</option>
-        </select>
-      </div>
-      <div class="config-group">
-        <label>agent</label>
-        <select id="agentSelect" onchange="updateOutput()">
-          <option value="">auto-detect</option>
-          <option value="claude-code">claude-code</option>
-          <option value="cursor">cursor</option>
-          <option value="codex">codex</option>
-          <option value="*">all agents</option>
-        </select>
-      </div>
     </div>
     <div class="actions">
       <button class="ghost" onclick="selectAll()">all</button>
@@ -595,26 +544,20 @@
     </div>
     <div class="modal-body">
       <div class="tabs">
-        <button class="tab active" data-tab="commands" onclick="switchTab('commands')">commands</button>
-        <button class="tab" data-tab="script" onclick="switchTab('script')">shell script</button>
-        <button class="tab" data-tab="oneliner" onclick="switchTab('oneliner')">one-liner</button>
+        <button class="tab active" data-tab="commands" onclick="switchTab('commands')">step by step</button>
+        <button class="tab" data-tab="script" onclick="switchTab('script')">all commands</button>
       </div>
       <div id="tab-commands">
-        <p class="hint">Run in your terminal:</p>
+        <p class="hint">Run in Claude Code:</p>
         <pre id="commandsOutput"></pre>
       </div>
       <div id="tab-script" style="display:none">
-        <p class="hint">Save and run with <code>bash install.sh</code>:</p>
+        <p class="hint">Copy and paste into Claude Code:</p>
         <pre id="scriptOutput"></pre>
-      </div>
-      <div id="tab-oneliner" style="display:none">
-        <p class="hint">Single command:</p>
-        <pre id="onelinerOutput"></pre>
       </div>
     </div>
     <div class="modal-footer">
       <button onclick="closeModal()">close</button>
-      <button onclick="downloadScript()">download .sh</button>
       <button class="primary" onclick="copyScript()">copy</button>
     </div>
   </div>
@@ -624,26 +567,27 @@
 
 <script>
 const REPO = 'aiocean/claude-plugins';
+const MARKETPLACE = 'aiocean-plugins';
 
 const PLUGINS = [
   {
     category: "Codebase & Architecture",
     plugins: [
-      { name: "aio-codebase-oracle", version: "5.1.2", desc: "Deep codebase analysis — architecture docs, C4 diagrams, dependency graphs, interactive HTML viewers" },
-      { name: "aio-deep-plan", version: "3.3.0", desc: "Proactive planning — discover, map, snapshot, plan, review. Understand codebase before writing code" },
-      { name: "aio-debug", version: "2.3.0", desc: "Reactive debugging — codebase context, root cause investigation, minimal fix, code review validation" },
-      { name: "aio-code-review", version: "3.1.1", desc: "Multi-agent code review with domain-specific skill detection and confidence scoring" },
+      { name: "aio-codebase-oracle", version: "5.1.3", desc: "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools" },
+      { name: "aio-deep-plan", version: "3.3.1", desc: "Proactive planning — discover, map, snapshot, plan, review. GitNexus hybrid search/knowledge graph and LSP" },
+      { name: "aio-debug", version: "2.3.1", desc: "Reactive debugging — codebase context, root cause investigation, minimal fix, code review validation" },
+      { name: "aio-code-review", version: "3.1.2", desc: "Multi-agent code review with GitNexus analytics, domain-specific skill detection, and confidence scoring" },
     ]
   },
   {
     category: "Development Tools",
     plugins: [
-      { name: "aio-worktree", version: "1.1.0", desc: "Git worktree management — create, sync, merge, cleanup isolated workspaces" },
-      { name: "aio-bun-fullstack-setup", version: "1.1.0", desc: "Scaffold Bun fullstack apps with Vite proxy, PM2 config, Docker build" },
-      { name: "aio-claude-manager", version: "1.1.0", desc: "Enable/disable skills by project context to reduce skill clutter" },
-      { name: "aio-reflect", version: "2.2.0", desc: "Analyze past sessions to extract patterns, corrections, and preferences" },
-      { name: "aio-feedback", version: "1.1.0", desc: "Submit bug reports and feature requests via GitHub Issues" },
-      { name: "aio-install", version: "1.1.0", desc: "Browse, install, enable/disable aiocean plugins for the current project" },
+      { name: "aio-worktree", version: "1.1.1", desc: "Git worktree management — create, sync (spotlight), merge, cleanup isolated workspaces" },
+      { name: "aio-bun-fullstack-setup", version: "1.1.0", desc: "Scaffold Bun fullstack apps — detects existing files, single port API + static frontend with Vite proxy" },
+      { name: "aio-claude-manager", version: "1.1.1", desc: "Enable/disable skills by project context to reduce skill clutter" },
+      { name: "aio-reflect", version: "2.2.1", desc: "Learn from Claude Code sessions — deep JSONL parsing for token usage, cost, work modes, subagents, tasks" },
+      { name: "aio-feedback", version: "1.1.1", desc: "Submit feedback, bug reports, feature requests for aiocean plugins via GitHub Issues" },
+      { name: "aio-install", version: "1.1.1", desc: "Install, enable, disable, and list aiocean plugins for the current project" },
     ]
   },
   {
@@ -651,53 +595,53 @@ const PLUGINS = [
     plugins: [
       { name: "aio-golang-mastery", version: "1.1.0", desc: "Complete Go development with 7-step lint tooling chain. Google/Uber style guides. Go 1.25" },
       { name: "aio-react-minimal-effects", version: "3.1.0", desc: "Minimize useEffect in React 19 — scan mode finds problematic effects with file:line refs" },
-      { name: "aio-xstate", version: "1.0.4", desc: "XState v5 strict ruleset — setup().createMachine() patterns, actor types, React integration" },
-      { name: "aio-tui", version: "1.0.2", desc: "Go Bubbletea TUI guide — TEA architecture, lipgloss styling, production patterns" },
+      { name: "aio-xstate", version: "1.0.5", desc: "XState v5 strict ruleset — setup().createMachine() patterns, actor types, React integration" },
+      { name: "aio-tui", version: "1.0.3", desc: "Go Bubbletea TUI guide — TEA architecture, lipgloss styling, production patterns" },
     ]
   },
   {
     category: "iOS",
     plugins: [
-      { name: "aio-ios-device-debug", version: "1.1.1", desc: "Debug iOS apps on physical devices — build, install, launch, logs, crash reports" },
+      { name: "aio-ios-device-debug", version: "1.1.2", desc: "Debug iOS apps on physical devices — build, install, launch, logs, crash reports" },
     ]
   },
   {
     category: "Design & Visualization",
     plugins: [
-      { name: "aio-neobrutalism", version: "2.0.0", desc: "Neobrutalism design system bootstrapper — CSS tokens, component transforms, bold borders" },
-      { name: "aio-mermaid", version: "1.2.0", desc: "Generate shareable MinimalMermaid diagram URLs from mermaid code" },
-      { name: "aio-grafana-diagram", version: "2.0.0", desc: "Auto-generate Mermaid diagrams with metric binding for Grafana dashboards" },
+      { name: "aio-neobrutalism", version: "2.0.1", desc: "Neobrutalism design system bootstrapper — CSS tokens, component transforms, bold borders, vibrant colors" },
+      { name: "aio-mermaid", version: "1.2.1", desc: "Generate shareable MinimalMermaid diagram URLs from mermaid code" },
+      { name: "aio-grafana-diagram", version: "2.0.1", desc: "Auto-generate Mermaid diagrams with metric binding for Grafana dashboards" },
     ]
   },
   {
     category: "Observability",
     plugins: [
-      { name: "aio-monitoring-observability", version: "1.0.4", desc: "Full monitoring stack — Golden Signals, RED/USE, OpenTelemetry, SLOs, dashboards, alerting" },
+      { name: "aio-monitoring-observability", version: "1.0.5", desc: "Full monitoring stack — Golden Signals, RED/USE, OpenTelemetry, SLOs, dashboards, alerting, 7 automation scripts" },
     ]
   },
   {
     category: "Content & Knowledge",
     plugins: [
-      { name: "aio-mental-models", version: "2.0.0", desc: "Decision advisor using 50+ mental models — selection, application, synthesis, stress-testing" },
-      { name: "aio-youtube", version: "1.1.0", desc: "Search YouTube and extract video transcripts using yt-dlp" },
-      { name: "aio-epub-packing", version: "1.1.0", desc: "Convert Markdown to professional EPUB ebooks with neo-brutalism covers" },
-      { name: "aio-epub-translate", version: "2.5.0", desc: "AI-driven EPUB translation pipeline — setup, research, translate, review, package" },
-      { name: "aio-gherkin-refine", version: "1.0.3", desc: "Convert vague requirements into structured Given/When/Then scenarios" },
-      { name: "aio-research-kit", version: "1.2.0", desc: "Structured 10-phase research framework with project init and validation" },
+      { name: "aio-mental-models", version: "2.0.1", desc: "Decision advisor using 50+ mental models — selection, application, synthesis, stress-testing" },
+      { name: "aio-youtube", version: "1.1.1", desc: "Search YouTube and extract video transcripts using yt-dlp" },
+      { name: "aio-epub-packing", version: "1.1.1", desc: "Convert Markdown to professional EPUB ebooks with neo-brutalism covers" },
+      { name: "aio-epub-translate", version: "2.5.1", desc: "AI-driven EPUB translation — setup, research, terminology, translate, review, package" },
+      { name: "aio-gherkin-refine", version: "1.0.4", desc: "Convert vague requirements into structured Given/When/Then scenarios" },
+      { name: "aio-research-kit", version: "1.2.1", desc: "Structured 10-phase research framework with project init and validation" },
     ]
   },
   {
     category: "Integrations",
     plugins: [
-      { name: "aio-jira", version: "2.1.0", desc: "Jira via MCP — issues, sprints, workflow transitions, JQL search" },
-      { name: "aio-github", version: "1.1.0", desc: "GitHub via MCP — repos, PRs, issues, code review, file operations" },
-      { name: "aio-gitlab", version: "1.1.0", desc: "GitLab via MCP — merge requests, pipelines, jobs, branch protection" },
-      { name: "aio-confluence", version: "1.1.0", desc: "Confluence via MCP — page management, CQL search, comments" },
-      { name: "aio-google-workspace", version: "1.1.0", desc: "Google Workspace via MCP — Drive, Gmail, Calendar, Sheets, Docs, Tasks" },
-      { name: "aio-x", version: "1.1.0", desc: "X/Twitter via MCP — tweets, threads, search, engagement, moderation" },
-      { name: "aio-tanca", version: "1.1.0", desc: "Tanca via MCP — employee timekeeping, shifts, check-in/check-out" },
-      { name: "aio-rag-kit", version: "1.1.0", desc: "RAG Kit via MCP — Qdrant vector database, semantic search" },
-      { name: "aio-browser-cookie", version: "2.0.0", desc: "Extract browser cookies with rookiepy — Netscape exports, authenticated requests" },
+      { name: "aio-jira", version: "2.1.1", desc: "Jira via MCP — issues, sprints, workflow transitions, comments, JQL search, dev info" },
+      { name: "aio-github", version: "1.1.1", desc: "GitHub via MCP — repos, PRs, issues, code review, file operations" },
+      { name: "aio-gitlab", version: "1.1.1", desc: "GitLab via MCP — merge requests, pipelines, jobs, branch protection, git flow" },
+      { name: "aio-confluence", version: "1.1.1", desc: "Confluence via MCP — page management, CQL search, content operations, comments" },
+      { name: "aio-google-workspace", version: "1.1.1", desc: "Google Workspace via MCP — Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat" },
+      { name: "aio-x", version: "1.1.1", desc: "X/Twitter via MCP — tweets, threads, search, engagement, moderation, lists" },
+      { name: "aio-tanca", version: "1.1.1", desc: "Tanca via MCP — employee timekeeping, shifts, check-in/check-out, clock logs" },
+      { name: "aio-rag-kit", version: "1.1.1", desc: "RAG Kit via MCP — Qdrant vector database, semantic search, index content" },
+      { name: "aio-browser-cookie", version: "2.0.1", desc: "Extract browser cookies with rookiepy — Netscape exports, authenticated requests" },
     ]
   },
 ];
@@ -705,26 +649,11 @@ const PLUGINS = [
 const selected = new Set();
 let activeTab = 'commands';
 
-function getFlags() {
-  const scope = document.getElementById('scopeSelect').value;
-  const agent = document.getElementById('agentSelect').value;
-  let flags = '';
-  if (scope === 'global') flags += ' -g';
-  if (agent) flags += ` -a ${agent}`;
-  return flags;
+
+function buildCmd(pluginName) {
+  return `/plugin install ${pluginName}@${MARKETPLACE}`;
 }
 
-function buildCmd(skillName) {
-  const flags = getFlags();
-  return `npx skills add ${REPO} -s ${skillName}${flags} -y`;
-}
-
-function buildBulkCmd() {
-  const plugins = getSelectedPlugins();
-  const flags = getFlags();
-  const skills = plugins.map(n => n).join(' ');
-  return `npx skills add ${REPO} -s ${skills}${flags} -y`;
-}
 
 function render() {
   const container = document.getElementById('pluginList');
@@ -786,12 +715,6 @@ function updateBar() {
   document.getElementById('generateBtn').disabled = selected.size === 0;
 }
 
-function updateOutput() {
-  // Re-generate if modal is open
-  if (document.getElementById('modal').classList.contains('open')) {
-    populateOutputs();
-  }
-}
 
 function getSelectedPlugins() {
   const ordered = [];
@@ -803,30 +726,25 @@ function getSelectedPlugins() {
 
 function generateCommands() {
   const plugins = getSelectedPlugins();
-  if (plugins.length <= 3) {
-    return plugins.map(name => buildCmd(name)).join('\n') + '\n';
-  }
-  return buildBulkCmd() + '\n';
+  let out = `<span class="comment"># Step 1: Add the marketplace (one-time)</span>\n`;
+  out += `/plugin marketplace add ${REPO}\n\n`;
+  out += `<span class="comment"># Step 2: Install plugins</span>\n`;
+  out += plugins.map(name => buildCmd(name)).join('\n') + '\n';
+  return out;
 }
 
 function generateScript() {
   const plugins = getSelectedPlugins();
-  const flags = getFlags();
-  let out = '#!/bin/bash\nset -e\n\n';
-  plugins.forEach(name => {
-    out += `npx skills add ${REPO} -s ${name}${flags} -y\n`;
-  });
+  let out = `<span class="comment"># Run these commands in Claude Code</span>\n\n`;
+  out += `/plugin marketplace add ${REPO}\n\n`;
+  out += plugins.map(name => buildCmd(name)).join('\n') + '\n';
   return out;
 }
 
-function generateOneliner() {
-  return buildBulkCmd();
-}
 
 function populateOutputs() {
-  document.getElementById('commandsOutput').textContent = generateCommands();
-  document.getElementById('scriptOutput').textContent = generateScript();
-  document.getElementById('onelinerOutput').textContent = generateOneliner();
+  document.getElementById('commandsOutput').innerHTML = generateCommands();
+  document.getElementById('scriptOutput').innerHTML = generateScript();
 }
 
 function openModal() {
@@ -845,29 +763,26 @@ function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t =>
     t.classList.toggle('active', t.dataset.tab === tab)
   );
-  ['commands', 'script', 'oneliner'].forEach(id => {
+  ['commands', 'script'].forEach(id => {
     document.getElementById('tab-' + id).style.display = id === tab ? '' : 'none';
   });
 }
 
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent;
+}
+
 function getActiveContent() {
-  if (activeTab === 'commands') return generateCommands();
-  if (activeTab === 'script') return generateScript();
-  return generateOneliner();
+  if (activeTab === 'commands') return stripHtml(generateCommands());
+  return stripHtml(generateScript());
 }
 
 function copyScript() {
   navigator.clipboard.writeText(getActiveContent()).then(() => showToast('copied'));
 }
 
-function downloadScript() {
-  const blob = new Blob([generateScript()], { type: 'text/x-shellscript' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'install-aiocean-plugins.sh';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
 
 function showToast(msg) {
   const t = document.getElementById('toast');
