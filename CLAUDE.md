@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Claude Code plugin marketplace (`aiocean/claude-plugins`) containing 13 independent plugins. Users install via:
+A Claude Code plugin marketplace (`aiocean/claude-plugins`) containing 35+ independent plugins. Users install via:
 ```bash
 /plugin marketplace add aiocean/claude-plugins
 /plugin install <plugin-name>@aiocean-plugins
@@ -48,9 +48,10 @@ plugins/{plugin-name}/
 
 ## Plugin Categories
 
-- **Script-based** (worktree, remove-bg, claude-manager, ios-device-debug, youtube, golangci-lint): Shell/Python/TS scripts that execute actions
-- **Knowledge/Reference** (mental-models, monitoring, neobrutalism, react-minimal-effects, gherkin-refine): Documentation-only skills that provide frameworks and patterns
-- **Hybrid** (reflect, epub-packing, bun-fullstack-setup): Scripts + documentation
+- **Script-based** (worktree, ios-device-debug, youtube, claude-manager, install, feedback): Shell/Python/TS scripts that execute actions
+- **Knowledge/Reference** (mental-models, monitoring, neobrutalism, react-minimal-effects, gherkin-refine, xstate, tui, golang-mastery): Documentation-only skills that provide frameworks and patterns
+- **Hybrid** (reflect, epub-packing, bun-fullstack-setup, codebase-oracle, deep-plan, debug, code-review): Scripts + documentation
+- **MCP Integration** (jira, github, gitlab, confluence, google-workspace, x, tanca, rag-kit, research-kit, browser-cookie): Thin wrappers around MCP servers
 
 ## Adding a New Plugin
 
@@ -59,6 +60,8 @@ plugins/{plugin-name}/
 3. Add scripts/references as needed
 4. Register in `.claude-plugin/marketplace.json`
 5. Add description to `README.md`
+6. Update `docs/index.html` to include the new plugin
+7. Run `bash scripts/validate-marketplace.sh` to verify everything is correct
 
 ## SKILL.md Frontmatter Format
 
@@ -76,3 +79,11 @@ The `description` field is how Claude discovers and triggers the skill — inclu
 ## No Build System
 
 No package.json, no build step, no tests. Plugins are standalone directories of markdown and scripts. Shell scripts use `#!/bin/bash`. TypeScript scripts run via `bun`.
+
+## Commit Conventions
+
+Use conventional commits: `feat:`, `fix:`, `chore:`, `docs:` prefixes (e.g., `feat: add aio-new-plugin`).
+
+## Validation
+
+Run `bash scripts/validate-marketplace.sh` before considering any plugin work done. It checks plugin.json fields, folder naming, SKILL.md frontmatter, script existence, marketplace registration, and version sync.
