@@ -1,6 +1,6 @@
 ---
 name: aio-ios-device-debug
-description: This skill should be used when the user asks to "debug on device", "deploy to iPhone", "get crash logs", "check device logs", "install on device", "run on phone", "pull crash report", "analyze crash", "why is my app crashing", "syslog", "device logs", "take screenshot", "capture screenshot", "screenshot from device", "device screenshot", or when debugging iOS app crashes on physical devices. Covers the full workflow from build, install, launch, log capture, screenshot capture, crash report extraction, and crash analysis.
+description: Debug iOS apps on physical devices — build, install, capture logs, extract crash reports, and take screenshots. Triggers: "debug on device", "deploy to iPhone", "get crash logs", "pull crash report", "device screenshot", syslog.
 ---
 
 ```bash

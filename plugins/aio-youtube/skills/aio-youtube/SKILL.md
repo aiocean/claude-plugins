@@ -1,6 +1,6 @@
 ---
 name: aio-youtube
-description: This skill should be used when the user asks to "search YouTube", "get video transcript", "summarize video", "extract subtitles", or mentions YouTube, video search, captions, yt-dlp, or provides youtube.com/youtu.be URLs.
+description: Search YouTube and extract video transcripts via yt-dlp. Triggers: "search YouTube", "get transcript", "summarize video", "extract subtitles", youtube.com URLs, yt-dlp.
 ---
 
 # YouTube

@@ -1,6 +1,6 @@
 ---
 name: aio-rag-kit
-description: This skill should be used when the user asks to create vector collection, index content, semantic search, search embeddings, RAG setup, vector database, or mentions qdrant, vector search, embeddings, retrieval augmented generation, rag-kit. Auto-installs rag-kit if missing.
+description: Set up vector search and RAG pipelines using Qdrant via rag-kit (auto-installs if missing). Triggers: "create vector collection", "index content", "semantic search", "RAG setup", qdrant, embeddings.
 ---
 
 # RAG Kit Skill

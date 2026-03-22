@@ -1,6 +1,6 @@
 ---
 name: aio-browser-cookie
-description: This skill should be used when the user asks to extract browser cookies, reuse an authenticated browser session, export Netscape cookie files, inspect Chrome/Firefox/Safari login cookies, or mentions rookiepy, browser cookies, cookie jar, or authenticated requests from local browser state.
+description: Extract cookies from local browsers (Chrome/Firefox/Safari) and export them as JSON or Netscape format for authenticated requests. Triggers: "extract browser cookies", "reuse browser session", "export cookies", "cookie jar", rookiepy.
 ---
 
 # Browser Cookie

@@ -1,6 +1,6 @@
 ---
 name: aio-epub-research
-description: This skill should be used when the user asks to research sách, tìm hiểu sách, research book, nghiên cứu trước khi dịch, tìm thuật ngữ, research terminology, find Vietnamese equivalents, or needs to understand a book before translating. Runs faceted web searches for existing translations, genre conventions, benchmark books, and terminology. Run after aio-epub-setup, before aio-epub-translate.
+description: Research a book before translating — finds existing translations, genre conventions, benchmark books, and terminology via web searches. Triggers: "research sách", "research book", "tìm thuật ngữ", "research terminology". Run after aio-epub-setup, before aio-epub-translate.
 context: fork
 agent: Explore
 ---

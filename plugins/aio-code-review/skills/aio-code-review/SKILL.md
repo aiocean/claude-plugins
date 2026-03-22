@@ -1,6 +1,6 @@
 ---
 name: aio-code-review
-description: This skill should be used when the user asks to "review code", "code review", "review this", "review changes", "review PR", "ultra review", or "comprehensive review". Multi-phase review pipeline with domain-specific analysis and codebase understanding. Use after implementing changes from aio-deep-plan pipeline, or to validate work before merging. Complements doc-writer for architecture-level review.
+description: Multi-phase code review pipeline with domain-specific analysis via GitNexus and parallel specialized agents. Triggers: "review code", "code review", "review PR", "ultra review". Use after aio-deep-plan or before merging.
 context: fork
 agent: oh-my-claudecode:critic
 ---

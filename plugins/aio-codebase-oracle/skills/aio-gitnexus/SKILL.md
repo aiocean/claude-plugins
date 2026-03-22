@@ -1,6 +1,6 @@
 ---
 name: aio-gitnexus
-description: This skill should be used when the user asks to "setup gitnexus", "install gitnexus", "index this codebase", "analyze codebase", "check index status", "gitnexus status", "rebuild index", "update index", "gitnexus analyze", "gitnexus setup", "setup code intelligence", or mentions "gitnexus". Manages the GitNexus code intelligence engine — install, configure MCP, analyze, check status, and troubleshoot.
+description: Install, configure, and manage the GitNexus code intelligence engine — index codebase, setup MCP, check status, troubleshoot. Triggers: "setup gitnexus", "index codebase", "gitnexus status", "rebuild index", "setup code intelligence".
 ---
 
 # GitNexus Manager

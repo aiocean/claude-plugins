@@ -1,6 +1,6 @@
 ---
 name: aio-monitoring-observability
-description: This skill should be used when the user asks to "set up monitoring", "design metrics", "create alerts", "build dashboards", "calculate SLOs", "analyze performance", "compare monitoring tools", "migrate from Datadog", or mentions Prometheus, Grafana, Loki, OpenTelemetry, Four Golden Signals, RED/USE methods, error budgets, distributed tracing.
+description: Design metrics, alerts, dashboards, and SLOs using monitoring best practices (Four Golden Signals, RED/USE). Triggers: "set up monitoring", "design metrics", "calculate SLOs", "build dashboards", Prometheus, Grafana, OpenTelemetry, distributed tracing.
 ---
 
 ```bash

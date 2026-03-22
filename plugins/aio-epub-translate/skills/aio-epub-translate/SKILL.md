@@ -1,6 +1,6 @@
 ---
 name: aio-epub-translate
-description: This skill should be used when the user asks to dịch sách, translate epub, translate chapter, dịch chapter, dịch tiếp, continue translating, or wants to translate content in an already-set-up EPUB project. Translates chapters in batches of 20 items with glossary maintenance. Requires aio-epub-setup first.
+description: Translate chapters in a set-up EPUB project in batches of 20 items with glossary maintenance. Triggers: "dịch sách", "translate epub", "translate chapter", "dịch tiếp", "continue translating". Requires aio-epub-setup first.
 ---
 
 # EPUB Translate — Chapter Translation

@@ -1,6 +1,6 @@
 ---
 name: aio-feedback
-description: This skill should be used when the user asks to "submit feedback", "report bug", "request feature", "request plugin", "feedback", "file issue", or wants to report a problem with any aiocean plugin. Submits bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues.
+description: Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: "submit feedback", "report bug", "request feature", "request plugin", "file issue".
 ---
 
 # Feedback — Submit Issues for aiocean Plugins

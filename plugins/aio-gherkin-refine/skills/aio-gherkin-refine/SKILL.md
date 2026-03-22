@@ -1,6 +1,6 @@
 ---
 name: aio-gherkin-refine
-description: This skill should be used when the user asks to "refine requirements", "write acceptance criteria", "clarify requirements", "use gherkin format", or mentions gherkin, BDD, Given/When/Then. Refines ambiguous requests into structured Gherkin format before implementation. Also use this proactively when a user request is ambiguous, underspecified, or spans multiple conditions — even if they don't mention Gherkin.
+description: Refine ambiguous or underspecified requests into structured Gherkin scenarios before implementation. Triggers: "refine requirements", "write acceptance criteria", "clarify requirements", gherkin, BDD, Given/When/Then. Also use proactively when a request spans multiple conditions.
 ---
 
 # gherkin-refine

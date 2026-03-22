@@ -1,6 +1,6 @@
 ---
 name: aio-google-workspace
-description: This skill should be used when the user asks to interact with Google Workspace — "send email", "check inbox", "gmail", "upload to drive", "search drive", "google drive", "create event", "check calendar", "google calendar", "read spreadsheet", "update sheet", "google sheets", "create task", "google tasks", "standup report", "meeting prep", "weekly digest", or mentions Google Workspace, gws, Drive, Gmail, Calendar, Sheets, Docs, Slides, Tasks, Chat, Meet.
+description: Interact with Google Workspace services (Gmail, Drive, Calendar, Sheets, Docs, Tasks) via the gws CLI. Triggers: "send email", "upload to drive", "create event", "read spreadsheet", "standup report", gws, Google Workspace.
 ---
 
 # Google Workspace (gws CLI)

@@ -1,6 +1,6 @@
 ---
 name: aio-gitlab
-description: This skill should be used when the user asks to list merge requests, create MR, accept MR, rebase MR, trigger pipeline, manage branches, git flow, list pipelines, retry job, or mentions gitlab, merge request, gitlab pipeline, gitlab CI, gitlab project. Auto-installs gitlab-mcp if missing.
+description: Manage GitLab MRs, pipelines, branches, and CI jobs via gitlab-mcp (auto-installs if missing). Triggers: "create MR", "accept MR", "trigger pipeline", "retry job", gitlab, merge request, gitlab CI.
 ---
 
 # GitLab Skill
