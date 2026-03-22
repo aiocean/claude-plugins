@@ -1,6 +1,6 @@
 ---
 name: aio-xstate
-description: This skill should be used when the user asks to "create state machine", "implement XState", "refactor XState", "review XState", "add actor", "design statechart", or mentions XState, state machines, actors, statecharts, finite state logic, actor systems, fromPromise, fromCallback. Covers XState v5 strict patterns with setup().createMachine(), actor patterns, and TypeScript typing. Use aio-code-review for reviewing XState implementations in context.
+description: Implement XState v5 state machines with strict patterns — setup().createMachine(), actors, and TypeScript typing. Triggers: "create state machine", "implement XState", "design statechart", "add actor", XState, statecharts, fromPromise.
 ---
 
 ## Environment

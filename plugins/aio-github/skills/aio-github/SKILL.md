@@ -1,6 +1,6 @@
 ---
 name: aio-github
-description: This skill should be used when the user asks to list repos, create PR, review PR, approve PR, get issue, comment on issue, close issue, get file from github, or mentions github repository, pull request, github issue management via github-mcp. Auto-installs github-mcp if missing.
+description: Manage GitHub repos, PRs, and issues via github-mcp (auto-installs if missing). Triggers: "list repos", "create PR", "review PR", "get issue", "comment on issue", github repository, pull request.
 ---
 
 # GitHub Skill

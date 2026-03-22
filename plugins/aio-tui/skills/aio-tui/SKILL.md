@@ -1,6 +1,6 @@
 ---
 name: aio-tui
-description: This skill should be used when the user asks to "build a TUI", "create terminal UI", "interactive dashboard", "monitoring tool", "Bubbletea app", "terminal monitor", or mentions TUI, terminal UI, Bubbletea, lipgloss, interactive CLI tools, or real-time terminal dashboards. Covers Go Bubbletea architecture, styling, and patterns. Combine with aio-golang-mastery for idiomatic Go patterns in TUI apps.
+description: Build interactive terminal UIs with Go Bubbletea and lipgloss — architecture, styling, and patterns. Triggers: "build a TUI", "create terminal UI", "Bubbletea app", "interactive dashboard", TUI, lipgloss.
 ---
 
 ## Environment

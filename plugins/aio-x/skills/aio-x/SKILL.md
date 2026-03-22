@@ -1,6 +1,6 @@
 ---
 name: aio-x
-description: This skill should be used when the user asks to post tweet, search twitter, get tweet, like tweet, retweet, post thread, block user, mute user, get mentions, or mentions twitter, x.com, tweet, timeline, x API. Auto-installs x-mcp if missing.
+description: Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing). Triggers: "post tweet", "search twitter", "post thread", "get mentions", twitter, x.com, tweet, timeline.
 ---
 
 # X / Twitter Skill

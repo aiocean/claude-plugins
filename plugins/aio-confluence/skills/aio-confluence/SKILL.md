@@ -1,6 +1,6 @@
 ---
 name: aio-confluence
-description: This skill should be used when the user asks to search confluence, get page, create page, update page, list spaces, get comments, or mentions confluence, wiki, atlassian pages, CQL. Provides Confluence operations through CLI or MCP.
+description: Search, create, update, and manage Confluence pages via CLI or MCP. Triggers: "search confluence", "create page", "update page", "list spaces", confluence, wiki, CQL.
 ---
 
 # Confluence

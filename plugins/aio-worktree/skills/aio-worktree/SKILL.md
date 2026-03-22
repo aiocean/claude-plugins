@@ -1,6 +1,6 @@
 ---
 name: aio-worktree
-description: This skill should be used when the user asks to "create a worktree", "sync worktree", "spotlight preview", "manage worktrees", "parallel development", or mentions worktree, spotlight, sync commits. Manages git worktrees for parallel development workflows.
+description: Manage git worktrees for parallel development workflows — create, sync, and spotlight preview. Triggers: "create worktree", "sync worktree", "manage worktrees", "parallel development", worktree.
 ---
 
 # Git Worktree Management

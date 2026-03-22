@@ -1,6 +1,6 @@
 ---
 name: aio-claude-manager
-description: This skill should be used when the user asks to "manage skills", "disable skills", "enable skills", "reduce skill clutter", "analyze usage", "apply preset", or mentions starting work on a specific project type (frontend, backend, data, ai). Use when user mentions too many skills, slow responses, context window concerns, or wants to switch between project types.
+description: Manage and optimize Claude Code skills — enable, disable, analyze usage, and apply project-type presets. Triggers: "manage skills", "disable skills", "reduce clutter", "apply preset", "too many skills", switching project types (frontend, backend, data, ai).
 ---
 
 # Claude Manager

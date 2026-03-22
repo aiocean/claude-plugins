@@ -1,6 +1,6 @@
 ---
 name: aio-mermaid
-description: This skill should be used when the user asks to "share a mermaid diagram", "generate diagram URL", "create diagram link", or mentions mermaid, minimalmermaid, shareable mermaid. Also use whenever the user wants to share or embed a diagram, asks to "draw", "diagram", or "visualize" something, even without mentioning Mermaid. Generates shareable MinimalMermaid diagram URLs using LZ-String compression.
+description: Generate shareable MinimalMermaid diagram URLs via LZ-String compression. Triggers: "share diagram", "generate diagram URL", "draw", "diagram", "visualize", mermaid — even without explicit mention of Mermaid.
 ---
 
 # MinimalMermaid URL Generator

@@ -1,6 +1,6 @@
 ---
 name: aio-jira
-description: This skill should be used when the user asks to "create a Jira issue", "search issues", "update issue status", "add comment", "manage sprint", "link issues", "track time", or mentions jira, jql, sprint, story, epic, bug. Provides Jira operations through MCP tools for issue lifecycle management. Auto-installs the jira-mcp server if not configured.
+description: Manage Jira issues, sprints, and time tracking via MCP (auto-installs jira-mcp if missing). Triggers: "create Jira issue", "search issues", "update issue status", "manage sprint", jira, JQL, epic.
 ---
 
 # Jira Skill

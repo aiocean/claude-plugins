@@ -1,6 +1,6 @@
 ---
 name: aio-reflect
-description: This skill should be used when the user asks to "reflect on sessions", "what did we learn", "save this knowledge", "review past sessions", "extract learnings", or after completing significant tasks. Evaluates Claude Code sessions to extract reusable knowledge as CLAUDE.md updates or new skills.
+description: Evaluate past Claude Code sessions and extract reusable knowledge as CLAUDE.md updates or new skills. Triggers: "reflect on sessions", "what did we learn", "save this knowledge", "extract learnings", after completing significant tasks.
 context: fork
 ---
 

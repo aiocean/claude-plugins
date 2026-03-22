@@ -1,6 +1,6 @@
 ---
 name: aio-epub-packing
-description: This skill should be used when the user asks to "create an ebook", "convert Markdown to EPUB", "generate EPUB", "package articles for offline reading", or mentions epub, ebook, e-reader, kindle. Generates professional EPUB ebooks from Markdown with auto-generated neo-brutalism covers and embedded images.
+description: Convert Markdown into professional EPUB ebooks with auto-generated neo-brutalism covers and embedded images. Triggers: "create ebook", "convert Markdown to EPUB", "generate EPUB", "package for offline reading", epub, kindle.
 ---
 
 # EPUB Generator Skill
