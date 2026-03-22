@@ -1,12 +1,51 @@
 ---
 name: aio-react-minimal-effects
-description: This skill should be used when the user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop. Provides proper patterns to minimize useEffect usage in React 19.
+description: Use when reviewing React code for unnecessary useEffect usage, refactoring to React 19 patterns, or as useEffect best practices reference. Scan mode actively finds and fixes problematic effects. Also use when user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop.
 ---
 
 ## Environment
 - tsc: !`tsc --version 2>/dev/null || echo "NOT INSTALLED"`
 
 # React 19 Minimal Effects
+
+## Scan Mode (when user has existing React code)
+
+Use this mode to actively audit a codebase for problematic useEffect patterns and fix them.
+
+### Step 1: SCAN
+Search the codebase for all `useEffect` usage:
+```bash
+grep -rn "useEffect" --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" src/
+```
+Also search for related anti-patterns:
+```bash
+grep -rn "forwardRef\|useCallback\|useMemo" --include="*.tsx" --include="*.ts" src/
+```
+
+### Step 2: CLASSIFY
+For each `useEffect` found, classify into one of these categories:
+
+| Category | Signal | Severity |
+|----------|--------|----------|
+| **Unnecessary** (derived state) | `useEffect(() => setState(f(x)), [x])` | HIGH - remove entirely |
+| **Resettable** (state reset on prop) | `useEffect(() => setState(init), [prop])` | HIGH - use key prop |
+| **Event-driven** (user action response) | `useEffect` triggered by user interaction state | MEDIUM - move to handler |
+| **Chain** (effect triggers effect) | Multiple `useEffect` with interdependent state | MEDIUM - consolidate |
+| **Notification** (parent callback in effect) | `useEffect(() => onChange(val), [val])` | MEDIUM - call in event |
+| **Legitimate** (external sync) | Data fetching, subscriptions, DOM listeners, third-party widgets | OK - keep or use library |
+
+### Step 3: REPORT
+Output a table sorted by severity:
+```
+| File:Line | Category | Current Code (summary) | Recommended Fix |
+```
+
+### Step 4: REFACTOR
+For each non-legitimate useEffect, apply the specific fix from the Reference patterns below. After refactoring, verify the component still works and no render loops were introduced.
+
+---
+
+## Reference Mode (patterns and knowledge)
 
 Most `useEffect` usage is wrong. Effects are for **synchronizing with external systems**, not for:
 

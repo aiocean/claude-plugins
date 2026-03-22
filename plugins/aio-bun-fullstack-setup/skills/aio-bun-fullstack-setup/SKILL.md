@@ -1,12 +1,54 @@
 ---
 name: aio-bun-fullstack-setup
-description: This skill should be used when the user asks to "create a fullstack app", "setup Bun server", "configure single port server", "add Vite proxy", "setup monorepo", "configure Docker for Bun", or mentions fullstack Bun, single port, Bun server, Vite proxy.
+description: Use when scaffolding a new Bun fullstack project, creating a fullstack app, setting up Bun server, configuring single port server, adding Vite proxy, setting up monorepo, or configuring Docker for Bun. Scaffold mode detects existing files and generates only what is missing. Also use when user mentions fullstack Bun, single port, Bun server, Vite proxy.
 ---
 
 ## Environment
 - bun: !`bun --version 2>/dev/null || echo "NOT INSTALLED"`
 
 # Bun Fullstack Setup
+
+## Scaffold Mode (when setting up a new project)
+
+Use this mode to bootstrap a Bun fullstack project, filling in only what is missing.
+
+### Step 1: DETECT
+Check what already exists in the project root:
+```bash
+ls -la package.json bun.lock* Dockerfile docker-compose.yml docker-entrypoint.sh ecosystem.config.cjs .env.example 2>/dev/null
+ls -la pkgs/server/index.ts pkgs/server/config.ts pkgs/webapp/vite.config.ts pkgs/shared/ 2>/dev/null
+```
+
+### Step 2: PLAN
+Compare against the full project structure and list what needs to be created:
+
+| File | Purpose | Exists? |
+|------|---------|---------|
+| `pkgs/server/config.ts` | Env validation, fail-fast startup | ? |
+| `pkgs/server/index.ts` | Bun server entry (API + static serving) | ? |
+| `pkgs/webapp/vite.config.ts` | Vite config with API proxy | ? |
+| `ecosystem.config.cjs` | PM2 dev runner (webapp + server) | ? |
+| `Dockerfile` | Multi-stage production build | ? |
+| `docker-entrypoint.sh` | Container entry script | ? |
+| `docker-compose.yml` | Container orchestration | ? |
+| `.env.example` | Environment variable documentation | ? |
+
+Present the plan to the user before generating.
+
+### Step 3: GENERATE
+Create each missing file using the templates in the Reference section below. Adapt ports, paths, and env vars to match the user's project name and requirements.
+
+### Step 4: VERIFY
+Run a quick validation:
+```bash
+cd pkgs/server && bun run index.ts &
+sleep 2 && curl -s http://localhost:3001/api/health && kill %1
+```
+If webapp exists, also verify: `cd pkgs/webapp && bun run build`
+
+---
+
+## Reference Mode (templates and patterns)
 
 Pattern for Bun server that serves API + static frontend on single port in production, with Vite proxy in development.
 

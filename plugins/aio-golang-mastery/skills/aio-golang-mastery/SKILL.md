@@ -1,6 +1,6 @@
 ---
 name: aio-golang-mastery
-description: This skill should be used when the user asks to "write Go code", "review Go code", "refactor Go", "Go best practices", "Go concurrency", "Go error handling", "Go testing", "gRPC server", or mentions Go, Golang, goroutines, channels. Covers idiomatic patterns, concurrency, generics, TDD, and production hardening based on Google/Uber style guides. For Go TUI apps, combine with aio-tui.
+description: Use when writing, reviewing, scanning, or linting Go code. Lint mode runs the full 7-step tooling chain (go build, go vet, golangci-lint, govulncheck, nilaway, deadcode, race detection) and applies idiomatic fixes. Also use for Go best practices, concurrency, error handling, testing, gRPC, goroutines, channels. Covers idiomatic patterns, generics, TDD, and production hardening based on Google/Uber style guides. For Go TUI apps, combine with aio-tui.
 ---
 
 ## Environment
@@ -9,6 +9,48 @@ description: This skill should be used when the user asks to "write Go code", "r
 - govulncheck: !`which govulncheck 2>/dev/null || echo "NOT INSTALLED"`
 
 # Go Mastery
+
+## Lint Mode (when user has Go code to review)
+
+Use this mode to systematically lint and fix a Go codebase using the full tooling chain.
+
+### Step 1: RUN
+Execute the 7-step tooling chain in order. Capture all output:
+```bash
+go build ./...                    # 1. Compilation errors
+go vet ./...                      # 2. Suspicious constructs
+golangci-lint run ./...           # 3. Style, bugs, performance, security
+govulncheck ./...                 # 4. Known CVEs in deps
+nilaway ./...                     # 5. Nil pointer dereference detection
+deadcode ./...                    # 6. Unreachable functions
+go test -race -count=1 ./...     # 7. Data races
+```
+Skip any tool that is not installed (check Environment above) and note it in the report.
+
+### Step 2: ANALYZE
+Parse all tool output and group findings:
+
+| Severity | Source | Examples |
+|----------|--------|----------|
+| **Critical** | govulncheck, race detection | Known CVEs, data races |
+| **High** | go vet, nilaway | Nil derefs, printf mismatches, suspicious constructs |
+| **Medium** | golangci-lint | Style violations, inefficient code, unchecked errors |
+| **Low** | deadcode | Unused functions (safe to remove) |
+
+### Step 3: FIX
+For each finding, apply the idiomatic Go fix using the reference patterns below. Prioritize critical and high severity first. Common fix mappings:
+- Unchecked error -> add explicit `if err != nil` handling
+- Nil deref -> add nil guard or restructure control flow
+- Race condition -> add mutex, use atomic, or redesign with channels
+- Dead code -> remove or gate behind build tag
+- CVE -> update dependency with `go get pkg@latest`
+
+### Step 4: VERIFY
+Re-run the full tooling chain to confirm all fixes. Repeat Step 3 for any remaining findings.
+
+---
+
+## Reference Mode (patterns and knowledge)
 
 Production-grade Go patterns from Google, Uber, and the Go team. Updated for Go 1.25.
 

@@ -1,33 +1,66 @@
 ---
 name: aio-neobrutalism
-description: This skill should be used when the user asks to "apply neobrutalism", "create brutalist design", "add bold borders", "use hard shadows", or mentions neobrutalism, brutalist, bold design, high-contrast aesthetic. Provides neobrutalism design patterns with bold borders, hard shadows, vibrant colors, and no gradients.
+description: |
+  Use when applying neobrutalism design to a web project. Detects tech stack, generates CSS tokens, and transforms existing UI components. Also use as neobrutalism design reference.
+  Trigger phrases: "apply neobrutalism", "create brutalist design", "add bold borders", "use hard shadows", neobrutalism, brutalist, bold design, high-contrast aesthetic.
 ---
 
-# Neobrutalism Design System
+# Neobrutalism Design System Bootstrapper
 
-## Quick Setup
+## Objective Workflow
 
-### 1. Add Fonts to `index.html`
+### Phase 1: DETECT — Identify Project Tech Stack
 
-```html
-<head>
-  <!-- Neobrutalism fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&family=Bricolage+Grotesque:wght@200..800&display=swap"
-    rel="stylesheet"
-  />
-</head>
+Scan the project root to determine the web framework and styling approach:
+
+```bash
+# Check for package.json, framework config files, CSS preprocessors
+ls package.json tsconfig.json vite.config.* next.config.* nuxt.config.* tailwind.config.* postcss.config.* 2>/dev/null
 ```
 
-### 2. Copy Base CSS
+Identify:
+- **Framework**: React, Vue, Svelte, Next.js, Nuxt, Astro, plain HTML
+- **Styling**: Tailwind CSS, CSS Modules, styled-components, Sass/Less, plain CSS
+- **Component library**: shadcn/ui, Radix, MUI, Vuetify, or none
+- **Entry points**: main CSS file, layout files, global styles location
 
-Copy [code/base.css](code/base.css) to your project's `src/style.css`.
+### Phase 2: GENERATE — Create CSS Tokens and Base Styles
 
-### 3. Copy UI Components
+Based on detected stack, generate the appropriate token format:
 
-Copy components from [code/](code/) directory as needed (button, card, input, etc.).
+- **Tailwind**: Extend `theme` in tailwind config with neobrutalism tokens (borders, shadows, colors)
+- **CSS Variables**: Generate `:root` block with all design tokens
+- **styled-components/CSS-in-JS**: Generate a theme object
+- **Plain CSS**: Copy [code/base.css](code/base.css) directly
+
+Always include the neobrutalism fonts:
+```html
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&family=Bricolage+Grotesque:wght@200..800&display=swap" rel="stylesheet" />
+```
+
+### Phase 3: APPLY — Transform Existing UI Components
+
+1. List all UI component files in the project (buttons, cards, inputs, modals, nav)
+2. For each component, apply the 6 Rules (see reference below):
+   - Add thick black borders (2-4px solid #000)
+   - Replace soft shadows with hard shadows (4px 4px 0 #000)
+   - Remove border-radius or reduce to 0px
+   - Replace gradients with solid vibrant colors
+   - Increase font weights to 700-900
+   - Add press-down or elevate-up interaction patterns
+3. Prioritize: buttons first, then cards, then inputs, then navigation
+
+### Phase 4: REVIEW — Show Before/After
+
+For each transformed component:
+- Show the **before** state (existing styles)
+- Show the **after** state (neobrutalism styles)
+- Flag any anti-patterns found (blurred shadows, gradients, excessive radius)
+- Verify hover states and `cursor: pointer` on all interactive elements
+
+---
+
+## Reference Material
 
 ## The 6 Rules
 

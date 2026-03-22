@@ -1,7 +1,7 @@
 {
   "name": "aio-mental-models",
-  "description": "Comprehensive mental models framework from The Great Mental Models series. 50+ models for decision-making, problem-solving, and strategic thinking.",
-  "version": "1.0.3",
+  "description": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
+  "version": "2.0.0",
   "author": { "name": "aiocean" },
   "license": "MIT"
 }

@@ -280,7 +280,12 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
     fi
 
     # Also check scripts listed in markdown tables: | `script-name.sh` | ... |
-    table_refs="$(grep -oE '\|\s*`[a-zA-Z0-9_.-]+\.(sh|py|ts|js)`' "$skill_md" 2>/dev/null | grep -oE '[a-zA-Z0-9_.-]+\.(sh|py|ts|js)' | sort -u || true)"
+    # Only validate table-listed scripts if this skill actually has a scripts/ directory
+    # (to avoid false positives from template/scaffold tables that list project files)
+    table_refs=""
+    if $has_scripts; then
+      table_refs="$(grep -oE '\|\s*`[a-zA-Z0-9_.-]+\.(sh|py|ts|js)`' "$skill_md" 2>/dev/null | grep -oE '[a-zA-Z0-9_.-]+\.(sh|py|ts|js)' | sort -u || true)"
+    fi
     if [ -n "$table_refs" ]; then
       while IFS= read -r ref_script; do
         [ -z "$ref_script" ] && continue
