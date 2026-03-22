@@ -406,20 +406,20 @@
     </div>
     <div class="modal-body">
       <div class="tabs">
-        <button class="tab active" data-tab="paste" onclick="switchTab('paste')">Paste in Claude Code</button>
+        <button class="tab active" data-tab="npx" onclick="switchTab('npx')">npx skills</button>
         <button class="tab" data-tab="script" onclick="switchTab('script')">Shell Script</button>
         <button class="tab" data-tab="curl" onclick="switchTab('curl')">One-liner</button>
       </div>
-      <div id="tab-paste">
-        <p class="hint">Copy and paste these commands into a Claude Code session:</p>
-        <pre id="pasteOutput"></pre>
+      <div id="tab-npx">
+        <p class="hint">Run these commands in your terminal:</p>
+        <pre id="npxOutput"></pre>
       </div>
       <div id="tab-script" style="display:none">
         <p class="hint">Save as <code>install-plugins.sh</code> and run with <code>bash install-plugins.sh</code>:</p>
         <pre id="scriptOutput"></pre>
       </div>
       <div id="tab-curl" style="display:none">
-        <p class="hint">Run this in your terminal (creates a temp script, executes, and cleans up):</p>
+        <p class="hint">Run this one-liner in your terminal:</p>
         <pre id="curlOutput"></pre>
       </div>
     </div>
@@ -512,7 +512,7 @@ const PLUGINS = [
 ];
 
 const selected = new Set();
-let activeTab = 'paste';
+let activeTab = 'npx';
 
 function render() {
   const container = document.getElementById('pluginList');
@@ -582,13 +582,11 @@ function getSelectedPlugins() {
   return ordered;
 }
 
-function generatePaste() {
+function generateNpx() {
   const plugins = getSelectedPlugins();
-  let out = '# Add the aiocean marketplace (run once)\n';
-  out += '/plugin marketplace add aiocean/claude-plugins\n\n';
-  out += '# Install selected plugins\n';
+  let out = '# Install selected aiocean plugins\n';
   plugins.forEach(name => {
-    out += `/plugin install ${name}@aiocean-plugins\n`;
+    out += `npx skills install aiocean/claude-plugins/${name}\n`;
   });
   return out;
 }
@@ -604,12 +602,8 @@ function generateScript() {
   out += 'set -e\n\n';
   out += 'echo "Installing aiocean plugins for Claude Code..."\n';
   out += 'echo ""\n\n';
-  out += '# Add marketplace\n';
-  out += 'claude plugin marketplace add aiocean/claude-plugins 2>/dev/null || true\n';
-  out += 'echo "Marketplace added."\n\n';
-  out += '# Install plugins\n';
   plugins.forEach(name => {
-    out += `claude plugin install ${name}@aiocean-plugins\n`;
+    out += `npx skills install aiocean/claude-plugins/${name}\n`;
   });
   out += '\necho ""\n';
   out += `echo "Done! ${plugins.length} plugin(s) installed."\n`;
@@ -618,16 +612,13 @@ function generateScript() {
 
 function generateCurl() {
   const plugins = getSelectedPlugins();
-  const cmds = [
-    'claude plugin marketplace add aiocean/claude-plugins 2>/dev/null || true',
-    ...plugins.map(n => `claude plugin install ${n}@aiocean-plugins`)
-  ];
-  return `bash -c '${cmds.join(' && ')}'`;
+  const cmds = plugins.map(n => `npx skills install aiocean/claude-plugins/${n}`);
+  return cmds.join(' && ');
 }
 
 function openModal() {
   if (selected.size === 0) return;
-  document.getElementById('pasteOutput').textContent = generatePaste();
+  document.getElementById('npxOutput').textContent = generateNpx();
   document.getElementById('scriptOutput').textContent = generateScript();
   document.getElementById('curlOutput').textContent = generateCurl();
   document.getElementById('modal').classList.add('open');
@@ -641,13 +632,13 @@ function closeModal() {
 function switchTab(tab) {
   activeTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.getElementById('tab-paste').style.display = tab === 'paste' ? '' : 'none';
+  document.getElementById('tab-npx').style.display = tab === 'npx' ? '' : 'none';
   document.getElementById('tab-script').style.display = tab === 'script' ? '' : 'none';
   document.getElementById('tab-curl').style.display = tab === 'curl' ? '' : 'none';
 }
 
 function getActiveContent() {
-  if (activeTab === 'paste') return generatePaste();
+  if (activeTab === 'npx') return generateNpx();
   if (activeTab === 'script') return generateScript();
   return generateCurl();
 }
