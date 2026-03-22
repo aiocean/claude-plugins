@@ -56,8 +56,27 @@ With codebase context established, apply systematic debugging rigor:
 **Critical constraints**:
 - Never guess. Gather evidence first
 - One change at a time. Never shotgun multiple fixes
-- If 3+ fix attempts fail, question the architecture
 - Compare broken code against working examples in the same codebase
+
+### Circuit Breaker — 3 Strikes Rule
+
+Track each fix attempt explicitly (attempt 1, attempt 2, attempt 3). After **3 failed fix attempts**, STOP and escalate:
+
+1. **Declare circuit breaker** — announce: "Circuit breaker triggered: 3 fix attempts failed. Stopping to reassess."
+2. **Summarize all 3 attempts**: what was tried, what evidence was gathered, why each failed
+3. **Re-anchor** — re-read the original bug report and all Phase 1-2 evidence from scratch. Fresh eyes after reset.
+4. **Question the architecture**:
+   - Is the root cause actually in this layer, or is it a design flaw one level up?
+   - Are we fighting the framework/library instead of working with it?
+   - Is there a simpler approach that sidesteps the problem entirely?
+   - Should this component be restructured rather than patched?
+5. **Present options to the user**:
+   - Option A: Redesign the affected component (describe the approach)
+   - Option B: Work around with explicit trade-offs (describe them)
+   - Option C: Escalate to a human domain expert
+6. **Do NOT attempt a 4th fix** without user approval of a fundamentally different approach
+
+A circuit breaker is not failure — it prevents wasted time and regression-inducing guesses. The best debuggers know when to stop patching and start rethinking.
 
 **Exit criteria**: Confirmed root cause with evidence. Single, specific fix identified.
 
