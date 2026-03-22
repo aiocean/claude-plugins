@@ -5,6 +5,10 @@ context: fork
 agent: oh-my-claudecode:architect
 ---
 
+```bash
+SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/skills/doc-writer/scripts 2>/dev/null | sort -V | tail -1)"
+```
+
 ## Environment
 - GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
 
@@ -417,7 +421,7 @@ NEVER:
 Run the bundled quality checker after writing docs:
 
 ```bash
-bash scripts/doc-quality-check.sh docs
+bash $SCRIPTS/doc-quality-check.sh docs
 ```
 
 Key gates: evidence density (path:line refs), no placeholders, unknowns section required, no filler words, no sensitive data leakage.

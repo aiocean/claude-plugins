@@ -1,6 +1,9 @@
 ---
 name: aio-plan
-description: This skill should be used when the user asks to "plan implementation", "how should I implement", "approach", "strategy", or needs a concrete implementation plan with files, changes, and risks. Third step in the aio-deep-plan pipeline — run discover and map first. Uses GitNexus to check for duplicates and conventions.
+description: |
+  PROACTIVE planning — third step in the aio-deep-plan pipeline. Use when the user needs a concrete implementation plan before writing code: "plan implementation", "how should I implement", "approach", "strategy", "plan feature", "plan refactor", or needs a plan with files, changes, and risks. Run discover and map first.
+  NOT for fixing bugs or debugging errors — use aio-debug instead.
+  Uses GitNexus to check for duplicates and conventions.
 context: fork
 agent: oh-my-claudecode:planner
 ---

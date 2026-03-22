@@ -1,7 +1,7 @@
 {
   "name": "aio-ios-device-debug",
   "description": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "aiocean"
   },

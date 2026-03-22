@@ -1,10 +1,12 @@
 {
   "name": "aio-remove-bg",
   "description": "Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "aiocean"
   },
   "repository": "https://github.com/aiocean/claude-plugins",
-  "license": "MIT"
+  "license": "MIT",
+  "deprecated": true,
+  "deprecation_reason": "Too thin - use ImageMagick or rembg CLI directly"
 }

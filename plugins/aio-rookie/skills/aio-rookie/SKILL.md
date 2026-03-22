@@ -3,6 +3,8 @@ name: aio-rookie
 description: This skill should be used when the user asks to extract browser cookies, reuse an authenticated browser session, export Netscape cookie files, inspect Chrome/Firefox/Safari login cookies, or mentions rookie, rookiepy, browser cookies, cookie jar, or authenticated requests from local browser state.
 ---
 
+> **DEPRECATED**: This plugin is deprecated. Use `rookiepy` CLI directly for cookie extraction.
+
 # Rookie
 
 ## Environment

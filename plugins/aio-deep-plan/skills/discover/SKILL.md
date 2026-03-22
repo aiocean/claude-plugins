@@ -1,6 +1,9 @@
 ---
 name: aio-discover
-description: This skill should be used when the user asks to "discover", "find code", "how does X work", "where is", "what handles", or needs to understand how something works before planning or coding. First step in the aio-deep-plan pipeline — follow with map, then plan. Requires GitNexus for hybrid search.
+description: |
+  PROACTIVE planning — first step in the aio-deep-plan pipeline. Use when exploring the codebase before writing code: "discover", "find code", "how does X work", "where is", "what handles", "understand codebase", "explore code", or needs to understand how something works before planning or implementing a new feature, refactor, or change. Follow with map, then plan.
+  NOT for fixing bugs or debugging errors — use aio-debug instead.
+  Requires GitNexus for hybrid search.
 context: fork
 agent: oh-my-claudecode:explore
 ---
