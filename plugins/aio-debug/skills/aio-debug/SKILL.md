@@ -5,6 +5,9 @@ context: fork
 agent: oh-my-claudecode:debugger
 ---
 
+## Environment
+- git: !`git --version 2>/dev/null || echo "NOT INSTALLED"`
+
 # DebugFix - Systematic Debug & Fix Orchestrator
 
 Orchestrate four specialized skills in sequence to maximize debugging effectiveness. Each phase builds on the previous, ensuring root cause is found before any code changes, and all changes are reviewed before completion.

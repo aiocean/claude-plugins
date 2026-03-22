@@ -4,6 +4,9 @@ description: This skill should be used when the user asks to "check my changes",
 context: fork
 ---
 
+## Environment
+- GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
+
 # Review — Post-Implementation Check
 
 Review completed work using change detection, duplication detection, and type checking.

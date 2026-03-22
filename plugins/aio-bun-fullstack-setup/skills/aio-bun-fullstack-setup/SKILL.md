@@ -3,6 +3,9 @@ name: aio-bun-fullstack-setup
 description: This skill should be used when the user asks to "create a fullstack app", "setup Bun server", "configure single port server", "add Vite proxy", "setup monorepo", "configure Docker for Bun", or mentions fullstack Bun, single port, Bun server, Vite proxy.
 ---
 
+## Environment
+- bun: !`bun --version 2>/dev/null || echo "NOT INSTALLED"`
+
 # Bun Fullstack Setup
 
 Pattern for Bun server that serves API + static frontend on single port in production, with Vite proxy in development.

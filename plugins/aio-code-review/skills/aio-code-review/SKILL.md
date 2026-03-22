@@ -9,6 +9,10 @@ agent: oh-my-claudecode:critic
 
 Ultimate code review: deep codebase understanding via GitNexus + CodeWiki, domain detection, parallel specialized agents, and adversarial meta-review.
 
+## Environment
+- GitNexus: !`npx gitnexus status 2>/dev/null && echo "AVAILABLE" || echo "NOT INSTALLED"`
+- CodeWiki: !`which codewiki 2>/dev/null || echo "NOT INSTALLED"`
+
 ## When to Use
 
 - User requests "review code", "code review", "review this PR"
@@ -20,19 +24,9 @@ Ultimate code review: deep codebase understanding via GitNexus + CodeWiki, domai
 
 ### Phase 0: Detect Tools and Language/Domain
 
-#### 0.1 Tool Availability Detection (Run First)
+#### 0.1 Tool Availability
 
-Before starting analytics, detect which tools are available. The review adapts based on what's installed.
-
-```bash
-# 1. GitNexus (knowledge graph — hybrid search, symbol context, blast radius)
-npx gitnexus status 2>/dev/null && echo "gitnexus: YES" || echo "gitnexus: NO"
-
-# 2. CodeWiki (static analysis — module structure, metrics)
-which codewiki 2>/dev/null && echo "codewiki: YES" || echo "codewiki: NO"
-```
-
-**Decision matrix:**
+Tools are pre-detected in the Environment section above. Adapt the review based on availability:
 
 | Tool | Status | Impact on Review |
 |------|--------|-----------------|
@@ -40,14 +34,6 @@ which codewiki 2>/dev/null && echo "codewiki: YES" || echo "codewiki: NO"
 | GitNexus | Missing | Fall back to CodeWiki dependency graphs + manual grep for impact |
 | CodeWiki | Available | Module clustering, metrics, dependency graphs |
 | CodeWiki | Missing | Skip module mapping — use GitNexus context or file-path grouping |
-
-**Report available tools to user:**
-
-```
-Code Review Tools:
-✓ GitNexus — knowledge graph (hybrid search, symbol context, blast radius)
-✓ CodeWiki — static analysis (module structure, metrics)
-```
 
 Proceed with whatever tools are available. Both together give the richest review; either subset still works.
 
