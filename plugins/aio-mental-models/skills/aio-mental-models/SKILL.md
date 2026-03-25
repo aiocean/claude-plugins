@@ -1,6 +1,6 @@
 ---
 name: aio-mental-models
-description: Use when facing decisions, evaluating trade-offs, solving complex problems, or needing structured thinking frameworks. Actively guides you through model selection and application. Triggers: decision, trade-off, mental model, think through, evaluate options, strategic thinking, problem-solving, structured reasoning, second-order, first principles, inversion.
+description: Use when facing decisions, evaluating trade-offs, solving complex problems, or needing structured thinking frameworks. Actively guides you through model selection and application. Triggers: decision, trade-off, mental model, think through, evaluate options, strategic thinking, problem-solving, structured reasoning, second-order, first principles, inversion, search mental models, find model, which model.
 ---
 
 # Mental Models Decision Advisor
@@ -24,7 +24,13 @@ If the user's message already contains enough context, proceed directly to Step 
 
 ### Step 2: SELECT — Pick 2-3 Relevant Models
 
-Based on the user's context, select 2-3 models from the catalog below. Use this routing:
+**First, run semantic search** with the user's problem as the query to find the most relevant models. Then cross-reference with the routing table below to ensure coverage.
+
+```bash
+bun run "$MM/search-models.ts" "<user's problem description>" --top 5 --json
+```
+
+Read the full markdown file for each top result before proceeding. Use the routing table as a secondary guide:
 
 | Context                                | Start With                                                                 |
 | -------------------------------------- | -------------------------------------------------------------------------- |
@@ -77,6 +83,32 @@ $MM/list-models.sh --volume 1         # Filter by volume (1-4)
 $MM/list-models.sh --search "thinking" # Search by keyword
 $MM/list-models.sh --count            # Quick count
 ```
+
+### Semantic Search
+
+Find relevant models by meaning, not just keywords. Uses pre-computed embeddings (snowflake-arctic-embed-xs, 384-dim, runs locally).
+
+First install dependencies (one-time):
+```bash
+cd "$MM" && npm install
+```
+
+Then search:
+```bash
+bun run "$MM/search-models.ts" "how to think about risk and uncertainty"
+bun run "$MM/search-models.ts" "team dynamics and collaboration" --top 3
+bun run "$MM/search-models.ts" "startup growth strategy" --json
+```
+
+Options:
+- `--top N` — Number of results (default: 5)
+- `--json` — Output as JSON for programmatic use
+
+---
+
+## Important
+
+**Always run semantic search first before selecting models.** The search uses embeddings to find the most relevant models for the user's specific problem — this is more reliable than guessing from the catalog or your training knowledge. After searching, read the full markdown file for each selected model.
 
 ---
 
