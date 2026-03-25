@@ -90,7 +90,7 @@
       "name": "aio-mental-models",
       "source": "./plugins/aio-mental-models",
       "description": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "author": {
         "name": "aiocean"
       }

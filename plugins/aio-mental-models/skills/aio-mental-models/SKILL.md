@@ -27,7 +27,7 @@ If the user's message already contains enough context, proceed directly to Step 
 **First, run semantic search** with the user's problem as the query to find the most relevant models. Then cross-reference with the routing table below to ensure coverage.
 
 ```bash
-bun run "$MM/search-models.ts" "<user's problem description>" --top 5 --json
+npx tsx "$MM/search-models.ts" "<user's problem description>" --top 5 --json
 ```
 
 Read the full markdown file for each top result before proceeding. Use the routing table as a secondary guide:
@@ -88,16 +88,11 @@ $MM/list-models.sh --count            # Quick count
 
 Find relevant models by meaning, not just keywords. Uses pre-computed embeddings (snowflake-arctic-embed-xs, 384-dim, runs locally).
 
-First install dependencies (one-time):
+Search (dependencies auto-install on first run):
 ```bash
-cd "$MM" && npm install
-```
-
-Then search:
-```bash
-bun run "$MM/search-models.ts" "how to think about risk and uncertainty"
-bun run "$MM/search-models.ts" "team dynamics and collaboration" --top 3
-bun run "$MM/search-models.ts" "startup growth strategy" --json
+npx tsx "$MM/search-models.ts" "how to think about risk and uncertainty"
+npx tsx "$MM/search-models.ts" "team dynamics and collaboration" --top 3
+npx tsx "$MM/search-models.ts" "startup growth strategy" --json
 ```
 
 Options:
