@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env npx tsx
 /**
  * Pre-compute embeddings for all mental model markdown files.
  * Uses snowflake-arctic-embed-xs (384-dim) via @huggingface/transformers (local, no API key).
@@ -7,9 +7,19 @@
  * Output: embeddings.json in the same directory
  */
 
-import { pipeline } from "@huggingface/transformers";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, basename } from "node:path";
+import { existsSync } from "node:fs";
+import { execSync } from "node:child_process";
+
+// Auto-install dependencies if missing
+const SCRIPT_DIR_INIT = import.meta.dirname;
+if (!existsSync(join(SCRIPT_DIR_INIT, "node_modules"))) {
+  console.error("Installing dependencies...");
+  execSync("npm install --silent", { cwd: SCRIPT_DIR_INIT, stdio: "inherit" });
+}
+
+const { pipeline } = await import("@huggingface/transformers");
 
 const SCRIPT_DIR = import.meta.dirname;
 const SKILL_DIR = join(SCRIPT_DIR, "..");

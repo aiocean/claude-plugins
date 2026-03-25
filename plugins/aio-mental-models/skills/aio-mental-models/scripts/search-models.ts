@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env npx tsx
 /**
  * Semantic search across mental models using pre-computed embeddings.
  * Uses snowflake-arctic-embed-xs for query embedding, cosine similarity against embeddings.json.
@@ -9,13 +9,23 @@
  *   --json     Output as JSON
  */
 
-import { pipeline } from "@huggingface/transformers";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { existsSync } from "node:fs";
+import { execSync } from "node:child_process";
 
 const SCRIPT_DIR = import.meta.dirname;
 const MODEL_ID = "Snowflake/snowflake-arctic-embed-xs";
 const EMBEDDINGS_FILE = join(SCRIPT_DIR, "embeddings.json");
+
+// Auto-install dependencies if missing
+const nodeModules = join(SCRIPT_DIR, "node_modules");
+if (!existsSync(nodeModules)) {
+  console.error("Installing dependencies...");
+  execSync("npm install --silent", { cwd: SCRIPT_DIR, stdio: "inherit" });
+}
+
+const { pipeline } = await import("@huggingface/transformers");
 
 interface ModelEmbedding {
   id: string;
