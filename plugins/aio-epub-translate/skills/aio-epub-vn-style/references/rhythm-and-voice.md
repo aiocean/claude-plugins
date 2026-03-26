@@ -49,7 +49,6 @@ Nơi nào phải dừng lại, đọc lại, hoặc mất hơi — đó là nơi
 
 - **Thạch Lam**: Câu văn mềm mại, giàu hình ảnh, nhịp nhàng mà không cầu kỳ. Ngôn ngữ trong trẻo, cảm xúc tiết chế → tham khảo khi dịch văn trữ tình.
 - **Nguyễn Huy Thiệp**: Ngôn ngữ sắc gọn, hàm súc, đối thoại giàu tính kịch, dung hợp từ ngữ thông tục → tham khảo khi dịch văn hiện thực, tối giản.
-- **Bảo Ninh**: Dòng ý thức, câu văn dài uốn lượn theo tâm lý nhân vật, trau chuốt giàu sức biểu cảm → tham khảo khi dịch văn tâm lý.
 - **Nguyễn Ngọc Tư**: Ngôn ngữ dung dị, đậm phương ngữ Nam Bộ, giọng buồn mà không chán, hóm hỉnh mà thấm thía → tham khảo khi dịch văn đời thường.
 - **Nam Cao**: Châm biếm sắc sảo, giọng mỉa mai nhẹ nhàng → tham khảo khi dịch văn ironic.
 

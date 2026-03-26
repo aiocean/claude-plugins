@@ -7,8 +7,8 @@
     {
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
-      "description": "EPUB book translation via ConnectRPC API. Seven skills: aio-epub-vn-style (Vietnamese literary translation style guide with 10 reference docs), aio-epub-translate (literary translation with batch API), aio-epub-quality (quality detection & re-translation), aio-epub-manage (browse, progress, guidelines), aio-epub-upload (upload & prepare), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
-      "version": "3.2.0",
+      "description": "EPUB book translation via ConnectRPC API. Seven skills: aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API), aio-epub-quality (quality detection & re-translation), aio-epub-manage (browse, progress, guidelines), aio-epub-upload (upload & prepare), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
+      "version": "3.2.7",
       "author": {
         "name": "aiocean"
       }
@@ -315,7 +315,7 @@
       "name": "aio-uiux",
       "source": "./plugins/aio-uiux",
       "description": "Comprehensive UI/UX design knowledge base and advisor. 100+ topics covering visual design, typography, color theory, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, and responsive design. Includes semantic search with local embeddings.",
-      "version": "1.2.0",
+      "version": "1.2.2",
       "author": {
         "name": "aiocean"
       }

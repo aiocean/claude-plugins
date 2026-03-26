@@ -27,7 +27,7 @@ Mỗi thể loại sách đòi hỏi một "hợp đồng" khác với người 
 **Nguyên tắc**: Giữ nguyên đặc trưng cá nhân của tác giả, kể cả những "sai lệch" có chủ đích khỏi ngữ pháp chuẩn. KHÔNG "sửa" sự lặp lại của Hemingway hay câu chạy dài của Faulkner.
 
 **Quy tắc**:
-- **Dòng ý thức** (Woolf, Faulkner → tham khảo Bảo Ninh): Câu dài xoáy theo thời gian nội tâm. KHÔNG siết chặt hay hợp lý hóa. Dùng "—" (em dash) để giữ hơi, không tách câu.
+- **Dòng ý thức** (Woolf, Faulkner): Câu dài xoáy theo thời gian nội tâm. KHÔNG siết chặt hay hợp lý hóa. Dùng "—" (em dash) để giữ hơi, không tách câu.
 - **Phân biệt giọng đối thoại**: Nhân vật có học vs bình dân → Northern standard vs informal markers (ông/bà → thằng/con + hả/chứ/mà).
 - **Khoảng cách tường thuật**: Free indirect discourse ("She hated him. He was impossible.") → giữ nguyên sự mơ hồ, KHÔNG thêm "cô nghĩ rằng".
 - **Hemingway (tối giản)**: "He drank the coffee. It was good." → "Anh uống cà phê. Ngon." KHÔNG dịch thành "Anh ấy đã uống ly cà phê. Nó rất ngon lành."
