@@ -319,6 +319,15 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "aio-uiux",
+      "source": "./plugins/aio-uiux",
+      "description": "Comprehensive UI/UX design knowledge base and advisor. 100+ topics covering visual design, typography, color theory, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, and responsive design. Includes semantic search with local embeddings.",
+      "version": "1.2.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }
