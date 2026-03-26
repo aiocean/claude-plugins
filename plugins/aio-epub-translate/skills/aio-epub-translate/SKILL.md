@@ -1,9 +1,6 @@
 ---
 name: aio-epub-translate
-description: |
-  Translate EPUB book chapters with literary Vietnamese quality via ConnectRPC API.
-  Triggers: "dịch sách", "translate epub", "translate chapter", "dịch tiếp",
-  "continue translating", "dịch chương", "translate book".
+description: Translate EPUB book chapters with literary Vietnamese quality via ConnectRPC API. Triggers: "dịch sách", "translate epub", "translate chapter", "dịch tiếp", "continue translating", "dịch chương", "translate book".
 ---
 
 # EPUB Translate — Chapter Translation
