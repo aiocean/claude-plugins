@@ -96,50 +96,25 @@ print(f"Need translation: {len(items_to_translate)}")
 - Giữ nguyên tên riêng trừ khi guideline nói khác
 - Dịch theo batch: đọc ~10-15 items, dịch hết, submit batch
 
-#### NỀN TẢNG
+#### NGUYÊN TẮC DỊCH VĂN HỌC
 
-**Ba tiêu chuẩn — Tín · Đạt · Nhã** (Nghiêm Phục, 1898):
-- **Tín** (faithfulness): Trung thành ý nghĩa, tinh thần nguyên tác
-- **Đạt** (comprehensibility): Mạch lạc, dễ hiểu
-- **Nhã** (elegance): Uyển chuyển, đẹp ngôn từ
+**BẮT BUỘC đọc các reference files** trong thư mục `references/` trước khi dịch:
 
-**Nguyên tắc cốt lõi**: Dịch sense-by-sense (theo nghĩa), KHÔNG word-by-word. Mục tiêu: tạo văn bản đọc như được viết bằng tiếng Việt ngay từ đầu.
+| File | Nội dung |
+|------|----------|
+| `references/translation-principles.md` | Nền tảng Tín-Đạt-Nhã, cấu trúc Đề-Thuyết, đặc trưng tiếng Việt |
+| `references/sentence-structure.md` | Tách câu, chuyển bị động, bối cảnh trước hành động, chống danh từ hóa |
+| `references/word-choice.md` | Hán-Việt vs thuần Việt, từ láy, thành ngữ, đại từ nhân xưng (bảng đầy đủ) |
+| `references/rhythm-and-voice.md` | Nhịp chẵn, cân đối vế, giọng văn theo thể loại, bậc thầy văn xuôi Việt |
+| `references/common-errors.md` | 6 loại lỗi phải tránh, xử lý văn hóa (Vinay & Darbelnet) |
+| `references/structure-conversion-table.md` | Bảng chuyển đổi cấu trúc Anh→Việt, checklist tự kiểm tra |
 
-#### CẤU TRÚC CÂU
-
-- Tách câu dài (>25 từ) thành 2-3 câu ngắn có nhịp
-- Chuyển bị động sang chủ động ("bị" = tiêu cực, "được" = tích cực)
-- Đặt bối cảnh trước, hành động sau (cấu trúc Đề-Thuyết)
-- Tránh danh từ hóa quá mức
-
-#### CHỌN TỪ
-
-- Ưu tiên thuần Việt cho sách đời thường, Hán-Việt cho sách hàn lâm
-- Dùng từ láy tăng sức gợi hình (se se lạnh, lững thững, lấp lánh)
-- Khai thác thành ngữ Việt khi phù hợp
-- Chọn động từ mạnh, cụ thể
-- Xử lý đại từ nhân xưng nhất quán (tôi/anh/cô vs mình/cậu)
-
-#### NHỊP ĐIỆU
-
-- Nhịp chẵn 2/2, 2/4, 4/4 là nhịp tự nhiên tiếng Việt
-- Cân đối giữa các vế
-- Câu ngắn đột ngột tạo nhấn mạnh
-
-#### GIỌNG VĂN
-
-- Xác định giọng nguyên tác trước khi dịch
-- Đối thoại phải khác trần thuật (ừ, ờ, à, nhé, nha...)
-- Giữ phong cách tác giả, không san phẳng thành "giọng dịch"
-
-#### LỖI PHẢI TRÁNH
-
-- Câu cứng theo cấu trúc tiếng Anh
-- Lạm dụng bị động
-- Câu quá dài không tách nhịp
-- Hán-Việt nặng nề khi thuần Việt tự nhiên hơn
-- "Sáo rỗng dịch thuật" (Nói một cách khác → nói cách khác)
-- Dịch word-by-word thành ngữ
+**Tóm tắt nhanh** (đọc đầy đủ trong references):
+- Dịch sense-by-sense, KHÔNG word-by-word
+- Cấu trúc Đề-Thuyết, chuyển bị động sang chủ động
+- Ưu tiên thuần Việt, dùng từ láy, thành ngữ
+- Nhịp chẵn 2/2, 2/4, giữ phong cách tác giả
+- Tránh: câu cứng theo tiếng Anh, lạm dụng bị động, sáo rỗng dịch thuật
 
 ### 5. Submit bản dịch — DÙNG BATCH API
 
