@@ -1,5 +1,7 @@
 # C. NHỊP ĐIỆU
 
+> **Xem thêm**: `vietnamese-linguistics.md` phần 4 (tu từ: đối ngẫu, liệt kê tăng tiến) và phần 5 (vần trong văn xuôi, điệp ngữ). `advanced-techniques.md` phần 1 (bù đắp — compensation strategies).
+
 ## C1. Nhịp chẵn là nhịp tự nhiên của tiếng Việt
 
 Do xu hướng song tiết hóa, tiếng Việt có nhịp tự nhiên 2/2, 2/4, 4/4. Sau khi dịch xong, nếu câu bị "vấp" — điều chỉnh trật tự từ hoặc thay từ.

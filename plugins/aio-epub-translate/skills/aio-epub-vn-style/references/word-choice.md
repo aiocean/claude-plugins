@@ -1,5 +1,7 @@
 # B. CHỌN TỪ
 
+> **Xem thêm**: `vietnamese-linguistics.md` phần 1 (loại từ biểu cảm: nỗi/niềm/mối/cuộc) và phần 2 (tiểu từ tình thái cho đối thoại).
+
 ## B1. Ưu tiên thuần Việt khi ngữ cảnh thân mật, đời thường
 
 | Hán-Việt (trang trọng) | Thuần Việt (gần gũi) | Sắc thái |

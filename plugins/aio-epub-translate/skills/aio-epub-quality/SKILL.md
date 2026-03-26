@@ -64,6 +64,42 @@ for issue in report.get("issues", []):
 | `untranslated` | Translation identical to original | Re-translate |
 | `missing_translation_element` | ID referenced but element missing | Re-mark or re-translate |
 
+### 2b. Literary Quality Evaluation (Đánh giá văn học sâu)
+
+> Dùng khi mechanical score cao (>90%) nhưng bản dịch "nghe như dịch máy" hoặc "đọc không tự nhiên".
+
+**Nạp kiến thức đánh giá** — resolve path đến references của `aio-epub-vn-style`:
+
+```bash
+REFS=$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-epub-translate/*/skills/aio-epub-vn-style/references 2>/dev/null | sort -V | tail -1)
+echo "$REFS"
+```
+
+Dùng Read tool đọc `$REFS/quality-rubric.md` (khung đánh giá MQM/ATA) và `$REFS/common-errors.md` (6 loại lỗi phải tránh). Đọc thêm `$REFS/word-choice.md` nếu cần tra đại từ.
+
+**Tiêu chí đánh giá** (MQM + Tín-Đạt-Nhã):
+
+| Tiêu chí | Trọng số | Kiểm tra |
+|---|---|---|
+| Accuracy (Tín) | 35% | Đúng nghĩa, không thêm bớt |
+| Fluency (Đạt) | 25% | Không calque, không bị động thừa, Topic-Comment |
+| Style (Nhã) | 20% | Giọng văn tác giả, từ láy, nhịp điệu |
+| Cultural fit | 12% | Thành ngữ, Hán-Việt/thuần Việt phù hợp |
+| Consistency | 8% | Đại từ, thuật ngữ xuyên chương |
+
+**Red flags — dấu hiệu chất lượng kém** (chi tiết trong `$REFS/quality-rubric.md`):
+
+| Red Flag | Pattern | Mức |
+|---|---|---|
+| Calque thành ngữ | "phá băng", "con voi trong phòng" | Critical |
+| Calque bị động | "bị [verb] bởi [agent]" | Major |
+| Calque copula | "Nó là quan trọng để..." | Major |
+| Đại từ không nhất quán | "anh/em" → "anh/cô" giữa cảnh | Major |
+| Thiếu tiểu từ tình thái | Đối thoại không có nhé, nhỉ, ơi, mà | Minor–Major |
+| Câu dài >30 từ không tách | Giữ nguyên cấu trúc Anh | Minor–Major |
+| Danh từ hóa quá mức | Chuỗi "sự + verb" | Minor–Major |
+| Cụm sáo rỗng dịch thuật | "Nói một cách khác", "Sự thật là..." | Minor |
+
 ### 3. Re-translate Bad Items
 
 For chapters with issues, use `aio-epub-translate` to re-translate:
