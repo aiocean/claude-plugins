@@ -64,6 +64,36 @@ def print_toc(items, indent=0):
 print_toc(toc["tableOfContent"]["items"])
 ```
 
+### Get/Update TOC (raw NCX)
+
+```python
+# Get raw NCX XML
+toc_raw = api("GetTOC", {"bookId": BOOK_ID})
+print(toc_raw["tocContent"])
+
+# Update TOC with modified NCX XML
+# Workflow: get → edit XML → update
+ncx_xml = toc_raw["tocContent"]
+# ... modify ncx_xml ...
+result = api("UpdateTOC", {
+    "bookId": BOOK_ID,
+    "tocContent": ncx_xml
+})
+print(result["message"])
+```
+
+> **Tip**: `GetTableOfContent` trả về structured data (dễ đọc), `GetTOC`/`UpdateTOC` dùng raw NCX XML (dùng khi cần sửa trực tiếp).
+
+### Repair Book Metadata
+
+Dùng khi cover image không hiển thị hoặc metadata thiếu (tác giả, ngôn ngữ...):
+
+```python
+result = api("RepairBookMeta", {"bookId": BOOK_ID})
+print(result["message"])
+print(f"Cover URL: {result.get('coverImageUrl', 'none')}")
+```
+
 ### Check Translation Progress
 
 ```python
