@@ -64,25 +64,40 @@ def print_toc(items, indent=0):
 print_toc(toc["tableOfContent"]["items"])
 ```
 
-### Get/Update TOC (raw NCX)
+### Update TOC (structured)
+
+Dùng `UpdateTableOfContent` để lưu TOC đã chỉnh sửa — không cần XML:
 
 ```python
-# Get raw NCX XML
-toc_raw = api("GetTOC", {"bookId": BOOK_ID})
-print(toc_raw["tocContent"])
+# Workflow: get → chỉnh sửa items → save
+toc = api("GetTableOfContent", {"bookId": BOOK_ID})
+items = toc["tableOfContent"]["items"]
 
-# Update TOC with modified NCX XML
-# Workflow: get → edit XML → update
-ncx_xml = toc_raw["tocContent"]
-# ... modify ncx_xml ...
-result = api("UpdateTOC", {
+# Ví dụ: sửa title của chapter đầu tiên
+items[0]["title"] = "Chapter 1: The Beginning"
+
+result = api("UpdateTableOfContent", {
     "bookId": BOOK_ID,
-    "tocContent": ncx_xml
+    "tableOfContent": {"items": items}
 })
 print(result["message"])
 ```
 
-> **Tip**: `GetTableOfContent` trả về structured data (dễ đọc), `GetTOC`/`UpdateTOC` dùng raw NCX XML (dùng khi cần sửa trực tiếp).
+### Generate TOC với AI
+
+```python
+result = api("GenerateTOC", {
+    "bookId": BOOK_ID,
+    "modelId": "claude-sonnet-4-6",
+    "language": "vi"
+})
+# Note: GenerateTOC trả về {"toc": ...}, khác với GetTableOfContent {"tableOfContent": ...}
+items = result["toc"]["items"]
+# Save bằng UpdateTableOfContent (same pattern as structured update above)
+api("UpdateTableOfContent", {"bookId": BOOK_ID, "tableOfContent": {"items": items}})
+```
+
+> **Tip**: `GetTableOfContent` + `UpdateTableOfContent` là cặp API chính để đọc/ghi TOC với structured data. `GetTOC`/`UpdateTOC` (raw NCX XML) chỉ dùng khi cần thao tác XML trực tiếp ở mức thấp.
 
 ### Repair Book Metadata
 
