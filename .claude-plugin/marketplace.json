@@ -7,8 +7,8 @@
     {
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
-      "description": "EPUB book translation via ConnectRPC API. Five skills: aio-epub-upload (upload & prepare), aio-epub-translate (literary translation with batch API), aio-epub-quality (quality detection & re-translation), aio-epub-manage (browse, progress, guidelines), aio-epub-export (pack & kindle).",
-      "version": "3.1.0",
+      "description": "EPUB book translation via ConnectRPC API. Seven skills: aio-epub-vn-style (Vietnamese literary translation style guide with 10 reference docs), aio-epub-translate (literary translation with batch API), aio-epub-quality (quality detection & re-translation), aio-epub-manage (browse, progress, guidelines), aio-epub-upload (upload & prepare), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
+      "version": "3.2.0",
       "author": {
         "name": "aiocean"
       }
@@ -27,15 +27,6 @@
       "name": "aio-worktree",
       "source": "./plugins/aio-worktree",
       "description": "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup.",
-      "version": "1.1.1",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-epub-packing",
-      "source": "./plugins/aio-epub-packing",
-      "description": "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers.",
       "version": "1.1.1",
       "author": {
         "name": "aiocean"

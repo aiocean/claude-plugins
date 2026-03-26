@@ -98,23 +98,47 @@ print(f"Need translation: {len(items_to_translate)}")
 
 #### NGUYÊN TẮC DỊCH VĂN HỌC
 
-**BẮT BUỘC đọc các reference files** trong thư mục `references/` trước khi dịch:
+> **⚠️ DỪNG LẠI. KHÔNG ĐƯỢC DỊCH KHI CHƯA HOÀN THÀNH BƯỚC NÀY.**
+>
+> Bước này quyết định chất lượng bản dịch. Bỏ qua = bản dịch cứng, máy móc, bị reject.
 
-| File | Nội dung |
-|------|----------|
-| `references/translation-principles.md` | Nền tảng Tín-Đạt-Nhã, cấu trúc Đề-Thuyết, đặc trưng tiếng Việt |
-| `references/sentence-structure.md` | Tách câu, chuyển bị động, bối cảnh trước hành động, chống danh từ hóa |
-| `references/word-choice.md` | Hán-Việt vs thuần Việt, từ láy, thành ngữ, đại từ nhân xưng (bảng đầy đủ) |
-| `references/rhythm-and-voice.md` | Nhịp chẵn, cân đối vế, giọng văn theo thể loại, bậc thầy văn xuôi Việt |
-| `references/common-errors.md` | 6 loại lỗi phải tránh, xử lý văn hóa (Vinay & Darbelnet) |
-| `references/structure-conversion-table.md` | Bảng chuyển đổi cấu trúc Anh→Việt, checklist tự kiểm tra |
+**BƯỚC BẮT BUỘC — Nạp kiến thức dịch thuật:**
 
-**Tóm tắt nhanh** (đọc đầy đủ trong references):
+1. Dùng Skill tool gọi skill `aio-epub-vn-style` — đây là cẩm nang dịch văn học Anh→Việt
+2. Sau khi SKILL.md của `aio-epub-vn-style` được load, đọc các reference files bằng cách resolve path:
+
+```bash
+REFS=$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-epub-translate/*/skills/aio-epub-vn-style/references 2>/dev/null | sort -V | tail -1)
+echo "$REFS"
+```
+
+3. Dùng Read tool đọc các file reference theo thứ tự ưu tiên:
+
+| Ưu tiên | File | Khi nào ĐỌC |
+|---------|------|-------------|
+| **LUÔN** | `$REFS/translation-principles.md` | Mọi lần dịch |
+| **LUÔN** | `$REFS/common-errors.md` | Mọi lần dịch — tránh 6 lỗi phổ biến |
+| **LUÔN** | `$REFS/sentence-structure.md` | Mọi lần dịch — cấu trúc Đề-Thuyết |
+| **LUÔN** | `$REFS/word-choice.md` | Mọi lần dịch — đại từ, từ láy, Hán-Việt |
+| Nên đọc | `$REFS/rhythm-and-voice.md` | Văn xuôi, fiction |
+| Nên đọc | `$REFS/genre-strategies.md` | Khi biết thể loại sách |
+| Nên đọc | `$REFS/vietnamese-linguistics.md` | Khi muốn dùng từ tượng thanh/hình, loại từ biểu cảm |
+| Khi cần | `$REFS/advanced-techniques.md` | Khi gặp ẩn dụ, hài hước, chơi chữ |
+| Khi cần | `$REFS/structure-conversion-table.md` | Bảng chuyển đổi cấu trúc nhanh |
+| Khi cần | `$REFS/quality-rubric.md` | Khi tự đánh giá chất lượng |
+
+4. **GATE — Xác nhận đã đọc**: Trước khi dịch câu đầu tiên, liệt kê ngắn gọn:
+   - Thể loại sách (self-help, fiction, science, philosophy...?)
+   - Đại từ sẽ dùng cho nhân vật chính (tôi/mình/ta? anh/cô/em?)
+   - 2-3 nguyên tắc dịch sẽ ưu tiên áp dụng cho sách này
+
+**Nếu không thể gọi skill hoặc resolve path**, áp dụng tối thiểu:
 - Dịch sense-by-sense, KHÔNG word-by-word
-- Cấu trúc Đề-Thuyết, chuyển bị động sang chủ động
-- Ưu tiên thuần Việt, dùng từ láy, thành ngữ
+- Cấu trúc Đề-Thuyết: bối cảnh trước, hành động sau
+- Chuyển bị động sang chủ động ("bị X bởi Y" → "Y khiến X")
+- Ưu tiên thuần Việt, dùng từ láy, thành ngữ khi phù hợp
 - Nhịp chẵn 2/2, 2/4, giữ phong cách tác giả
-- Tránh: câu cứng theo tiếng Anh, lạm dụng bị động, sáo rỗng dịch thuật
+- Tránh: câu cứng theo tiếng Anh, lạm dụng bị động, sáo rỗng dịch thuật ("Nói một cách khác", "Sự thật là...")
 
 ### 5. Submit bản dịch — DÙNG BATCH API
 
