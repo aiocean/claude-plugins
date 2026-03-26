@@ -1,17 +1,6 @@
 ---
 name: aio-uiux
-description: |
-  Comprehensive UI/UX design knowledge base and advisor. Use when building web interfaces,
-  designing components, reviewing UI quality, improving user experience, implementing
-  accessibility, choosing colors, typography, layout, animations, or any visual/interaction
-  design work. Covers visual design, typography, color theory, layout systems, accessibility
-  (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component
-  patterns, design systems, UX writing, performance UX, modern CSS, and responsive design.
-  Triggers: UI, UX, design, layout, color, typography, animation, accessibility, a11y,
-  component, responsive, mobile, dark mode, design system, form design, navigation,
-  modal, button, card, spacing, whitespace, visual hierarchy, user experience, WCAG,
-  ARIA, contrast, font, micro-interaction, skeleton screen, loading state, empty state,
-  design tokens, Tailwind, CSS, hover, focus, disabled, error state.
+description: Use when designing or reviewing web UI — layouts, components, color, typography, animations, accessibility, or design systems. Covers UX psychology, interaction patterns, WCAG compliance, responsive design, and modern CSS. Triggers: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens.
 ---
 
 # UI/UX Design Advisor
