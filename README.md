@@ -53,6 +53,7 @@ npx skills add aiocean/claude-plugins -s <plugin-name>
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
+| **aio-uiux** | 1.0.0 | **Comprehensive UI/UX design advisor**. 100+ topics: visual design, typography, color, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, responsive design. Semantic search with local embeddings.<br>`npx skills add aiocean/claude-plugins -s aio-uiux` |
 | **aio-neobrutalism** | 2.0.0 | Neobrutalism **design system bootstrapper**. Detects tech stack, generates CSS tokens, and transforms existing UI components. Bold borders, hard shadows, vibrant colors.<br>`npx skills add aiocean/claude-plugins -s aio-neobrutalism` |
 | **aio-mermaid** | 1.2.0 | Generate shareable MinimalMermaid diagram URLs from mermaid code.<br>`npx skills add aiocean/claude-plugins -s aio-mermaid` |
 | **aio-grafana-diagram** | 2.0.0 | **Dashboard diagram generator**. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana.<br>`npx skills add aiocean/claude-plugins -s aio-grafana-diagram` |
