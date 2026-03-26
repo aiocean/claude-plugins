@@ -1,12 +1,6 @@
 ---
 name: aio-epub-vn-style
-description: |
-  Vietnamese literary translation style guide — single source of truth for
-  Tín-Đạt-Nhã principles, sentence structure, word choice, rhythm, common errors,
-  genre strategies, advanced techniques, and quality evaluation criteria.
-  Triggers: "vietnamese style guide", "translation style", "phong cách dịch",
-  "nguyên tắc dịch", "how to translate well", "dịch hay", "translation principles",
-  "hướng dẫn dịch", "cẩm nang dịch thuật".
+description: Use when translating Vietnamese literature, asking how to translate naturally, reviewing a translated passage for quality, or needing guidance on word choice, sentence rhythm, genre style, or common errors. Triggers: "dịch sao cho hay", "dịch thế nào", "phong cách dịch", "nguyên tắc dịch", "translation style", "how to translate", "dịch văn học", "style guide".
 ---
 
 # Vietnamese Literary Translation — Style Guide

@@ -1,9 +1,6 @@
 ---
 name: aio-epub-manage
-description: |
-  Browse books, check translation progress, manage guidelines, and view TOC.
-  Triggers: "list books", "liệt kê sách", "check progress", "xem tiến độ",
-  "update guideline", "cập nhật guideline", "book info", "thông tin sách".
+description: Browse books, check translation progress, manage guidelines, and view TOC. Triggers: "list books", "liệt kê sách", "check progress", "xem tiến độ", "update guideline", "cập nhật guideline", "book info", "thông tin sách".
 ---
 
 # EPUB Manage — Book Management

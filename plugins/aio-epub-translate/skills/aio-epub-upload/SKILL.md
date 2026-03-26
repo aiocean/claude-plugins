@@ -1,8 +1,6 @@
 ---
 name: aio-epub-upload
-description: |
-  Upload and prepare EPUB books for translation. Triggers: "upload epub",
-  "tải sách lên", "prepare book", "chuẩn bị sách", "add book".
+description: Upload and prepare EPUB books for translation. Triggers: "upload epub", "tải sách lên", "prepare book", "chuẩn bị sách", "add book".
 ---
 
 # EPUB Upload & Prepare
