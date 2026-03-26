@@ -132,10 +132,10 @@
       }
     },
     {
-      "name": "aio-jira",
-      "source": "./plugins/aio-jira",
-      "description": "Jira operations through MCP tools. Issue management, sprint tracking, workflow transitions, comments, JQL search, and development information. Auto-installs jira-mcp server if missing.",
-      "version": "2.2.0",
+      "name": "aio-atlassian",
+      "source": "./plugins/aio-atlassian",
+      "description": "Atlassian CLI tools for Jira and Confluence. Manage Jira issues, sprints, workflows, and Confluence pages via CLI.",
+      "version": "1.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -217,15 +217,6 @@
       "source": "./plugins/aio-deep-plan",
       "description": "PROACTIVE planning toolkit — use before writing code to understand codebase structure and plan changes. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning with re-anchoring protocol), review (post-implementation check). Combines GitNexus hybrid search/knowledge graph and LSP. NOT for debugging bugs — use aio-debug instead.",
       "version": "3.3.1",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-confluence",
-      "source": "./plugins/aio-confluence",
-      "description": "Confluence CLI/MCP for page management, CQL search, content operations, comments, and space listing via confluence-mcp.",
-      "version": "1.1.1",
       "author": {
         "name": "aiocean"
       }

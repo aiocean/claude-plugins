@@ -1,6 +1,0 @@
-{
-  "name": "aio-jira",
-  "description": "Jira operations through MCP tools. Issue management, sprint tracking, workflow transitions, comments, JQL search, and development information. Auto-installs jira-mcp server if missing.",
-  "version": "2.2.0",
-  "author": { "name": "aiocean" }
-}
