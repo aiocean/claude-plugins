@@ -1,5 +1,15 @@
 # Gherkin Writing Guide
 
+## The Cucumber Litmus Test
+
+Before writing any step, ask:
+
+> "Will this wording need to change if the implementation does?"
+
+If yes — the step is imperative. Rewrite it at the intent level. This single test catches most brittle Gherkin before it's written.
+
+---
+
 ## The Core Distinction: Declarative vs Imperative
 
 This is the most important principle in writing good Gherkin.

@@ -232,6 +232,50 @@ And the product shows as "Out of Stock" on the product page
 
 ---
 
+### 10. Generic "I" Instead of Named Actor
+
+**Smell:** Using first-person "I" in multi-actor scenarios — ambiguous when multiple roles exist.
+
+**Before:**
+```gherkin
+When I tweet a message
+Then I see it in my feed
+```
+
+**After:**
+```gherkin
+When Aslak tweets a message
+And Steve follows Aslak
+Then Steve sees the message in his feed
+But Matt (who does not follow Aslak) does not see it
+```
+
+**Why:** "I" is fine for single-actor features but breaks down instantly when multiple roles need to be distinguished. Named personas (Alice, Bob, Admin) make multi-role scenarios unambiguous and readable. *Source: Cucumber anti-patterns, part 2.*
+
+---
+
+### 11. Vague / High-Level Scenarios
+
+**Smell:** Steps use indefinite quantities or abstract descriptions that cannot be verified.
+
+**Before:**
+```gherkin
+Given I have some money in my account
+When I withdraw some money
+Then the balance should be the original balance minus the amount withdrawn
+```
+
+**After:**
+```gherkin
+Given my account balance is $500
+When I withdraw $150
+Then my new balance should be $350
+```
+
+**Why:** Abstract values ("some", "original", "the amount") are un-automatable and un-verifiable. Every scenario needs concrete, specific values that a test can assert against. *Source: Cucumber anti-patterns, part 1.*
+
+---
+
 ## Quality Gates Checklist
 
 Before marking a Feature file as ready:
@@ -239,7 +283,8 @@ Before marking a Feature file as ready:
 - [ ] Each scenario tests exactly one business rule
 - [ ] No UI references in any step (buttons, colors, URLs, field names)
 - [ ] All steps use domain language (not technical/DB/API language)
-- [ ] Every scenario has a named actor (Alice, Admin, Customer, System)
+- [ ] Named actors used (Alice, Admin, Bob) — no generic "I" in multi-actor scenarios
+- [ ] All quantities and values are concrete (no "some", "a few", "the amount")
 - [ ] Scenarios are independent — no scenario depends on a previous scenario's state
 - [ ] Happy path is covered
 - [ ] At least one failure/alternative scenario per rule that can fail
