@@ -1,95 +1,79 @@
 ---
 name: aio-gherkin-refine
-description: Refine ambiguous or underspecified requests into structured Gherkin scenarios before implementation. Triggers: "refine requirements", "write acceptance criteria", "clarify requirements", gherkin, BDD, Given/When/Then. Also use proactively when a request spans multiple conditions.
+description: Comprehensive BDD field guide for writing and reviewing Gherkin scenarios with expert quality. Triggers: "write gherkin", "refine requirements", "write acceptance criteria", "review gherkin", "improve scenarios", "BDD", "Given/When/Then", "acceptance tests". Use proactively when a request is ambiguous, spans multiple conditions, or edge cases need clarification.
 ---
 
-# gherkin-refine
+# aio-gherkin-refine
 
-Transforms vague or complex user requests into clear Gherkin scenarios to ensure mutual understanding before taking action.
+Transforms vague requests into clear Gherkin scenarios and reviews existing Gherkin for quality. Serves developers, BA/QA/Product, and Claude agents.
 
-## When to use
+## Mode Detection
 
-- User request is ambiguous or could be interpreted multiple ways
-- Requirements span multiple steps or conditions
-- Edge cases need clarification
-- You want to confirm understanding before implementing
+**REVIEW mode** — when user pastes existing Gherkin, says "review", "improve", "check my scenarios":
+1. Load `references/review-checklist.md`
+2. Rate each scenario: ✅ Good / ⚠️ Needs Work / ❌ Rewrite
+3. Show before/after for each issue with explanation
+4. End with quality score and top 3 improvements
 
-## Process
+**WRITE mode** — when request is new, ambiguous, or user says "write", "create", "draft":
+1. Load `references/mental-models.md` — use Example Mapping to extract rules/examples/questions
+2. Load `references/writing-guide.md` — apply declarative style and naming conventions
+3. Draft Feature file with happy path + at least one failure scenario
+4. Present to user for confirmation before implementing
 
-1. Parse user request for intent
-2. Identify ambiguities, assumptions, edge cases
-3. Write Gherkin scenario(s) capturing your understanding
-4. Present to user for confirmation
-5. Proceed only after user confirms or refines
+**When in doubt:** default to WRITE mode, offer REVIEW as an option.
 
-## Format
+## Example Mapping Quick-Start (WRITE mode)
+
+Before writing any Gherkin, run a mini Example Mapping session:
+
+```
+Story: [what the user wants]
+  Rule 1: [business rule derived from story]
+    Example: [concrete example that tests this rule]
+    Example: [edge case]
+  Rule 2: [another rule]
+    Example: [...]
+  Questions: [anything unclear — ask user before proceeding]
+```
+
+If you have more than 4 examples for a single rule, the rule is too broad — split it.
+
+## Output Format
+
+Always use fenced code blocks with `gherkin` syntax:
 
 ```gherkin
-Feature: [What user wants to achieve]
+Feature: [noun phrase — what capability this describes]
 
-  Scenario: [Main flow]
-    Given [initial context/state]
-    And [additional context if needed]
-    When [user action or trigger]
-    And [additional actions if needed]
-    Then [expected outcome]
-    And [additional outcomes if needed]
+  Background:  # only if ALL scenarios share this context
+    Given [shared precondition]
 
-  Scenario: [Edge case or alternative flow]
+  Scenario: [complete sentence describing the rule being tested]
+    Given [initial context — who, what state]
+    When [the action that triggers behavior]
+    Then [the observable outcome]
+
+  Scenario: [failure or alternative case]
     Given [different context]
-    When [action]
+    When [same or different action]
     Then [different outcome]
 ```
 
-## Examples
+After presenting Gherkin, always ask: "Does this capture what you need? Any scenarios to add or modify?"
 
-**User says:** "Add a button to delete users"
+## Key Principles
 
-**Refine as:**
+- **Declarative over imperative**: `When I submit the order` not `When I click the Submit button`
+- **One rule per scenario**: if you need `And` to link unrelated actions, split the scenario
+- **Domain language**: use business terms, not UI or technical terms
+- **Independent scenarios**: each scenario must stand alone — no shared state between scenarios
+- **3 Amigos check**: would a developer, QA engineer, and BA all understand this scenario?
 
-```gherkin
-Feature: User deletion
+## Deep References
 
-  Scenario: Admin deletes a user
-    Given I am logged in as an admin
-    And I am on the user management page
-    When I click the delete button for a user
-    Then a confirmation dialog appears
-    When I confirm the deletion
-    Then the user is removed from the system
-    And I see a success message
-
-  Scenario: Non-admin cannot delete users
-    Given I am logged in as a regular user
-    When I view the user list
-    Then I do not see delete buttons
-```
-
-Then ask: "Does this match what you need? Any scenarios I should add or modify?"
-
-**User says:** "Make the search faster"
-
-**Refine as:**
-
-```gherkin
-Feature: Search performance improvement
-
-  Scenario: Search returns results quickly
-    Given the database has 100,000 records
-    When I search for "keyword"
-    Then results appear within 500ms
-
-  Scenario: Search with filters
-    Given I apply category and date filters
-    When I search for "keyword"
-    Then filtered results appear within 500ms
-```
-
-Then ask: "What's your current search time? What's your target? Should I focus on indexing, caching, or query optimization?"
-
-## Keep it simple
-
-- 1-3 scenarios usually enough
-- Skip obvious Given/When/Then if context is clear
-- Focus on clarifying ambiguities, not documenting everything
-- Use natural language, not technical jargon
+Load these when needed:
+- `references/mental-models.md` — Example Mapping, 3 Amigos, Deliberate Discovery
+- `references/writing-guide.md` — Declarative style, naming, Scenario Outline, Background, Ubiquitous Language
+- `references/review-checklist.md` — Anti-patterns catalog, quality gates, before/after examples
+- `references/expert-frameworks.md` — Cucumber School rules, Specification by Example, BDD in Action, ATDD by Example
