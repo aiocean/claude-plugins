@@ -1,3 +1,178 @@
+#!/bin/bash
+set -euo pipefail
+
+# Generate docs/index.html from .claude-plugin/marketplace.json
+# Usage: bash scripts/generate-landing.sh
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+MARKETPLACE="$ROOT_DIR/.claude-plugin/marketplace.json"
+OUTPUT="$ROOT_DIR/docs/index.html"
+
+if [ ! -f "$MARKETPLACE" ]; then
+  echo "ERROR: $MARKETPLACE not found" >&2
+  exit 1
+fi
+
+if ! command -v jq &>/dev/null; then
+  echo "ERROR: jq is required. Install with: brew install jq" >&2
+  exit 1
+fi
+
+MARKETPLACE_NAME=$(jq -r '.name' "$MARKETPLACE")
+REPO="$(jq -r '.owner.name' "$MARKETPLACE")/claude-plugins"
+
+# Category mapping — plugin name → category
+declare -A CATEGORIES=(
+  [aio-codebase-oracle]="Codebase & Architecture"
+  [aio-deep-plan]="Codebase & Architecture"
+  [aio-debug]="Codebase & Architecture"
+  [aio-code-review]="Codebase & Architecture"
+  [aio-worktree]="Development Tools"
+  [aio-bun-fullstack-setup]="Development Tools"
+  [aio-claude-manager]="Development Tools"
+  [aio-reflect]="Development Tools"
+  [aio-feedback]="Development Tools"
+  [aio-install]="Development Tools"
+  [aio-golang-mastery]="Language & Framework"
+  [aio-react-minimal-effects]="Language & Framework"
+  [aio-xstate]="Language & Framework"
+  [aio-tui]="Language & Framework"
+  [aio-ios-device-debug]="iOS"
+  [aio-uiux]="Design & Visualization"
+  [aio-neobrutalism]="Design & Visualization"
+  [aio-mermaid]="Design & Visualization"
+  [aio-grafana-diagram]="Design & Visualization"
+  [aio-monitoring-observability]="Observability"
+  [aio-mental-models]="Content & Knowledge"
+  [aio-youtube]="Content & Knowledge"
+  [aio-epub-packing]="Content & Knowledge"
+  [aio-epub-translate]="Content & Knowledge"
+  [aio-gherkin-refine]="Content & Knowledge"
+  [aio-research-kit]="Content & Knowledge"
+  [aio-jira]="Integrations"
+  [aio-github]="Integrations"
+  [aio-gitlab]="Integrations"
+  [aio-confluence]="Integrations"
+  [aio-google-workspace]="Integrations"
+  [aio-x]="Integrations"
+  [aio-tanca]="Integrations"
+  [aio-rag-kit]="Integrations"
+  [aio-browser-cookie]="Integrations"
+  [aio-remove-bg]="Development Tools"
+)
+
+# Category display order
+CATEGORY_ORDER=(
+  "Codebase & Architecture"
+  "Development Tools"
+  "Language & Framework"
+  "iOS"
+  "Design & Visualization"
+  "Observability"
+  "Content & Knowledge"
+  "Integrations"
+)
+
+# Read plugins from marketplace.json (skip deprecated)
+PLUGINS_JSON=$(jq -c '[.plugins[] | select(.deprecated != true) | {name: .name, version: .version, desc: .description}]' "$MARKETPLACE")
+PLUGIN_COUNT=$(echo "$PLUGINS_JSON" | jq 'length')
+
+echo "Generating landing page from $PLUGIN_COUNT plugins..."
+
+# Build JS plugin data grouped by category
+build_plugin_js() {
+  local first_cat=true
+  echo "const PLUGINS = ["
+
+  for category in "${CATEGORY_ORDER[@]}"; do
+    # Collect plugins for this category
+    local plugins_in_cat=()
+    local count
+    count=$(echo "$PLUGINS_JSON" | jq 'length')
+
+    for ((i = 0; i < count; i++)); do
+      local name
+      name=$(echo "$PLUGINS_JSON" | jq -r ".[$i].name")
+      local mapped_cat="${CATEGORIES[$name]:-Uncategorized}"
+      if [ "$mapped_cat" = "$category" ]; then
+        plugins_in_cat+=("$i")
+      fi
+    done
+
+    [ ${#plugins_in_cat[@]} -eq 0 ] && continue
+
+    if [ "$first_cat" = true ]; then
+      first_cat=false
+    else
+      echo "  ,"
+    fi
+
+    echo "  {"
+    echo "    category: \"$category\","
+    echo "    plugins: ["
+
+    local first_plugin=true
+    for idx in "${plugins_in_cat[@]}"; do
+      local name version desc
+      name=$(echo "$PLUGINS_JSON" | jq -r ".[$idx].name")
+      version=$(echo "$PLUGINS_JSON" | jq -r ".[$idx].version")
+      desc=$(echo "$PLUGINS_JSON" | jq -r ".[$idx].desc" | sed 's/"/\\"/g' | head -c 200)
+
+      if [ "$first_plugin" = true ]; then
+        first_plugin=false
+      else
+        echo "      ,"
+      fi
+      echo "      { name: \"$name\", version: \"$version\", desc: \"$desc\" }"
+    done
+
+    echo "    ]"
+    echo "  }"
+  done
+
+  # Check for uncategorized plugins
+  local count
+  count=$(echo "$PLUGINS_JSON" | jq 'length')
+  local uncat_plugins=()
+  for ((i = 0; i < count; i++)); do
+    local name
+    name=$(echo "$PLUGINS_JSON" | jq -r ".[$i].name")
+    local mapped_cat="${CATEGORIES[$name]:-}"
+    if [ -z "$mapped_cat" ]; then
+      uncat_plugins+=("$i")
+      echo "  WARNING: Uncategorized plugin: $name" >&2
+    fi
+  done
+
+  if [ ${#uncat_plugins[@]} -gt 0 ]; then
+    echo "  ,"
+    echo "  {"
+    echo "    category: \"Other\","
+    echo "    plugins: ["
+    local first_plugin=true
+    for idx in "${uncat_plugins[@]}"; do
+      local name version desc
+      name=$(echo "$PLUGINS_JSON" | jq -r ".[$idx].name")
+      version=$(echo "$PLUGINS_JSON" | jq -r ".[$idx].version")
+      desc=$(echo "$PLUGINS_JSON" | jq -r ".[$idx].desc" | sed 's/"/\\"/g' | head -c 200)
+      if [ "$first_plugin" = true ]; then
+        first_plugin=false
+      else
+        echo "      ,"
+      fi
+      echo "      { name: \"$name\", version: \"$version\", desc: \"$desc\" }"
+    done
+    echo "    ]"
+    echo "  }"
+  fi
+
+  echo "];"
+}
+
+PLUGIN_JS_DATA=$(build_plugin_js)
+
+cat > "$OUTPUT" << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -466,119 +641,17 @@
 <div class="toast" id="toast">copied</div>
 
 <script>
-const MARKETPLACE = 'aiocean-plugins';
+HTMLEOF
 
-const PLUGINS = [
-  {
-    category: "Codebase & Architecture",
-    plugins: [
-      { name: "aio-codebase-oracle", version: "5.1.3", desc: "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interacti" }
-      ,
-      { name: "aio-code-review", version: "3.1.2", desc: "Ultimate code review with GitNexus knowledge graph analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-" }
-      ,
-      { name: "aio-debug", version: "2.3.1", desc: "REACTIVE debugging — systematic debug & fix orchestrator for bugs, errors, and test failures. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review valid" }
-      ,
-      { name: "aio-deep-plan", version: "3.3.1", desc: "PROACTIVE planning toolkit — use before writing code to understand codebase structure and plan changes. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), pl" }
-    ]
-  }
-  ,
-  {
-    category: "Development Tools",
-    plugins: [
-      { name: "aio-worktree", version: "1.1.1", desc: "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup." }
-      ,
-      { name: "aio-claude-manager", version: "1.1.1", desc: "Enable/disable skills based on project context. Reduce skill clutter for specific project types." }
-      ,
-      { name: "aio-bun-fullstack-setup", version: "1.1.0", desc: "Scaffold and setup Bun fullstack projects. Scaffold mode detects existing files and generates only what is missing. Single port API + static frontend with Vite proxy in dev." }
-      ,
-      { name: "aio-reflect", version: "2.2.1", desc: "Learn from Claude Code sessions to extract reusable knowledge. Deep JSONL parsing extracts token usage, cost, work modes, subagents, tasks, compaction, session chains, and file operations for comprehe" }
-      ,
-      { name: "aio-feedback", version: "1.1.1", desc: "Submit feedback, bug reports, feature requests, and plugin requests for aiocean plugins directly from Claude Code via GitHub Issues." }
-      ,
-      { name: "aio-install", version: "1.1.1", desc: "Install, enable, disable, and list aiocean plugins for the current project via settings.local.json." }
-    ]
-  }
-  ,
-  {
-    category: "Language & Framework",
-    plugins: [
-      { name: "aio-react-minimal-effects", version: "3.1.0", desc: "Minimize useEffect in React 19. Scan mode finds and fixes problematic effects in existing code. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns." }
-      ,
-      { name: "aio-xstate", version: "1.0.5", desc: "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCal" }
-      ,
-      { name: "aio-golang-mastery", version: "1.1.0", desc: "Complete Go development skill with lint mode (7-step tooling chain: build, vet, golangci-lint, govulncheck, nilaway, deadcode, race detection). Covers idiomatic patterns, error handling, concurrency, " }
-      ,
-      { name: "aio-tui", version: "1.0.3", desc: "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hove" }
-    ]
-  }
-  ,
-  {
-    category: "iOS",
-    plugins: [
-      { name: "aio-ios-device-debug", version: "1.1.2", desc: "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal." }
-    ]
-  }
-  ,
-  {
-    category: "Design & Visualization",
-    plugins: [
-      { name: "aio-neobrutalism", version: "2.0.1", desc: "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors." }
-      ,
-      { name: "aio-grafana-diagram", version: "2.0.1", desc: "Dashboard diagram generator. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic me" }
-      ,
-      { name: "aio-mermaid", version: "1.2.1", desc: "Generate shareable MinimalMermaid diagram URLs. Compress mermaid code into shareable links." }
-      ,
-      { name: "aio-uiux", version: "1.2.0", desc: "Comprehensive UI/UX design knowledge base and advisor. 100+ topics covering visual design, typography, color theory, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, m" }
-    ]
-  }
-  ,
-  {
-    category: "Observability",
-    plugins: [
-      { name: "aio-monitoring-observability", version: "1.0.5", desc: "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, " }
-    ]
-  }
-  ,
-  {
-    category: "Content & Knowledge",
-    plugins: [
-      { name: "aio-epub-translate", version: "2.5.1", desc: "AI-driven EPUB translation using jread CLI. Five opinionated skills: aio-epub-setup (project setup), aio-epub-research (book research, terminology, web search), aio-epub-translate (chapter translation" }
-      ,
-      { name: "aio-epub-packing", version: "1.1.1", desc: "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers." }
-      ,
-      { name: "aio-youtube", version: "1.1.1", desc: "Search YouTube and extract video transcripts using yt-dlp." }
-      ,
-      { name: "aio-gherkin-refine", version: "1.0.4", desc: "Refines ambiguous user requests into structured Gherkin format (Given/When/Then) before implementation." }
-      ,
-      { name: "aio-mental-models", version: "2.1.1", desc: "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems." }
-      ,
-      { name: "aio-research-kit", version: "1.2.1", desc: "Structured 10-phase research framework CLI. Initialize research projects, validate structure, and execute systematic research via research-cli." }
-    ]
-  }
-  ,
-  {
-    category: "Integrations",
-    plugins: [
-      { name: "aio-jira", version: "2.2.0", desc: "Jira operations through MCP tools. Issue management, sprint tracking, workflow transitions, comments, JQL search, and development information. Auto-installs jira-mcp server if missing." }
-      ,
-      { name: "aio-confluence", version: "1.1.1", desc: "Confluence CLI/MCP for page management, CQL search, content operations, comments, and space listing via confluence-mcp." }
-      ,
-      { name: "aio-github", version: "1.1.1", desc: "GitHub CLI/MCP for repository, pull request, issue management, code review, and file operations via github-mcp." }
-      ,
-      { name: "aio-gitlab", version: "1.1.1", desc: "GitLab CLI/MCP for merge requests, pipelines, jobs, branch protection, and git flow operations via gitlab-mcp." }
-      ,
-      { name: "aio-rag-kit", version: "1.1.1", desc: "RAG Kit CLI/MCP for Qdrant vector database operations: create collections, index content, and semantic search via rag-kit." }
-      ,
-      { name: "aio-tanca", version: "1.1.1", desc: "Tanca CLI/MCP for employee timekeeping, shift management, check-in/check-out, and clock logs via tanca-mcp." }
-      ,
-      { name: "aio-x", version: "1.1.1", desc: "X/Twitter CLI/MCP for tweets, threads, search, engagement, moderation, and list operations via x-mcp." }
-      ,
-      { name: "aio-google-workspace", version: "1.1.1", desc: "Google Workspace operations via gws CLI. Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat, and cross-service workflows (standup, meeting prep, weekly digest)." }
-      ,
-      { name: "aio-browser-cookie", version: "2.0.1", desc: "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports." }
-    ]
-  }
-];
+# Inject the dynamic plugin data
+cat >> "$OUTPUT" << JSEOF
+const MARKETPLACE = '${MARKETPLACE_NAME}';
+
+${PLUGIN_JS_DATA}
+JSEOF
+
+# Append the rest of the JS (static logic)
+cat >> "$OUTPUT" << 'HTMLEOF'
 
 const selected = new Set();
 
@@ -720,3 +793,6 @@ render();
 
 </body>
 </html>
+HTMLEOF
+
+echo "Generated $OUTPUT with $PLUGIN_COUNT plugins"
