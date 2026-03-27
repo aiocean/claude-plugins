@@ -82,6 +82,101 @@ jira-cli get-comments --issue-key PROJ-123 --env .env
 jira-cli add-worklog --issue-key PROJ-123 --time-spent "2h 30m" --env .env
 ```
 
+#### Rich Comments with Tables/Formatting (ADF) — IMPORTANT
+
+`jira-cli add-comment --comment` only supports **plain text**. It does NOT render wiki markup (h2., ||header||, {code}, etc.) — those will appear as literal text in Jira.
+
+For comments with tables, headings, bold, code blocks, or colored text, **use the Jira REST API v3 directly** with ADF (Atlassian Document Format):
+
+```bash
+# 1. Load credentials
+source /path/to/.env
+
+# 2. Write ADF JSON to a temp file
+cat > /tmp/jira_comment.json << 'ENDJSON'
+{
+  "body": {
+    "version": 1,
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": {"level": 2},
+        "content": [{"type": "text", "text": "Investigation Results"}]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {"type": "text", "text": "Found "},
+          {"type": "text", "text": "3 issues", "marks": [{"type": "strong"}]},
+          {"type": "text", "text": " across all shops."}
+        ]
+      },
+      {
+        "type": "table",
+        "attrs": {"isNumberColumnEnabled": false, "layout": "default"},
+        "content": [
+          {
+            "type": "tableRow",
+            "content": [
+              {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Shop"}]}]},
+              {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Revenue"}]}]}
+            ]
+          },
+          {
+            "type": "tableRow",
+            "content": [
+              {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Shop A"}]}]},
+              {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "$1,234.56"}]}]}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+ENDJSON
+
+# 3. Post via REST API
+curl -s -X POST \
+  -u "$ATLASSIAN_EMAIL:$ATLASSIAN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @/tmp/jira_comment.json \
+  "$ATLASSIAN_HOST/rest/api/3/issue/PROJ-123/comment"
+```
+
+**ADF Node Reference:**
+
+| Node | Usage |
+|------|-------|
+| `heading` | `{"type": "heading", "attrs": {"level": 2}, "content": [...]}` |
+| `paragraph` | `{"type": "paragraph", "content": [...]}` |
+| `text` | `{"type": "text", "text": "...", "marks": [...]}` |
+| `table` | `{"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [tableRow...]}` |
+| `tableRow` | `{"type": "tableRow", "content": [tableHeader|tableCell...]}` |
+| `tableHeader` | `{"type": "tableHeader", "content": [paragraph]}` |
+| `tableCell` | `{"type": "tableCell", "content": [paragraph]}` |
+| `codeBlock` | `{"type": "codeBlock", "attrs": {"language": "go"}, "content": [{"type": "text", "text": "code"}]}` |
+| `orderedList` | `{"type": "orderedList", "attrs": {"order": 1}, "content": [listItem...]}` |
+| `bulletList` | `{"type": "bulletList", "content": [listItem...]}` |
+| `listItem` | `{"type": "listItem", "content": [paragraph]}` |
+
+**Text Marks:**
+
+| Mark | Example |
+|------|---------|
+| Bold | `"marks": [{"type": "strong"}]` |
+| Italic | `"marks": [{"type": "em"}]` |
+| Code | `"marks": [{"type": "code"}]` |
+| Color | `"marks": [{"type": "textColor", "attrs": {"color": "#bf2600"}}]` |
+| Link | `"marks": [{"type": "link", "attrs": {"href": "https://..."}}]` |
+
+**When to use which:**
+- Simple one-liner comments → `jira-cli add-comment --comment "text"`
+- Comments with tables, headings, formatting → REST API with ADF JSON
+- Updating issue description → `curl -X PUT .../rest/api/3/issue/PROJ-123` with `{"fields": {"description": {ADF doc}}}`
+- Deleting a comment → `curl -X DELETE .../rest/api/3/issue/PROJ-123/comment/{commentId}`
+
 ### Relationships & Links
 
 ```bash
