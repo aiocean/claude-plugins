@@ -105,7 +105,7 @@ print(f"Need translation: {len(items_to_translate)}")
 2. Sau khi SKILL.md của `aio-epub-vn-style` được load, đọc các reference files bằng cách resolve path:
 
 ```bash
-REFS=$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-epub-translate/*/skills/aio-epub-vn-style/references 2>/dev/null | sort -V | tail -1)
+REFS="${CLAUDE_PLUGIN_ROOT}/skills/aio-epub-vn-style/references"
 echo "$REFS"
 ```
 

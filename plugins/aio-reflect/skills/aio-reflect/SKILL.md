@@ -8,7 +8,7 @@ context: fork
 
 ## Environment
 - bun: !`which bun 2>/dev/null || echo "NOT INSTALLED"`
-- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-reflect/*/skills/aio-reflect/scripts 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-reflect/scripts"`
 - Memory dir: !`[ -d "$HOME/.claude/aio-reflect/memory" ] && echo "$HOME/.claude/aio-reflect/memory" || echo "NOT CREATED (will be created on first run)"`
 
 **Purpose**: Turn transient learnings into permanent improvements. What separates growth from stagnation is the ability to learn from experience.
@@ -24,7 +24,7 @@ context: fork
 ## Quick Start
 
 ```bash
-RF="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-reflect/*/skills/aio-reflect/scripts 2>/dev/null | sort -V | tail -1)"
+RF="${CLAUDE_PLUGIN_ROOT}/skills/aio-reflect/scripts"
 MEMORY="$HOME/.claude/aio-reflect/memory"
 mkdir -p "$MEMORY/diary" "$MEMORY/reflections"
 ```

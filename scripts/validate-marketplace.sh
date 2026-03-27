@@ -10,7 +10,7 @@
 #   4. Scripts referenced in skills actually exist
 #   5. Plugin is registered in root .claude-plugin/marketplace.json
 #   6. Version in marketplace.json matches version in plugin.json
-#   7. SKILL.md resolver block uses correct marketplace path pattern when scripts exist
+#   7. SKILL.md resolver block uses ${CLAUDE_PLUGIN_ROOT} (preferred) or legacy cache path when scripts exist
 
 set -euo pipefail
 
@@ -302,36 +302,31 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
     fi
 
     # -------------------------------------------------------
-    # Check 7: Resolver block uses correct marketplace path pattern
+    # Check 7: Resolver block uses CLAUDE_PLUGIN_ROOT path pattern
     # -------------------------------------------------------
     if $has_scripts; then
-      # Look for the resolver pattern in SKILL.md
-      # Expected: ~/.claude/plugins/cache/aiocean-plugins/{plugin-name}/*/skills/{skill-name}
-      resolver_line="$(grep 'claude/plugins/cache/aiocean-plugins/' "$skill_md" 2>/dev/null | head -1 || true)"
+      # Preferred: ${CLAUDE_PLUGIN_ROOT}/skills/{skill-name}/...
+      # Legacy:    ~/.claude/plugins/cache/aiocean-plugins/{plugin-name}/*/skills/{skill-name}/...
+      new_resolver="$(grep 'CLAUDE_PLUGIN_ROOT' "$skill_md" 2>/dev/null | head -1 || true)"
+      legacy_resolver="$(grep 'claude/plugins/cache/aiocean-plugins/' "$skill_md" 2>/dev/null | head -1 || true)"
 
-      if [ -n "$resolver_line" ]; then
-        # Check it references the correct plugin name
-        if echo "$resolver_line" | grep -q "aiocean-plugins/${PLUGIN_NAME}/"; then
-          pass "Resolver references correct plugin name"
-        else
-          fail "Resolver does not reference plugin name '$PLUGIN_NAME'"
-        fi
-
+      if [ -n "$new_resolver" ]; then
         # Check it references the correct skill name
-        if echo "$resolver_line" | grep -q "skills/${skill_name}"; then
-          pass "Resolver references correct skill name"
+        if echo "$new_resolver" | grep -q "skills/${skill_name}"; then
+          pass "Resolver uses CLAUDE_PLUGIN_ROOT with correct skill name"
         else
-          fail "Resolver does not reference skill name '$skill_name'"
+          fail "Resolver uses CLAUDE_PLUGIN_ROOT but does not reference skill name '$skill_name'"
         fi
-
-        # Check it uses the wildcard version pattern /*/
-        if echo "$resolver_line" | grep -qE "/${PLUGIN_NAME}/\\\*/skills/|/${PLUGIN_NAME}/\*/skills/"; then
-          pass "Resolver uses version wildcard pattern"
+      elif [ -n "$legacy_resolver" ]; then
+        warn "Resolver uses legacy cache path — migrate to \${CLAUDE_PLUGIN_ROOT}/skills/${skill_name}/..."
+        # Still validate the legacy pattern
+        if echo "$legacy_resolver" | grep -q "skills/${skill_name}"; then
+          pass "Legacy resolver references correct skill name"
         else
-          fail "Resolver missing version wildcard (/*/) in path"
+          fail "Legacy resolver does not reference skill name '$skill_name'"
         fi
       else
-        fail "Has scripts but SKILL.md lacks resolver block (~/.claude/plugins/cache/aiocean-plugins/...)"
+        fail "Has scripts but SKILL.md lacks resolver block (\${CLAUDE_PLUGIN_ROOT} or legacy cache path)"
       fi
     fi
 

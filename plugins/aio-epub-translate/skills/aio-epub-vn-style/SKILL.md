@@ -65,7 +65,7 @@ Dựa trên MQM (Multidimensional Quality Metrics) + ATA, điều chỉnh cho EN
 **Resolve path** để đọc reference files bằng Read tool:
 
 ```bash
-REFS=$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-epub-translate/*/skills/aio-epub-vn-style/references 2>/dev/null | sort -V | tail -1)
+REFS="${CLAUDE_PLUGIN_ROOT}/skills/aio-epub-vn-style/references"
 echo "$REFS"
 ```
 

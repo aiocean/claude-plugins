@@ -9,7 +9,7 @@ Manages skills, agents, and provides usage analytics to optimize Claude Code wor
 
 ## Environment
 
-- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-claude-manager/*/skills/aio-claude-manager 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-claude-manager"`
 
 Set `CM` to the Scripts path shown above.
 

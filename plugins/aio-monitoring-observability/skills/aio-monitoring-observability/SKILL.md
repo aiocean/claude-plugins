@@ -4,7 +4,7 @@ description: Design metrics, alerts, dashboards, and SLOs using monitoring best 
 ---
 
 ```bash
-SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-monitoring-observability/*/skills/aio-monitoring-observability/scripts 2>/dev/null | sort -V | tail -1)"
+SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/aio-monitoring-observability/scripts"
 ```
 
 ## Environment

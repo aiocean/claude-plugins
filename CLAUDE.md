@@ -29,12 +29,12 @@ plugins/{plugin-name}/
 - Plugin folder name MUST match `name` in `plugin.json`
 - Skill folder name typically matches plugin name
 - SKILL.md frontmatter requires `name` and `description` fields — description must include trigger words/phrases for skill discovery
-- **Script path for marketplace plugins**: `~/.claude/plugins/cache/aiocean-plugins/{plugin-name}/*/skills/{skill-name}/scripts/` (version directory varies)
-- Every SKILL.md with scripts MUST start with a resolver block:
+- **Script path**: Use `${CLAUDE_PLUGIN_ROOT}` — the official Claude variable that resolves to the plugin's root directory at runtime.
+- Every SKILL.md with scripts MUST use `${CLAUDE_PLUGIN_ROOT}` to locate scripts/references:
   ```bash
-  SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/{plugin-name}/*/skills/{skill-name}/scripts 2>/dev/null | sort -V | tail -1)"
+  SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/{skill-name}/scripts"
   ```
-  Then reference scripts as `$SCRIPTS/script-name`. NEVER use `~/.claude/skills/` — that path does not exist for marketplace plugins.
+  Then reference scripts as `$SCRIPTS/script-name`. NEVER use `~/.claude/skills/` or hardcoded cache paths.
 - Script naming: prefix with skill name (e.g., `worktree-create.sh`, `worktree-sync.sh`)
 - Any change inside `plugins/{plugin-name}/` MUST include a version bump in `plugins/{plugin-name}/.claude-plugin/plugin.json`
   - Use semantic versioning:

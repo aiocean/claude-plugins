@@ -8,12 +8,12 @@ description: Extract cookies from local browsers (Chrome/Firefox/Safari) and exp
 ## Environment
 - python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
 - rookiepy: !`python3 -c "import rookiepy" 2>/dev/null && echo "installed" || echo "NOT INSTALLED — pip3 install -U rookiepy"`
-- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-browser-cookie/*/skills/aio-browser-cookie 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-browser-cookie"`
 
 Use this skill to extract cookies from local browsers with `rookiepy`, export them as JSON or Netscape, or replay an authenticated request with the extracted session.
 
 ```bash
-BCOOKIE="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-browser-cookie/*/skills/aio-browser-cookie 2>/dev/null | sort -V | tail -1)"
+BCOOKIE="${CLAUDE_PLUGIN_ROOT}/skills/aio-browser-cookie"
 ```
 
 Then run:

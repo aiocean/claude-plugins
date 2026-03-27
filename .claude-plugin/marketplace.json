@@ -8,7 +8,7 @@
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
       "description": "EPUB book translation via ConnectRPC API. Seven skills: aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API), aio-epub-quality (quality detection & re-translation), aio-epub-manage (browse, progress, guidelines), aio-epub-upload (upload & prepare), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
-      "version": "3.2.7",
+      "version": "3.2.9",
       "author": {
         "name": "aiocean"
       }
@@ -17,7 +17,7 @@
       "name": "aio-remove-bg",
       "source": "./plugins/aio-remove-bg",
       "description": "Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods.",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "author": {
         "name": "aiocean"
       },
@@ -27,7 +27,7 @@
       "name": "aio-worktree",
       "source": "./plugins/aio-worktree",
       "description": "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "author": {
         "name": "aiocean"
       }
@@ -36,7 +36,7 @@
       "name": "aio-youtube",
       "source": "./plugins/aio-youtube",
       "description": "Search YouTube and extract video transcripts using yt-dlp.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "author": {
         "name": "aiocean"
       }
@@ -54,7 +54,7 @@
       "name": "aio-claude-manager",
       "source": "./plugins/aio-claude-manager",
       "description": "Enable/disable skills based on project context. Reduce skill clutter for specific project types.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "author": {
         "name": "aiocean"
       }
@@ -81,7 +81,7 @@
       "name": "aio-mental-models",
       "source": "./plugins/aio-mental-models",
       "description": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "author": {
         "name": "aiocean"
       }
@@ -90,7 +90,7 @@
       "name": "aio-reflect",
       "source": "./plugins/aio-reflect",
       "description": "Learn from Claude Code sessions to extract reusable knowledge. Deep JSONL parsing extracts token usage, cost, work modes, subagents, tasks, compaction, session chains, and file operations for comprehensive reflection.",
-      "version": "2.2.1",
+      "version": "2.2.2",
       "author": {
         "name": "aiocean"
       }
@@ -99,7 +99,7 @@
       "name": "aio-monitoring-observability",
       "source": "./plugins/aio-monitoring-observability",
       "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "author": {
         "name": "aiocean"
       }
@@ -108,7 +108,7 @@
       "name": "aio-ios-device-debug",
       "source": "./plugins/aio-ios-device-debug",
       "description": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "author": {
         "name": "aiocean"
       }
@@ -117,7 +117,7 @@
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
       "description": "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interactive HTML viewers.",
-      "version": "5.1.3",
+      "version": "5.1.4",
       "author": {
         "name": "aiocean"
       }
@@ -198,7 +198,7 @@
       "name": "aio-feedback",
       "source": "./plugins/aio-feedback",
       "description": "Submit feedback, bug reports, feature requests, and plugin requests for aiocean plugins directly from Claude Code via GitHub Issues.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "author": {
         "name": "aiocean"
       }
@@ -207,7 +207,7 @@
       "name": "aio-tui",
       "source": "./plugins/aio-tui",
       "description": "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hover, delta tracking), and critical gotchas.",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "author": {
         "name": "aiocean"
       }
@@ -297,7 +297,7 @@
       "name": "aio-browser-cookie",
       "source": "./plugins/aio-browser-cookie",
       "description": "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports.",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "author": {
         "name": "aiocean"
       }
@@ -306,7 +306,7 @@
       "name": "aio-uiux",
       "source": "./plugins/aio-uiux",
       "description": "Comprehensive UI/UX design knowledge base and advisor. 100+ topics covering visual design, typography, color theory, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, and responsive design. Includes semantic search with local embeddings.",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "author": {
         "name": "aiocean"
       }
