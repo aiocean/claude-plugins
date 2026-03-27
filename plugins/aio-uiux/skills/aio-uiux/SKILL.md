@@ -28,7 +28,7 @@ If the user's message already contains enough context, proceed directly to Step 
 **First, run semantic search** with the user's design challenge to find the most relevant topics:
 
 ```bash
-UX="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-uiux/*/skills/aio-uiux/scripts 2>/dev/null | sort -V | tail -1)"
+UX="${CLAUDE_PLUGIN_ROOT}/skills/aio-uiux/scripts"
 npx tsx "$UX/search-uiux.ts" "<user's design challenge>" --top 5 --json
 ```
 
@@ -91,7 +91,7 @@ Verify the recommendation against:
 
 Before calling any script, resolve the scripts directory (version may vary):
 ```bash
-UX="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-uiux/*/skills/aio-uiux/scripts 2>/dev/null | sort -V | tail -1)"
+UX="${CLAUDE_PLUGIN_ROOT}/skills/aio-uiux/scripts"
 ```
 
 ### List Topics

@@ -7,7 +7,7 @@ description: Build interactive terminal UIs with Go Bubbletea and lipgloss — a
 - go: !`go version 2>/dev/null || echo "NOT INSTALLED"`
 
 ```bash
-REFS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-tui/*/skills/aio-tui/references 2>/dev/null | sort -V | tail -1)"
+REFS="${CLAUDE_PLUGIN_ROOT}/skills/aio-tui/references"
 ```
 
 # Bubbletea TUI Development Guide

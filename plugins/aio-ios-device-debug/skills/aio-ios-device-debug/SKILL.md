@@ -4,7 +4,7 @@ description: Debug iOS apps on physical devices — build, install, capture logs
 ---
 
 ```bash
-SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-ios-device-debug/*/skills/aio-ios-device-debug/scripts 2>/dev/null | sort -V | tail -1)"
+SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/aio-ios-device-debug/scripts"
 ```
 
 # iOS Device Debug

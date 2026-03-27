@@ -6,7 +6,7 @@ agent: oh-my-claudecode:architect
 ---
 
 ```bash
-SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-codebase-oracle/*/skills/doc-writer/scripts 2>/dev/null | sort -V | tail -1)"
+SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/doc-writer/scripts"
 ```
 
 ## Environment

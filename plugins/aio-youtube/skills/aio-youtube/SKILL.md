@@ -9,10 +9,10 @@ description: Search YouTube and extract video transcripts via yt-dlp. Triggers: 
 - yt-dlp: !`which yt-dlp 2>/dev/null || echo "NOT INSTALLED"`
 - jq: !`which jq 2>/dev/null || echo "NOT INSTALLED"`
 - curl: !`which curl 2>/dev/null || echo "NOT INSTALLED"`
-- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-youtube/*/skills/aio-youtube/scripts 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-youtube/scripts"`
 
 ```bash
-YT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-youtube/*/skills/aio-youtube/scripts 2>/dev/null | sort -V | tail -1)"
+YT="${CLAUDE_PLUGIN_ROOT}/skills/aio-youtube/scripts"
 ```
 
 Then call scripts as: `$YT/yt-search "query"`
@@ -33,7 +33,7 @@ Then call scripts as: `$YT/yt-search "query"`
 
 ```bash
 # Resolve scripts path first
-YT="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-youtube/*/skills/aio-youtube/scripts | sort -V | tail -1)"
+YT="${CLAUDE_PLUGIN_ROOT}/skills/aio-youtube/scripts"
 
 # Search
 $YT/yt-search "react hooks tutorial" 10

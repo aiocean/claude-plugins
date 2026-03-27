@@ -1,7 +1,7 @@
 {
   "name": "aio-tui",
   "description": "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hover, delta tracking), and critical gotchas.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": {
     "name": "aiocean"
   }

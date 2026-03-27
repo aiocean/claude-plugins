@@ -74,7 +74,7 @@ Pick one model that argues against the recommendation. Apply it honestly:
 
 Before calling any script, resolve the scripts directory (version may vary):
 ```bash
-MM="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-mental-models/*/skills/aio-mental-models/scripts 2>/dev/null | sort -V | tail -1)"
+MM="${CLAUDE_PLUGIN_ROOT}/skills/aio-mental-models/scripts"
 ```
 
 ```bash

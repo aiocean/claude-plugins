@@ -10,7 +10,7 @@ Manages git worktrees for parallel development workflows.
 ## Environment
 
 - git: !`which git 2>/dev/null || echo "NOT INSTALLED"`
-- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-worktree/*/skills/aio-worktree 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"`
 
 Set `WT` to the Scripts path shown above. Then call scripts as `$WT/script-name`.
 

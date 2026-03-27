@@ -68,7 +68,7 @@ for issue in report.get("issues", []):
 **Nạp kiến thức đánh giá** — resolve path đến references của `aio-epub-vn-style`:
 
 ```bash
-REFS=$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-epub-translate/*/skills/aio-epub-vn-style/references 2>/dev/null | sort -V | tail -1)
+REFS="${CLAUDE_PLUGIN_ROOT}/skills/aio-epub-vn-style/references"
 echo "$REFS"
 ```
 

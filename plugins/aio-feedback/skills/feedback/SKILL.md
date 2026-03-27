@@ -8,12 +8,12 @@ description: Submit bug reports, feature requests, and plugin requests to aiocea
 ## Environment
 - gh: !`which gh 2>/dev/null || echo "NOT INSTALLED — brew install gh"`
 - gh auth: !`gh auth status 2>/dev/null | grep -q "Logged in" && echo "authenticated" || echo "NOT AUTHENTICATED — run: gh auth login"`
-- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-feedback/*/skills/feedback/scripts 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/feedback/scripts"`
 
 Submit bug reports, feature requests, and plugin requests directly to the aiocean/claude-plugins repository without leaving Claude Code.
 
 ```bash
-SCRIPTS="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-feedback/*/skills/feedback/scripts 2>/dev/null | sort -V | tail -1)"
+SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/feedback/scripts"
 ```
 
 ## Workflow

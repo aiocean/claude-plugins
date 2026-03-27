@@ -11,12 +11,12 @@ description: Remove image backgrounds using threshold (fast) or rembg AI (comple
 - python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
 - rembg: !`python3 -c "import rembg" 2>/dev/null && echo "installed" || echo "NOT INSTALLED"`
 - opencv: !`python3 -c "import cv2" 2>/dev/null && echo "installed" || echo "NOT INSTALLED"`
-- Scripts: !`ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-remove-bg/*/skills/aio-remove-bg 2>/dev/null | sort -V | tail -1 || echo "NOT FOUND"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-remove-bg"`
 
 Remove image backgrounds using threshold (fast, for mono/simple images) or rembg AI (complex images). Automatically trims transparent edges.
 
 ```bash
-RB="$(ls -d ~/.claude/plugins/cache/aiocean-plugins/aio-remove-bg/*/skills/aio-remove-bg 2>/dev/null | sort -V | tail -1)"
+RB="${CLAUDE_PLUGIN_ROOT}/skills/aio-remove-bg"
 ```
 
 ## Quick start
