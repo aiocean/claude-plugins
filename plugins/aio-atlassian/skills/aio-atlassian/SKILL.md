@@ -82,86 +82,30 @@ jira-cli get-comments --issue-key PROJ-123 --env .env
 jira-cli add-worklog --issue-key PROJ-123 --time-spent "2h 30m" --env .env
 ```
 
-#### Rich Comments with Tables/Formatting (ADF) — IMPORTANT
+#### Rich Formatting — Markdown Supported
 
-`jira-cli add-comment --comment` only supports **plain text**. It does NOT render wiki markup (h2., ||header||, {code}, etc.) — those will appear as literal text in Jira.
-
-For comments with tables, headings, bold, code blocks, or colored text, **use the Jira REST API v3 directly** with ADF (Atlassian Document Format):
+`jira-cli` automatically converts **Markdown to ADF** (Atlassian Document Format) for all text fields — comments, descriptions, and issue updates. Just write standard Markdown:
 
 ```bash
-# 1. Load credentials
-source /path/to/.env
+# Headings, bold, lists, code blocks — all work
+jira-cli add-comment --issue-key PROJ-123 --comment "## Investigation Results
 
-# 2. Write ADF JSON to a temp file
-cat > /tmp/jira_comment.json << 'ENDJSON'
-{
-  "body": {
-    "version": 1,
-    "type": "doc",
-    "content": [
-      {
-        "type": "heading",
-        "attrs": {"level": 2},
-        "content": [{"type": "text", "text": "Investigation Results"}]
-      },
-      {
-        "type": "paragraph",
-        "content": [
-          {"type": "text", "text": "Found "},
-          {"type": "text", "text": "3 issues", "marks": [{"type": "strong"}]},
-          {"type": "text", "text": " across all shops."}
-        ]
-      },
-      {
-        "type": "table",
-        "attrs": {"isNumberColumnEnabled": false, "layout": "default"},
-        "content": [
-          {
-            "type": "tableRow",
-            "content": [
-              {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Shop"}]}]},
-              {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Revenue"}]}]}
-            ]
-          },
-          {
-            "type": "tableRow",
-            "content": [
-              {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Shop A"}]}]},
-              {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "$1,234.56"}]}]}
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}
-ENDJSON
+Found **3 issues** across all shops.
 
-# 3. Post via REST API
-curl -s -X POST \
-  -u "$ATLASSIAN_EMAIL:$ATLASSIAN_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d @/tmp/jira_comment.json \
-  "$ATLASSIAN_HOST/rest/api/3/issue/PROJ-123/comment"
+- Shop A: $1,234.56
+- Shop B: $2,345.67
+
+\`\`\`go
+func main() { fmt.Println(\"hello\") }
+\`\`\`" --env .env
 ```
 
-**ADF Node Reference:**
+> **NEVER use Jira wiki markup** (`h2.`, `||header||`, `{code}`, `*bold*`, `#` lists).
+> It will appear as **literal ugly text**. Always use Markdown — jira-cli handles conversion.
 
-| Node | Usage |
-|------|-------|
-| `heading` | `{"type": "heading", "attrs": {"level": 2}, "content": [...]}` |
-| `paragraph` | `{"type": "paragraph", "content": [...]}` |
-| `text` | `{"type": "text", "text": "...", "marks": [...]}` |
-| `table` | `{"type": "table", "attrs": {"isNumberColumnEnabled": false, "layout": "default"}, "content": [tableRow...]}` |
-| `tableRow` | `{"type": "tableRow", "content": [tableHeader|tableCell...]}` |
-| `tableHeader` | `{"type": "tableHeader", "content": [paragraph]}` |
-| `tableCell` | `{"type": "tableCell", "content": [paragraph]}` |
-| `codeBlock` | `{"type": "codeBlock", "attrs": {"language": "go"}, "content": [{"type": "text", "text": "code"}]}` |
-| `orderedList` | `{"type": "orderedList", "attrs": {"order": 1}, "content": [listItem...]}` |
-| `bulletList` | `{"type": "bulletList", "content": [listItem...]}` |
-| `listItem` | `{"type": "listItem", "content": [paragraph]}` |
+**Supported Markdown elements:** headings, bold, italic, inline code, code blocks (with language), bullet lists, ordered lists, links, strikethrough, blockquotes, horizontal rules.
 
-**Text Marks:**
+**Text Marks (for REST API direct usage):**
 
 | Mark | Example |
 |------|---------|
@@ -172,9 +116,8 @@ curl -s -X POST \
 | Link | `"marks": [{"type": "link", "attrs": {"href": "https://..."}}]` |
 
 **When to use which:**
-- Simple one-liner comments → `jira-cli add-comment --comment "text"`
-- Comments with tables, headings, formatting → REST API with ADF JSON
-- Updating issue description → `curl -X PUT .../rest/api/3/issue/PROJ-123` with `{"fields": {"description": {ADF doc}}}`
+- All comments (simple or rich) → `jira-cli add-comment --comment "markdown text"` (auto-converts to ADF)
+- Issue description → `jira-cli create-issue --description "markdown"` or `jira-cli update-issue --description "markdown"`
 - Deleting a comment → `curl -X DELETE .../rest/api/3/issue/PROJ-123/comment/{commentId}`
 
 ### Relationships & Links
