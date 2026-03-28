@@ -84,32 +84,27 @@ MCP Resources available via `gitnexus://` URI scheme:
 ### Analyze Codebase
 
 ```bash
-# Standard analysis (skips if git commit unchanged)
-npx gitnexus analyze
-
-# Force full re-index
-npx gitnexus analyze --force
-
-# With embeddings (slower, better semantic search)
+# Standard analysis with embeddings (skips if git commit unchanged)
 npx gitnexus analyze --embeddings
 
-# Skip embeddings (faster, BM25 search still works)
-npx gitnexus analyze --skip-embeddings
+# Force full re-index with embeddings
+npx gitnexus analyze --embeddings --force
 
 # With generated skill files (Leiden clustering)
-npx gitnexus analyze --skills
+npx gitnexus analyze --embeddings --skills
 
 # Full analysis: embeddings + skills + verbose
 npx gitnexus analyze --embeddings --skills --verbose
 
 # Analyze a specific path
-npx gitnexus analyze /path/to/repo
+npx gitnexus analyze --embeddings /path/to/repo
 ```
 
+**IMPORTANT:** Always use `--embeddings`. Semantic search is essential for meaningful results — BM25-only mode misses concept-level matches.
+
 **Flags explained:**
+- `--embeddings`: **(always use)** Generate 384-dim vectors via snowflake-arctic-embed-xs (local, no API key). Enables semantic search in hybrid mode
 - `--force`: Force full re-index, ignoring commit check
-- `--embeddings`: Generate 384-dim vectors via snowflake-arctic-embed-xs (local, no API key). Enables semantic search in hybrid mode
-- `--skip-embeddings`: Skip embedding generation. BM25 full-text search still works
 - `--skills`: Generate repo-specific skill files via Leiden clustering to `.claude/skills/generated/`
 - `--verbose`: Show skipped files during analysis
 
@@ -118,11 +113,11 @@ npx gitnexus analyze /path/to/repo
 ### Update Index (After Code Changes)
 
 ```bash
-# Re-analyze (auto-detects changes via git commit hash)
-npx gitnexus analyze
+# Re-analyze with embeddings (auto-detects changes via git commit hash)
+npx gitnexus analyze --embeddings
 
-# Force full rebuild
-npx gitnexus analyze --force
+# Force full rebuild with embeddings
+npx gitnexus analyze --embeddings --force
 ```
 
 ### Clean / Delete Index
@@ -186,13 +181,7 @@ CLAUDE.md                   # Claude-specific context
 
 Embeddings are entirely local. No cloud service, no API key needed.
 
-**When to use `--embeddings`:**
-- First analysis of a new codebase (for full semantic search quality)
-- When you need concept-level search ("find auth patterns", "error handling strategy")
-
-**When to skip embeddings:**
-- Quick re-index after small changes (BM25 still works)
-- Large codebases where speed matters more than search quality
+**Always use `--embeddings`** — semantic search is the primary value of GitNexus. Without embeddings, you lose concept-level search ("find auth patterns", "error handling strategy") and hybrid ranking quality degrades significantly.
 
 ### Supported Languages
 
@@ -202,7 +191,7 @@ TypeScript, JavaScript, Python, Rust, Go, Java, C, C++, C#, Ruby, PHP, Swift, Ko
 
 After running GitNexus, use the doc-writer skill to write documentation:
 
-1. `npx gitnexus analyze --embeddings` — builds knowledge graph
+1. `npx gitnexus analyze --embeddings` — builds knowledge graph (always with embeddings)
 2. `/aio-codebase-oracle:doc-writer` — Oracle reads the graph and writes all docs
 
 GitNexus provides the **knowledge graph** (structure, dependencies, clusters, flows, search). Oracle provides the **qualitative analysis** (design rationale, failure modes, decision guidance).
@@ -215,8 +204,9 @@ GitNexus provides the **knowledge graph** (structure, dependencies, clusters, fl
 | Analysis seems stuck | Large codebases take time. GitNexus auto-allocates 8GB heap. Use `--verbose` to monitor progress |
 | `gitnexus status` shows stale | Run `npx gitnexus analyze` to re-index |
 | MCP tools not showing up | Re-run `npx gitnexus setup` or manually add MCP server |
-| Embedding generation slow | Skip with `--skip-embeddings` for faster analysis. BM25 search still works |
+| Embedding generation slow | Normal for first run; subsequent runs are faster. Do not skip embeddings |
 | Want to start fresh | `npx gitnexus clean` then `npx gitnexus analyze --embeddings` |
+| Embedding generation slow | Normal for first run. Always keep `--embeddings` — the search quality tradeoff is not worth it |
 | Index exists but queries empty | Git commit unchanged — use `--force` to rebuild |
 | `.gitnexus/` in git | GitNexus auto-adds to `.gitignore`. If not, add it manually |
 | Multiple repos, single MCP | GitNexus MCP server auto-routes to all indexed repos via `~/.gitnexus/registry.json` |

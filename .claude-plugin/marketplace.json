@@ -117,7 +117,7 @@
       "name": "aio-codebase-oracle",
       "source": "./plugins/aio-codebase-oracle",
       "description": "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interactive HTML viewers.",
-      "version": "5.1.4",
+      "version": "5.1.5",
       "author": {
         "name": "aiocean"
       }
@@ -135,7 +135,7 @@
       "name": "aio-atlassian",
       "source": "./plugins/aio-atlassian",
       "description": "Atlassian CLI tools for Jira and Confluence. Manage Jira issues, sprints, workflows, and Confluence pages via CLI.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "aiocean"
       }
