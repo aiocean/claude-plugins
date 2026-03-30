@@ -28,6 +28,7 @@ import sys
 import threading
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from urllib.parse import urlparse, parse_qs
 
 DEFAULT_PORT = 9223
@@ -110,6 +111,13 @@ class CDPConnection:
                         self._events[sid].append(data)
             except Exception:
                 break
+        # WS died — mark disconnected so ensure_connected() will reconnect
+        print("[relay] WebSocket recv loop ended, marking disconnected.", file=sys.stderr)
+        self.close()
+        # Wake up any pending requests so they don't hang forever
+        for mid, (evt, _) in list(self._pending.items()):
+            self._pending[mid] = (evt, {"error": "WebSocket disconnected"})
+            evt.set()
 
     def drain_events(self, session_id=None):
         key = session_id or "__global__"
@@ -290,7 +298,10 @@ def main():
     signal.signal(signal.SIGTERM, cleanup)
     signal.signal(signal.SIGINT, cleanup)
 
-    server = HTTPServer(("127.0.0.1", args.port), RelayHandler)
+    class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+        daemon_threads = True
+
+    server = ThreadingHTTPServer(("127.0.0.1", args.port), RelayHandler)
     print(f"[relay] Listening on 127.0.0.1:{args.port} (idle timeout: {args.idle_timeout}s)", file=sys.stderr)
 
     watchdog = threading.Thread(target=_idle_watchdog, args=(server,), daemon=True)

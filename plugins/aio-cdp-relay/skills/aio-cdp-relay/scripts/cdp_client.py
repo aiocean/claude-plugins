@@ -41,6 +41,7 @@ import urllib.request
 DEFAULT_PORT = 9223
 PID_FILE = "/tmp/cdp_relay.pid"
 RELAY_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cdp_relay.py")
+RELAY_BINARY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cdp-relay")
 
 
 class CDPClient:
@@ -75,8 +76,13 @@ class CDPClient:
             return False
 
     def _start_relay(self):
+        # Try Go binary first, fall back to Python
+        if os.path.isfile(RELAY_BINARY) and os.access(RELAY_BINARY, os.X_OK):
+            cmd = [RELAY_BINARY, "--port", str(self.port)]
+        else:
+            cmd = [sys.executable, RELAY_SCRIPT, "--port", str(self.port)]
         subprocess.Popen(
-            [sys.executable, RELAY_SCRIPT, "--port", str(self.port)],
+            cmd,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             start_new_session=True,
