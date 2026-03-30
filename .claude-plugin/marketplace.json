@@ -303,6 +303,15 @@
       }
     },
     {
+      "name": "aio-cdp-relay",
+      "source": "./plugins/aio-cdp-relay",
+      "description": "Persistent Chrome DevTools Protocol relay for browser automation via scripts — no MCP tool calls, no approval prompts.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
       "name": "aio-uiux",
       "source": "./plugins/aio-uiux",
       "description": "Comprehensive UI/UX design knowledge base and advisor. 100+ topics covering visual design, typography, color theory, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, and responsive design. Includes semantic search with local embeddings.",

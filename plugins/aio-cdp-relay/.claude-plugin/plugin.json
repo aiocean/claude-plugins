@@ -1,0 +1,8 @@
+{
+  "name": "aio-cdp-relay",
+  "description": "Persistent Chrome DevTools Protocol relay for browser automation via scripts — no MCP tool calls, no approval prompts.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}
