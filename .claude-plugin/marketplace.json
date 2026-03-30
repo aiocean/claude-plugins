@@ -7,8 +7,8 @@
     {
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
-      "description": "EPUB book translation via ConnectRPC API. Seven skills: aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API), aio-epub-quality (quality detection & re-translation), aio-epub-manage (browse, progress, guidelines), aio-epub-upload (upload & prepare), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
-      "version": "3.2.9",
+      "description": "EPUB book translation via ConnectRPC API. Nine skills: aio-epub-analyze (pre-translation intelligence — style, characters, glossary), aio-epub-review (deep literary review with Tín-Đạt-Nhã scoring), aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API, edit & update), aio-epub-quality (mechanical quality detection & re-translation), aio-epub-manage (browse, progress, guidelines, community, fork, reset, usage stats), aio-epub-upload (upload, prepare, unmark & change tags), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
+      "version": "3.4.0",
       "author": {
         "name": "aiocean"
       }

@@ -188,6 +188,44 @@ for fp in progress["progress"].get("fileProgress", []):
 
 **Workflow**: `aio-epub-setup` → `aio-epub-upload` → **`aio-epub-translate`** → `aio-epub-quality` → `aio-epub-export`
 
+### 7. Sửa bản dịch cụ thể
+
+Khi cần sửa 1 bản dịch đã submit (không cần dịch lại cả batch):
+
+```python
+result = api("EditTranslation", {
+    "bookId": BOOK_ID,
+    "filePath": FILE_PATH,
+    "contentId": CONTENT_ID,
+    "translatedContent": "Nội dung đã sửa..."
+})
+print(result["message"])
+```
+
+### 8. Cập nhật batch từ JSON
+
+Khi có sẵn JSON chứa nhiều bản dịch cần cập nhật (thay thế translations hiện có):
+
+```python
+result = api("UpdatePageJson", {
+    "bookId": BOOK_ID,
+    "filePath": FILE_PATH,
+    "contents": [
+        {
+            "contentId": "id-1",
+            "translations": [{"contentText": "Bản dịch mới 1"}]
+        },
+        {
+            "contentId": "id-2",
+            "translations": [{"contentText": "Bản dịch mới 2"}]
+        }
+    ]
+})
+print(result["message"])
+```
+
+> `UpdatePageJson` khác `BatchCreateManualTranslation`: UpdatePageJson **thay thế** translations hiện có, BatchCreate **thêm mới**.
+
 ## Endpoints Summary
 
 | API | Mục đích |
@@ -195,6 +233,8 @@ for fp in progress["progress"].get("fileProgress", []):
 | `GetChapterContext` | Lấy guideline + glossary + previous chapter summary |
 | `GetPageJson` | Lấy nội dung cần dịch |
 | `BatchCreateManualTranslation` | Submit batch translations (1 call) |
+| `EditTranslation` | Sửa 1 bản dịch cụ thể |
+| `UpdatePageJson` | Cập nhật batch translations (thay thế) |
 | `GetTranslationProgress` | Kiểm tra tiến độ |
 | `GetGuideline` | Lấy guideline riêng |
 | `GetChapterGuideline` | Lấy chapter guideline |

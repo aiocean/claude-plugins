@@ -1,6 +1,6 @@
 ---
 name: aio-epub-manage
-description: Browse books, check translation progress, manage guidelines, and view TOC. Triggers: "list books", "liệt kê sách", "check progress", "xem tiến độ", "update guideline", "cập nhật guideline", "book info", "thông tin sách".
+description: Browse books, check translation progress, manage guidelines, view TOC, fork books, publish to community, reset chapters, and view usage stats. Triggers: "list books", "liệt kê sách", "check progress", "xem tiến độ", "update guideline", "cập nhật guideline", "book info", "thông tin sách", "fork book", "nhân bản sách", "publish book", "đăng sách", "community books", "sách cộng đồng", "reset book", "reset chapter", "usage stats", "thống kê".
 ---
 
 # EPUB Manage — Book Management
@@ -174,7 +174,69 @@ result = api("DeleteBook", {"bookId": BOOK_ID})
 print(result["message"])
 ```
 
-### Reset Chapter (remove translations, keep markings)
+### Fork Book
+
+Nhân bản sách để tạo bản dịch riêng mà không ảnh hưởng bản gốc:
+
+```python
+result = api("ForkBook", {
+    "bookId": BOOK_ID,
+    "title": "My Translation of Book Title"
+})
+new_book_id = result["bookId"]
+print(f"Forked: {new_book_id}")
+```
+
+### Publish / Unpublish Book
+
+Đăng sách lên community hoặc gỡ xuống:
+
+```python
+# Publish
+result = api("PublishBook", {"bookId": BOOK_ID})
+print(result["message"])
+
+# Unpublish
+result = api("UnpublishBook", {"bookId": BOOK_ID})
+print(result["message"])
+```
+
+### List Community Books
+
+Duyệt sách đã được cộng đồng đăng:
+
+```python
+books = api("ListCommunityBooks", {"pageSize": 50, "pageNumber": 1})
+for book in books.get("books", []):
+    print(f"  {book['title']} — {book['author']}")
+```
+
+### Reset Book
+
+Reset toàn bộ sách về trạng thái gốc (xóa folder unpacked, giải nén lại, prepare lại):
+
+```python
+result = api("ResetBook", {"bookId": BOOK_ID})
+print(result["message"])
+```
+
+> **Cẩn thận**: Mất toàn bộ bản dịch và markings. Dùng khi sách bị lỗi nghiêm trọng.
+
+### Reset Chapter
+
+Reset 1 chapter — xóa bản dịch VÀ markings, trả về trạng thái gốc:
+
+```python
+result = api("ResetChapter", {
+    "bookId": BOOK_ID,
+    "filePath": FILE_PATH
+})
+print(result["message"])
+```
+
+> Khác với `RemarkChapter` (chỉ xóa bản dịch, giữ markings). Dùng `ResetChapter` khi cần re-mark lại từ đầu.
+
+### Remark Chapter (remove translations, keep markings)
 
 ```python
 result = api("RemarkChapter", {
@@ -184,7 +246,31 @@ result = api("RemarkChapter", {
 print(result["message"])
 ```
 
-> Sau khi reset, dùng `aio-epub-translate` để dịch lại chương này.
+> Sau khi remark, dùng `aio-epub-translate` để dịch lại chương này.
+
+### View Page Content
+
+Xem nội dung HTML của 1 trang:
+
+```python
+page = api("GetPage", {
+    "bookId": BOOK_ID,
+    "filePath": FILE_PATH
+})
+print(page["content"][:2000])  # Preview first 2000 chars
+```
+
+### View LLM Usage Stats
+
+Xem thống kê token và chi phí cho 1 cuốn sách:
+
+```python
+usage = api("GetLLMUsage", {"bookId": BOOK_ID})
+for entry in usage.get("usage", []):
+    print(f"  Model: {entry['model']}")
+    print(f"  Tokens: {entry['inputTokens']} in / {entry['outputTokens']} out")
+    print(f"  Cost: ${entry['cost']:.4f}")
+```
 
 ## Điều hướng
 
