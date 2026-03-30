@@ -88,6 +88,7 @@ npx skills add aiocean/claude-plugins -s <plugin-name>
 | **aio-tanca** | 1.1.0 | Tanca via MCP: employee timekeeping, shifts, check-in/check-out, clock logs.<br>`npx skills add aiocean/claude-plugins -s aio-tanca` |
 | **aio-rag-kit** | 1.1.0 | RAG Kit via MCP: Qdrant vector database — create collections, index content, semantic search.<br>`npx skills add aiocean/claude-plugins -s aio-rag-kit` |
 | **aio-browser-cookie** | 2.0.0 | Extract browser cookies with rookiepy. Export Netscape files, replay authenticated requests. Supports Chrome, Firefox, Safari, Brave, Edge, and more.<br>`npx skills add aiocean/claude-plugins -s aio-browser-cookie` |
+| **aio-cdp-relay** | 1.0.0 | Persistent Chrome DevTools Protocol relay for browser automation via scripts — no MCP tool calls, no approval prompts.<br>`npx skills add aiocean/claude-plugins -s aio-cdp-relay` |
 
 ### Deprecated
 
