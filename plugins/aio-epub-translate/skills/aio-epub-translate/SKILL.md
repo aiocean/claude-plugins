@@ -193,16 +193,51 @@ for fp in progress["progress"].get("fileProgress", []):
 Khi cần sửa 1 bản dịch đã submit (không cần dịch lại cả batch):
 
 ```python
+# Lấy translationId từ GetPageJson
+page = api("GetPageJson", {"bookId": BOOK_ID, "filePath": FILE_PATH, "size": 0, "offset": 0})
+for item in page["contents"]:
+    for t in item.get("translations", []):
+        # t["translationId"] là ID cần dùng
+        pass
+
+# Sửa bản dịch — dùng translationId, KHÔNG phải contentId
 result = api("EditTranslation", {
     "bookId": BOOK_ID,
     "filePath": FILE_PATH,
-    "contentId": CONTENT_ID,
-    "translatedContent": "Nội dung đã sửa..."
+    "translationId": TRANSLATION_ID,
+    "content": "Nội dung đã sửa..."
 })
-print(result["message"])
 ```
 
-### 8. Cập nhật batch từ JSON
+> **Chú ý**: `EditTranslation` dùng `translationId` (từ `translations[].translationId` trong GetPageJson) và `content` (không phải `contentId` hay `translatedContent`).
+
+### 8. Sửa nhiều bản dịch cross-chapter
+
+Khi cần sửa nhiều translations xuyên nhiều chapters (ví dụ: đổi thuật ngữ toàn sách):
+
+```python
+result = api("BulkEditTranslation", {
+    "bookId": BOOK_ID,
+    "edits": [
+        {
+            "filePath": "xhtml/ch01.html",
+            "contentId": "id-1",
+            "translatedContent": "Bản dịch sửa 1"
+        },
+        {
+            "filePath": "xhtml/ch05.html",
+            "contentId": "id-2",
+            "translatedContent": "Bản dịch sửa 2"
+        }
+    ]
+})
+print(f"Updated: {result.get('updatedCount', 0)}, Failed: {result.get('failedCount', 0)}")
+if result.get("failedEdits"):
+    for f in result["failedEdits"]:
+        print(f"  FAIL: {f['filePath']} {f['contentId']}: {f['error']}")
+```
+
+### 9. Cập nhật batch trong 1 chapter
 
 Khi có sẵn JSON chứa nhiều bản dịch cần cập nhật (thay thế translations hiện có):
 
@@ -224,7 +259,7 @@ result = api("UpdatePageJson", {
 print(result["message"])
 ```
 
-> `UpdatePageJson` khác `BatchCreateManualTranslation`: UpdatePageJson **thay thế** translations hiện có, BatchCreate **thêm mới**.
+> `UpdatePageJson` thay thế translations trong 1 chapter. `BulkEditTranslation` sửa cross-chapter.
 
 ## Endpoints Summary
 
@@ -232,9 +267,10 @@ print(result["message"])
 |-----|----------|
 | `GetChapterContext` | Lấy guideline + glossary + previous chapter summary |
 | `GetPageJson` | Lấy nội dung cần dịch |
-| `BatchCreateManualTranslation` | Submit batch translations (1 call) |
-| `EditTranslation` | Sửa 1 bản dịch cụ thể |
-| `UpdatePageJson` | Cập nhật batch translations (thay thế) |
+| `BatchCreateManualTranslation` | Submit batch translations mới (1 call) |
+| `EditTranslation` | Sửa 1 bản dịch (dùng `translationId` + `content`) |
+| `BulkEditTranslation` | Sửa nhiều bản dịch cross-chapter |
+| `UpdatePageJson` | Cập nhật batch translations trong 1 chapter |
 | `GetTranslationProgress` | Kiểm tra tiến độ |
 | `GetGuideline` | Lấy guideline riêng |
 | `GetChapterGuideline` | Lấy chapter guideline |

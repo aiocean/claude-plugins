@@ -29,7 +29,7 @@ def api(method, body):
 
 ## Workflow
 
-### 1. Lấy thông tin sách và TOC
+### 1. Lấy thông tin sách, TOC, và thống kê
 
 ```python
 book = api("GetBook", {"bookId": BOOK_ID})
@@ -37,6 +37,13 @@ b = book["book"]
 print(f"Title: {b['title']}")
 print(f"Author: {b['author']}")
 print(f"Language: {b['language']}")
+
+# Book stats — word count, chapter sizes
+stats = api("GetBookStats", {"bookId": BOOK_ID})
+print(f"Chapters: {stats['totalChapters']}")
+print(f"Total words: {stats['totalOriginalWords']}")
+print(f"Longest: {stats['longestChapter']['filePath']} ({stats['longestChapter']['wordCount']} words)")
+print(f"Shortest: {stats['shortestChapter']['filePath']} ({stats['shortestChapter']['wordCount']} words)")
 
 toc = api("GetTableOfContent", {"bookId": BOOK_ID})
 chapters = []
@@ -47,7 +54,7 @@ def collect_chapters(items):
         if item.get("children"):
             collect_chapters(item["children"])
 collect_chapters(toc["tableOfContent"]["items"])
-print(f"Total chapters: {len(chapters)}")
+print(f"Total chapters in TOC: {len(chapters)}")
 ```
 
 ### 2. Sample chapters — đầu, giữa, cuối
@@ -62,20 +69,21 @@ if len(chapters) > 4:
 sample_indices.append(len(chapters) - 1)
 sample_indices = sorted(set(sample_indices))
 
+# Dùng BatchGetPageJson để lấy tất cả mẫu trong 1 call
+sample_paths = [chapters[i]["filePath"] for i in sample_indices]
+batch = api("BatchGetPageJson", {
+    "bookId": BOOK_ID,
+    "filePaths": sample_paths,
+    "filter": "CONTENT_FILTER_ALL"
+})
+
 samples = {}
-for idx in sample_indices:
-    ch = chapters[idx]
-    page = api("GetPageJson", {
-        "bookId": BOOK_ID,
-        "filePath": ch["filePath"],
-        "size": 0, "offset": 0
-    })
-    samples[ch["filePath"]] = {
-        "title": ch["title"],
-        "contents": page["contents"]
+for ch_data in batch.get("chapters", []):
+    fp = ch_data["filePath"]
+    samples[fp] = {
+        "contents": ch_data["contents"]
     }
-    total_items = len(page["contents"])
-    print(f"  [{idx}] {ch['title']}: {total_items} items")
+    print(f"  {fp}: {ch_data['totalItems']} items")
 ```
 
 ### 3. Agent phân tích nội dung
@@ -121,6 +129,13 @@ Liệt kê thuật ngữ quan trọng xuất hiện nhiều lần:
 Dựa trên kết quả phân tích, tạo guideline chi tiết:
 
 ```python
+# Xem guideline hiện có trước khi ghi đè
+existing = api("GetGuideline", {"bookId": BOOK_ID})
+if existing.get("guideline"):
+    print("=== EXISTING GUIDELINE ===")
+    print(existing["guideline"])
+    print("\n→ Merge với kết quả phân tích mới, KHÔNG ghi đè nếu guideline cũ có thông tin tốt.")
+
 guideline = """
 # Translation Guideline — {book_title}
 
@@ -154,15 +169,43 @@ api("UpdateGuideline", {
 print("Guideline saved!")
 ```
 
-### 5. Xem guideline hiện có (nếu có)
+### 5. Lưu glossary vào server
+
+Sau khi phân tích key terms, lưu glossary để dùng xuyên suốt quá trình dịch:
 
 ```python
-existing = api("GetGuideline", {"bookId": BOOK_ID})
-if existing.get("guideline"):
-    print("=== EXISTING GUIDELINE ===")
-    print(existing["guideline"])
-    print("\n→ Merge với kết quả phân tích mới, KHÔNG ghi đè nếu guideline cũ có thông tin tốt.")
+# Xem glossary hiện có
+existing_glossary = api("GetGlossary", {"bookId": BOOK_ID})
+print(f"Existing terms: {len(existing_glossary.get('entries', []))}")
+
+# Thêm từng term
+api("AddGlossaryTerm", {
+    "bookId": BOOK_ID,
+    "original": "mindfulness",
+    "translated": "chánh niệm",
+    "note": "Thuật ngữ Phật giáo, quen thuộc với độc giả Việt"
+})
+
+# Hoặc thay thế toàn bộ glossary
+api("UpdateGlossary", {
+    "bookId": BOOK_ID,
+    "entries": [
+        {"original": "self", "translated": "bản ngã", "note": "Tâm lý học"},
+        {"original": "ego", "translated": "cái tôi", "note": "Phân biệt với self"},
+        {"original": "anxiety", "translated": "lo âu", "note": "Không dùng 'sự lo lắng'"},
+        {"original": "repression", "translated": "dồn nén", "note": "Thuật ngữ phân tâm học"}
+    ]
+})
+print("Glossary saved!")
+
+# Xóa term không cần
+api("DeleteGlossaryTerm", {
+    "bookId": BOOK_ID,
+    "original": "term_to_remove"
+})
 ```
+
+> **Glossary được merge tự động**: Khi dịch (`GetChapterContext`), server merge glossary thủ công với auto-generated glossary từ translations. Glossary thủ công được ưu tiên khi conflict.
 
 ## Output mẫu
 

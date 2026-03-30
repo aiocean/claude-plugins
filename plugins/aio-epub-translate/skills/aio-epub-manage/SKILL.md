@@ -272,6 +272,91 @@ for entry in usage.get("usage", []):
     print(f"  Cost: ${entry['cost']:.4f}")
 ```
 
+### Search Translations
+
+Tìm kiếm text trong bản gốc hoặc bản dịch xuyên toàn bộ sách:
+
+```python
+# Tìm trong bản gốc
+results = api("SearchTranslations", {
+    "bookId": BOOK_ID,
+    "query": "self",
+    "scope": "SEARCH_SCOPE_ORIGINAL",
+    "limit": 20
+})
+print(f"Found: {results['totalCount']}")
+for r in results.get("results", []):
+    print(f"  [{r['filePath']}] EN: {r['originalText'][:80]}")
+    print(f"               VI: {r.get('translatedText', '(chưa dịch)')[:80]}")
+
+# Tìm trong bản dịch
+results = api("SearchTranslations", {
+    "bookId": BOOK_ID,
+    "query": "bản ngã",
+    "scope": "SEARCH_SCOPE_TRANSLATION",
+    "limit": 20
+})
+
+# Tìm cả hai
+results = api("SearchTranslations", {
+    "bookId": BOOK_ID,
+    "query": "anxiety",
+    "scope": "SEARCH_SCOPE_BOTH",
+    "limit": 20
+})
+```
+
+### Glossary Management
+
+Quản lý thuật ngữ cố định cho sách:
+
+```python
+# Xem glossary
+glossary = api("GetGlossary", {"bookId": BOOK_ID})
+for entry in glossary.get("entries", []):
+    note = f" ({entry['note']})" if entry.get("note") else ""
+    print(f"  {entry['original']} → {entry['translated']}{note}")
+
+# Thêm term
+api("AddGlossaryTerm", {
+    "bookId": BOOK_ID,
+    "original": "ego",
+    "translated": "cái tôi",
+    "note": "Thuật ngữ phân tâm học"
+})
+
+# Thay thế toàn bộ glossary
+api("UpdateGlossary", {
+    "bookId": BOOK_ID,
+    "entries": [
+        {"original": "self", "translated": "bản ngã", "note": ""},
+        {"original": "ego", "translated": "cái tôi", "note": ""}
+    ]
+})
+
+# Xóa term
+api("DeleteGlossaryTerm", {
+    "bookId": BOOK_ID,
+    "original": "term_to_remove"
+})
+```
+
+> Glossary thủ công được merge tự động với auto-generated glossary trong `GetChapterContext`. Glossary thủ công ưu tiên khi conflict.
+
+### Book Statistics
+
+Xem thống kê word count và chapter sizes:
+
+```python
+stats = api("GetBookStats", {"bookId": BOOK_ID})
+print(f"Chapters: {stats['totalChapters']}")
+print(f"Original words: {stats['totalOriginalWords']}")
+print(f"Translated words: {stats['totalTranslatedWords']}")
+print(f"Translation ratio: {stats['avgTranslationRatio']:.1%}")
+print(f"Longest: {stats['longestChapter']['filePath']} ({stats['longestChapter']['wordCount']} words)")
+print(f"Shortest: {stats['shortestChapter']['filePath']} ({stats['shortestChapter']['wordCount']} words)")
+```
+
 ## Điều hướng
 
 | Bạn muốn... | Dùng skill |

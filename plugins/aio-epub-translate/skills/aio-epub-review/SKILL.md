@@ -131,58 +131,114 @@ Tìm các pattern lỗi phổ biến (từ `common-errors.md`):
 #### Sửa từng bản dịch cụ thể:
 
 ```python
+# Dùng translationId (từ GetPageJson → translations[].translationId)
 result = api("EditTranslation", {
     "bookId": BOOK_ID,
     "filePath": FILE_PATH,
-    "contentId": CONTENT_ID,
-    "translatedContent": "Bản dịch đã sửa..."
+    "translationId": TRANSLATION_ID,
+    "content": "Bản dịch đã sửa..."
 })
-print(result["message"])
 ```
 
-#### Sửa nhiều bản dịch trong 1 chapter:
+> **Chú ý**: `EditTranslation` dùng `translationId` + `content`, KHÔNG phải `contentId` + `translatedContent`.
+
+#### Sửa nhiều bản dịch cross-chapter (BulkEditTranslation):
 
 ```python
-result = api("UpdatePageJson", {
+result = api("BulkEditTranslation", {
     "bookId": BOOK_ID,
-    "filePath": FILE_PATH,
-    "contents": [
-        {
-            "contentId": "id-1",
-            "translations": [{"contentText": "Bản dịch sửa 1"}]
-        },
-        {
-            "contentId": "id-2",
-            "translations": [{"contentText": "Bản dịch sửa 2"}]
-        }
+    "edits": [
+        {"filePath": "xhtml/ch01.html", "contentId": "id-1", "translatedContent": "Bản dịch sửa 1"},
+        {"filePath": "xhtml/ch05.html", "contentId": "id-2", "translatedContent": "Bản dịch sửa 2"},
+        {"filePath": "xhtml/ch10.html", "contentId": "id-3", "translatedContent": "Bản dịch sửa 3"}
     ]
 })
-print(f"Updated: {result['message']}")
+print(f"Updated: {result.get('updatedCount', 0)}, Failed: {result.get('failedCount', 0)}")
 ```
+
+> `BulkEditTranslation` dùng `contentId` + `translatedContent` (khác với `EditTranslation` dùng `translationId` + `content`).
 
 ### 7. Cross-chapter Consistency Check
 
-Khi review nhiều chapters, kiểm tra nhất quán xuyên suốt:
+#### Search toàn sách cho 1 thuật ngữ:
 
 ```python
-# Lấy nội dung nhiều chapters đã dịch
-chapters_to_review = ["Text/chapter01.html", "Text/chapter05.html", "Text/chapter10.html"]
+# Tìm tất cả chỗ dùng "self" trong bản gốc
+results = api("SearchTranslations", {
+    "bookId": BOOK_ID,
+    "query": "self",
+    "scope": "SEARCH_SCOPE_ORIGINAL",
+    "limit": 50
+})
+print(f"Found {results['totalCount']} matches")
+for r in results.get("results", []):
+    print(f"  [{r['filePath']}] {r['contentId']}")
+    print(f"    EN: {r['originalText'][:100]}")
+    print(f"    VI: {r.get('translatedText', '(chưa dịch)')[:100]}")
+```
 
-all_translations = {}
-for fp in chapters_to_review:
-    page = api("GetPageJson", {
-        "bookId": BOOK_ID,
-        "filePath": fp,
-        "size": 0, "offset": 0
-    })
-    all_translations[fp] = page["contents"]
+```python
+# Tìm thuật ngữ trong bản dịch — check consistency
+results = api("SearchTranslations", {
+    "bookId": BOOK_ID,
+    "query": "bản ngã",
+    "scope": "SEARCH_SCOPE_TRANSLATION",
+    "limit": 100
+})
+# So sánh: có chỗ nào dịch "self" thành "bản thân" thay vì "bản ngã"?
+```
+
+#### Batch load nhiều chapters để review:
+
+```python
+# Dùng BatchGetPageJson — 1 call thay vì N calls
+batch = api("BatchGetPageJson", {
+    "bookId": BOOK_ID,
+    "filePaths": ["xhtml/ch01.html", "xhtml/ch05.html", "xhtml/ch10.html"],
+    "filter": "CONTENT_FILTER_TRANSLATED"  # Chỉ lấy items đã dịch
+})
+for ch in batch.get("chapters", []):
+    print(f"\n=== {ch['filePath']} ({ch['totalItems']} items) ===")
+    for item in ch["contents"][:3]:
+        orig = item.get("contentText", "")[:80]
+        trans = item["translations"][0]["contentText"][:80] if item.get("translations") else ""
+        print(f"  EN: {orig}")
+        print(f"  VI: {trans}")
 ```
 
 Agent kiểm tra across chapters:
 - **Tên nhân vật**: cùng character có bị dịch khác nhau giữa các chapters?
-- **Thuật ngữ**: cùng term có bị dịch 2 cách?
+- **Thuật ngữ**: dùng `SearchTranslations` tìm term trong bản dịch — có nhất quán không?
 - **Tone shift**: chapter này formal, chapter kia informal bất ngờ?
 - **Đại từ drift**: "anh" ở chapter 1, "anh ấy" ở chapter 5, "hắn" ở chapter 10?
+
+#### Workflow fix consistency:
+
+```python
+# 1. Search tìm chỗ dịch sai
+results = api("SearchTranslations", {
+    "bookId": BOOK_ID,
+    "query": "anh ấy",  # thuật ngữ muốn thay
+    "scope": "SEARCH_SCOPE_TRANSLATION",
+    "limit": 100
+})
+
+# 2. Bulk edit tất cả
+edits = []
+for r in results.get("results", []):
+    new_text = r["translatedText"].replace("anh ấy", "hắn")
+    edits.append({
+        "filePath": r["filePath"],
+        "contentId": r["contentId"],
+        "translatedContent": new_text
+    })
+
+result = api("BulkEditTranslation", {
+    "bookId": BOOK_ID,
+    "edits": edits
+})
+print(f"Fixed {result.get('updatedCount', 0)} translations across chapters")
+```
 
 ### 8. Output — Quality Report
 
