@@ -94,6 +94,37 @@ progress = api("GetTranslationProgress", {"bookId": book_id})
 print(f"Progress: {progress['progress']['translationPercentage']:.1f}%")
 ```
 
+### 5. Content Marking Management
+
+Sau khi prepare, có thể tinh chỉnh content markings:
+
+#### Unmark Element
+
+Bỏ đánh dấu 1 element không cần dịch (ví dụ: code block, số liệu, header trang):
+
+```python
+result = api("UnmarkElement", {
+    "bookId": book_id,
+    "filePath": FILE_PATH,
+    "contentId": CONTENT_ID
+})
+print(result["message"])
+```
+
+#### Change Element Tag
+
+Đổi tag của element (ví dụ: đổi từ paragraph sang heading):
+
+```python
+result = api("ChangeElementTag", {
+    "bookId": book_id,
+    "filePath": FILE_PATH,
+    "contentId": CONTENT_ID,
+    "tag": "h2"
+})
+print(result["message"])
+```
+
 ## Bước tiếp theo
 
 | Bạn muốn... | Dùng skill |
