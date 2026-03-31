@@ -164,6 +164,7 @@
     border: 1px solid var(--border);
     background: var(--surface);
     margin-bottom: 0.25rem;
+    cursor: pointer;
   }
 
   .plugin.has-skills:hover {
@@ -516,12 +517,12 @@ function render() {
         <h2>${cat.category}</h2>
       </div>
       ${cat.plugins.map(p => `
-        <div class="plugin${p.skills ? ' has-skills' : ''}">
+        <div class="plugin${p.skills ? ' has-skills' : ''}" ${p.skills ? `onclick="toggleSkills('${p.name}')"` : ''}>
           <div class="plugin-info">
             <div class="plugin-top">
               <span class="plugin-name">${p.name}</span>
               <span class="plugin-version">${p.version}</span>
-              ${p.skills ? `<span class="skill-count" id="badge-${p.name}" onclick="toggleSkills('${p.name}')">${p.skills.length} skills</span>` : ''}
+              ${p.skills ? `<span class="skill-count" id="badge-${p.name}">${p.skills.length} skills</span>` : ''}
             </div>
             <div class="plugin-desc">${p.desc}</div>
             ${p.skills ? `
@@ -535,7 +536,7 @@ function render() {
               </div>
             ` : ''}
           </div>
-          <button class="install-btn" onclick="copyInstall('${p.name}', this)">install</button>
+          <button class="install-btn" onclick="event.stopPropagation(); copyInstall('${p.name}', this)">install</button>
         </div>
       `).join('')}
     </div>
