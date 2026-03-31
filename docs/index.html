@@ -412,6 +412,64 @@
     .config-bar .left { flex-wrap: wrap; }
     footer { flex-direction: column; gap: 0.5rem; text-align: center; }
   }
+
+  .skill-toggle {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.12s;
+  }
+
+  .skill-toggle:hover { opacity: 1; }
+
+  .skills-list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+    margin-left: 1.5rem;
+  }
+
+  .skills-list.open { max-height: 600px; }
+
+  .skill-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    font-size: 0.78rem;
+    color: var(--text-2);
+    border-left: 1px solid var(--border);
+    padding-left: 0.75rem;
+    margin-left: 0.25rem;
+  }
+
+  .skill-item-name {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    white-space: nowrap;
+    opacity: 0.85;
+  }
+
+  .skill-item-desc {
+    color: var(--text-3);
+    font-size: 0.75rem;
+  }
+
+  .skill-count {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-3);
+    background: var(--surface-2);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
 </style>
 </head>
 <body>
@@ -472,19 +530,65 @@ const PLUGINS = [
   {
     category: "Toolkits",
     plugins: [
-      { name: "aio-planning", version: "1.0.0", desc: "Code analysis & planning — 9 skills: codebase-oracle (GitNexus + doc-writer), deep-plan (discover/map/plan/review/snapshot), debug (4-phase pipeline), code-review (multi-agent with critic)." },
-      { name: "aio-claude-toolkit", version: "1.0.0", desc: "Claude Code management — 6 skills: claude-manager (enable/disable skills), install (plugin management), reflect (session learnings), dream (memory consolidation), skillify (capture workflows), feedback." },
-      { name: "aio-devops", version: "1.0.0", desc: "DevOps toolkit — 3 skills: github (repos, PRs, issues via MCP), gitlab (MRs, pipelines via MCP), worktree (git worktree management for parallel development)." },
-      { name: "aio-design-system", version: "1.0.0", desc: "UI/UX design — 3 skills: uiux (comprehensive design knowledge), neobrutalism (design system bootstrapper), react-minimal-effects (minimize useEffect in React 19)." },
-      { name: "aio-saas-tools", version: "1.0.0", desc: "SaaS integrations — 4 skills: atlassian (Jira + Confluence CLI), google-workspace (Drive, Gmail, Calendar, Sheets, Docs), tanca (HR/timekeeping), x (X/Twitter)." },
-      { name: "aio-research", version: "1.0.0", desc: "Research toolkit — 2 skills: research-kit (structured 10-phase research), rag-kit (Qdrant vector database for semantic search)." },
-      { name: "aio-diagramming", version: "1.0.0", desc: "Diagram generation — 2 skills: mermaid (shareable MinimalMermaid URLs), grafana-diagram (auto-generate dashboard diagrams from codebase)." }
+      { name: "aio-planning", version: "1.0.0", desc: "Code analysis & planning — 9 skills for codebase understanding, debugging, and review.", skills: [
+        { name: "aio-gitnexus", desc: "GitNexus knowledge graph — index and query codebase structure" },
+        { name: "doc-writer", desc: "Generate architecture docs, module docs, and HTML viewers" },
+        { name: "discover", desc: "Find relevant code for a feature or concept" },
+        { name: "map", desc: "Structural analysis — dependencies, blast radius, call graphs" },
+        { name: "plan", desc: "Implementation planning with re-anchoring" },
+        { name: "review", desc: "Plan review and validation" },
+        { name: "snapshot", desc: "Baseline snapshot for change tracking" },
+        { name: "aio-debug", desc: "4-phase debug pipeline: context → root cause → fix → review" },
+        { name: "aio-code-review", desc: "Multi-agent code review with critic meta-review" }
+      ]},
+      { name: "aio-claude-toolkit", version: "1.0.0", desc: "Claude Code management — 6 skills for skill management, learning, and feedback.", skills: [
+        { name: "aio-claude-manager", desc: "Enable/disable skills by project context, apply presets" },
+        { name: "aio-install", desc: "Browse, install, enable/disable aiocean plugins" },
+        { name: "aio-reflect", desc: "Extract reusable knowledge from past sessions" },
+        { name: "aio-dream", desc: "Consolidate and organize memory files" },
+        { name: "aio-skillify", desc: "Capture repeatable workflows as reusable skills" },
+        { name: "feedback", desc: "Submit bug reports and feature requests via GitHub Issues" }
+      ]},
+      { name: "aio-devops", version: "1.0.0", desc: "DevOps toolkit — 3 skills for Git platform management and parallel development.", skills: [
+        { name: "aio-github", desc: "GitHub repos, PRs, issues, code review via MCP" },
+        { name: "aio-gitlab", desc: "GitLab MRs, pipelines, jobs, branch protection via MCP" },
+        { name: "aio-worktree", desc: "Git worktree management for parallel development" }
+      ]},
+      { name: "aio-design-system", version: "1.0.0", desc: "UI/UX design — 3 skills for design knowledge, systems, and React optimization.", skills: [
+        { name: "aio-uiux", desc: "Comprehensive UI/UX design knowledge — 100+ topics, WCAG 2.2, UX laws" },
+        { name: "aio-neobrutalism", desc: "Neobrutalism design system bootstrapper — CSS tokens, component transforms" },
+        { name: "aio-react-minimal-effects", desc: "Minimize useEffect in React 19 — scan mode with file:line refs" }
+      ]},
+      { name: "aio-saas-tools", version: "1.0.0", desc: "SaaS integrations — 4 skills for Atlassian, Google, HR, and social.", skills: [
+        { name: "aio-atlassian", desc: "Jira issues, sprints, workflows + Confluence pages via CLI" },
+        { name: "aio-google-workspace", desc: "Drive, Gmail, Calendar, Sheets, Docs, Tasks via gws CLI" },
+        { name: "aio-tanca", desc: "Employee timekeeping, shifts, check-in/check-out via MCP" },
+        { name: "aio-x", desc: "X/Twitter tweets, threads, search, engagement via MCP" }
+      ]},
+      { name: "aio-research", version: "1.0.0", desc: "Research toolkit — 2 skills for structured research and vector search.", skills: [
+        { name: "aio-research-kit", desc: "Structured 10-phase research framework" },
+        { name: "aio-rag-kit", desc: "Qdrant vector database — index, search, semantic queries" }
+      ]},
+      { name: "aio-diagramming", version: "1.0.0", desc: "Diagram generation — 2 skills for Mermaid and Grafana diagrams.", skills: [
+        { name: "aio-mermaid", desc: "Generate shareable MinimalMermaid diagram URLs" },
+        { name: "aio-grafana-diagram", desc: "Auto-generate Mermaid diagrams with metric binding for Grafana" }
+      ]}
     ]
   },
   {
     category: "Content & Translation",
     plugins: [
-      { name: "aio-epub-translate", version: "3.5.1", desc: "EPUB book translation via ConnectRPC API — 9 skills: analyze, translate, review, quality, manage, upload, export, setup, vn-style guide." },
+      { name: "aio-epub-translate", version: "3.5.1", desc: "EPUB book translation via ConnectRPC API — 9 skills for the full translation pipeline.", skills: [
+        { name: "aio-epub-setup", desc: "Account registration, license, API key configuration" },
+        { name: "aio-epub-upload", desc: "Upload and prepare EPUB books for translation" },
+        { name: "aio-epub-analyze", desc: "Pre-translation analysis — style, characters, glossary" },
+        { name: "aio-epub-translate", desc: "Literary translation with batch API, edit & update" },
+        { name: "aio-epub-review", desc: "Deep literary review with quality scoring" },
+        { name: "aio-epub-quality", desc: "Mechanical quality detection and re-translation" },
+        { name: "aio-epub-manage", desc: "Browse, progress, guidelines, community, fork, reset" },
+        { name: "aio-epub-export", desc: "Pack and export — bilingual or translation-only EPUB" },
+        { name: "aio-epub-vn-style", desc: "Vietnamese literary translation style guide" }
+      ]},
       { name: "aio-youtube", version: "1.1.3", desc: "Search YouTube and extract video transcripts using yt-dlp." },
       { name: "aio-mental-models", version: "2.1.3", desc: "Decision advisor using 50+ mental models. Guides through selection, application, synthesis, and stress-testing." },
       { name: "aio-gherkin-refine", version: "2.0.2", desc: "BDD field guide — writes and reviews Gherkin with expert quality. Example Mapping, 3 Amigos, anti-patterns catalog." }
@@ -538,14 +642,35 @@ function render() {
             <div class="plugin-top">
               <span class="plugin-name">${p.name}</span>
               <span class="plugin-version">${p.version}</span>
+              ${p.skills ? `<span class="skill-count">${p.skills.length} skills</span>` : ''}
             </div>
             <div class="plugin-desc">${p.desc}</div>
+            ${p.skills ? `
+              <div class="skills-list" id="skills-${p.name}">
+                ${p.skills.map(s => `
+                  <div class="skill-item">
+                    <span class="skill-item-name">${s.name}</span>
+                    <span class="skill-item-desc">${s.desc}</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
           </div>
+          ${p.skills ? `<button class="skill-toggle" onclick="event.preventDefault(); event.stopPropagation(); toggleSkills('${p.name}')" title="Show skills">&#9662;</button>` : ''}
         </label>
       `).join('')}
     </div>
   `).join('');
   updateBar();
+}
+
+function toggleSkills(name) {
+  const el = document.getElementById('skills-' + name);
+  const btn = el?.closest('.plugin')?.querySelector('.skill-toggle');
+  if (el) {
+    el.classList.toggle('open');
+    if (btn) btn.innerHTML = el.classList.contains('open') ? '&#9652;' : '&#9662;';
+  }
 }
 
 function toggle(name) {
