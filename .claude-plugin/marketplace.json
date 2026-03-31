@@ -135,7 +135,7 @@
       "name": "aio-atlassian",
       "source": "./plugins/aio-atlassian",
       "description": "Atlassian CLI tools for Jira and Confluence. Manage Jira issues, sprints, workflows, and Confluence pages via CLI.",
-      "version": "1.0.2",
+      "version": "1.1.0",
       "author": {
         "name": "aiocean"
       }
