@@ -28,12 +28,11 @@ Look for new information worth persisting. Sources in rough priority order:
 
 1. **Daily logs** (`logs/YYYY/MM/YYYY-MM-DD.md`) if present — these are the append-only stream
 2. **Existing memories that drifted** — facts that contradict something you see in the codebase now
-3. **Transcript search** — if you need specific context (e.g., "what was the error message from yesterday's build failure?"), grep the JSONL transcripts for narrow terms:
+3. **Session transcripts** — the transcript directory contains JSONL files of past sessions. Grep them for relevant context:
    ```bash
    grep -rn "<narrow term>" <transcript-dir>/ --include="*.jsonl" | tail -50
    ```
-
-Don't exhaustively read transcripts. Look only for things you already suspect matter.
+   Use narrow, specific terms relevant to what you found in Phase 1 (e.g., a project name, a tool, a decision topic). Read surrounding lines when a match looks valuable.
 
 ## Phase 3 — Consolidate
 
