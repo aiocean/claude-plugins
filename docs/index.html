@@ -470,111 +470,48 @@ const MARKETPLACE = 'aiocean-plugins';
 
 const PLUGINS = [
   {
-    category: "Codebase & Architecture",
+    category: "Toolkits",
     plugins: [
-      { name: "aio-codebase-oracle", version: "5.1.3", desc: "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interacti" }
-      ,
-      { name: "aio-code-review", version: "3.1.2", desc: "Ultimate code review with GitNexus knowledge graph analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-" }
-      ,
-      { name: "aio-debug", version: "2.3.1", desc: "REACTIVE debugging — systematic debug & fix orchestrator for bugs, errors, and test failures. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review valid" }
-      ,
-      { name: "aio-deep-plan", version: "3.3.1", desc: "PROACTIVE planning toolkit — use before writing code to understand codebase structure and plan changes. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), pl" }
+      { name: "aio-planning", version: "1.0.0", desc: "Code analysis & planning — 9 skills: codebase-oracle (GitNexus + doc-writer), deep-plan (discover/map/plan/review/snapshot), debug (4-phase pipeline), code-review (multi-agent with critic)." },
+      { name: "aio-claude-toolkit", version: "1.0.0", desc: "Claude Code management — 6 skills: claude-manager (enable/disable skills), install (plugin management), reflect (session learnings), dream (memory consolidation), skillify (capture workflows), feedback." },
+      { name: "aio-devops", version: "1.0.0", desc: "DevOps toolkit — 3 skills: github (repos, PRs, issues via MCP), gitlab (MRs, pipelines via MCP), worktree (git worktree management for parallel development)." },
+      { name: "aio-design-system", version: "1.0.0", desc: "UI/UX design — 3 skills: uiux (comprehensive design knowledge), neobrutalism (design system bootstrapper), react-minimal-effects (minimize useEffect in React 19)." },
+      { name: "aio-saas-tools", version: "1.0.0", desc: "SaaS integrations — 4 skills: atlassian (Jira + Confluence CLI), google-workspace (Drive, Gmail, Calendar, Sheets, Docs), tanca (HR/timekeeping), x (X/Twitter)." },
+      { name: "aio-research", version: "1.0.0", desc: "Research toolkit — 2 skills: research-kit (structured 10-phase research), rag-kit (Qdrant vector database for semantic search)." },
+      { name: "aio-diagramming", version: "1.0.0", desc: "Diagram generation — 2 skills: mermaid (shareable MinimalMermaid URLs), grafana-diagram (auto-generate dashboard diagrams from codebase)." }
     ]
-  }
-  ,
+  },
   {
-    category: "Development Tools",
+    category: "Content & Translation",
     plugins: [
-      { name: "aio-worktree", version: "1.1.1", desc: "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup." }
-      ,
-      { name: "aio-claude-manager", version: "1.1.1", desc: "Enable/disable skills based on project context. Reduce skill clutter for specific project types." }
-      ,
-      { name: "aio-bun-fullstack-setup", version: "1.1.0", desc: "Scaffold and setup Bun fullstack projects. Scaffold mode detects existing files and generates only what is missing. Single port API + static frontend with Vite proxy in dev." }
-      ,
-      { name: "aio-reflect", version: "2.2.1", desc: "Learn from Claude Code sessions to extract reusable knowledge. Deep JSONL parsing extracts token usage, cost, work modes, subagents, tasks, compaction, session chains, and file operations for comprehe" }
-      ,
-      { name: "aio-feedback", version: "1.1.1", desc: "Submit feedback, bug reports, feature requests, and plugin requests for aiocean plugins directly from Claude Code via GitHub Issues." }
-      ,
-      { name: "aio-install", version: "1.1.1", desc: "Install, enable, disable, and list aiocean plugins for the current project via settings.local.json." }
+      { name: "aio-epub-translate", version: "3.5.1", desc: "EPUB book translation via ConnectRPC API — 9 skills: analyze, translate, review, quality, manage, upload, export, setup, vn-style guide." },
+      { name: "aio-youtube", version: "1.1.3", desc: "Search YouTube and extract video transcripts using yt-dlp." },
+      { name: "aio-mental-models", version: "2.1.3", desc: "Decision advisor using 50+ mental models. Guides through selection, application, synthesis, and stress-testing." },
+      { name: "aio-gherkin-refine", version: "2.0.2", desc: "BDD field guide — writes and reviews Gherkin with expert quality. Example Mapping, 3 Amigos, anti-patterns catalog." }
     ]
-  }
-  ,
+  },
   {
     category: "Language & Framework",
     plugins: [
-      { name: "aio-react-minimal-effects", version: "3.1.0", desc: "Minimize useEffect in React 19. Scan mode finds and fixes problematic effects in existing code. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns." }
-      ,
-      { name: "aio-xstate", version: "1.0.5", desc: "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCal" }
-      ,
-      { name: "aio-golang-mastery", version: "1.1.0", desc: "Complete Go development skill with lint mode (7-step tooling chain: build, vet, golangci-lint, govulncheck, nilaway, deadcode, race detection). Covers idiomatic patterns, error handling, concurrency, " }
-      ,
-      { name: "aio-tui", version: "1.0.3", desc: "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hove" }
+      { name: "aio-golang-mastery", version: "1.1.1", desc: "Complete Go development with lint mode: 7-step tooling chain (build, vet, golangci-lint, govulncheck, nilaway, deadcode, race). Google/Uber style." },
+      { name: "aio-xstate", version: "1.0.6", desc: "XState v5 strict ruleset: setup().createMachine() patterns, design-first workflow, actor types, React integration." },
+      { name: "aio-tui", version: "1.0.5", desc: "Go Bubbletea TUI guide: TEA architecture, lipgloss styling, production patterns." },
+      { name: "aio-bun-fullstack-setup", version: "1.1.1", desc: "Scaffold Bun fullstack apps. Detects existing files, generates only what's missing: single-port server, Vite proxy, PM2, Docker." }
     ]
-  }
-  ,
+  },
   {
-    category: "iOS",
+    category: "Platform & Browser",
     plugins: [
-      { name: "aio-ios-device-debug", version: "1.1.2", desc: "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal." }
+      { name: "aio-ios-device-debug", version: "1.1.4", desc: "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, take screenshots." },
+      { name: "aio-cdp-relay", version: "1.2.2", desc: "Persistent Chrome DevTools Protocol relay for browser automation via scripts — no MCP tool calls, no approval prompts." },
+      { name: "aio-browser-cookie", version: "2.0.3", desc: "Extract browser cookies with rookiepy. Export Netscape files, replay authenticated requests." }
     ]
-  }
-  ,
+  },
   {
-    category: "Design & Visualization",
+    category: "Observability & Utilities",
     plugins: [
-      { name: "aio-neobrutalism", version: "2.0.1", desc: "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors." }
-      ,
-      { name: "aio-grafana-diagram", version: "2.0.1", desc: "Dashboard diagram generator. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic me" }
-      ,
-      { name: "aio-mermaid", version: "1.2.1", desc: "Generate shareable MinimalMermaid diagram URLs. Compress mermaid code into shareable links." }
-      ,
-      { name: "aio-uiux", version: "1.2.2", desc: "Comprehensive UI/UX design knowledge base and advisor. 100+ topics covering visual design, typography, color theory, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, m" }
-    ]
-  }
-  ,
-  {
-    category: "Observability",
-    plugins: [
-      { name: "aio-monitoring-observability", version: "1.0.5", desc: "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, " }
-    ]
-  }
-  ,
-  {
-    category: "Content & Knowledge",
-    plugins: [
-      { name: "aio-epub-translate", version: "3.2.7", desc: "EPUB book translation via ConnectRPC API. Seven skills: aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API)," }
-      ,
-      { name: "aio-epub-packing", version: "1.1.1", desc: "Generate professional EPUB ebooks from Markdown files with auto-generated neo-brutalism covers." }
-      ,
-      { name: "aio-youtube", version: "1.1.1", desc: "Search YouTube and extract video transcripts using yt-dlp." }
-      ,
-      { name: "aio-gherkin-refine", version: "2.0.1", desc: "Comprehensive BDD field guide — writes and reviews Gherkin with expert quality. Includes Example Mapping, 3 Amigos, anti-patterns catalog, and declarative style guide." }
-      ,
-      { name: "aio-mental-models", version: "2.1.1", desc: "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems." }
-      ,
-      { name: "aio-research-kit", version: "1.2.1", desc: "Structured 10-phase research framework CLI. Initialize research projects, validate structure, and execute systematic research via research-cli." }
-    ]
-  }
-  ,
-  {
-    category: "Integrations",
-    plugins: [
-      { name: "aio-atlassian", version: "1.0.0", desc: "Atlassian CLI tools for Jira and Confluence. Manage Jira issues, sprints, workflows, and Confluence pages via CLI." }
-      ,
-      { name: "aio-github", version: "1.1.1", desc: "GitHub CLI/MCP for repository, pull request, issue management, code review, and file operations via github-mcp." }
-      ,
-      { name: "aio-gitlab", version: "1.1.1", desc: "GitLab CLI/MCP for merge requests, pipelines, jobs, branch protection, and git flow operations via gitlab-mcp." }
-      ,
-      { name: "aio-rag-kit", version: "1.1.1", desc: "RAG Kit CLI/MCP for Qdrant vector database operations: create collections, index content, and semantic search via rag-kit." }
-      ,
-      { name: "aio-tanca", version: "1.1.1", desc: "Tanca CLI/MCP for employee timekeeping, shift management, check-in/check-out, and clock logs via tanca-mcp." }
-      ,
-      { name: "aio-x", version: "1.1.1", desc: "X/Twitter CLI/MCP for tweets, threads, search, engagement, moderation, and list operations via x-mcp." }
-      ,
-      { name: "aio-google-workspace", version: "1.1.1", desc: "Google Workspace operations via gws CLI. Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat, and cross-service workflows (standup, meeting prep, weekly digest)." }
-      ,
-      { name: "aio-browser-cookie", version: "2.0.1", desc: "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports." },
-      { name: "aio-cdp-relay", version: "1.0.0", desc: "Persistent Chrome DevTools Protocol relay for browser automation via scripts — no MCP tool calls, no approval prompts." }
+      { name: "aio-monitoring-observability", version: "1.0.7", desc: "Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry, SLOs, dashboards, alerting. 7 automation scripts." },
+      { name: "aio-remove-bg", version: "1.1.4", desc: "Remove background from images. Supports threshold-based (fast) and AI-based (rembg) methods." }
     ]
   }
 ];
