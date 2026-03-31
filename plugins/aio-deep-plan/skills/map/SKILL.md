@@ -1,6 +1,9 @@
 ---
 name: aio-map
 description: PROACTIVE planning — second step in the aio-deep-plan pipeline. Use when the user needs structural analysis: "map dependencies", "show structure", "who calls this", "blast radius", "trace references", "impact analysis". Run discover first, then follow with plan. NOT for debugging — use aio-debug instead.
+when_to_use: map dependencies, show structure, who calls this, blast radius, trace references, impact analysis, dependency graph, call graph, symbol map, structural analysis, reference tracing
+argument-hint: "File, function, or module to map dependencies for"
+effort: medium
 context: fork
 agent: oh-my-claudecode:explore
 ---

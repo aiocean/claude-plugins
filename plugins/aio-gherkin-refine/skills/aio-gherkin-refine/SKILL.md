@@ -1,6 +1,8 @@
 ---
 name: aio-gherkin-refine
 description: Comprehensive BDD field guide for writing and reviewing Gherkin scenarios with expert quality. Triggers: "write gherkin", "refine requirements", "write acceptance criteria", "review gherkin", "improve scenarios", "BDD", "Given/When/Then", "acceptance tests". Use proactively when a request is ambiguous, spans multiple conditions, or edge cases need clarification.
+when_to_use: write gherkin, refine requirements, write acceptance criteria, review gherkin, improve scenarios, BDD, Given/When/Then, acceptance tests, behavior-driven development, scenario outline, feature file, cucumber, specification by example, edge cases
+effort: low
 ---
 
 # aio-gherkin-refine

@@ -1,6 +1,8 @@
 ---
 name: aio-claude-manager
 description: Manage and optimize Claude Code skills — enable, disable, analyze usage, and apply project-type presets. Triggers: "manage skills", "disable skills", "reduce clutter", "apply preset", "too many skills", switching project types (frontend, backend, data, ai).
+when_to_use: manage skills, disable skills, enable skills, reduce clutter, apply preset, too many skills, switch project type, skill management, toggle skills, agents status, optimize skills
+effort: medium
 ---
 
 # Claude Manager

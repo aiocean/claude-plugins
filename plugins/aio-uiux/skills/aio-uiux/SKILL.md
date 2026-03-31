@@ -1,6 +1,8 @@
 ---
 name: aio-uiux
 description: Use when designing or reviewing web UI — layouts, components, color, typography, animations, accessibility, or design systems. Covers UX psychology, interaction patterns, WCAG compliance, responsive design, and modern CSS. Triggers: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens.
+when_to_use: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens, web design, CSS, component design, interaction patterns
+effort: low
 ---
 
 # UI/UX Design Advisor

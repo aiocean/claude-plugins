@@ -1,6 +1,8 @@
 ---
 name: aio-cdp-relay
 description: Interact with Chrome browser via a persistent CDP relay — navigate, capture network, read cookies, evaluate JS, take screenshots. No MCP tool calls, no approval prompts. Use when needing browser automation in scripts. Triggers: "cdp relay", "browser relay", "chrome relay", "capture network", "browser cookies cdp", "screenshot cdp", "evaluate js in browser".
+when_to_use: cdp relay, browser relay, chrome relay, capture network, browser automation, screenshot, evaluate js, navigate browser, read cookies, chrome devtools protocol, headless chrome, network capture
+effort: medium
 ---
 
 # CDP Relay — Browser Automation Without MCP
@@ -8,7 +10,7 @@ description: Interact with Chrome browser via a persistent CDP relay — navigat
 ## Environment
 
 - go: !`go version 2>/dev/null | awk '{print $3}' || echo "NOT INSTALLED — install from https://go.dev/dl/"`
-- binary: !`test -x /tmp/cdp-relay && echo "built (/tmp/cdp-relay)" || echo "NOT BUILT"`
+- binary: !`command -v cdp-relay >/dev/null 2>&1 && echo "installed ($(which cdp-relay))" || (test -x /tmp/cdp-relay && echo "built (/tmp/cdp-relay)" || echo "NOT INSTALLED — run go install in relay-go dir")`
 - relay: !`curl -s http://127.0.0.1:9223/health 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'running (pid={d.get(\"pid\")}, connected={d.get(\"connected\")})')" 2>/dev/null || echo "NOT RUNNING"`
 - websocket-client: !`python3 -c "import websocket; print('installed')" 2>/dev/null || echo "NOT INSTALLED — pip install websocket-client"`
 - chrome: !`curl -s http://127.0.0.1:9223/targets 2>/dev/null | python3 -c "import json,sys; t=json.load(sys.stdin); pages=[x for x in t if x.get('type')=='page']; print(f'{len(pages)} tabs')" 2>/dev/null || echo "check chrome://inspect/#remote-debugging"`
@@ -29,9 +31,17 @@ brew install go
 sudo apt install golang-go
 ```
 
-### 2. Build the relay binary (if `binary` check above shows NOT BUILT)
+### 2. Build and install the relay binary globally (if `binary` check above shows NOT BUILT)
 
-Tell the user to run:
+The relay server should be installed globally so it's available system-wide across all projects:
+
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}/skills/aio-cdp-relay/scripts/relay-go" && go install .
+```
+
+This installs `cdp-relay` to `$GOPATH/bin` (typically `~/go/bin`). Make sure `$GOPATH/bin` is in your `$PATH`.
+
+Alternatively, build to a fixed location:
 ```bash
 cd "${CLAUDE_PLUGIN_ROOT}/skills/aio-cdp-relay/scripts/relay-go" && go build -o /tmp/cdp-relay .
 ```
@@ -54,6 +64,9 @@ The relay server must be started manually and runs persistently (no idle timeout
 
 Tell the user to run:
 ```bash
+# If installed globally:
+nohup cdp-relay > /tmp/cdp_relay.log 2>&1 &
+# Or if built locally:
 nohup /tmp/cdp-relay > /tmp/cdp_relay.log 2>&1 &
 ```
 
@@ -281,6 +294,6 @@ with CDPClient() as cdp:
 |-------|-----|
 | Relay not running | Start with `nohup` command above |
 | No tabs found | Open at least one page in Chrome |
-| Connection refused | Chrome may have restarted — relay auto-reconnects within ~3s |
+| Connection refused | Chrome may have restarted — relay auto-reconnects with backoff (1s → 30s max) |
 | Events empty | Call `network_enable()` before navigation, increase `wait_events` timeout |
 | Check relay logs | `tail -f /tmp/cdp_relay.log` |

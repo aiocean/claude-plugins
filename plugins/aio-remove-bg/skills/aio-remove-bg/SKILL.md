@@ -1,6 +1,9 @@
 ---
 name: aio-remove-bg
 description: Remove image backgrounds using threshold (fast) or rembg AI (complex images) and trim transparent edges. Triggers: "remove background", "make image transparent", "cutout image", bgrem, rembg.
+when_to_use: remove background, transparent background, cutout image, bgrem, rembg, image background removal, make transparent, trim edges, background eraser
+effort: medium
+argument-hint: <image-path> [--rembg]
 ---
 
 > **DEPRECATED**: This plugin is deprecated. Use ImageMagick (`convert`) or `rembg` CLI directly for background removal.

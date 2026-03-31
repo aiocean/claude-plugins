@@ -1,7 +1,9 @@
 {
   "name": "aio-bun-fullstack-setup",
   "description": "Scaffold and setup Bun fullstack projects. Scaffold mode detects existing files and generates only what is missing. Single port API + static frontend with Vite proxy in dev.",
-  "version": "1.1.0",
-  "author": { "name": "aiocean" },
+  "version": "1.1.1",
+  "author": {
+    "name": "aiocean"
+  },
   "license": "MIT"
 }

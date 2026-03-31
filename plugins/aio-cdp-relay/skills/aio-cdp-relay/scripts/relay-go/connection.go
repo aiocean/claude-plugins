@@ -54,13 +54,14 @@ type pendingRequest struct {
 
 // CDPConnection manages a persistent WebSocket connection to Chrome CDP.
 type CDPConnection struct {
-	ws        *websocket.Conn
-	mu        sync.Mutex
-	msgID     atomic.Int64
-	pending   map[int64]*pendingRequest
-	pendingMu sync.Mutex
-	events    map[string][]json.RawMessage
-	eventsMu  sync.Mutex
+	ws           *websocket.Conn
+	mu           sync.Mutex
+	msgID        atomic.Int64
+	pending      map[int64]*pendingRequest
+	pendingMu    sync.Mutex
+	events       map[string][]json.RawMessage
+	eventsMu     sync.Mutex
+	reconnecting atomic.Bool // prevents multiple concurrent autoReconnect goroutines
 }
 
 // NewCDPConnection creates a new CDPConnection.
@@ -101,6 +102,19 @@ func (c *CDPConnection) EnsureConnected() error {
 
 // recvLoop reads messages from the WebSocket and routes them.
 func (c *CDPConnection) recvLoop() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[relay] PANIC in recvLoop recovered: %v", r)
+			c.mu.Lock()
+			if c.ws != nil {
+				c.ws.Close()
+				c.ws = nil
+			}
+			c.mu.Unlock()
+			c.tryAutoReconnect()
+		}
+	}()
+
 	for {
 		_, raw, err := c.ws.ReadMessage()
 		if err != nil {
@@ -158,26 +172,63 @@ func (c *CDPConnection) recvLoop() {
 	}
 	c.pendingMu.Unlock()
 
-	// Auto-reconnect in background
-	go c.autoReconnect()
+	// Auto-reconnect in background (guarded by atomic flag)
+	c.tryAutoReconnect()
 }
 
-const reconnectInterval = 3 * time.Second
+const (
+	reconnectMinInterval = 2 * time.Second
+	reconnectMaxInterval = 30 * time.Second
+	reconnectMaxAttempts = 10
+)
 
-// autoReconnect keeps trying to reconnect to Chrome until successful.
-func (c *CDPConnection) autoReconnect() {
-	for {
-		time.Sleep(reconnectInterval)
-		log.Println("[relay] Attempting to reconnect to Chrome...")
-		if err := c.EnsureConnected(); err == nil {
-			log.Println("[relay] Reconnected to Chrome successfully.")
-			return
-		}
+// tryAutoReconnect starts autoReconnect if one isn't already running.
+func (c *CDPConnection) tryAutoReconnect() {
+	if c.reconnecting.CompareAndSwap(false, true) {
+		go c.autoReconnect()
 	}
 }
 
+// autoReconnect tries to reconnect to Chrome with exponential backoff, limited attempts.
+func (c *CDPConnection) autoReconnect() {
+	defer c.reconnecting.Store(false)
+
+	interval := reconnectMinInterval
+	for attempt := 1; attempt <= reconnectMaxAttempts; attempt++ {
+		time.Sleep(interval)
+		log.Printf("[relay] Reconnect attempt #%d/%d (backoff %v)...", attempt, reconnectMaxAttempts, interval)
+		if err := c.EnsureConnected(); err == nil {
+			log.Printf("[relay] Reconnected to Chrome after %d attempts.", attempt)
+			return
+		}
+		interval = min(interval*2, reconnectMaxInterval)
+	}
+	log.Printf("[relay] Gave up reconnecting after %d attempts. Next Send() will retry.", reconnectMaxAttempts)
+}
+
 // Send sends a CDP command and waits for a response.
+// On write failure, it reconnects and retries once.
 func (c *CDPConnection) Send(method string, params json.RawMessage, sessionID string, timeout float64) (json.RawMessage, error) {
+	resp, err := c.sendOnce(method, params, sessionID, timeout)
+	if err != nil {
+		// Disconnect, reconnect, retry once
+		log.Printf("[relay] Send failed (%v), reconnecting and retrying...", err)
+		c.mu.Lock()
+		if c.ws != nil {
+			c.ws.Close()
+			c.ws = nil
+		}
+		c.mu.Unlock()
+
+		if connErr := c.EnsureConnected(); connErr != nil {
+			return nil, fmt.Errorf("retry connect failed: %w", connErr)
+		}
+		return c.sendOnce(method, params, sessionID, timeout)
+	}
+	return resp, nil
+}
+
+func (c *CDPConnection) sendOnce(method string, params json.RawMessage, sessionID string, timeout float64) (json.RawMessage, error) {
 	if err := c.EnsureConnected(); err != nil {
 		return nil, err
 	}
@@ -185,7 +236,7 @@ func (c *CDPConnection) Send(method string, params json.RawMessage, sessionID st
 	id := c.msgID.Add(1)
 
 	// Build message
-	msg := map[string]interface{}{
+	msg := map[string]any{
 		"id":     id,
 		"method": method,
 	}
