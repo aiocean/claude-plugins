@@ -13,7 +13,7 @@ You are performing a **dream** — a reflective pass over your memory files. Syn
 ## Environment
 
 - Memory directory: !`echo "${CLAUDE_MEMORY_DIR:-$HOME/.claude/projects/$(pwd | sed 's|/|-|g')/memory}"`
-- Session transcripts: !`echo "${CLAUDE_PROJECT_DIR:-$HOME/.claude/projects/$(pwd | sed 's|/|-|g')}"`
+- Session transcripts: !`echo "${CLAUDE_PROJECT_DIR:-$HOME/.claude/projects/$(pwd | sed 's|/|-|g')}"` (JSONL files — each file is one past session)
 
 ## Phase 1 — Orient
 
