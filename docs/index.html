@@ -53,7 +53,7 @@
   }
 
   .container {
-    max-width: 920px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 3rem 1.5rem 4rem;
     position: relative;
@@ -67,27 +67,29 @@
 
   .logo {
     font-family: var(--mono);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--pink);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: 0.75rem;
     text-shadow: 2px 0 var(--pink), -2px 0 var(--cyan);
+    animation: glitch-text 4s infinite;
   }
 
   header h1 {
     font-family: var(--display);
-    font-size: 2.25rem;
+    font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: -0.03em;
     color: white;
     text-shadow: -1px -1px 0 var(--cyan), 1px 1px 0 var(--pink);
+    animation: flicker 3s infinite alternate;
   }
 
   header p {
     color: rgba(0, 255, 255, 0.6);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     margin-top: 0.25rem;
   }
 
@@ -123,7 +125,7 @@
 
   .setup-cmd code {
     font-family: var(--mono);
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     color: var(--cyan);
     flex: 1;
   }
@@ -149,7 +151,7 @@
   .search-bar input {
     width: 100%;
     font-family: var(--mono);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     padding: 0.6rem 0.75rem;
     border: 2px solid rgba(0,255,255,0.3);
     background: var(--gray);
@@ -176,7 +178,7 @@
 
   .category-header h2 {
     font-family: var(--mono);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: var(--pink);
     text-transform: uppercase;
@@ -226,20 +228,20 @@
   .plugin-name {
     font-family: var(--mono);
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     color: white;
   }
 
   .plugin-version {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     color: rgba(0,255,255,0.4);
   }
 
   .plugin-desc {
-    font-size: 0.78rem;
-    color: rgba(0,255,255,0.6);
-    margin-top: 0.15rem;
-    line-height: 1.5;
+    font-size: 0.88rem;
+    color: rgba(0,255,255,0.65);
+    margin-top: 0.2rem;
+    line-height: 1.55;
   }
 
   .plugin:not(.has-skills) .plugin-desc {
@@ -324,15 +326,15 @@
 
   .skill-item-name {
     font-family: var(--mono);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--pink);
     white-space: nowrap;
   }
 
   .skill-item-desc {
-    color: rgba(0,255,255,0.4);
-    font-size: 0.72rem;
+    color: rgba(0,255,255,0.5);
+    font-size: 0.82rem;
   }
 
   /* Modal */
@@ -496,6 +498,127 @@
 
   footer a:hover { color: var(--cyan); text-shadow: 0 0 10px rgba(0,255,255,0.5); }
 
+  /* Animations */
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.8; }
+    97% { opacity: 1; }
+    98% { opacity: 0.6; }
+    99% { opacity: 1; }
+  }
+
+  @keyframes glitch-text {
+    0%, 92%, 100% { transform: translateX(0); }
+    93% { transform: translateX(-2px); }
+    94% { transform: translateX(2px); }
+    95% { transform: translateX(-1px); }
+    96% { transform: translateX(1px); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 4px 4px 0px rgba(0,255,255,0.25); }
+    50% { box-shadow: 4px 4px 0px rgba(0,255,255,0.25), 0 0 20px rgba(0,255,255,0.15); }
+  }
+
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes border-flow {
+    0% { border-image-source: linear-gradient(0deg, var(--cyan), var(--pink)); }
+    50% { border-image-source: linear-gradient(180deg, var(--cyan), var(--pink)); }
+    100% { border-image-source: linear-gradient(360deg, var(--cyan), var(--pink)); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .setup-cmd {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  .category {
+    animation: fade-in-up 0.4s ease-out both;
+  }
+
+  .category:nth-child(1) { animation-delay: 0.05s; }
+  .category:nth-child(2) { animation-delay: 0.1s; }
+  .category:nth-child(3) { animation-delay: 0.15s; }
+  .category:nth-child(4) { animation-delay: 0.2s; }
+  .category:nth-child(5) { animation-delay: 0.25s; }
+
+  .plugin.has-skills:hover {
+    animation: float 2s ease-in-out infinite;
+  }
+
+  .category-header h2 {
+    display: inline-block;
+    position: relative;
+  }
+
+  .category-header h2::before {
+    content: '>';
+    margin-right: 0.4rem;
+    color: var(--cyan);
+    opacity: 0.5;
+    animation: flicker 2s infinite alternate;
+  }
+
+  /* Floating particles canvas */
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Gradient orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: -1;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .orb-1 {
+    width: 300px; height: 300px;
+    background: rgba(0,255,255,0.06);
+    top: 10%; left: -5%;
+    animation-delay: 0s;
+  }
+
+  .orb-2 {
+    width: 250px; height: 250px;
+    background: rgba(255,0,255,0.05);
+    top: 50%; right: -8%;
+    animation-delay: -3s;
+  }
+
+  .orb-3 {
+    width: 200px; height: 200px;
+    background: rgba(255,255,0,0.03);
+    bottom: 10%; left: 30%;
+    animation-delay: -5s;
+  }
+
   .category.hidden { display: none; }
   .plugin.hidden { display: none; }
 
@@ -509,6 +632,11 @@
 </style>
 </head>
 <body>
+
+<canvas id="particles"></canvas>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
 
 <div class="container">
   <header>
@@ -761,6 +889,56 @@ function filterPlugins() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 render();
+
+// Floating particles
+(function() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function init() {
+    resize();
+    particles = [];
+    const count = Math.floor((w * h) / 18000);
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.5 + 0.5,
+        dx: (Math.random() - 0.5) * 0.3,
+        dy: (Math.random() - 0.5) * 0.3,
+        color: Math.random() > 0.7 ? 'rgba(255,0,255,' : 'rgba(0,255,255,',
+        alpha: Math.random() * 0.4 + 0.1
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + p.alpha + ')';
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); });
+  init();
+  draw();
+})();
 </script>
 
 </body>
