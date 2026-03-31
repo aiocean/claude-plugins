@@ -32,27 +32,24 @@ Usage:
 """
 
 import json
-import os
-import subprocess
-import sys
 import time
 import urllib.request
 
 DEFAULT_PORT = 9223
-PID_FILE = "/tmp/cdp_relay.pid"
-RELAY_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cdp_relay.py")
-RELAY_BINARY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cdp-relay")
 
 
 class CDPClient:
     """High-level client for Chrome interaction via the CDP relay."""
 
-    def __init__(self, port=DEFAULT_PORT, auto_start=True):
+    def __init__(self, port=DEFAULT_PORT):
         self.port = port
         self.base = f"http://127.0.0.1:{port}"
         self.session_id = None
-        if auto_start:
-            self.ensure_relay()
+        if not self._health():
+            raise ConnectionError(
+                "CDP relay is not running. Start it with:\n"
+                "  nohup /tmp/cdp-relay > /tmp/cdp_relay.log 2>&1 &"
+            )
 
     def __enter__(self):
         return self
@@ -62,36 +59,12 @@ class CDPClient:
 
     # -- Relay lifecycle --
 
-    def ensure_relay(self):
-        """Start relay if not running. Returns True if relay is available."""
-        if self._health():
-            return True
-        return self._start_relay()
-
     def _health(self):
         try:
             data = self._get("/health")
             return data.get("status") == "ok"
         except Exception:
             return False
-
-    def _start_relay(self):
-        # Try Go binary first, fall back to Python
-        if os.path.isfile(RELAY_BINARY) and os.access(RELAY_BINARY, os.X_OK):
-            cmd = [RELAY_BINARY, "--port", str(self.port)]
-        else:
-            cmd = [sys.executable, RELAY_SCRIPT, "--port", str(self.port)]
-        subprocess.Popen(
-            cmd,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-        for _ in range(20):
-            time.sleep(0.25)
-            if self._health():
-                return True
-        return False
 
     def stop_relay(self):
         """Gracefully stop the relay."""

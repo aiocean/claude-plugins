@@ -7,12 +7,61 @@ description: Interact with Chrome browser via a persistent CDP relay — navigat
 
 ## Environment
 
-- relay: !`curl -s http://127.0.0.1:9223/health 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'running (pid={d.get(\"pid\")}, idle={d.get(\"idle_seconds\",0)}s)')" 2>/dev/null || echo "not running (will auto-start)"`
+- go: !`go version 2>/dev/null | awk '{print $3}' || echo "NOT INSTALLED — install from https://go.dev/dl/"`
+- binary: !`test -x /tmp/cdp-relay && echo "built (/tmp/cdp-relay)" || echo "NOT BUILT"`
+- relay: !`curl -s http://127.0.0.1:9223/health 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'running (pid={d.get(\"pid\")}, connected={d.get(\"connected\")})')" 2>/dev/null || echo "NOT RUNNING"`
 - websocket-client: !`python3 -c "import websocket; print('installed')" 2>/dev/null || echo "NOT INSTALLED — pip install websocket-client"`
 - chrome: !`curl -s http://127.0.0.1:9223/targets 2>/dev/null | python3 -c "import json,sys; t=json.load(sys.stdin); pages=[x for x in t if x.get('type')=='page']; print(f'{len(pages)} tabs')" 2>/dev/null || echo "check chrome://inspect/#remote-debugging"`
 
 ```bash
 CDP="${CLAUDE_PLUGIN_ROOT}/skills/aio-cdp-relay/scripts"
+```
+
+## Setup (first time)
+
+### 1. Install Go (if `go` check above shows NOT INSTALLED)
+
+Tell the user to install Go from https://go.dev/dl/ or via their package manager:
+```bash
+# macOS:
+brew install go
+# Linux:
+sudo apt install golang-go
+```
+
+### 2. Build the relay binary (if `binary` check above shows NOT BUILT)
+
+Tell the user to run:
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}/skills/aio-cdp-relay/scripts/relay-go" && go build -o /tmp/cdp-relay .
+```
+
+### 3. Enable Chrome remote debugging
+
+Tell the user to open Chrome and go to `chrome://inspect/#remote-debugging` (one-time, persists until Chrome restart).
+
+### 4. Install websocket-client (if check above shows NOT INSTALLED)
+
+```bash
+pip install websocket-client
+```
+
+## Relay Server
+
+The relay server must be started manually and runs persistently (no idle timeout). It auto-reconnects to Chrome if the connection drops.
+
+### Start the relay server (if `relay` check above shows NOT RUNNING)
+
+Tell the user to run:
+```bash
+nohup /tmp/cdp-relay > /tmp/cdp_relay.log 2>&1 &
+```
+
+### Stop the relay server
+
+```bash
+curl -X POST http://127.0.0.1:9223/stop
+# Or: kill $(cat /tmp/cdp_relay.pid)
 ```
 
 ## How It Works
@@ -23,7 +72,8 @@ A persistent HTTP relay holds one WebSocket to Chrome. Scripts talk to the relay
 Script ──HTTP──▶ CDP Relay (:9223) ──WS──▶ Chrome
 ```
 
-- **Auto-starts** on first use, **auto-stops** after 5 min idle
+- Runs persistently until explicitly stopped
+- Auto-reconnects to Chrome if WebSocket drops
 - Scripts can start/stop freely without reconnecting
 - All CDP commands available: navigation, network, cookies, DOM, screenshots, JS eval
 
@@ -50,8 +100,6 @@ sys.path.insert(0, "<CLAUDE_PLUGIN_ROOT>/skills/aio-cdp-relay/scripts")
 from cdp_client import CDPClient
 
 with CDPClient() as cdp:
-    # Auto-starts relay if needed
-
     # Find and attach to a tab
     tab = cdp.find_tab(url_contains="admin.shopify.com")
     cdp.attach(tab["targetId"])
@@ -88,8 +136,7 @@ with CDPClient() as cdp:
 
 | Method | Description |
 |--------|-------------|
-| `CDPClient(port=9223)` | Create client, auto-start relay |
-| `cdp.ensure_relay()` | Start relay if not running |
+| `CDPClient(port=9223)` | Create client (relay must already be running) |
 | `cdp.stop_relay()` | Gracefully stop relay |
 
 ### Targets
@@ -222,14 +269,18 @@ with CDPClient() as cdp:
 
 ## Prerequisites
 
-1. Chrome with remote debugging: `chrome://inspect/#remote-debugging` (one-time, persists until Chrome restart)
-2. `pip install websocket-client`
+1. Go installed (`go version` — install from https://go.dev/dl/)
+2. Relay binary built (`go build -o /tmp/cdp-relay .` in relay-go dir)
+3. Chrome with remote debugging: `chrome://inspect/#remote-debugging`
+4. `pip install websocket-client` (for Python client/CLI tool)
+5. Relay server running with `nohup` (see "Start the relay server" above)
 
 ## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
-| Relay won't start | Check `chrome://inspect/#remote-debugging` is enabled |
+| Relay not running | Start with `nohup` command above |
 | No tabs found | Open at least one page in Chrome |
-| Connection refused | Chrome may have restarted — relay auto-reconnects on next request |
+| Connection refused | Chrome may have restarted — relay auto-reconnects within ~3s |
 | Events empty | Call `network_enable()` before navigation, increase `wait_events` timeout |
+| Check relay logs | `tail -f /tmp/cdp_relay.log` |

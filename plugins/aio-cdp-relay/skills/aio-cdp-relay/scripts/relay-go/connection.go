@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -139,7 +140,7 @@ func (c *CDPConnection) recvLoop() {
 		}
 	}
 
-	// WebSocket died — clean up
+	// WebSocket died — clean up and auto-reconnect
 	fmt.Fprintln(os.Stderr, "[relay] WebSocket recv loop ended, marking disconnected.")
 	c.mu.Lock()
 	if c.ws != nil {
@@ -156,6 +157,23 @@ func (c *CDPConnection) recvLoop() {
 		delete(c.pending, id)
 	}
 	c.pendingMu.Unlock()
+
+	// Auto-reconnect in background
+	go c.autoReconnect()
+}
+
+const reconnectInterval = 3 * time.Second
+
+// autoReconnect keeps trying to reconnect to Chrome until successful.
+func (c *CDPConnection) autoReconnect() {
+	for {
+		time.Sleep(reconnectInterval)
+		log.Println("[relay] Attempting to reconnect to Chrome...")
+		if err := c.EnsureConnected(); err == nil {
+			log.Println("[relay] Reconnected to Chrome successfully.")
+			return
+		}
+	}
 }
 
 // Send sends a CDP command and waits for a response.
