@@ -1,6 +1,8 @@
 ---
 name: aio-reflect
 description: Evaluate past Claude Code sessions and extract reusable knowledge as CLAUDE.md updates or new skills. Triggers: "reflect on sessions", "what did we learn", "save this knowledge", "extract learnings", after completing significant tasks.
+when_to_use: reflect on sessions, what did we learn, save knowledge, extract learnings, session review, reusable knowledge, CLAUDE.md updates, extract skills, retrospective, post-mortem
+effort: high
 context: fork
 ---
 

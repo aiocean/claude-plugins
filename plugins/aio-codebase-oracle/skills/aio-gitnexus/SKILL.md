@@ -1,6 +1,8 @@
 ---
 name: aio-gitnexus
 description: Install, configure, and manage the GitNexus code intelligence engine — index codebase, setup MCP, check status, troubleshoot. Triggers: "setup gitnexus", "index codebase", "gitnexus status", "rebuild index", "setup code intelligence".
+when_to_use: setup gitnexus, index codebase, gitnexus status, rebuild index, code intelligence, knowledge graph, install gitnexus, configure mcp, gitnexus troubleshoot, analyze codebase
+effort: medium
 ---
 
 # GitNexus Manager

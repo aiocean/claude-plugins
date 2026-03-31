@@ -1,6 +1,9 @@
 ---
 name: aio-epub-export
 description: Pack and export translated EPUB books. Bilingual or translation-only output. Triggers: "export epub", "xuất sách", "pack epub", "đóng gói sách", "download epub", "tải sách", "send to kindle".
+when_to_use: export epub, xuất sách, pack epub, đóng gói sách, download epub, tải sách, send to kindle, bilingual export, generate epub file
+effort: medium
+argument-hint: book ID
 ---
 
 # EPUB Export — Pack & Download

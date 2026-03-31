@@ -70,11 +70,22 @@ plugins/{plugin-name}/
 name: skill-name
 description: |
   What it does. Use when [trigger phrase 1], [trigger phrase 2],
-  or user mentions [keyword].
+  or user mentions [keyword]. Include all synonyms and variations
+  for fuzzy-match discovery.
+when_to_use: |
+  raw keywords and phrases for AI matching, comma-separated.
+  Example: cdp relay, browser automation, chrome devtools, capture network
+argument-hint: "brief hint shown in UI (e.g. 'URL or issue key')"
+effort: medium
 ---
 ```
 
-The `description` field is how Claude discovers and triggers the skill — include all relevant trigger words and use cases.
+### Field roles:
+- **`description`** (required): Long-form text with trigger words/phrases — used for **fuzzy-match** skill discovery. Keep it verbose with synonyms and variations.
+- **`when_to_use`** (recommended): Raw keywords/phrases for **AI model** to decide when to invoke. No need for full sentences — comma-separated keywords are fine.
+- **`argument-hint`** (optional): Short hint displayed in UI so users know what arguments the skill accepts.
+- **`effort`** (optional): Thinking effort level — `low` for knowledge-only skills, `medium` for standard, `high`/`max` for complex reasoning skills.
+- **`model`** (optional): Force a specific model — `haiku` for lightweight lookups, `sonnet` for standard, `opus` for deep analysis.
 
 ## No Build System
 

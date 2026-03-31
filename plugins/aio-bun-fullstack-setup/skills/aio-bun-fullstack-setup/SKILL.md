@@ -1,6 +1,8 @@
 ---
 name: aio-bun-fullstack-setup
 description: Use when scaffolding a new Bun fullstack project, creating a fullstack app, setting up Bun server, configuring single port server, adding Vite proxy, setting up monorepo, or configuring Docker for Bun. Scaffold mode detects existing files and generates only what is missing. Also use when user mentions fullstack Bun, single port, Bun server, Vite proxy.
+when_to_use: scaffold, fullstack, bun server, vite proxy, single port, monorepo, docker bun, new project, bootstrap, setup bun, bun fullstack, project scaffold
+effort: medium
 ---
 
 ## Environment

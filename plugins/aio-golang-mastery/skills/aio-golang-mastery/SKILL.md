@@ -1,6 +1,8 @@
 ---
 name: aio-golang-mastery
 description: Use when writing, reviewing, scanning, or linting Go code. Lint mode runs the full 7-step tooling chain (go build, go vet, golangci-lint, govulncheck, nilaway, deadcode, race detection) and applies idiomatic fixes. Also use for Go best practices, concurrency, error handling, testing, gRPC, goroutines, channels. Covers idiomatic patterns, generics, TDD, and production hardening based on Google/Uber style guides. For Go TUI apps, combine with aio-tui.
+when_to_use: go code, golang, lint go, review go, go best practices, concurrency, goroutines, channels, error handling, gRPC, go vet, golangci-lint, govulncheck, race detection, generics, TDD, idiomatic go, go testing
+effort: medium
 ---
 
 ## Environment

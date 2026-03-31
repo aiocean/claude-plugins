@@ -1,6 +1,8 @@
 {
   "name": "aio-research-kit",
   "description": "Research Kit CLI for structured 10-phase research workflows. Initialize research projects, validate structure, and execute systematic research via research-cli.",
-  "version": "1.2.1",
-  "author": { "name": "aiocean" }
+  "version": "1.2.2",
+  "author": {
+    "name": "aiocean"
+  }
 }

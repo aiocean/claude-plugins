@@ -1,7 +1,9 @@
 {
   "name": "aio-golang-mastery",
   "description": "Complete Go development skill with lint mode (7-step tooling chain: build, vet, golangci-lint, govulncheck, nilaway, deadcode, race detection). Covers idiomatic patterns, error handling, concurrency, interfaces, generics, testing, project structure, production hardening, and gRPC. Based on Google/Uber style guides. Updated for Go 1.25.",
-  "version": "1.1.0",
-  "author": { "name": "aiocean" },
+  "version": "1.1.1",
+  "author": {
+    "name": "aiocean"
+  },
   "license": "MIT"
 }

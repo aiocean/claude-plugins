@@ -1,6 +1,9 @@
 ---
 name: aio-epub-review
 description: Deep literary review of translated EPUB chapters. Evaluate translation quality, fix consistency issues, and check cross-chapter coherence. Triggers: "review translation", "đánh giá bản dịch", "review chapter", "kiểm tra dịch", "consistency check", "kiểm tra nhất quán", "fix translation", "sửa bản dịch", "literary review".
+when_to_use: review translation, đánh giá bản dịch, review chapter, kiểm tra dịch, consistency check, kiểm tra nhất quán, fix translation, sửa bản dịch, literary review, cross-chapter coherence, tone review, fluency check
+effort: high
+argument-hint: book ID and optional chapter number
 ---
 
 # EPUB Review — Deep Literary Review

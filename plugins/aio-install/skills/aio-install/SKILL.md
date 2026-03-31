@@ -1,6 +1,8 @@
 ---
 name: aio-install
 description: Install, enable, disable, and list aiocean plugins for the current project. Triggers: "install plugin", "add plugin", "enable plugin", "disable plugin", "list plugins", "available plugins".
+when_to_use: install plugin, add plugin, enable plugin, disable plugin, list plugins, available plugins, manage plugins, remove plugin, search plugins, aiocean
+effort: medium
 ---
 
 # Plugin Installer (aiocean-plugins)

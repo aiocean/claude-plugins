@@ -1,6 +1,8 @@
 ---
 name: aio-ios-device-debug
 description: Debug iOS apps on physical devices — build, install, capture logs, extract crash reports, and take screenshots. Triggers: "debug on device", "deploy to iPhone", "get crash logs", "pull crash report", "device screenshot", syslog.
+when_to_use: debug on device, deploy to iPhone, get crash logs, pull crash report, device screenshot, syslog, iOS device, physical device, libimobiledevice, idevicesyslog, idevicecrashreport, xcodebuild
+effort: medium
 ---
 
 ```bash

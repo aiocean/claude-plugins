@@ -1,7 +1,9 @@
 {
   "name": "aio-mermaid",
   "description": "Generate shareable MinimalMermaid diagram URLs. Compress mermaid code into shareable links.",
-  "version": "1.2.1",
-  "author": { "name": "aiocean" },
+  "version": "1.2.2",
+  "author": {
+    "name": "aiocean"
+  },
   "license": "MIT"
 }

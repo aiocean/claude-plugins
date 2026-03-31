@@ -1,6 +1,9 @@
 ---
 name: aio-epub-quality
 description: Check translation quality and find chapters that need re-translation. Triggers: "check quality", "kiểm tra chất lượng", "quality report", "báo cáo chất lượng", "find bad translations", "tìm bản dịch kém".
+when_to_use: check quality, kiểm tra chất lượng, quality report, báo cáo chất lượng, find bad translations, tìm bản dịch kém, translation quality, QA check, retranslate
+effort: medium
+argument-hint: book ID
 ---
 
 # EPUB Quality — Translation Quality Report

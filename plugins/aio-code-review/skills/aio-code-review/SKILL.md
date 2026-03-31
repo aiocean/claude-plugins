@@ -1,6 +1,8 @@
 ---
 name: aio-code-review
 description: Multi-phase code review pipeline with domain-specific analysis via GitNexus and parallel specialized agents. Triggers: "review code", "code review", "review PR", "ultra review". Use after aio-deep-plan or before merging.
+when_to_use: review code, code review, review PR, ultra review, before merge, quality check, pull request review, review changes, review diff, security review, architecture review
+effort: high
 context: fork
 agent: oh-my-claudecode:critic
 ---

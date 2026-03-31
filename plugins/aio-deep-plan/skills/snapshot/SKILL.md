@@ -1,6 +1,8 @@
 ---
 name: aio-snapshot
 description: PROACTIVE planning — baseline step in the aio-deep-plan pipeline. Use when the user wants change tracking: "create snapshot", "baseline", "before I start coding". Enables change detection in the review skill after coding. NOT for debugging — use aio-debug instead.
+when_to_use: create snapshot, baseline, before I start coding, change tracking, save state, capture baseline, before coding
+effort: low
 ---
 
 ## Environment

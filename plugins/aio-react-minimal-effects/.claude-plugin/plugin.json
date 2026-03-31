@@ -1,7 +1,9 @@
 {
   "name": "aio-react-minimal-effects",
   "description": "Minimize useEffect in React 19. Scan mode finds and fixes problematic effects in existing code. Covers React Compiler, new hooks, and proper patterns.",
-  "version": "3.1.0",
-  "author": { "name": "aiocean" },
+  "version": "3.1.1",
+  "author": {
+    "name": "aiocean"
+  },
   "license": "MIT"
 }
