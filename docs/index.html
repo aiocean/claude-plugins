@@ -6,87 +6,116 @@
 <title>aiocean — Claude Code Plugins</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --surface-2: #1a1a1a;
-    --border: #262626;
-    --border-hover: #333;
-    --text: #ededed;
-    --text-2: #a1a1a1;
-    --text-3: #666;
-    --accent: #00e5a0;
-    --accent-dim: rgba(0, 229, 160, 0.08);
-    --accent-border: rgba(0, 229, 160, 0.25);
-    --mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --radius: 6px;
+    --cyan: #00FFFF;
+    --pink: #FF00FF;
+    --yellow: #FFFF00;
+    --black: #050505;
+    --gray: #121212;
+    --cyan-dim: rgba(0, 255, 255, 0.08);
+    --cyan-border: rgba(0, 255, 255, 0.3);
+    --pink-dim: rgba(255, 0, 255, 0.08);
+    --pink-border: rgba(255, 0, 255, 0.3);
+    --mono: 'JetBrains Mono', 'SF Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  ::selection {
+    background: var(--pink);
+    color: white;
+  }
+
   body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
+    font-family: var(--mono);
+    background: var(--black);
+    color: var(--cyan);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* CRT scan lines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%),
+      linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 100;
   }
 
   .container {
-    max-width: 880px;
+    max-width: 920px;
     margin: 0 auto;
     padding: 3rem 1.5rem 4rem;
+    position: relative;
   }
 
-  header { margin-bottom: 2rem; }
+  /* Header */
+  header {
+    margin-bottom: 2.5rem;
+    rotate: -0.3deg;
+  }
 
   .logo {
     font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--accent);
-    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--pink);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     margin-bottom: 0.75rem;
+    text-shadow: 2px 0 var(--pink), -2px 0 var(--cyan);
   }
 
   header h1 {
-    font-family: var(--sans);
-    font-size: 1.75rem;
+    font-family: var(--display);
+    font-size: 2.25rem;
     font-weight: 700;
     letter-spacing: -0.03em;
-    margin-bottom: 0.5rem;
+    color: white;
+    text-shadow: -1px -1px 0 var(--cyan), 1px 1px 0 var(--pink);
   }
 
   header p {
-    color: var(--text-2);
-    font-size: 0.9rem;
+    color: rgba(0, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
   }
 
+  /* Setup command */
   .setup-cmd {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.6rem 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--accent-border);
-    border-radius: var(--radius);
-    background: var(--accent-dim);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    border: 2px solid var(--cyan);
+    background: var(--black);
     cursor: pointer;
-    transition: all 0.12s;
+    transition: all 0.15s;
+    box-shadow: 4px 4px 0px rgba(0,255,255,0.25);
+    rotate: 0.2deg;
   }
 
   .setup-cmd:hover {
-    border-color: var(--accent);
-    background: var(--accent-border);
+    box-shadow: 4px 4px 0px rgba(0,255,255,0.25), 0 0 20px rgba(0,255,255,0.3);
   }
 
   .setup-cmd .setup-label {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--accent);
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--black);
+    background: var(--cyan);
+    padding: 0.15rem 0.4rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     white-space: nowrap;
@@ -94,81 +123,95 @@
 
   .setup-cmd code {
     font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--text);
+    font-size: 0.78rem;
+    color: var(--cyan);
     flex: 1;
   }
 
   .setup-cmd .setup-copy {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--text-3);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: rgba(0,255,255,0.5);
     padding: 0.15rem 0.4rem;
-    border: 1px solid var(--border);
-    border-radius: 3px;
+    border: 1px solid rgba(0,255,255,0.3);
     white-space: nowrap;
+    transition: all 0.12s;
   }
 
   .setup-cmd:hover .setup-copy {
-    color: var(--text);
-    border-color: var(--border-hover);
+    color: var(--cyan);
+    border-color: var(--cyan);
   }
 
-  .search-bar { margin-bottom: 1.25rem; }
+  /* Search */
+  .search-bar { margin-bottom: 1.5rem; }
 
   .search-bar input {
     width: 100%;
     font-family: var(--mono);
     font-size: 0.85rem;
     padding: 0.6rem 0.75rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
+    border: 2px solid rgba(0,255,255,0.3);
+    background: var(--gray);
+    color: var(--cyan);
     outline: none;
-    transition: border-color 0.12s;
+    transition: all 0.15s;
   }
 
-  .search-bar input::placeholder { color: var(--text-3); }
-  .search-bar input:focus { border-color: var(--accent); }
+  .search-bar input::placeholder { color: rgba(0,255,255,0.3); }
 
-  .category { margin-bottom: 1.5rem; }
+  .search-bar input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 15px rgba(0,255,255,0.2);
+  }
+
+  /* Category */
+  .category { margin-bottom: 2rem; }
 
   .category-header {
-    padding: 0.5rem 0;
-    margin-bottom: 0.25rem;
+    padding: 0.4rem 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,0,255,0.3);
   }
 
   .category-header h2 {
     font-family: var(--mono);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-3);
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--pink);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
+    text-shadow: 1px 0 var(--pink);
   }
 
+  /* Plugin card */
   .plugin {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
     padding: 0.75rem;
-    border-radius: var(--radius);
-    transition: all 0.12s;
+    transition: all 0.15s;
     border: 1px solid transparent;
+    margin-bottom: 2px;
   }
 
-  .plugin:hover { background: var(--surface); }
+  .plugin:hover {
+    background: rgba(0,255,255,0.03);
+    border-color: rgba(0,255,255,0.15);
+  }
 
   .plugin.has-skills {
-    border: 1px solid var(--border);
-    background: var(--surface);
-    margin-bottom: 0.25rem;
+    border: 2px solid rgba(0,255,255,0.2);
+    background: rgba(0,255,255,0.03);
+    margin-bottom: 0.5rem;
     cursor: pointer;
+    box-shadow: 4px 4px 0px rgba(0,255,255,0.1);
+    rotate: -0.15deg;
   }
 
   .plugin.has-skills:hover {
-    border-color: var(--border-hover);
+    border-color: var(--cyan);
+    box-shadow: 4px 4px 0px rgba(0,255,255,0.2), 0 0 15px rgba(0,255,255,0.15);
   }
 
   .plugin-info { flex: 1; min-width: 0; }
@@ -182,22 +225,21 @@
 
   .plugin-name {
     font-family: var(--mono);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.85rem;
-    color: var(--text);
+    color: white;
   }
 
   .plugin-version {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--text-3);
+    font-size: 0.65rem;
+    color: rgba(0,255,255,0.4);
   }
 
   .plugin-desc {
-    font-size: 0.82rem;
-    color: var(--text-2);
+    font-size: 0.78rem;
+    color: rgba(0,255,255,0.6);
     margin-top: 0.15rem;
-    line-height: 1.45;
+    line-height: 1.5;
   }
 
   .plugin:not(.has-skills) .plugin-desc {
@@ -206,64 +248,65 @@
     text-overflow: ellipsis;
   }
 
+  /* Install button */
   .install-btn {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 0.35rem 0.65rem;
-    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.35rem 0.7rem;
     cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text-2);
-    transition: all 0.12s;
+    border: 2px solid rgba(0,255,255,0.4);
+    background: transparent;
+    color: var(--cyan);
+    transition: all 0.15s;
     white-space: nowrap;
     flex-shrink: 0;
     margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   .install-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-dim);
+    border-color: var(--cyan);
+    background: var(--cyan);
+    color: var(--black);
+    box-shadow: 0 0 15px rgba(0,255,255,0.4);
+    transform: translateY(-1px);
   }
 
-  .install-btn.copied {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: #0a0a0a;
+  .install-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
   }
 
+  /* Skill count badge */
   .skill-count {
     font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--accent);
-    background: var(--accent-dim);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    border: 1px solid var(--accent-border);
-    cursor: pointer;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--black);
+    background: var(--pink);
+    padding: 0.1rem 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
     transition: all 0.12s;
     user-select: none;
   }
 
-  .skill-count:hover {
-    background: var(--accent-border);
-  }
-
   .skill-count::after {
     content: ' \25BE';
-    font-size: 0.65rem;
+    font-size: 0.55rem;
   }
 
   .skill-count.open::after {
     content: ' \25B4';
   }
 
+  /* Skills list */
   .skills-list {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.25s ease;
+    transition: max-height 0.3s ease;
     margin-top: 0.25rem;
   }
 
@@ -274,73 +317,30 @@
     align-items: baseline;
     gap: 0.5rem;
     padding: 0.2rem 0;
-    font-size: 0.78rem;
-    color: var(--text-2);
-    border-left: 1px solid var(--border);
+    border-left: 2px solid rgba(255,0,255,0.3);
     padding-left: 0.75rem;
     margin-left: 0.25rem;
   }
 
   .skill-item-name {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--pink);
     white-space: nowrap;
-    opacity: 0.85;
   }
 
   .skill-item-desc {
-    color: var(--text-3);
-    font-size: 0.75rem;
+    color: rgba(0,255,255,0.4);
+    font-size: 0.72rem;
   }
 
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--accent);
-    color: #0a0a0a;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    font-weight: 600;
-    opacity: 0;
-    transition: all 0.25s;
-    z-index: 300;
-    pointer-events: none;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  footer {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-    color: var(--text-3);
-  }
-
-  footer a {
-    font-family: var(--mono);
-    color: var(--text-2);
-    text-decoration: none;
-  }
-
-  footer a:hover { color: var(--accent); }
-
+  /* Modal */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(5, 5, 5, 0.85);
     z-index: 200;
     align-items: center;
     justify-content: center;
@@ -351,102 +351,159 @@
   .modal-overlay.open { display: flex; }
 
   .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: var(--gray);
+    border: 2px solid var(--cyan);
     width: 100%;
     max-width: 600px;
-    overflow: hidden;
+    box-shadow: 8px 8px 0px rgba(0,255,255,0.2), 0 0 40px rgba(0,255,255,0.15);
   }
 
   .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    border-bottom: 2px solid var(--cyan);
+    background: rgba(0,255,255,0.05);
   }
 
   .modal-header h3 {
     font-family: var(--mono);
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--cyan);
   }
+
+  .modal-header .dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .modal-header .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .modal-header .dot-pink { border: 1.5px solid var(--pink); }
+  .modal-header .dot-cyan { background: var(--cyan); }
 
   .modal-close {
     background: none;
     border: none;
-    color: var(--text-3);
+    color: rgba(0,255,255,0.5);
     font-size: 1.2rem;
     cursor: pointer;
     padding: 0;
     line-height: 1;
+    font-family: var(--mono);
   }
 
-  .modal-close:hover { color: var(--text); }
+  .modal-close:hover { color: var(--cyan); }
 
-  .modal-body {
-    padding: 1rem;
-  }
+  .modal-body { padding: 1rem; }
 
   .modal-body p {
-    font-size: 0.8rem;
-    color: var(--text-3);
-    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    color: rgba(0,255,255,0.5);
+    margin-bottom: 0.6rem;
   }
 
   .modal-cmd {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--black);
+    border: 1px solid rgba(0,255,255,0.3);
     padding: 0.75rem 1rem;
     cursor: pointer;
-    transition: border-color 0.12s;
+    transition: all 0.12s;
   }
 
-  .modal-cmd:hover { border-color: var(--accent-border); }
+  .modal-cmd:hover { border-color: var(--cyan); }
 
   .modal-cmd code {
     font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--text);
+    font-size: 0.78rem;
+    color: var(--cyan);
     flex: 1;
     user-select: all;
   }
 
   .modal-cmd .copy-icon {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--text-3);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(0,255,255,0.5);
     padding: 0.2rem 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 3px;
+    border: 1px solid rgba(0,255,255,0.3);
     transition: all 0.12s;
-    white-space: nowrap;
+    text-transform: uppercase;
   }
 
   .modal-cmd:hover .copy-icon {
-    color: var(--accent);
-    border-color: var(--accent-border);
+    color: var(--cyan);
+    border-color: var(--cyan);
   }
 
   .modal-cmd.copied .copy-icon {
-    color: #0a0a0a;
-    background: var(--accent);
-    border-color: var(--accent);
+    color: var(--black);
+    background: var(--cyan);
+    border-color: var(--cyan);
   }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--cyan);
+    color: var(--black);
+    padding: 0.5rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 300;
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(0,255,255,0.5);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,0,255,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: rgba(0,255,255,0.3);
+  }
+
+  footer a {
+    font-family: var(--mono);
+    color: rgba(0,255,255,0.5);
+    text-decoration: none;
+  }
+
+  footer a:hover { color: var(--cyan); text-shadow: 0 0 10px rgba(0,255,255,0.5); }
 
   .category.hidden { display: none; }
   .plugin.hidden { display: none; }
 
   @media (max-width: 640px) {
     .container { padding: 2rem 1rem 3rem; }
-    header h1 { font-size: 1.4rem; }
+    header h1 { font-size: 1.6rem; }
     .setup-cmd { flex-wrap: wrap; }
-    .setup-cmd code { font-size: 0.7rem; }
+    .setup-cmd code { font-size: 0.68rem; }
     footer { flex-direction: column; gap: 0.5rem; text-align: center; }
   }
 </style>
@@ -455,9 +512,9 @@
 
 <div class="container">
   <header>
-    <div class="logo">aiocean/claude-plugins</div>
+    <div class="logo">// aiocean/claude-plugins</div>
     <h1>Plugin Marketplace</h1>
-    <p>Browse plugins and copy install commands.</p>
+    <p>$ browse plugins and copy install commands</p>
   </header>
 
   <div class="setup-cmd" onclick="copySetup()" title="Click to copy">
@@ -467,7 +524,7 @@
   </div>
 
   <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="search plugins..." oninput="filterPlugins()">
+    <input type="text" id="searchInput" placeholder="$ search plugins..." oninput="filterPlugins()">
   </div>
 
   <div id="pluginList"></div>
@@ -482,10 +539,13 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="modalTitle">install</h3>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div class="dots">
+        <div class="dot dot-pink"></div>
+        <div class="dot dot-cyan"></div>
+      </div>
     </div>
     <div class="modal-body">
-      <p>Run in your terminal:</p>
+      <p>// run in your terminal</p>
       <div class="modal-cmd" id="modalCmd" onclick="copyModalCmd()">
         <code id="modalCode"></code>
         <span class="copy-icon" id="modalCopyIcon">copy</span>
@@ -598,7 +658,7 @@ function installCmd(name) {
 }
 
 function openInstallModal(name) {
-  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('modalTitle').textContent = '$ install ' + name;
   document.getElementById('modalCode').textContent = installCmd(name);
   document.getElementById('modalCmd').classList.remove('copied');
   document.getElementById('modalCopyIcon').textContent = 'copy';
