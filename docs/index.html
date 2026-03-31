@@ -414,18 +414,25 @@
   }
 
   .skill-toggle {
-    background: none;
-    border: none;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 0.7rem;
-    padding: 0.15rem 0.4rem;
+    font-size: 1rem;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     opacity: 0.7;
-    transition: opacity 0.12s;
+    transition: all 0.12s;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
-  .skill-toggle:hover { opacity: 1; }
+  .skill-toggle:hover { opacity: 1; border-color: var(--accent); }
 
   .skills-list {
     max-height: 0;
