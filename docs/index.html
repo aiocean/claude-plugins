@@ -545,10 +545,15 @@
       </div>
     </div>
     <div class="modal-body">
-      <p>// run in your terminal</p>
-      <div class="modal-cmd" id="modalCmd" onclick="copyModalCmd()">
+      <p>// step 1: add marketplace (one-time)</p>
+      <div class="modal-cmd" onclick="copyCmd(this, 'claude plugin marketplace add aiocean/claude-plugins')">
+        <code>claude plugin marketplace add aiocean/claude-plugins</code>
+        <span class="copy-icon">copy</span>
+      </div>
+      <p style="margin-top:0.75rem">// step 2: install plugin</p>
+      <div class="modal-cmd" id="modalCmd" onclick="copyCmd(this, document.getElementById('modalCode').textContent)">
         <code id="modalCode"></code>
-        <span class="copy-icon" id="modalCopyIcon">copy</span>
+        <span class="copy-icon">copy</span>
       </div>
     </div>
   </div>
@@ -665,11 +670,15 @@ function openInstallModal(name) {
   document.getElementById('modal').classList.add('open');
 }
 
-function copyModalCmd() {
-  const cmd = document.getElementById('modalCode').textContent;
-  navigator.clipboard.writeText(cmd).then(() => {
-    document.getElementById('modalCopyIcon').textContent = 'copied';
-    document.getElementById('modalCmd').classList.add('copied');
+function copyCmd(el, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const icon = el.querySelector('.copy-icon');
+    icon.textContent = 'copied';
+    el.classList.add('copied');
+    setTimeout(() => {
+      icon.textContent = 'copy';
+      el.classList.remove('copied');
+    }, 1500);
   });
 }
 
