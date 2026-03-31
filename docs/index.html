@@ -251,6 +251,9 @@
     color: var(--text-2);
     margin-top: 0.1rem;
     line-height: 1.45;
+  }
+
+  .plugin:not(.has-skills) .plugin-desc {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -384,6 +387,56 @@
 
   footer a:hover { color: var(--accent); }
 
+  .setup-cmd {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius);
+    background: var(--accent-dim);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .setup-cmd:hover {
+    border-color: var(--accent);
+    background: var(--accent-border);
+  }
+
+  .setup-cmd .setup-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .setup-cmd code {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .setup-cmd .setup-copy {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-3);
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .setup-cmd:hover .setup-copy {
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
   .search-bar { margin-bottom: 0.75rem; }
 
   .search-bar input {
@@ -413,26 +466,18 @@
     footer { flex-direction: column; gap: 0.5rem; text-align: center; }
   }
 
-  .skill-toggle {
-    background: var(--surface-2);
+  .plugin.has-skills {
     border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 1rem;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: all 0.12s;
-    flex-shrink: 0;
-    margin-top: 2px;
+    background: var(--surface);
   }
 
-  .skill-toggle:hover { opacity: 1; border-color: var(--accent); }
+  .plugin.has-skills:hover {
+    border-color: var(--border-hover);
+  }
+
+  .skill-toggle {
+    display: none;
+  }
 
   .skills-list {
     max-height: 0;
@@ -470,12 +515,28 @@
 
   .skill-count {
     font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--accent-border);
+    cursor: pointer;
+    transition: all 0.12s;
+    user-select: none;
+  }
+
+  .skill-count:hover {
+    background: var(--accent-border);
+  }
+
+  .skill-count::after {
+    content: ' \25BE';
     font-size: 0.65rem;
-    color: var(--text-3);
-    background: var(--surface-2);
-    padding: 0.1rem 0.35rem;
-    border-radius: 3px;
-    border: 1px solid var(--border);
+  }
+
+  .skill-count.open::after {
+    content: ' \25B4';
   }
 </style>
 </head>
@@ -487,6 +548,12 @@
     <h1>Plugin Marketplace</h1>
     <p>Select plugins, configure scope, generate install script.</p>
   </header>
+
+  <div class="setup-cmd" onclick="copySetup()" title="Click to copy">
+    <span class="setup-label">setup</span>
+    <code>claude plugin marketplace add aiocean/claude-plugins</code>
+    <span class="setup-copy">copy</span>
+  </div>
 
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="search plugins..." oninput="filterPlugins()">
@@ -642,14 +709,14 @@ function render() {
         <button class="ghost" onclick="toggleCategory('${cat.category}')">toggle</button>
       </div>
       ${cat.plugins.map(p => `
-        <label class="plugin ${selected.has(p.name) ? 'selected' : ''}" id="card-${p.name}">
+        <label class="plugin ${selected.has(p.name) ? 'selected' : ''}${p.skills ? ' has-skills' : ''}" id="card-${p.name}">
           <input type="checkbox" ${selected.has(p.name) ? 'checked' : ''}
                  onchange="toggle('${p.name}')">
           <div class="plugin-info">
             <div class="plugin-top">
               <span class="plugin-name">${p.name}</span>
               <span class="plugin-version">${p.version}</span>
-              ${p.skills ? `<span class="skill-count">${p.skills.length} skills</span>` : ''}
+              ${p.skills ? `<span class="skill-count" id="badge-${p.name}" onclick="event.preventDefault(); event.stopPropagation(); toggleSkills('${p.name}')">${p.skills.length} skills</span>` : ''}
             </div>
             <div class="plugin-desc">${p.desc}</div>
             ${p.skills ? `
@@ -663,7 +730,6 @@ function render() {
               </div>
             ` : ''}
           </div>
-          ${p.skills ? `<button class="skill-toggle" onclick="event.preventDefault(); event.stopPropagation(); toggleSkills('${p.name}')" title="Show skills">&#9662;</button>` : ''}
         </label>
       `).join('')}
     </div>
@@ -673,10 +739,10 @@ function render() {
 
 function toggleSkills(name) {
   const el = document.getElementById('skills-' + name);
-  const btn = el?.closest('.plugin')?.querySelector('.skill-toggle');
+  const badge = document.getElementById('badge-' + name);
   if (el) {
     el.classList.toggle('open');
-    if (btn) btn.innerHTML = el.classList.contains('open') ? '&#9652;' : '&#9662;';
+    if (badge) badge.classList.toggle('open');
   }
 }
 
@@ -750,6 +816,10 @@ function closeModal() {
 
 function copyScript() {
   navigator.clipboard.writeText(generatePlainScript()).then(() => showToast('copied'));
+}
+
+function copySetup() {
+  navigator.clipboard.writeText('claude plugin marketplace add aiocean/claude-plugins').then(() => showToast('copied'));
 }
 
 function showToast(msg) {
