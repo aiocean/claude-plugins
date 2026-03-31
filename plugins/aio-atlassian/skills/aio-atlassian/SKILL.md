@@ -39,6 +39,8 @@ ATLASSIAN_TOKEN=your-api-token
 
 All CLI commands accept `--env .env` to load credentials from this file.
 
+**Global flags:** `--env <path>` (load .env file), `--output text|json` (output format, default: text)
+
 ---
 
 ## Jira CLI
@@ -46,48 +48,96 @@ All CLI commands accept `--env .env` to load credentials from this file.
 ### Issues
 
 ```bash
+# Get issue (full details with transitions, changelog, subtasks, description)
 jira-cli get-issue --issue-key PROJ-123 --env .env
+jira-cli get-issue --issue-key PROJ-123 --fields summary,status --output json
+jira-cli get-issue --issue-key PROJ-123 --expand transitions,changelog
+
+# Search issues with JQL
 jira-cli search-issues --jql "project = PROJ AND status = 'In Progress'" --env .env
-jira-cli search-issues --jql "assignee = currentUser() AND sprint in openSprints()" --env .env
-jira-cli search-issues --jql "project = PROJ AND created >= -7d" --env .env
-jira-cli create-issue --project-key PROJ --summary "Bug title" --issue-type Bug --env .env
-jira-cli create-child-issue --parent-issue-key PROJ-100 --summary "Subtask" --env .env
+jira-cli search-issues --jql "assignee = currentUser() AND sprint in openSprints()" --max-results 10 --env .env
+jira-cli search-issues --jql "project = PROJ AND created >= -7d" --fields summary,status --env .env
+
+# Create issue
+jira-cli create-issue --project PROJ --summary "Bug title" --type Bug --env .env
+jira-cli create-issue --project PROJ --summary "New feature" --type Story \
+  --description "## Overview\nA new feature" --priority High --env .env
+jira-cli create-issue --project PROJ --summary "Task" --type Task \
+  --assignee 5a1234b --priority Medium --env .env
+
+# Create child issue (subtask)
+jira-cli create-child-issue --parent-key PROJ-100 --summary "Subtask 1" --env .env
+jira-cli create-child-issue --parent-key PROJ-100 --summary "Subtask" \
+  --description "Details here" --type Subtask --env .env
+
+# Update issue
 jira-cli update-issue --issue-key PROJ-123 --summary "Updated title" --env .env
+jira-cli update-issue --issue-key PROJ-123 --priority High --assignee 5a1234b --env .env
+jira-cli update-issue --issue-key PROJ-123 --description "## New description" --env .env
+
+# Delete issue (cannot be undone)
 jira-cli delete-issue --issue-key PROJ-123 --env .env
-jira-cli list-issue-types --project-key PROJ --env .env
+
+# List available issue types
+jira-cli list-issue-types --env .env
 ```
 
-### Workflow
+**Issue types:** Bug, Task, Story, Epic, Subtask
+**Priorities:** Highest, High, Medium, Low, Lowest
+
+### Workflow (Status & Transitions)
 
 ```bash
 # Step 1: see available transitions
 jira-cli get-transitions --issue-key PROJ-123 --env .env
 # Step 2: apply transition
 jira-cli transition-issue --issue-key PROJ-123 --transition-id 31 --env .env
+
+# List all statuses for a project
+jira-cli list-statuses --project-key PROJ --env .env
 ```
 
 ### Sprints
 
 ```bash
-jira-cli get-active-sprint --project-key PROJ --env .env
+# List sprints for a project
 jira-cli list-sprints --project-key PROJ --env .env
+jira-cli list-sprints --board-id 42 --env .env
+
+# Get active sprint
+jira-cli get-active-sprint --project-key PROJ --env .env
+
+# Get specific sprint by ID
+jira-cli get-sprint --sprint-id 42 --env .env
+
+# Search sprints by name (substring match by default)
 jira-cli search-sprint --name "Sprint 23" --project-key PROJ --env .env
+jira-cli search-sprint --name "Sprint 23" --project-key PROJ --exact-match --env .env
 ```
 
-### Comments & Worklog
+### Comments
 
 ```bash
 jira-cli add-comment --issue-key PROJ-123 --comment "Fixed in PR #456" --env .env
 jira-cli get-comments --issue-key PROJ-123 --env .env
-jira-cli add-worklog --issue-key PROJ-123 --time-spent "2h 30m" --env .env
 ```
+
+### Worklogs
+
+```bash
+# Log time spent
+jira-cli add-worklog --issue-key PROJ-123 --time-spent 2h30m --env .env
+jira-cli add-worklog --issue-key PROJ-123 --time-spent 1h \
+  --comment "Code review" --started "2025-01-15T09:00:00.000+0700" --env .env
+```
+
+**Time format:** `1h30m`, `3h`, `30m`, or seconds. No spaces between units.
 
 #### Rich Formatting — Markdown Supported
 
 `jira-cli` automatically converts **Markdown to ADF** (Atlassian Document Format) for all text fields — comments, descriptions, and issue updates. Just write standard Markdown:
 
 ```bash
-# Headings, bold, lists, code blocks — all work
 jira-cli add-comment --issue-key PROJ-123 --comment "## Investigation Results
 
 Found **3 issues** across all shops.
@@ -123,20 +173,35 @@ func main() { fmt.Println(\"hello\") }
 ### Relationships & Links
 
 ```bash
-jira-cli link-issues --inward-issue-key PROJ-100 --outward-issue-key PROJ-101 --link-type blocks --env .env
+jira-cli link-issues --inward-issue PROJ-100 --outward-issue PROJ-101 --link-type Blocks --env .env
+jira-cli link-issues --inward-issue PROJ-1 --outward-issue PROJ-2 --link-type Relates --comment "Related work" --env .env
 jira-cli get-related-issues --issue-key PROJ-100 --env .env
 ```
 
-Common link types: `blocks`, `is blocked by`, `relates to`, `duplicates`
+Common link types: `Blocks`, `Duplicate`, `Relates` (capitalized)
 
-### Other
+### Versions
 
 ```bash
-jira-cli get-development-info --issue-key PROJ-123 --env .env   # linked PRs, branches, commits
-jira-cli get-issue-history --issue-key PROJ-123 --env .env
+jira-cli get-version --version-id 10001 --env .env
 jira-cli list-project-versions --project-key PROJ --env .env
-jira-cli list-statuses --project-key PROJ --env .env
-jira-cli download-attachment --issue-key PROJ-123 --env .env
+```
+
+### Development Info
+
+```bash
+# Get linked PRs, branches, commits, builds for an issue
+jira-cli get-development-info --issue-key PROJ-123 --env .env
+jira-cli get-development-info --issue-key PROJ-123 \
+  --include-branches true --include-pull-requests true \
+  --include-commits true --include-builds true --env .env
+```
+
+### History & Attachments
+
+```bash
+jira-cli get-issue-history --issue-key PROJ-123 --env .env
+jira-cli download-attachment --attachment-id 10500 --env .env
 ```
 
 ---
@@ -168,12 +233,12 @@ Flags: `--env` (path to .env), `--output text|json`
 
 ### Sprint Planning
 1. `jira-cli get-active-sprint --project-key PROJ --env .env`
-2. `jira-cli search-issues --jql "sprint = 42 AND status != Done" --env .env`
+2. `jira-cli search-issues --jql "sprint = 42 AND status != Done" --max-results 50 --env .env`
 
 ### Story with Subtasks
-1. `jira-cli create-issue --project-key PROJ --summary "User auth" --issue-type Story --env .env`
-2. `jira-cli create-child-issue --parent-issue-key PROJ-100 --summary "Backend" --env .env`
-3. `jira-cli create-child-issue --parent-issue-key PROJ-100 --summary "Frontend" --env .env`
+1. `jira-cli create-issue --project PROJ --summary "User auth" --type Story --env .env`
+2. `jira-cli create-child-issue --parent-key PROJ-100 --summary "Backend" --env .env`
+3. `jira-cli create-child-issue --parent-key PROJ-100 --summary "Frontend" --env .env`
 
 ### Find and Update Confluence Page
 1. `confluence-cli search-page --query "space = DEV AND text ~ 'deploy'" --env .env`
