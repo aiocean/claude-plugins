@@ -5,8 +5,11 @@ A curated collection of 20 plugins for Claude Code — from codebase analysis to
 ## Quick Start
 
 ```bash
-# Install any plugin
-npx skills add aiocean/claude-plugins -s <plugin-name>
+# 1. Add the marketplace (one-time)
+claude plugin marketplace add aiocean/claude-plugins
+
+# 2. Install any plugin
+claude plugin install <plugin-name>@aiocean-plugins
 
 # Or browse and pick plugins interactively
 # https://aiocean.github.io/claude-plugins/
