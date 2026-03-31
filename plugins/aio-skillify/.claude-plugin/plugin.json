@@ -1,8 +1,0 @@
-{
-  "name": "aio-skillify",
-  "description": "Capture repeatable processes from the current session into reusable skills via guided interview.",
-  "version": "1.0.0",
-  "author": {
-    "name": "aiocean"
-  }
-}

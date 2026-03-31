@@ -9,7 +9,6 @@ allowed-tools:
   - Grep
   - AskUserQuestion
   - Bash(mkdir:*)
-  - Bash(node:*)
 argument-hint: "[optional description of the process to capture]"
 ---
 
@@ -25,20 +24,9 @@ Analyze the current session, interview the user about their intent, and produce 
 
 ### 1. Load Session Memory
 
-Read the session memory summary to get a condensed view of what happened in this session. Use the bundled script:
+Session memory is stored at `~/.claude/projects/{sanitized-cwd}/{sessionId}/session-memory/summary.md` where sanitized-cwd replaces all non-alphanumeric characters with `-`.
 
-```bash
-SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/aio-skillify/scripts"
-node "$SCRIPTS/get-session-memory.mjs" --latest
-```
-
-Options:
-- `--latest` - most recent session memory (default behavior)
-- `--list` - list all available session memories with dates
-- `--session-id <id>` - read a specific session
-- `--cwd <path>` - override working directory
-
-This gives you a compact summary of the entire session including compacted context.
+Use Glob to find and Read the most recent session memory for the current project. This gives you a compact summary of the entire session including compacted context. If no session memory exists, skip this step and rely on the current conversation context.
 
 ### 2. Analyze the Session
 

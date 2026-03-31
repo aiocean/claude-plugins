@@ -51,15 +51,6 @@
       }
     },
     {
-      "name": "aio-claude-manager",
-      "source": "./plugins/aio-claude-manager",
-      "description": "Enable/disable skills based on project context. Reduce skill clutter for specific project types.",
-      "version": "1.1.3",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
       "name": "aio-neobrutalism",
       "source": "./plugins/aio-neobrutalism",
       "description": "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors.",
@@ -82,15 +73,6 @@
       "source": "./plugins/aio-mental-models",
       "description": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
       "version": "2.1.3",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-reflect",
-      "source": "./plugins/aio-reflect",
-      "description": "Learn from Claude Code sessions to extract reusable knowledge. Deep JSONL parsing extracts token usage, cost, work modes, subagents, tasks, compaction, session chains, and file operations for comprehensive reflection.",
-      "version": "2.2.3",
       "author": {
         "name": "aiocean"
       }
@@ -195,15 +177,6 @@
       }
     },
     {
-      "name": "aio-feedback",
-      "source": "./plugins/aio-feedback",
-      "description": "Submit feedback, bug reports, feature requests, and plugin requests for aiocean plugins directly from Claude Code via GitHub Issues.",
-      "version": "1.1.3",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
       "name": "aio-tui",
       "source": "./plugins/aio-tui",
       "description": "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hover, delta tracking), and critical gotchas.",
@@ -285,15 +258,6 @@
       }
     },
     {
-      "name": "aio-install",
-      "source": "./plugins/aio-install",
-      "description": "Install, enable, disable, and list aiocean plugins for the current project via settings.local.json.",
-      "version": "1.1.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
       "name": "aio-browser-cookie",
       "source": "./plugins/aio-browser-cookie",
       "description": "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports.",
@@ -321,9 +285,9 @@
       }
     },
     {
-      "name": "aio-skillify",
-      "source": "./plugins/aio-skillify",
-      "description": "Capture repeatable processes from the current session into reusable skills via guided interview.",
+      "name": "aio-claude-toolkit",
+      "source": "./plugins/aio-claude-toolkit",
+      "description": "Claude Code management toolkit — skill management, plugin install, session reflection, memory consolidation, skill capture, and feedback.",
       "version": "1.0.0",
       "author": "aiocean"
     }
