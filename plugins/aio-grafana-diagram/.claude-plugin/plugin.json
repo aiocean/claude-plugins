@@ -1,9 +1,0 @@
-{
-  "name": "aio-grafana-diagram",
-  "version": "2.0.2",
-  "author": {
-    "name": "aiocean"
-  },
-  "description": "Dashboard diagram generator. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana dashboards.",
-  "license": "MIT"
-}

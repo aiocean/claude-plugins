@@ -1,0 +1,8 @@
+{
+  "name": "aio-research",
+  "description": "Research toolkit — structured research workflows and vector search. Two skills: aio-research-kit (10-phase structured research), aio-rag-kit (RAG with Qdrant vector database).",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}

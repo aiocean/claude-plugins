@@ -1,9 +1,0 @@
-{
-  "name": "aio-neobrutalism",
-  "description": "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors.",
-  "version": "2.0.2",
-  "author": {
-    "name": "aiocean"
-  },
-  "license": "MIT"
-}

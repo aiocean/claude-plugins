@@ -1,8 +1,0 @@
-{
-  "name": "aio-codebase-oracle",
-  "description": "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Oracle writes architecture docs (C4 diagrams, dependency graphs, key flows), module docs, and interactive HTML viewers from scratch.",
-  "version": "5.1.6",
-  "author": {
-    "name": "aiocean"
-  }
-}
