@@ -1,0 +1,8 @@
+{
+  "name": "aio-claude-toolkit",
+  "description": "Claude Code management toolkit — skill management, plugin install, session reflection, memory consolidation, skill capture, and feedback. Six skills: aio-claude-manager (enable/disable/preset skills), aio-install (install aiocean plugins), aio-reflect (extract session learnings), aio-dream (consolidate memories), aio-skillify (capture workflows as skills), feedback (submit bug reports/feature requests).",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}
