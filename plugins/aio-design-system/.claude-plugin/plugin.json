@@ -1,0 +1,8 @@
+{
+  "name": "aio-design-system",
+  "description": "UI/UX design toolkit — design systems, component patterns, and React optimization. Three skills: aio-uiux (comprehensive UI/UX design knowledge), aio-neobrutalism (neobrutalism design system bootstrapper), aio-react-minimal-effects (minimize useEffect in React 19).",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}

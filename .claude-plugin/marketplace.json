@@ -24,15 +24,6 @@
       "deprecated": true
     },
     {
-      "name": "aio-worktree",
-      "source": "./plugins/aio-worktree",
-      "description": "Manage git worktrees for parallel development. Create worktrees, sync changes (spotlight), merge branches, and cleanup.",
-      "version": "1.1.3",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
       "name": "aio-youtube",
       "source": "./plugins/aio-youtube",
       "description": "Search YouTube and extract video transcripts using yt-dlp.",
@@ -45,15 +36,6 @@
       "name": "aio-gherkin-refine",
       "source": "./plugins/aio-gherkin-refine",
       "description": "Comprehensive BDD field guide — writes and reviews Gherkin with expert quality. Includes Example Mapping, 3 Amigos, anti-patterns catalog, and declarative style guide.",
-      "version": "2.0.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-neobrutalism",
-      "source": "./plugins/aio-neobrutalism",
-      "description": "Neobrutalism design system bootstrapper. Detects tech stack, generates CSS tokens, and transforms existing UI components with bold borders, hard shadows, vibrant colors.",
       "version": "2.0.2",
       "author": {
         "name": "aiocean"
@@ -96,73 +78,10 @@
       }
     },
     {
-      "name": "aio-codebase-oracle",
-      "source": "./plugins/aio-codebase-oracle",
-      "description": "Comprehensive codebase analysis and documentation powered by GitNexus knowledge graph and LSP precision tools. Zero infrastructure required. Oracle writes architecture docs, module docs, and interactive HTML viewers.",
-      "version": "5.1.6",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-grafana-diagram",
-      "source": "./plugins/aio-grafana-diagram",
-      "description": "Dashboard diagram generator. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana dashboards. Flowcharts, sequence diagrams, gantt charts, state diagrams with dynamic metric-driven coloring.",
-      "version": "2.0.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-atlassian",
-      "source": "./plugins/aio-atlassian",
-      "description": "Atlassian CLI tools for Jira and Confluence. Manage Jira issues, sprints, workflows, and Confluence pages via CLI.",
-      "version": "1.1.1",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-react-minimal-effects",
-      "source": "./plugins/aio-react-minimal-effects",
-      "description": "Minimize useEffect in React 19. Scan mode finds and fixes problematic effects in existing code. Covers React Compiler, new hooks (useActionState, useOptimistic), ref as prop, and proper patterns.",
-      "version": "3.1.1",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-mermaid",
-      "source": "./plugins/aio-mermaid",
-      "description": "Generate shareable MinimalMermaid diagram URLs. Compress mermaid code into shareable links.",
-      "version": "1.2.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-code-review",
-      "source": "./plugins/aio-code-review",
-      "description": "Ultimate code review with GitNexus knowledge graph analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional parallel review agents, and a critic meta-review with confidence scoring.",
-      "version": "3.1.3",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
       "name": "aio-xstate",
       "source": "./plugins/aio-xstate",
       "description": "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCallback, fromObservable, fromTransition), invoke vs spawnChild, and React integration.",
       "version": "1.0.6",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-debug",
-      "source": "./plugins/aio-debug",
-      "description": "REACTIVE debugging — systematic debug & fix orchestrator for bugs, errors, and test failures. Four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation. Circuit breaker escalation after 3 failed attempts. NOT for planning new features — use aio-deep-plan instead.",
-      "version": "2.3.2",
       "author": {
         "name": "aiocean"
       }
@@ -186,78 +105,6 @@
       }
     },
     {
-      "name": "aio-deep-plan",
-      "source": "./plugins/aio-deep-plan",
-      "description": "PROACTIVE planning toolkit — use before writing code to understand codebase structure and plan changes. Five skills: discover (find relevant code), map (structural analysis), snapshot (baseline), plan (implementation planning with re-anchoring protocol), review (post-implementation check). Combines GitNexus hybrid search/knowledge graph and LSP. NOT for debugging bugs — use aio-debug instead.",
-      "version": "3.3.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-github",
-      "source": "./plugins/aio-github",
-      "description": "GitHub CLI/MCP for repository, pull request, issue management, code review, and file operations via github-mcp.",
-      "version": "1.1.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-gitlab",
-      "source": "./plugins/aio-gitlab",
-      "description": "GitLab CLI/MCP for merge requests, pipelines, jobs, branch protection, and git flow operations via gitlab-mcp.",
-      "version": "1.1.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-rag-kit",
-      "source": "./plugins/aio-rag-kit",
-      "description": "RAG Kit CLI/MCP for Qdrant vector database operations: create collections, index content, and semantic search via rag-kit.",
-      "version": "1.1.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-research-kit",
-      "source": "./plugins/aio-research-kit",
-      "description": "Structured 10-phase research framework CLI. Initialize research projects, validate structure, and execute systematic research via research-cli.",
-      "version": "1.2.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-tanca",
-      "source": "./plugins/aio-tanca",
-      "description": "Tanca CLI/MCP for employee timekeeping, shift management, check-in/check-out, and clock logs via tanca-mcp.",
-      "version": "1.1.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-x",
-      "source": "./plugins/aio-x",
-      "description": "X/Twitter CLI/MCP for tweets, threads, search, engagement, moderation, and list operations via x-mcp.",
-      "version": "1.1.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
-      "name": "aio-google-workspace",
-      "source": "./plugins/aio-google-workspace",
-      "description": "Google Workspace operations via gws CLI. Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat, and cross-service workflows (standup, meeting prep, weekly digest).",
-      "version": "1.1.2",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
       "name": "aio-browser-cookie",
       "source": "./plugins/aio-browser-cookie",
       "description": "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports.",
@@ -276,18 +123,51 @@
       }
     },
     {
-      "name": "aio-uiux",
-      "source": "./plugins/aio-uiux",
-      "description": "Comprehensive UI/UX design knowledge base and advisor. 100+ topics covering visual design, typography, color theory, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, and responsive design. Includes semantic search with local embeddings.",
-      "version": "1.2.4",
-      "author": {
-        "name": "aiocean"
-      }
-    },
-    {
       "name": "aio-claude-toolkit",
       "source": "./plugins/aio-claude-toolkit",
       "description": "Claude Code management toolkit — skill management, plugin install, session reflection, memory consolidation, skill capture, and feedback.",
+      "version": "1.0.0",
+      "author": "aiocean"
+    },
+    {
+      "name": "aio-devops",
+      "source": "./plugins/aio-devops",
+      "description": "DevOps toolkit — GitHub/GitLab management and git worktree workflows. Three skills: aio-github (GitHub CLI for repos, PRs, issues), aio-gitlab (GitLab CLI for projects, MRs, pipelines), aio-worktree (",
+      "version": "1.0.0",
+      "author": "aiocean"
+    },
+    {
+      "name": "aio-design-system",
+      "source": "./plugins/aio-design-system",
+      "description": "UI/UX design toolkit — design systems, component patterns, and React optimization. Three skills: aio-uiux (comprehensive UI/UX design knowledge), aio-neobrutalism (neobrutalism design system bootstrap",
+      "version": "1.0.0",
+      "author": "aiocean"
+    },
+    {
+      "name": "aio-diagramming",
+      "source": "./plugins/aio-diagramming",
+      "description": "Diagram generation toolkit — Mermaid diagrams and Grafana dashboard diagrams. Two skills: aio-mermaid (shareable Mermaid diagram URLs), aio-grafana-diagram (auto-generate dashboard diagrams from codeb",
+      "version": "1.0.0",
+      "author": "aiocean"
+    },
+    {
+      "name": "aio-research",
+      "source": "./plugins/aio-research",
+      "description": "Research toolkit — structured research workflows and vector search. Two skills: aio-research-kit (10-phase structured research), aio-rag-kit (RAG with Qdrant vector database).",
+      "version": "1.0.0",
+      "author": "aiocean"
+    },
+    {
+      "name": "aio-planning",
+      "source": "./plugins/aio-planning",
+      "description": "Code analysis and planning toolkit — codebase understanding, planning, debugging, and code review. Four skills with 9 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), ai",
+      "version": "1.0.0",
+      "author": "aiocean"
+    },
+    {
+      "name": "aio-saas-tools",
+      "source": "./plugins/aio-saas-tools",
+      "description": "SaaS integration toolkit — Atlassian, Google Workspace, Tanca HR, and X/Twitter. Four skills: aio-atlassian (Jira + Confluence CLI), aio-google-workspace (Drive, Gmail, Calendar, Sheets, Docs), aio-ta",
       "version": "1.0.0",
       "author": "aiocean"
     }

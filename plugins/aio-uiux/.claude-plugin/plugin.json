@@ -1,9 +1,0 @@
-{
-  "name": "aio-uiux",
-  "description": "Comprehensive UI/UX design knowledge base covering visual design, typography, color theory, layout, accessibility, UX psychology, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, and responsive design. Includes semantic search across 100+ topics with local embeddings.",
-  "version": "1.2.4",
-  "author": {
-    "name": "aiocean"
-  },
-  "license": "MIT"
-}
