@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-A curated collection of 34 plugins for Claude Code — from codebase analysis to iOS debugging to ebook translation.
+A curated collection of 20 plugins for Claude Code — from codebase analysis to iOS debugging to ebook translation.
 
 ## Quick Start
 
@@ -12,122 +12,78 @@ npx skills add aiocean/claude-plugins -s <plugin-name>
 # https://aiocean.github.io/claude-plugins/
 ```
 
-## Plugins
+## Toolkits
 
-### Codebase & Architecture
+Grouped plugins bundling multiple related skills into a single install.
+
+| Plugin | Version | Skills | Description |
+|--------|---------|--------|-------------|
+| **aio-planning** | 1.0.0 | 9 | Code analysis & planning — codebase-oracle (GitNexus + doc-writer), deep-plan (discover/map/plan/review/snapshot), debug (4-phase pipeline), code-review (multi-agent with critic).<br>`npx skills add aiocean/claude-plugins -s aio-planning` |
+| **aio-claude-toolkit** | 1.0.0 | 6 | Claude Code management — claude-manager, install, reflect, dream, skillify, feedback.<br>`npx skills add aiocean/claude-plugins -s aio-claude-toolkit` |
+| **aio-devops** | 1.0.0 | 3 | DevOps — github (repos, PRs, issues), gitlab (MRs, pipelines), worktree (parallel development).<br>`npx skills add aiocean/claude-plugins -s aio-devops` |
+| **aio-design-system** | 1.0.0 | 3 | UI/UX design — uiux (design knowledge), neobrutalism (design system bootstrapper), react-minimal-effects (React 19).<br>`npx skills add aiocean/claude-plugins -s aio-design-system` |
+| **aio-saas-tools** | 1.0.0 | 4 | SaaS integrations — atlassian (Jira + Confluence), google-workspace, tanca (HR), x (Twitter).<br>`npx skills add aiocean/claude-plugins -s aio-saas-tools` |
+| **aio-research** | 1.0.0 | 2 | Research — research-kit (10-phase framework), rag-kit (Qdrant vector search).<br>`npx skills add aiocean/claude-plugins -s aio-research` |
+| **aio-diagramming** | 1.0.0 | 2 | Diagrams — mermaid (shareable URLs), grafana-diagram (dashboard diagrams from code).<br>`npx skills add aiocean/claude-plugins -s aio-diagramming` |
+
+## Standalone Plugins
+
+### Content & Translation
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| **aio-codebase-oracle** | 5.1.2 | Deep codebase analysis powered by GitNexus knowledge graph and LSP. Generates architecture docs (C4 diagrams, dependency graphs), module docs, and interactive HTML viewers.<br>`npx skills add aiocean/claude-plugins -s aio-codebase-oracle` |
-| **aio-deep-plan** | 3.3.0 | PROACTIVE planning — understand codebase structure before writing code. Five skills: discover, map, snapshot, plan (with re-anchoring), review. GitNexus + LSP powered.<br>`npx skills add aiocean/claude-plugins -s aio-deep-plan` |
-| **aio-debug** | 2.3.0 | REACTIVE debugging — four-phase pipeline: codebase context → root cause investigation → minimal fix → code review validation. Circuit breaker after 3 failed attempts.<br>`npx skills add aiocean/claude-plugins -s aio-debug` |
-| **aio-code-review** | 3.1.1 | Multi-agent code review: GitNexus analytics, domain-specific skill detection (Go, iOS, React, XState, observability), 5 core + 4 conditional agents, critic meta-review with confidence scoring.<br>`npx skills add aiocean/claude-plugins -s aio-code-review` |
-
-### Development Tools
-
-| Plugin | Version | Description |
-|--------|---------|-------------|
-| **aio-worktree** | 1.1.0 | Git worktree management for parallel development. Create isolated workspaces, sync changes, merge branches, cleanup.<br>`npx skills add aiocean/claude-plugins -s aio-worktree` |
-| **aio-bun-fullstack-setup** | 1.1.0 | Scaffold Bun fullstack apps. **Scaffold mode** detects existing files and generates only what's missing: single-port server, Vite proxy, PM2 config, Docker build.<br>`npx skills add aiocean/claude-plugins -s aio-bun-fullstack-setup` |
-| **aio-claude-manager** | 1.1.0 | Enable/disable skills by project context. Switch presets (frontend, backend, ai) to reduce skill clutter.<br>`npx skills add aiocean/claude-plugins -s aio-claude-manager` |
-| **aio-reflect** | 2.2.0 | Analyze past Claude Code sessions to extract patterns, corrections, and preferences. Turns insights into CLAUDE.md rules or new skills.<br>`npx skills add aiocean/claude-plugins -s aio-reflect` |
-| **aio-feedback** | 1.1.0 | Submit bug reports, feature requests, and plugin ideas directly from Claude Code via GitHub Issues.<br>`npx skills add aiocean/claude-plugins -s aio-feedback` |
-| **aio-install** | 1.1.0 | Browse, install, enable/disable aiocean plugins for the current project.<br>`npx skills add aiocean/claude-plugins -s aio-install` |
+| **aio-epub-translate** | 3.5.1 | EPUB translation via ConnectRPC API — 9 skills: analyze, translate, review, quality, manage, upload, export, setup, vn-style.<br>`npx skills add aiocean/claude-plugins -s aio-epub-translate` |
+| **aio-mental-models** | 2.1.3 | Decision advisor using 50+ mental models.<br>`npx skills add aiocean/claude-plugins -s aio-mental-models` |
+| **aio-youtube** | 1.1.3 | YouTube search and transcript extraction via yt-dlp.<br>`npx skills add aiocean/claude-plugins -s aio-youtube` |
+| **aio-gherkin-refine** | 2.0.2 | BDD field guide — Gherkin with Example Mapping, 3 Amigos, anti-patterns.<br>`npx skills add aiocean/claude-plugins -s aio-gherkin-refine` |
 
 ### Language & Framework
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| **aio-golang-mastery** | 1.1.0 | Complete Go development with **lint mode**: 7-step tooling chain (build → vet → golangci-lint → govulncheck → nilaway → deadcode → race detection). Based on Google/Uber style guides. Go 1.25.<br>`npx skills add aiocean/claude-plugins -s aio-golang-mastery` |
-| **aio-react-minimal-effects** | 3.1.0 | Minimize `useEffect` in React 19. **Scan mode** finds and classifies problematic effects in existing code with file:line references. Covers React Compiler, `useActionState`, `useOptimistic`.<br>`npx skills add aiocean/claude-plugins -s aio-react-minimal-effects` |
-| **aio-xstate** | 1.0.4 | XState v5 strict ruleset: `setup().createMachine()` patterns, design-first workflow, actor types, invoke vs spawnChild, React integration.<br>`npx skills add aiocean/claude-plugins -s aio-xstate` |
-| **aio-tui** | 1.0.2 | Go Bubbletea TUI guide: TEA architecture, lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tabs, scroll).<br>`npx skills add aiocean/claude-plugins -s aio-tui` |
+| **aio-golang-mastery** | 1.1.1 | Go development with 7-step lint chain. Google/Uber style guides.<br>`npx skills add aiocean/claude-plugins -s aio-golang-mastery` |
+| **aio-xstate** | 1.0.6 | XState v5 strict ruleset for TypeScript state machines.<br>`npx skills add aiocean/claude-plugins -s aio-xstate` |
+| **aio-tui** | 1.0.5 | Go Bubbletea TUI guide: TEA pattern, lipgloss, production patterns.<br>`npx skills add aiocean/claude-plugins -s aio-tui` |
+| **aio-bun-fullstack-setup** | 1.1.1 | Scaffold Bun fullstack apps with smart detection.<br>`npx skills add aiocean/claude-plugins -s aio-bun-fullstack-setup` |
 
-### iOS
-
-| Plugin | Version | Description |
-|--------|---------|-------------|
-| **aio-ios-device-debug** | 1.1.1 | Debug iOS apps on physical devices from terminal. Build, install, launch, capture logs, pull crash reports, take screenshots (iOS 17+). 6 automation scripts.<br>`npx skills add aiocean/claude-plugins -s aio-ios-device-debug` |
-
-### Design & Visualization
+### Platform & Browser
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| **aio-uiux** | 1.0.0 | **Comprehensive UI/UX design advisor**. 100+ topics: visual design, typography, color, layout, accessibility (WCAG 2.2), UX psychology, 30+ UX laws, interaction design, motion/animation, component patterns, design systems, UX writing, performance UX, modern CSS, responsive design. Semantic search with local embeddings.<br>`npx skills add aiocean/claude-plugins -s aio-uiux` |
-| **aio-neobrutalism** | 2.0.0 | Neobrutalism **design system bootstrapper**. Detects tech stack, generates CSS tokens, and transforms existing UI components. Bold borders, hard shadows, vibrant colors.<br>`npx skills add aiocean/claude-plugins -s aio-neobrutalism` |
-| **aio-mermaid** | 1.2.0 | Generate shareable MinimalMermaid diagram URLs from mermaid code.<br>`npx skills add aiocean/claude-plugins -s aio-mermaid` |
-| **aio-grafana-diagram** | 2.0.0 | **Dashboard diagram generator**. Analyzes codebase to auto-generate Mermaid diagrams with metric binding for Grafana.<br>`npx skills add aiocean/claude-plugins -s aio-grafana-diagram` |
+| **aio-ios-device-debug** | 1.1.4 | Debug iOS apps on physical devices from terminal.<br>`npx skills add aiocean/claude-plugins -s aio-ios-device-debug` |
+| **aio-cdp-relay** | 1.2.2 | Persistent CDP relay for browser automation — no MCP, no approval prompts.<br>`npx skills add aiocean/claude-plugins -s aio-cdp-relay` |
+| **aio-browser-cookie** | 2.0.3 | Extract browser cookies with rookiepy for authenticated requests.<br>`npx skills add aiocean/claude-plugins -s aio-browser-cookie` |
 
-### Observability
-
-| Plugin | Version | Description |
-|--------|---------|-------------|
-| **aio-monitoring-observability** | 1.0.4 | Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry tracing, SLOs, dashboards, alerting. 7 automation scripts + production-ready templates.<br>`npx skills add aiocean/claude-plugins -s aio-monitoring-observability` |
-
-### Content & Knowledge
+### Observability & Utilities
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| **aio-mental-models** | 2.0.0 | **Decision advisor** using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing — not just a reference.<br>`npx skills add aiocean/claude-plugins -s aio-mental-models` |
-| **aio-youtube** | 1.1.0 | Search YouTube and extract video transcripts using yt-dlp. 7 scripts.<br>`npx skills add aiocean/claude-plugins -s aio-youtube` |
-| **aio-epub-packing** | 1.1.0 | Convert Markdown to professional EPUB ebooks with auto-generated neo-brutalism covers.<br>`npx skills add aiocean/claude-plugins -s aio-epub-packing` |
-| **aio-epub-translate** | 2.5.0 | AI-driven EPUB translation pipeline. Five skills: setup → research (terminology, web search) → translate → editor review → package.<br>`npx skills add aiocean/claude-plugins -s aio-epub-translate` |
-| **aio-gherkin-refine** | 1.0.3 | Convert vague requirements into structured Given/When/Then scenarios before writing code.<br>`npx skills add aiocean/claude-plugins -s aio-gherkin-refine` |
-| **aio-research-kit** | 1.2.0 | Structured 10-phase research framework. Initialize projects, validate structure, and execute systematic research.<br>`npx skills add aiocean/claude-plugins -s aio-research-kit` |
-
-### Integrations
-
-| Plugin | Version | Description |
-|--------|---------|-------------|
-| **aio-jira** | 2.1.0 | Jira via MCP: issue management, sprint tracking, workflow transitions, JQL search. Auto-installs jira-mcp.<br>`npx skills add aiocean/claude-plugins -s aio-jira` |
-| **aio-github** | 1.1.0 | GitHub via MCP: repos, PRs, issues, code review, file operations.<br>`npx skills add aiocean/claude-plugins -s aio-github` |
-| **aio-gitlab** | 1.1.0 | GitLab via MCP: merge requests, pipelines, jobs, branch protection, git flow.<br>`npx skills add aiocean/claude-plugins -s aio-gitlab` |
-| **aio-confluence** | 1.1.0 | Confluence via MCP: page management, CQL search, comments, space listing.<br>`npx skills add aiocean/claude-plugins -s aio-confluence` |
-| **aio-google-workspace** | 1.1.0 | Google Workspace via MCP: Drive, Gmail, Calendar, Sheets, Docs, Tasks, Slides, Chat + cross-service workflows.<br>`npx skills add aiocean/claude-plugins -s aio-google-workspace` |
-| **aio-x** | 1.1.0 | X/Twitter via MCP: tweets, threads, search, engagement, moderation, lists.<br>`npx skills add aiocean/claude-plugins -s aio-x` |
-| **aio-tanca** | 1.1.0 | Tanca via MCP: employee timekeeping, shifts, check-in/check-out, clock logs.<br>`npx skills add aiocean/claude-plugins -s aio-tanca` |
-| **aio-rag-kit** | 1.1.0 | RAG Kit via MCP: Qdrant vector database — create collections, index content, semantic search.<br>`npx skills add aiocean/claude-plugins -s aio-rag-kit` |
-| **aio-browser-cookie** | 2.0.0 | Extract browser cookies with rookiepy. Export Netscape files, replay authenticated requests. Supports Chrome, Firefox, Safari, Brave, Edge, and more.<br>`npx skills add aiocean/claude-plugins -s aio-browser-cookie` |
-| **aio-cdp-relay** | 1.0.0 | Persistent Chrome DevTools Protocol relay for browser automation via scripts — no MCP tool calls, no approval prompts.<br>`npx skills add aiocean/claude-plugins -s aio-cdp-relay` |
-
-### Deprecated
-
-| Plugin | Version | Note |
-|--------|---------|------|
-| ~~aio-remove-bg~~ | 1.1.1 | Use ImageMagick or `rembg` CLI directly. |
+| **aio-monitoring-observability** | 1.0.7 | Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry, SLOs.<br>`npx skills add aiocean/claude-plugins -s aio-monitoring-observability` |
+| **aio-remove-bg** | 1.1.4 | Remove image backgrounds — threshold-based or AI (rembg).<br>`npx skills add aiocean/claude-plugins -s aio-remove-bg` |
 
 ## Workflows
 
-Plugins compose into multi-step workflows:
-
-**Feature Development** — clarify → understand → implement → review → track:
+**Feature Development** — clarify → understand → implement → review:
 ```
-gherkin-refine → deep-plan → [xstate / react-minimal-effects] → code-review → jira
+gherkin-refine → aio-planning (discover → plan) → [xstate / design-system] → aio-planning (code-review)
 ```
 
 **Debugging** — investigate → fix → observe → visualize:
 ```
-debug → ios-device-debug → monitoring-observability → grafana-diagram
+aio-planning (debug) → ios-device-debug → monitoring-observability → aio-diagramming
 ```
 
 **Content Pipeline** — research → think → document → publish:
 ```
-youtube → mental-models → codebase-oracle → epub-packing
+youtube → mental-models → aio-planning (codebase-oracle) → epub-translate
 ```
 
-**Project Bootstrap** — scaffold → design → parallelize → observe → learn:
+**Project Bootstrap** — scaffold → design → parallelize → learn:
 ```
-bun-fullstack-setup → neobrutalism → worktree → monitoring-observability → reflect
-```
-
-**Translation Pipeline** — setup → research → translate → review → export:
-```
-epub-setup → epub-research → epub-translate → editor-review → epub-package
+bun-fullstack-setup → aio-design-system → aio-devops (worktree) → aio-claude-toolkit (reflect)
 ```
 
 ## Validation
-
-Run the marketplace validator to check all plugins:
 
 ```bash
 bash scripts/validate-marketplace.sh
