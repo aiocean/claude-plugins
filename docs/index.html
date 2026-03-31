@@ -665,8 +665,10 @@ function installCmd(name) {
 function openInstallModal(name) {
   document.getElementById('modalTitle').textContent = '$ install ' + name;
   document.getElementById('modalCode').textContent = installCmd(name);
-  document.getElementById('modalCmd').classList.remove('copied');
-  document.getElementById('modalCopyIcon').textContent = 'copy';
+  document.querySelectorAll('.modal-cmd').forEach(el => {
+    el.classList.remove('copied');
+    el.querySelector('.copy-icon').textContent = 'copy';
+  });
   document.getElementById('modal').classList.add('open');
 }
 
