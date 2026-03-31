@@ -336,6 +336,109 @@
 
   footer a:hover { color: var(--accent); }
 
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 600px;
+    overflow: hidden;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-header h3 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modal-body p {
+    font-size: 0.8rem;
+    color: var(--text-3);
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-cmd {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.12s;
+  }
+
+  .modal-cmd:hover { border-color: var(--accent-border); }
+
+  .modal-cmd code {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text);
+    flex: 1;
+    user-select: all;
+  }
+
+  .modal-cmd .copy-icon {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-3);
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+
+  .modal-cmd:hover .copy-icon {
+    color: var(--accent);
+    border-color: var(--accent-border);
+  }
+
+  .modal-cmd.copied .copy-icon {
+    color: #0a0a0a;
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
   .category.hidden { display: none; }
   .plugin.hidden { display: none; }
 
@@ -373,6 +476,22 @@
     <a href="https://github.com/aiocean/claude-plugins">github.com/aiocean/claude-plugins</a>
     <span>MIT</span>
   </footer>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">install</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Run in your terminal:</p>
+      <div class="modal-cmd" id="modalCmd" onclick="copyModalCmd()">
+        <code id="modalCode"></code>
+        <span class="copy-icon" id="modalCopyIcon">copy</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast">copied</div>
@@ -478,15 +597,24 @@ function installCmd(name) {
   return `claude plugin install ${name}@${MARKETPLACE}`;
 }
 
-function copyInstall(name, btn) {
-  navigator.clipboard.writeText(installCmd(name)).then(() => {
-    btn.textContent = 'copied';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = 'install';
-      btn.classList.remove('copied');
-    }, 1500);
+function openInstallModal(name) {
+  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('modalCode').textContent = installCmd(name);
+  document.getElementById('modalCmd').classList.remove('copied');
+  document.getElementById('modalCopyIcon').textContent = 'copy';
+  document.getElementById('modal').classList.add('open');
+}
+
+function copyModalCmd() {
+  const cmd = document.getElementById('modalCode').textContent;
+  navigator.clipboard.writeText(cmd).then(() => {
+    document.getElementById('modalCopyIcon').textContent = 'copied';
+    document.getElementById('modalCmd').classList.add('copied');
   });
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
 }
 
 function copySetup() {
@@ -536,7 +664,7 @@ function render() {
               </div>
             ` : ''}
           </div>
-          <button class="install-btn" onclick="event.stopPropagation(); copyInstall('${p.name}', this)">install</button>
+          <button class="install-btn" onclick="event.stopPropagation(); openInstallModal('${p.name}')">install</button>
         </div>
       `).join('')}
     </div>
@@ -558,6 +686,8 @@ function filterPlugins() {
     catEl.classList.toggle('hidden', visible === 0);
   });
 }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 render();
 </script>
