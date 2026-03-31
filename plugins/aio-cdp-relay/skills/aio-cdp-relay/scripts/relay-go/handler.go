@@ -22,7 +22,6 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 	sendJSON(w, map[string]interface{}{
 		"status":       "ok",
 		"connected":    connected,
-		"idle_timeout": state.idleTimeout,
 		"idle_seconds": int(time.Since(state.lastActivity).Seconds()),
 		"pid":          os.Getpid(),
 	}, 200)

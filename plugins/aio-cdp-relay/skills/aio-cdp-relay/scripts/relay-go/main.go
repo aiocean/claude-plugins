@@ -13,15 +13,13 @@ import (
 )
 
 const (
-	defaultPort        = 9223
-	defaultIdleTimeout = 300
-	pidFile            = "/tmp/cdp_relay.pid"
+	defaultPort = 9223
+	pidFile     = "/tmp/cdp_relay.pid"
 )
 
 // RelayState holds the global state for the relay server.
 type RelayState struct {
 	cdp          *CDPConnection
-	idleTimeout  int
 	lastActivity time.Time
 	shouldStop   bool
 }
@@ -30,20 +28,14 @@ func (s *RelayState) touch() {
 	s.lastActivity = time.Now()
 }
 
-func (s *RelayState) isIdle() bool {
-	return time.Since(s.lastActivity) > time.Duration(s.idleTimeout)*time.Second
-}
-
 var state *RelayState
 
 func main() {
 	port := flag.Int("port", defaultPort, "Listen port")
-	idleTimeout := flag.Int("idle-timeout", defaultIdleTimeout, "Shutdown after N seconds idle")
 	flag.Parse()
 
 	state = &RelayState{
 		cdp:          NewCDPConnection(),
-		idleTimeout:  *idleTimeout,
 		lastActivity: time.Now(),
 	}
 
@@ -68,19 +60,12 @@ func main() {
 		Handler: mux,
 	}
 
-	// Idle watchdog
+	// Stop watchdog
 	go func() {
-		ticker := time.NewTicker(10 * time.Second)
-		defer ticker.Stop()
-		for range ticker.C {
-			if state.shouldStop || state.isIdle() {
-				if state.isIdle() {
-					fmt.Fprintf(os.Stderr, "[relay] Idle for %ds, shutting down.\n", state.idleTimeout)
-				}
-				server.Close()
-				return
-			}
+		for !state.shouldStop {
+			time.Sleep(1 * time.Second)
 		}
+		server.Close()
 	}()
 
 	// Signal handler
@@ -91,7 +76,7 @@ func main() {
 		server.Close()
 	}()
 
-	fmt.Fprintf(os.Stderr, "[relay] Listening on 127.0.0.1:%d (idle timeout: %ds)\n", *port, *idleTimeout)
+	fmt.Fprintf(os.Stderr, "[relay] Listening on 127.0.0.1:%d (persistent mode, no idle timeout)\n", *port)
 
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("[relay] Server error: %v", err)
