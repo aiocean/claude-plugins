@@ -8,7 +8,7 @@ agent: oh-my-claudecode:architect
 ---
 
 ```bash
-SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/doc-writer/scripts"
+SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/aio-doc-writer/scripts"
 ```
 
 ## Environment
