@@ -2,5 +2,7 @@
   "name": "aio-watermill-kit",
   "description": "Skills and generators for working with the Go Watermill messaging library (Pub/Sub, CQRS, Routers).",
   "version": "0.1.0",
-  "author": "aiocean"
+  "author": {
+    "name": "aiocean"
+  }
 }
