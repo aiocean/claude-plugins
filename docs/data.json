@@ -1,0 +1,353 @@
+[
+  {
+    "name": "aio-epub-translate",
+    "version": "3.5.1",
+    "desc": "EPUB book translation via ConnectRPC API. Nine skills: aio-epub-analyze (pre-translation intelligence \u2014 style, characters, glossary), aio-epub-review (deep literary review with T\u00edn-\u0110\u1ea1t-Nh\u00e3 scoring), aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API, edit & update), aio-epub-quality (mechanical quality detection & re-translation), aio-epub-manage (browse, progress, guidelines, community, fork, reset, usage stats), aio-epub-upload (upload, prepare, unmark & change tags), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
+    "skills": [
+      {
+        "name": "aio-epub-translate",
+        "desc": "Translate EPUB book chapters with literary Vietnamese quality via ConnectRPC API. Triggers: \"d\u1ecbch s\u00e1ch\", \"translate epub\", \"translate chapter\", \"d\u1ecbch ti\u1ebfp\", \"continue translating\", \"d\u1ecbch ch\u01b0\u01a1ng\", \"translate book\"."
+      },
+      {
+        "name": "aio-epub-manage",
+        "desc": "Browse books, check translation progress, manage guidelines, view TOC, fork books, publish to community, reset chapters, and view usage stats. Triggers: \"list books\", \"li\u1ec7t k\u00ea s\u00e1ch\", \"check progress\", \"xem ti\u1ebfn \u0111\u1ed9\", \"update guideline\", \"c\u1eadp nh\u1eadt guideline\", \"book info\", \"th\u00f4ng tin s\u00e1ch\", \"fork book\", \"nh\u00e2n b\u1ea3n s\u00e1ch\", \"publish book\", \"\u0111\u0103ng s\u00e1ch\", \"community books\", \"s\u00e1ch c\u1ed9ng \u0111\u1ed3ng\", \"reset book\", \"reset chapter\", \"usage stats\", \"th\u1ed1ng k\u00ea\"."
+      },
+      {
+        "name": "aio-epub-review",
+        "desc": "Deep literary review of translated EPUB chapters. Evaluate translation quality, fix consistency issues, and check cross-chapter coherence. Triggers: \"review translation\", \"\u0111\u00e1nh gi\u00e1 b\u1ea3n d\u1ecbch\", \"review chapter\", \"ki\u1ec3m tra d\u1ecbch\", \"consistency check\", \"ki\u1ec3m tra nh\u1ea5t qu\u00e1n\", \"fix translation\", \"s\u1eeda b\u1ea3n d\u1ecbch\", \"literary review\"."
+      },
+      {
+        "name": "aio-epub-export",
+        "desc": "Pack and export translated EPUB books. Bilingual or translation-only output. Triggers: \"export epub\", \"xu\u1ea5t s\u00e1ch\", \"pack epub\", \"\u0111\u00f3ng g\u00f3i s\u00e1ch\", \"download epub\", \"t\u1ea3i s\u00e1ch\", \"send to kindle\"."
+      },
+      {
+        "name": "aio-epub-upload",
+        "desc": "Upload and prepare EPUB books for translation. Triggers: \"upload epub\", \"t\u1ea3i s\u00e1ch l\u00ean\", \"prepare book\", \"chu\u1ea9n b\u1ecb s\u00e1ch\", \"add book\"."
+      },
+      {
+        "name": "aio-epub-quality",
+        "desc": "Check translation quality and find chapters that need re-translation. Triggers: \"check quality\", \"ki\u1ec3m tra ch\u1ea5t l\u01b0\u1ee3ng\", \"quality report\", \"b\u00e1o c\u00e1o ch\u1ea5t l\u01b0\u1ee3ng\", \"find bad translations\", \"t\u00ecm b\u1ea3n d\u1ecbch k\u00e9m\"."
+      },
+      {
+        "name": "aio-epub-vn-style",
+        "desc": "Use when translating Vietnamese literature, asking how to translate naturally, reviewing a translated passage for quality, or needing guidance on word choice, sentence rhythm, genre style, or common errors. Triggers: \"d\u1ecbch sao cho hay\", \"d\u1ecbch th\u1ebf n\u00e0o\", \"phong c\u00e1ch d\u1ecbch\", \"nguy\u00ean t\u1eafc d\u1ecbch\", \"translation style\", \"how to translate\", \"d\u1ecbch v\u0103n h\u1ecdc\", \"style guide\"."
+      },
+      {
+        "name": "aio-epub-setup",
+        "desc": "Setup guide for EPUB translation service. Register account, purchase license, configure API key. Triggers: \"setup epub\", \"c\u00e0i \u0111\u1eb7t epub\", \"epub setup\", \"register account\", \"\u0111\u0103ng k\u00fd t\u00e0i kho\u1ea3n\", \"buy license\", \"mua license\", \"configure api key\", \"c\u1ea5u h\u00ecnh api key\"."
+      },
+      {
+        "name": "aio-epub-analyze",
+        "desc": "Pre-translation analysis for EPUB books. Analyze writing style, characters, tone, and build glossary before translating. Triggers: \"analyze book\", \"ph\u00e2n t\u00edch s\u00e1ch\", \"pre-translate\", \"chu\u1ea9n b\u1ecb d\u1ecbch\", \"book analysis\", \"character list\", \"danh s\u00e1ch nh\u00e2n v\u1eadt\", \"glossary\", \"thu\u1eadt ng\u1eef\"."
+      }
+    ]
+  },
+  {
+    "name": "aio-remove-bg",
+    "version": "1.1.4",
+    "desc": "Remove background from images and trim transparent edges. Supports threshold-based (fast) and AI-based (rembg) methods.",
+    "skills": [
+      {
+        "name": "aio-remove-bg",
+        "desc": "Remove image backgrounds using threshold (fast) or rembg AI (complex images) and trim transparent edges. Triggers: \"remove background\", \"make image transparent\", \"cutout image\", bgrem, rembg."
+      }
+    ]
+  },
+  {
+    "name": "aio-youtube",
+    "version": "1.1.3",
+    "desc": "Search YouTube and extract video transcripts using yt-dlp.",
+    "skills": [
+      {
+        "name": "aio-youtube",
+        "desc": "Search YouTube and extract video transcripts via yt-dlp. Triggers: \"search YouTube\", \"get transcript\", \"summarize video\", \"extract subtitles\", youtube.com URLs, yt-dlp."
+      }
+    ]
+  },
+  {
+    "name": "aio-gherkin-refine",
+    "version": "2.0.2",
+    "desc": "Comprehensive BDD field guide \u2014 writes and reviews Gherkin with expert quality. Includes Example Mapping, 3 Amigos, anti-patterns catalog, and declarative style guide.",
+    "skills": [
+      {
+        "name": "aio-gherkin-refine",
+        "desc": "Comprehensive BDD field guide for writing and reviewing Gherkin scenarios with expert quality. Triggers: \"write gherkin\", \"refine requirements\", \"write acceptance criteria\", \"review gherkin\", \"improve scenarios\", \"BDD\", \"Given/When/Then\", \"acceptance tests\". Use proactively when a request is ambiguous, spans multiple conditions, or edge cases need clarification."
+      }
+    ]
+  },
+  {
+    "name": "aio-bun-fullstack-setup",
+    "version": "1.1.1",
+    "desc": "Scaffold and setup Bun fullstack projects. Scaffold mode detects existing files and generates only what is missing. Single port API + static frontend with Vite proxy in dev.",
+    "skills": [
+      {
+        "name": "aio-bun-fullstack-setup",
+        "desc": "Use when scaffolding a new Bun fullstack project, creating a fullstack app, setting up Bun server, configuring single port server, adding Vite proxy, setting up monorepo, or configuring Docker for Bun. Scaffold mode detects existing files and generates only what is missing. Also use when user mentions fullstack Bun, single port, Bun server, Vite proxy."
+      }
+    ]
+  },
+  {
+    "name": "aio-mental-models",
+    "version": "2.1.3",
+    "desc": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
+    "skills": [
+      {
+        "name": "aio-mental-models",
+        "desc": "Use when facing decisions, evaluating trade-offs, solving complex problems, or needing structured thinking frameworks. Actively guides you through model selection and application. Triggers: decision, trade-off, mental model, think through, evaluate options, strategic thinking, problem-solving, structured reasoning, second-order, first principles, inversion, search mental models, find model, which model."
+      }
+    ]
+  },
+  {
+    "name": "aio-monitoring-observability",
+    "version": "1.0.7",
+    "desc": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
+    "skills": [
+      {
+        "name": "aio-monitoring-observability",
+        "desc": "Design metrics, alerts, dashboards, and SLOs using monitoring best practices (Four Golden Signals, RED/USE). Triggers: \"set up monitoring\", \"design metrics\", \"calculate SLOs\", \"build dashboards\", Prometheus, Grafana, OpenTelemetry, distributed tracing."
+      }
+    ]
+  },
+  {
+    "name": "aio-ios-device-debug",
+    "version": "1.1.4",
+    "desc": "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, and analyze crashes from the terminal.",
+    "skills": [
+      {
+        "name": "aio-ios-device-debug",
+        "desc": "Debug iOS apps on physical devices \u2014 build, install, capture logs, extract crash reports, and take screenshots. Triggers: \"debug on device\", \"deploy to iPhone\", \"get crash logs\", \"pull crash report\", \"device screenshot\", syslog."
+      }
+    ]
+  },
+  {
+    "name": "aio-xstate",
+    "version": "1.0.6",
+    "desc": "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, design-first planning, params-first typing, anti-god-machine enforcement, actor patterns (fromPromise, fromCallback, fromObservable, fromTransition), invoke vs spawnChild, and React integration.",
+    "skills": [
+      {
+        "name": "aio-xstate",
+        "desc": "Implement XState v5 state machines with strict patterns \u2014 setup().createMachine(), actors, and TypeScript typing. Triggers: \"create state machine\", \"implement XState\", \"design statechart\", \"add actor\", XState, statecharts, fromPromise."
+      }
+    ]
+  },
+  {
+    "name": "aio-golang-mastery",
+    "version": "1.1.1",
+    "desc": "Complete Go development skill with lint mode (7-step tooling chain: build, vet, golangci-lint, govulncheck, nilaway, deadcode, race detection). Covers idiomatic patterns, error handling, concurrency, interfaces, generics, testing, project structure, production hardening, and gRPC. Based on Google/Uber style guides. Updated for Go 1.25.",
+    "skills": [
+      {
+        "name": "aio-golang-mastery",
+        "desc": "Use when writing, reviewing, scanning, or linting Go code. Lint mode runs the full 7-step tooling chain (go build, go vet, golangci-lint, govulncheck, nilaway, deadcode, race detection) and applies idiomatic fixes. Also use for Go best practices, concurrency, error handling, testing, gRPC, goroutines, channels. Covers idiomatic patterns, generics, TDD, and production hardening based on Google/Uber style guides. For Go TUI apps, combine with aio-tui."
+      }
+    ]
+  },
+  {
+    "name": "aio-tui",
+    "version": "1.0.5",
+    "desc": "Go Bubbletea TUI development guide. Architecture (TEA pattern), lipgloss styling, production patterns (column alignment, parallel fetch, auto-refresh, tab navigation, filter/search, scroll, mouse hover, delta tracking), and critical gotchas.",
+    "skills": [
+      {
+        "name": "aio-tui",
+        "desc": "Build interactive terminal UIs with Go Bubbletea and lipgloss \u2014 architecture, styling, and patterns. Triggers: \"build a TUI\", \"create terminal UI\", \"Bubbletea app\", \"interactive dashboard\", TUI, lipgloss."
+      }
+    ]
+  },
+  {
+    "name": "aio-browser-cookie",
+    "version": "2.0.3",
+    "desc": "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports.",
+    "skills": [
+      {
+        "name": "aio-browser-cookie",
+        "desc": "Extract cookies from local browsers (Chrome/Firefox/Safari) and export them as JSON or Netscape format for authenticated requests. Triggers: \"extract browser cookies\", \"reuse browser session\", \"export cookies\", \"cookie jar\", rookiepy."
+      }
+    ]
+  },
+  {
+    "name": "aio-cdp-relay",
+    "version": "1.3.0",
+    "desc": "Persistent Chrome DevTools Protocol relay for browser automation via scripts \u2014 no MCP tool calls, no approval prompts.",
+    "skills": [
+      {
+        "name": "aio-cdp-relay",
+        "desc": "Interact with Chrome browser via a persistent CDP relay \u2014 navigate, capture network, read cookies, evaluate JS, take screenshots. No MCP tool calls, no approval prompts. Use when needing browser automation in scripts. Triggers: \"cdp relay\", \"browser relay\", \"chrome relay\", \"capture network\", \"browser cookies cdp\", \"screenshot cdp\", \"evaluate js in browser\"."
+      }
+    ]
+  },
+  {
+    "name": "aio-claude-toolkit",
+    "version": "1.0.0",
+    "desc": "Claude Code management toolkit \u2014 skill management, plugin install, session reflection, memory consolidation, skill capture, and feedback.",
+    "skills": [
+      {
+        "name": "aio-install",
+        "desc": "Install, enable, disable, and list aiocean plugins for the current project. Triggers: \"install plugin\", \"add plugin\", \"enable plugin\", \"disable plugin\", \"list plugins\", \"available plugins\"."
+      },
+      {
+        "name": "aio-claude-manager",
+        "desc": "Manage and optimize Claude Code skills \u2014 enable, disable, analyze usage, and apply project-type presets. Triggers: \"manage skills\", \"disable skills\", \"reduce clutter\", \"apply preset\", \"too many skills\", switching project types (frontend, backend, data, ai)."
+      },
+      {
+        "name": "aio-skillify",
+        "desc": "Capture this session's repeatable process into a reusable SKILL.md file via guided interview. Triggers: \"skillify\", \"capture this workflow\", \"save this as a skill\", \"turn this into a skill\", \"make a skill from this session\"."
+      },
+      {
+        "name": "aio-reflect",
+        "desc": "Evaluate past Claude Code sessions and extract reusable knowledge as CLAUDE.md updates or new skills. Triggers: \"reflect on sessions\", \"what did we learn\", \"save this knowledge\", \"extract learnings\", after completing significant tasks."
+      },
+      {
+        "name": "aio-feedback",
+        "desc": "Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: \"submit feedback\", \"report bug\", \"request feature\", \"request plugin\", \"file issue\"."
+      },
+      {
+        "name": "aio-dream",
+        "desc": "Memory consolidation \u2014 review, merge, prune and re-index your memory files so future sessions orient quickly. Triggers: \"dream\", \"consolidate memory\", \"clean up memories\", \"organize memories\", \"memory maintenance\", \"prune memories\"."
+      }
+    ]
+  },
+  {
+    "name": "aio-devops",
+    "version": "1.0.0",
+    "desc": "DevOps toolkit \u2014 GitHub/GitLab management and git worktree workflows. Three skills: aio-github (GitHub CLI for repos, PRs, issues), aio-gitlab (GitLab CLI for projects, MRs, pipelines), aio-worktree (",
+    "skills": [
+      {
+        "name": "aio-github",
+        "desc": "Manage GitHub repos, PRs, and issues via github-mcp (auto-installs if missing). Triggers: \"list repos\", \"create PR\", \"review PR\", \"get issue\", \"comment on issue\", github repository, pull request."
+      },
+      {
+        "name": "aio-worktree",
+        "desc": "Manage git worktrees for parallel development workflows \u2014 create, sync, and spotlight preview. Triggers: \"create worktree\", \"sync worktree\", \"manage worktrees\", \"parallel development\", worktree."
+      },
+      {
+        "name": "aio-gitlab",
+        "desc": "Manage GitLab MRs, pipelines, branches, and CI jobs via gitlab-mcp (auto-installs if missing). Triggers: \"create MR\", \"accept MR\", \"trigger pipeline\", \"retry job\", gitlab, merge request, gitlab CI."
+      }
+    ]
+  },
+  {
+    "name": "aio-design-system",
+    "version": "1.0.0",
+    "desc": "UI/UX design toolkit \u2014 design systems, component patterns, and React optimization. Three skills: aio-uiux (comprehensive UI/UX design knowledge), aio-neobrutalism (neobrutalism design system bootstrap",
+    "skills": [
+      {
+        "name": "aio-uiux",
+        "desc": "Use when designing or reviewing web UI \u2014 layouts, components, color, typography, animations, accessibility, or design systems. Covers UX psychology, interaction patterns, WCAG compliance, responsive design, and modern CSS. Triggers: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens."
+      },
+      {
+        "name": "aio-neobrutalism",
+        "desc": "Use when applying neobrutalism design to a web project. Detects tech stack, generates CSS tokens, and transforms existing UI components. Triggers: \"apply neobrutalism\", \"create brutalist design\", \"add bold borders\", \"use hard shadows\", neobrutalism, brutalist, bold design, high-contrast aesthetic."
+      },
+      {
+        "name": "aio-react-minimal-effects",
+        "desc": "Use when reviewing React code for unnecessary useEffect usage, refactoring to React 19 patterns, or as useEffect best practices reference. Scan mode actively finds and fixes problematic effects. Also use when user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop."
+      }
+    ]
+  },
+  {
+    "name": "aio-diagramming",
+    "version": "1.0.0",
+    "desc": "Diagram generation toolkit \u2014 Mermaid diagrams and Grafana dashboard diagrams. Two skills: aio-mermaid (shareable Mermaid diagram URLs), aio-grafana-diagram (auto-generate dashboard diagrams from codeb",
+    "skills": [
+      {
+        "name": "aio-grafana-diagram",
+        "desc": "Use when creating Grafana diagrams for system visualization. Analyzes codebase to auto-generate Mermaid diagrams with metric binding. Triggers: \"create grafana diagram\", \"mermaid in grafana\", \"diagram panel\", \"data-driven diagram\", \"dynamic diagram\", flowcharts, sequence/state/ER diagrams in Grafana dashboards. For standalone Mermaid diagrams use aio-mermaid instead."
+      },
+      {
+        "name": "aio-mermaid",
+        "desc": "Generate shareable MinimalMermaid diagram URLs via LZ-String compression. Triggers: \"share diagram\", \"generate diagram URL\", \"draw\", \"diagram\", \"visualize\", mermaid \u2014 even without explicit mention of Mermaid."
+      }
+    ]
+  },
+  {
+    "name": "aio-research",
+    "version": "1.0.0",
+    "desc": "Research toolkit \u2014 structured research workflows and vector search. Two skills: aio-research-kit (10-phase structured research), aio-rag-kit (RAG with Qdrant vector database).",
+    "skills": [
+      {
+        "name": "aio-rag-kit",
+        "desc": "Set up vector search and RAG pipelines using Qdrant via rag-kit (auto-installs if missing). Triggers: \"create vector collection\", \"index content\", \"semantic search\", \"RAG setup\", qdrant, embeddings."
+      },
+      {
+        "name": "aio-research-kit",
+        "desc": "Run structured 10-phase research workflows via research-cli (auto-installs if missing). Triggers: \"start research\", \"research a topic\", \"create research project\", \"structured research\", research-kit."
+      }
+    ]
+  },
+  {
+    "name": "aio-planning",
+    "version": "1.0.0",
+    "desc": "Code analysis and planning toolkit \u2014 codebase understanding, planning, debugging, and code review. Four skills with 9 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), ai",
+    "skills": [
+      {
+        "name": "aio-code-review",
+        "desc": "Multi-phase code review pipeline with domain-specific analysis via GitNexus and parallel specialized agents. Triggers: \"review code\", \"code review\", \"review PR\", \"ultra review\". Use after aio-deep-plan or before merging."
+      },
+      {
+        "name": "aio-gitnexus",
+        "desc": "Install, configure, and manage the GitNexus code intelligence engine \u2014 index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows. Triggers: \"setup gitnexus\", \"index codebase\", \"gitnexus status\", \"rebuild index\", \"setup code intelligence\"."
+      },
+      {
+        "name": "aio-review",
+        "desc": "PROACTIVE planning \u2014 post-implementation validation in the aio-deep-plan pipeline. Use when validating completed work: \"check my changes\", \"before I commit\", \"did I miss anything\", \"review implementation\". Run snapshot before coding, then review after. NOT for debugging \u2014 use aio-debug. For full code review use aio-code-review."
+      },
+      {
+        "name": "aio-plan",
+        "desc": "PROACTIVE planning \u2014 third step in the aio-deep-plan pipeline. Use when the user needs a concrete implementation plan: \"plan implementation\", \"how should I implement\", \"approach\", \"strategy\", \"plan feature\", \"plan refactor\". Run discover and map first. NOT for debugging \u2014 use aio-debug instead."
+      },
+      {
+        "name": "aio-doc-writer",
+        "desc": "Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis. Triggers: \"analyze codebase\", \"map architecture\", \"document architecture\", \"what does this codebase do\", \"codebase oracle\"."
+      },
+      {
+        "name": "aio-snapshot",
+        "desc": "PROACTIVE planning \u2014 baseline step in the aio-deep-plan pipeline. Use when the user wants change tracking: \"create snapshot\", \"baseline\", \"before I start coding\". Enables change detection in the review skill after coding. NOT for debugging \u2014 use aio-debug instead."
+      },
+      {
+        "name": "aio-debug",
+        "desc": "REACTIVE debugging \u2014 use when something is broken and needs fixing. Triggers: \"debug\", \"fix bug\", \"fixbug\", \"investigate error\", \"troubleshoot\", \"why is this broken\", \"not working\", \"failing test\", \"unexpected behavior\", runtime error, stack trace, crash, regression, or any bug/error/test failure to investigate and fix. NOT for planning new features \u2014 use aio-deep-plan instead. Orchestrates codebase context \u2192 root cause investigation \u2192 minimal fix \u2192 code review validation."
+      },
+      {
+        "name": "aio-discover",
+        "desc": "PROACTIVE planning \u2014 first step in the aio-deep-plan pipeline. Use when exploring codebase before writing code: \"discover\", \"find code\", \"how does X work\", \"where is\", \"what handles\", \"understand codebase\", \"explore code\". Follow with map, then plan. NOT for debugging \u2014 use aio-debug instead."
+      },
+      {
+        "name": "aio-map",
+        "desc": "PROACTIVE planning \u2014 second step in the aio-deep-plan pipeline. Use when the user needs structural analysis: \"map dependencies\", \"show structure\", \"who calls this\", \"blast radius\", \"trace references\", \"impact analysis\". Run discover first, then follow with plan. NOT for debugging \u2014 use aio-debug instead."
+      }
+    ]
+  },
+  {
+    "name": "aio-saas-tools",
+    "version": "1.0.0",
+    "desc": "SaaS integration toolkit \u2014 Atlassian, Google Workspace, Tanca HR, and X/Twitter. Four skills: aio-atlassian (Jira + Confluence CLI), aio-google-workspace (Drive, Gmail, Calendar, Sheets, Docs), aio-ta",
+    "skills": [
+      {
+        "name": "aio-tanca",
+        "desc": "Manage employee timekeeping, shifts, and attendance via tanca-mcp (auto-installs if missing). Triggers: \"check in\", \"check out\", \"list employees\", \"get shift\", tanca, HR timekeeping, attendance."
+      },
+      {
+        "name": "aio-atlassian",
+        "desc": "Manage Jira issues, sprints, workflows, and Confluence pages via CLI. Triggers: \"create Jira issue\", \"search issues\", \"update issue status\", \"manage sprint\", \"search confluence\", \"create page\", \"update page\", jira, confluence, JQL, CQL, epic, wiki."
+      },
+      {
+        "name": "aio-google-workspace",
+        "desc": "Interact with Google Workspace services (Gmail, Drive, Calendar, Sheets, Docs, Tasks) via the gws CLI. Triggers: \"send email\", \"upload to drive\", \"create event\", \"read spreadsheet\", \"standup report\", gws, Google Workspace."
+      },
+      {
+        "name": "aio-x",
+        "desc": "Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing). Triggers: \"post tweet\", \"search twitter\", \"post thread\", \"get mentions\", twitter, x.com, tweet, timeline."
+      }
+    ]
+  },
+  {
+    "name": "aio-watermill-kit",
+    "version": "0.1.0",
+    "desc": "Skills and generators for working with the Go Watermill messaging library (Pub/Sub, CQRS, Routers).",
+    "skills": [
+      {
+        "name": "aio-watermill-kit",
+        "desc": "Comprehensive guide for building event-driven Go applications with the Watermill library (github.com/ThreeDotsLabs/watermill). Covers Router setup, middleware chains, Publisher/Subscriber patterns, CQRS, and production best practices. Use this skill whenever the user mentions \"watermill\", \"event-driven Go\", \"Go message router\", \"pub/sub in Go\", \"CQRS Go\", \"event bus Go\", \"message handler Go\", \"watermill middleware\", \"watermill router\", \"watermill kafka\", or is building any event-driven pipeline in Go. Also use when the user is configuring Watermill components like Forwarder, FanIn, Delay, RequestReply, or choosing between PubSub implementations (Kafka, AMQP, Redis Streams, NATS, SQL, Google Cloud Pub/Sub). Even if the user doesn't say \"watermill\" explicitly, trigger this skill when they're working on Go code that imports \"github.com/ThreeDotsLabs/watermill\"."
+      }
+    ]
+  }
+]

@@ -691,6 +691,7 @@
 
 <script>
 
+
 const MARKETPLACE = 'aiocean-plugins';
 let allPluginsData = [];
 
@@ -747,20 +748,31 @@ function toggleSkills(name) {
 function renderPlugins(plugins) {
   const container = document.getElementById('pluginList');
   
-  // Create a single "All Plugins" category for now, or we could sort them alphabetically
+  // Categorize or just sort by name (let's sort them into a single list for now)
   container.innerHTML = `
     <div class="category">
       <div class="category-header">
         <h2>Available Plugins</h2>
       </div>
       ${plugins.map(p => `
-        <div class="plugin">
+        <div class="plugin${p.skills && p.skills.length > 0 ? ' has-skills' : ''}" ${p.skills && p.skills.length > 0 ? `onclick="toggleSkills('${p.name}')"` : ''}>
           <div class="plugin-info">
             <div class="plugin-top">
               <span class="plugin-name">${p.name}</span>
               <span class="plugin-version">${p.version}</span>
+              ${p.skills && p.skills.length > 0 ? `<span class="skill-count" id="badge-${p.name}">${p.skills.length} skills</span>` : ''}
             </div>
-            <div class="plugin-desc" title="${p.description.replace(/"/g, '&quot;')}">${p.description}</div>
+            <div class="plugin-desc">${p.desc || p.description || ''}</div>
+            ${p.skills && p.skills.length > 0 ? `
+              <div class="skills-list" id="skills-${p.name}">
+                ${p.skills.map(s => `
+                  <div class="skill-item">
+                    <span class="skill-item-name">${s.name}</span>
+                    <span class="skill-item-desc">${s.desc}</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
           </div>
           <button class="install-btn" onclick="event.stopPropagation(); openInstallModal('${p.name}')">install</button>
         </div>
@@ -774,27 +786,47 @@ function filterPlugins() {
   document.querySelectorAll('.plugin').forEach(p => {
     const name = p.querySelector('.plugin-name').textContent.toLowerCase();
     const desc = p.querySelector('.plugin-desc').textContent.toLowerCase();
-    const match = !q || name.includes(q) || desc.includes(q);
+    
+    // Also search through skill names and descriptions
+    let skillMatch = false;
+    const skills = p.querySelectorAll('.skill-item');
+    skills.forEach(s => {
+       const sname = s.querySelector('.skill-item-name').textContent.toLowerCase();
+       const sdesc = s.querySelector('.skill-item-desc').textContent.toLowerCase();
+       if (sname.includes(q) || sdesc.includes(q)) skillMatch = true;
+    });
+
+    const match = !q || name.includes(q) || desc.includes(q) || skillMatch;
     p.classList.toggle('hidden', !match);
   });
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-// Fetch plugins from GitHub raw content
+// Fetch compiled data.json from the same repository domain
 async function loadPlugins() {
   try {
-    const response = await fetch('https://raw.githubusercontent.com/aiocean/claude-plugins/main/.claude-plugin/marketplace.json');
+    const response = await fetch('./data.json');
+    if (!response.ok) throw new Error('data.json not found');
     const data = await response.json();
-    allPluginsData = data.plugins.sort((a, b) => a.name.localeCompare(b.name));
+    allPluginsData = data.sort((a, b) => a.name.localeCompare(b.name));
     renderPlugins(allPluginsData);
   } catch (error) {
     console.error('Error loading plugins:', error);
-    document.getElementById('pluginList').innerHTML = '<p style="color:var(--pink)">Failed to load plugins. Please check your connection or GitHub availability.</p>';
+    // Fallback: try raw github link if local fails (e.g. running from file://)
+    try {
+      const fbResponse = await fetch('https://raw.githubusercontent.com/aiocean/claude-plugins/main/docs/data.json');
+      const fbData = await fbResponse.json();
+      allPluginsData = fbData.sort((a, b) => a.name.localeCompare(b.name));
+      renderPlugins(allPluginsData);
+    } catch(err2) {
+      document.getElementById('pluginList').innerHTML = '<p style="color:var(--pink)">Failed to load plugins. Please check your connection.</p>';
+    }
   }
 }
 
 loadPlugins();
+
 // Floating particles
 (function() {
   const canvas = document.getElementById('particles');
