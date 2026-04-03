@@ -349,5 +349,16 @@
         "desc": "Comprehensive guide for building event-driven Go applications with the Watermill library (github.com/ThreeDotsLabs/watermill). Covers Router setup, middleware chains, Publisher/Subscriber patterns, CQRS, and production best practices. Use this skill whenever the user mentions \"watermill\", \"event-driven Go\", \"Go message router\", \"pub/sub in Go\", \"CQRS Go\", \"event bus Go\", \"message handler Go\", \"watermill middleware\", \"watermill router\", \"watermill kafka\", or is building any event-driven pipeline in Go. Also use when the user is configuring Watermill components like Forwarder, FanIn, Delay, RequestReply, or choosing between PubSub implementations (Kafka, AMQP, Redis Streams, NATS, SQL, Google Cloud Pub/Sub). Even if the user doesn't say \"watermill\" explicitly, trigger this skill when they're working on Go code that imports \"github.com/ThreeDotsLabs/watermill\"."
       }
     ]
+  },
+  {
+    "name": "aio-kanban",
+    "version": "1.0.0",
+    "desc": "Markdown-based kanban board for AI agent task management. Single BOARD.md file with Backlog/Todo/Doing/Done/Blocked columns, auto-status on skill load, WIP limits, and session hooks.",
+    "skills": [
+      {
+        "name": "aio-kanban",
+        "desc": "Markdown-based kanban board for AI agent task management. Use when: \"kanban\", \"board\", \"tasks\", \"backlog\", \"show board\", \"what's next\", \"task status\", \"add task\", \"init kanban\", \"sprint\", \"todo list\", \"track progress\", \"prioritize tasks\", \"plan work\", \"move task\", \"archive done\"."
+      }
+    ]
   }
 ]
