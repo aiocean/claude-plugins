@@ -118,31 +118,15 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
   pj_name="$(jq -r '.name // empty' "$PLUGIN_JSON")"
   pj_desc="$(jq -r '.description // empty' "$PLUGIN_JSON")"
   pj_version="$(jq -r '.version // empty' "$PLUGIN_JSON")"
-  # Handle author as either string or object with .name
-  pj_author="$(jq -r 'if .author | type == "object" then .author.name // empty elif .author | type == "string" then .author else empty end' "$PLUGIN_JSON")"
+  pj_author_type="$(jq -r '.author | type' "$PLUGIN_JSON")"
+  pj_author="$(jq -r 'if .author | type == "object" then .author.name // empty else empty end' "$PLUGIN_JSON")"
 
-  if [ -n "$pj_name" ]; then
-    pass "plugin.json has 'name': $pj_name"
-  else
-    fail "plugin.json missing 'name' field"
-  fi
-
-  if [ -n "$pj_desc" ]; then
-    pass "plugin.json has 'description'"
-  else
-    fail "plugin.json missing 'description' field"
-  fi
-
-  if [ -n "$pj_version" ]; then
-    pass "plugin.json has 'version': $pj_version"
-  else
-    fail "plugin.json missing 'version' field"
-  fi
-
-  if [ -n "$pj_author" ]; then
+  if [ "$pj_author_type" != "object" ]; then
+    fail "plugin.json 'author' must be an object (got $pj_author_type)"
+  elif [ -n "$pj_author" ]; then
     pass "plugin.json has 'author': $pj_author"
   else
-    fail "plugin.json missing 'author' field"
+    fail "plugin.json missing 'author.name' field"
   fi
 
   # -------------------------------------------------------
