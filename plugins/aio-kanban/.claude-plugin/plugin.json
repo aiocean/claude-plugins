@@ -1,0 +1,8 @@
+{
+  "name": "aio-kanban",
+  "description": "Markdown-based kanban board for AI agent task management. Track tasks through Backlog, Todo, Doing, Done columns in a single BOARD.md file.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  }
+}
