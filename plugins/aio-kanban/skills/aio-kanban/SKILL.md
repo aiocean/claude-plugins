@@ -16,235 +16,80 @@ effort: medium
 
 !`bash "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/scripts/kanban-status.sh" 2>/dev/null`
 
-# Kanban — Markdown Task Management
+# Kanban Protocol
 
-Single-file kanban board (`BOARD.md`) designed for AI agents. No database, no build step — just markdown that any agent can read and write.
-
-## Design Principles
-
-1. **BOARD.md is the single source of truth** — one file, always in project root
-2. **Tasks flow left to right**: Backlog -> Todo -> Doing -> Done
-3. **WIP limit = 2** in Doing — focus over multitasking
-4. **AI reads board first, updates board last** — every session
+Board location: `.kanban/board.md`. Follow this protocol exactly. Do NOT adapt or invent your own format.
 
 ---
 
 ## Init
 
-If the auto-status above shows "not initialized", create the board:
+If auto-status above shows "not initialized":
 
 ```bash
-cat > BOARD.md << 'BOARD'
+mkdir -p .kanban/archive .kanban/tasks
+cat > .kanban/board.md << 'BOARD'
 # Kanban Board
-
 <!-- Updated: YYYY-MM-DD -->
 
 ## Backlog
-<!-- Needs refinement. Not ready to start. -->
 
 ## Todo
-<!-- Ready. Clear acceptance criteria. Pick from here. -->
 
 ## Doing
-<!-- In progress. Max 2 tasks. -->
 
 ## Done
-<!-- Completed. Archive monthly. -->
 
 ## Blocked
-<!-- Waiting on external input. Review daily. -->
 BOARD
 ```
 
-Also create the archive directory for completed tasks:
+Then inject kanban guide into CLAUDE.md:
 
 ```bash
-mkdir -p .kanban/archive
+bash "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/scripts/kanban-inject.sh"
 ```
 
 ---
 
-## Task Format
-
-Every task is an H3 block under a column. Minimal but parseable:
+## Task Format — MUST use verbatim
 
 ```markdown
-### T-001: Implement auth middleware
-> JWT-based auth for all API routes
+### T-NNN: Title
+> One-line description
 
-- **priority**: high
-- **effort**: M
-- **depends**: T-000
-- **branch**: feat/auth-middleware
+- **priority**: critical | high | medium | low
+- **effort**: XS | S | M | L
 
 #### Criteria
-- [ ] Middleware intercepts all /api/* routes
-- [ ] Token validation with proper error codes
-- [ ] Unit tests cover expired/invalid/missing token
+- [ ] Acceptance criterion 1
+- [ ] Acceptance criterion 2
 ```
 
-### Field Reference
+Optional fields (add below effort):
+- `- **depends**: T-NNN`
+- `- **branch**: feat/branch-name`
+- `- **completed**: YYYY-MM-DD` (when moved to Done)
+- `- **blocked-by**: reason` (when moved to Blocked)
 
-| Field | Values | Required |
-|-------|--------|----------|
-| **priority** | `critical` / `high` / `medium` / `low` | yes |
-| **effort** | `XS` (<30m) / `S` (1-2h) / `M` (half-day) / `L` (full-day) / `XL` (multi-day, break it down) | yes |
-| **depends** | `T-NNN` (blocks until dependency is Done) | no |
-| **branch** | git branch name, set when work starts | no |
-
-### Task ID Rules
-
-- Format: `T-NNN` (zero-padded, monotonic)
-- Never reuse an ID — even after archiving
-- To find next ID: `grep -oP 'T-\d+' BOARD.md | sort -t- -k2 -n | tail -1`
+**ID rule**: `T-NNN`, zero-padded, monotonic. NEVER reuse.
 
 ---
 
-## Workflow
+## Workflow Rules
 
-### Adding a Task
-
-1. Add `### T-NNN: Title` block under **Backlog**
-2. Fill in priority and effort at minimum
-3. When acceptance criteria are clear, move to **Todo**
-
-### Starting Work
-
-1. Pick highest-priority from **Todo**
-2. Cut-paste the entire block to **Doing**
-3. Set `branch` field
-4. Check WIP limit (max 2 in Doing)
-5. Optionally create git worktree: `git worktree add .worktrees/T-NNN -b feat/task-name`
-
-### Completing Work
-
-1. Verify all criteria checkboxes are checked
-2. Cut-paste block to **Done**
-3. Add completion note: `- **completed**: YYYY-MM-DD`
-
-### Blocked Tasks
-
-1. Move to **Blocked** with reason: `- **blocked-by**: description of blocker`
-2. Review daily — unblock or demote to Backlog
-
-### Archiving
-
-Monthly, move Done tasks to `.kanban/archive/YYYY-MM.md`:
-
-```bash
-# Extract Done section tasks, append to archive, clean from board
-MONTH=$(date +%Y-%m)
-awk '/^## Done/,/^## /' BOARD.md | grep -A999 "^### T-" >> ".kanban/archive/${MONTH}.md"
-```
-
-Then remove those tasks from BOARD.md Done section.
-
----
-
-## Complex Tasks
-
-When a task needs detailed planning (effort L or XL), create a detail file:
-
-```
-.kanban/
-  tasks/
-    T-005-payment-integration.md
-  archive/
-    2026-03.md
-```
-
-Reference from BOARD.md:
-
-```markdown
-### T-005: Payment integration -> [plan](.kanban/tasks/T-005-payment-integration.md)
-> Stripe checkout for subscription tiers
-
-- **priority**: high
-- **effort**: XL
-```
-
-The detail file has full context: research notes, API docs, sub-tasks, decisions.
+1. **Add**: new `### T-NNN` under **Backlog**. MUST include priority + effort.
+2. **Refine**: move to **Todo** when criteria are defined.
+3. **Start**: move to **Doing**, set branch. NEVER exceed 2 in Doing.
+4. **Complete**: ALL criteria checkboxes checked → move to **Done**, add `completed` date.
+5. **Block**: move to **Blocked**, add `blocked-by`. Review daily.
+6. **Archive**: monthly, cut Done tasks to `.kanban/archive/YYYY-MM.md`.
+7. **Next ID**: find highest T-NNN in board, increment by 1.
+8. **XL tasks**: create detail file at `.kanban/tasks/T-NNN-slug.md`, link from board title.
 
 ---
 
 ## Session Protocol
 
-### At Session Start
-
-The auto-execute script above already shows board status. Read the current Doing tasks to resume context:
-
-```
-Read BOARD.md, focus on Doing and Blocked sections.
-What was I working on? Any blockers to resolve first?
-```
-
-### At Session End
-
-Before ending, update BOARD.md:
-- Move completed tasks to Done (check all criteria first)
-- Note any new blockers
-- Update the `<!-- Updated: -->` timestamp
-
-### Between Sessions
-
-BOARD.md is committed to git — full history, blame, and diff support.
-
----
-
-## Auto-Context with Hooks
-
-Add to **`.claude/settings.local.json`** for automatic board awareness:
-
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hook": "prompt",
-        "prompt": "Before ending: check BOARD.md. Move any completed tasks to Done (verify criteria first). Note blockers. Update the timestamp comment. If no changes needed, skip."
-      }
-    ]
-  }
-}
-```
-
-This reminds the agent to update the board before every session ends.
-
-### Optional: CLAUDE.md Integration
-
-Add to your project's `CLAUDE.md` for every-session awareness:
-
-```markdown
-## Task Tracking
-
-This project uses BOARD.md as a kanban board.
-- At session start: read BOARD.md, resume Doing tasks
-- At session end: update BOARD.md with progress
-- WIP limit: max 2 tasks in Doing
-- Pick highest-priority from Todo when starting new work
-```
-
----
-
-## Quick Reference
-
-| Action | How |
-|--------|-----|
-| Init board | `cat > BOARD.md` with template above |
-| Add task | New `### T-NNN` block in Backlog |
-| Start task | Move block to Doing, set branch |
-| Complete | Check all criteria, move to Done |
-| Block | Move to Blocked, add `blocked-by` |
-| Next ID | `grep -oP 'T-\d+' BOARD.md \| sort -t- -k2 -n \| tail -1` |
-| Stats | `!bash "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/scripts/kanban-status.sh"` |
-| Archive | Move Done tasks to `.kanban/archive/YYYY-MM.md` |
-
----
-
-## Anti-Patterns
-
-- **No board, no work** — always init before starting a project
-- **XL tasks** — break them down. If effort is XL, it's actually 3-5 smaller tasks
-- **WIP > 2** — finish something before starting something new
-- **Stale Doing** — if a task sits in Doing for 2+ sessions, it's blocked (move it)
-- **Skipping criteria** — don't move to Done without checking every box
+- **Start**: Read `.kanban/board.md`. Resume Doing tasks. Check Blocked.
+- **End**: Update `.kanban/board.md` — move completed, note blockers, update `<!-- Updated: -->` timestamp.

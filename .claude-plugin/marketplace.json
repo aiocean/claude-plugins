@@ -197,8 +197,8 @@
     {
       "name": "aio-kanban",
       "source": "./plugins/aio-kanban",
-      "description": "Markdown-based kanban board for AI agent task management. Single BOARD.md file with Backlog/Todo/Doing/Done/Blocked columns, auto-status on skill load, WIP limits, and session hooks.",
-      "version": "1.0.0",
+      "description": "Markdown-based kanban board for AI agent task management. .kanban/board.md with Backlog/Todo/Doing/Done/Blocked columns, auto-status on skill load, WIP limits, and CLAUDE.md integration.",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
