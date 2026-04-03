@@ -1,7 +1,0 @@
-{
-  "reviews": [
-    {"run_id": "eval-0-with_skill", "feedback": "Looks good! The test instructions are helpful.", "timestamp": "2024-05-24T12:10:00Z"},
-    {"run_id": "eval-1-with_skill", "feedback": "Great, the explanation for CQRS makes it much clearer why we're doing this.", "timestamp": "2024-05-24T12:12:00Z"}
-  ],
-  "status": "complete"
-}
