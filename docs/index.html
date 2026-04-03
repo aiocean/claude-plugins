@@ -690,102 +690,9 @@
 <div class="toast" id="toast">copied</div>
 
 <script>
-const MARKETPLACE = 'aiocean-plugins';
 
-const PLUGINS = [
-  {
-    category: "Toolkits",
-    plugins: [
-      { name: "aio-planning", version: "1.0.0", desc: "Code analysis & planning — 9 skills for codebase understanding, debugging, and review.", skills: [
-        { name: "aio-gitnexus", desc: "GitNexus knowledge graph — index and query codebase structure" },
-        { name: "aio-doc-writer", desc: "Generate architecture docs, module docs, and HTML viewers" },
-        { name: "aio-discover", desc: "Find relevant code for a feature or concept" },
-        { name: "aio-map", desc: "Structural analysis — dependencies, blast radius, call graphs" },
-        { name: "aio-plan", desc: "Implementation planning with re-anchoring" },
-        { name: "aio-review", desc: "Plan review and validation" },
-        { name: "aio-snapshot", desc: "Baseline snapshot for change tracking" },
-        { name: "aio-debug", desc: "4-phase debug pipeline: context, root cause, fix, review" },
-        { name: "aio-code-review", desc: "Multi-agent code review with critic meta-review" }
-      ]},
-      { name: "aio-claude-toolkit", version: "1.0.0", desc: "Claude Code management — 6 skills for skill management, learning, and feedback.", skills: [
-        { name: "aio-claude-manager", desc: "Enable/disable skills by project context, apply presets" },
-        { name: "aio-install", desc: "Browse, install, enable/disable aiocean plugins" },
-        { name: "aio-reflect", desc: "Extract reusable knowledge from past sessions" },
-        { name: "aio-dream", desc: "Consolidate and organize memory files" },
-        { name: "aio-skillify", desc: "Capture repeatable workflows as reusable skills" },
-        { name: "feedback", desc: "Submit bug reports and feature requests via GitHub Issues" }
-      ]},
-      { name: "aio-devops", version: "1.0.0", desc: "DevOps toolkit — 3 skills for Git platform management and parallel development.", skills: [
-        { name: "aio-github", desc: "GitHub repos, PRs, issues, code review via MCP" },
-        { name: "aio-gitlab", desc: "GitLab MRs, pipelines, jobs, branch protection via MCP" },
-        { name: "aio-worktree", desc: "Git worktree management for parallel development" }
-      ]},
-      { name: "aio-design-system", version: "1.0.0", desc: "UI/UX design — 3 skills for design knowledge, systems, and React optimization.", skills: [
-        { name: "aio-uiux", desc: "Comprehensive UI/UX design knowledge — 100+ topics, WCAG 2.2, UX laws" },
-        { name: "aio-neobrutalism", desc: "Neobrutalism design system bootstrapper — CSS tokens, component transforms" },
-        { name: "aio-react-minimal-effects", desc: "Minimize useEffect in React 19 — scan mode with file:line refs" }
-      ]},
-      { name: "aio-saas-tools", version: "1.0.0", desc: "SaaS integrations — 4 skills for Atlassian, Google, HR, and social.", skills: [
-        { name: "aio-atlassian", desc: "Jira issues, sprints, workflows + Confluence pages via CLI" },
-        { name: "aio-google-workspace", desc: "Drive, Gmail, Calendar, Sheets, Docs, Tasks via gws CLI" },
-        { name: "aio-tanca", desc: "Employee timekeeping, shifts, check-in/check-out via MCP" },
-        { name: "aio-x", desc: "X/Twitter tweets, threads, search, engagement via MCP" }
-      ]},
-      { name: "aio-research", version: "1.0.0", desc: "Research toolkit — 2 skills for structured research and vector search.", skills: [
-        { name: "aio-research-kit", desc: "Structured 10-phase research framework" },
-        { name: "aio-rag-kit", desc: "Qdrant vector database — index, search, semantic queries" }
-      ]},
-      { name: "aio-diagramming", version: "1.0.0", desc: "Diagram generation — 2 skills for Mermaid and Grafana diagrams.", skills: [
-        { name: "aio-mermaid", desc: "Generate shareable MinimalMermaid diagram URLs" },
-        { name: "aio-grafana-diagram", desc: "Auto-generate Mermaid diagrams with metric binding for Grafana" }
-      ]}
-    ]
-  },
-  {
-    category: "Content & Translation",
-    plugins: [
-      { name: "aio-epub-translate", version: "3.5.1", desc: "EPUB book translation via ConnectRPC API — 9 skills for the full translation pipeline.", skills: [
-        { name: "aio-epub-setup", desc: "Account registration, license, API key configuration" },
-        { name: "aio-epub-upload", desc: "Upload and prepare EPUB books for translation" },
-        { name: "aio-epub-analyze", desc: "Pre-translation analysis — style, characters, glossary" },
-        { name: "aio-epub-translate", desc: "Literary translation with batch API, edit & update" },
-        { name: "aio-epub-review", desc: "Deep literary review with quality scoring" },
-        { name: "aio-epub-quality", desc: "Mechanical quality detection and re-translation" },
-        { name: "aio-epub-manage", desc: "Browse, progress, guidelines, community, fork, reset" },
-        { name: "aio-epub-export", desc: "Pack and export — bilingual or translation-only EPUB" },
-        { name: "aio-epub-vn-style", desc: "Vietnamese literary translation style guide" }
-      ]},
-      { name: "aio-youtube", version: "1.1.3", desc: "Search YouTube and extract video transcripts using yt-dlp." },
-      { name: "aio-mental-models", version: "2.1.3", desc: "Decision advisor using 50+ mental models. Guides through selection, application, synthesis, and stress-testing." },
-      { name: "aio-gherkin-refine", version: "2.0.2", desc: "BDD field guide — writes and reviews Gherkin with expert quality. Example Mapping, 3 Amigos, anti-patterns catalog." }
-    ]
-  },
-  {
-    category: "Language & Framework",
-    plugins: [
-      { name: "aio-golang-mastery", version: "1.1.1", desc: "Complete Go development with lint mode: 7-step tooling chain (build, vet, golangci-lint, govulncheck, nilaway, deadcode, race). Google/Uber style." },
-      { name: "aio-xstate", version: "1.0.6", desc: "XState v5 strict ruleset: setup().createMachine() patterns, design-first workflow, actor types, React integration." },
-      { name: "aio-tui", version: "1.0.5", desc: "Go Bubbletea TUI guide: TEA architecture, lipgloss styling, production patterns." },
-      { name: "aio-watermill-kit", version: "0.1.0", desc: "Skills and generators for working with the Go Watermill messaging library." },
-      { name: "aio-bun-fullstack-setup", version: "1.1.1", desc: "Scaffold Bun fullstack apps. Detects existing files, generates only what's missing: single-port server, Vite proxy, PM2, Docker." }
-    ]
-  },
-  {
-    category: "Platform & Browser",
-    plugins: [
-      { name: "aio-ios-device-debug", version: "1.1.4", desc: "Debug iOS apps on physical devices. Build, install, launch, capture logs, pull crash reports, take screenshots." },
-      { name: "aio-cdp-relay", version: "1.2.2", desc: "Persistent Chrome DevTools Protocol relay for browser automation via scripts — no MCP tool calls, no approval prompts." },
-      { name: "aio-browser-cookie", version: "2.0.3", desc: "Extract browser cookies with rookiepy. Export Netscape files, replay authenticated requests." }
-    ]
-  },
-  {
-    category: "Observability & Utilities",
-    plugins: [
-      { name: "aio-monitoring-observability", version: "1.0.7", desc: "Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry, SLOs, dashboards, alerting. 7 automation scripts." },
-      { name: "aio-remove-bg", version: "1.1.4", desc: "Remove background from images. Supports threshold-based (fast) and AI-based (rembg) methods." }
-    ]
-  }
-];
+const MARKETPLACE = 'aiocean-plugins';
+let allPluginsData = [];
 
 function installCmd(name) {
   return `claude plugin install ${name}@${MARKETPLACE}`;
@@ -837,60 +744,57 @@ function toggleSkills(name) {
   }
 }
 
-function render() {
+function renderPlugins(plugins) {
   const container = document.getElementById('pluginList');
-  container.innerHTML = PLUGINS.map(cat => `
+  
+  // Create a single "All Plugins" category for now, or we could sort them alphabetically
+  container.innerHTML = `
     <div class="category">
       <div class="category-header">
-        <h2>${cat.category}</h2>
+        <h2>Available Plugins</h2>
       </div>
-      ${cat.plugins.map(p => `
-        <div class="plugin${p.skills ? ' has-skills' : ''}" ${p.skills ? `onclick="toggleSkills('${p.name}')"` : ''}>
+      ${plugins.map(p => `
+        <div class="plugin">
           <div class="plugin-info">
             <div class="plugin-top">
               <span class="plugin-name">${p.name}</span>
               <span class="plugin-version">${p.version}</span>
-              ${p.skills ? `<span class="skill-count" id="badge-${p.name}">${p.skills.length} skills</span>` : ''}
             </div>
-            <div class="plugin-desc">${p.desc}</div>
-            ${p.skills ? `
-              <div class="skills-list" id="skills-${p.name}">
-                ${p.skills.map(s => `
-                  <div class="skill-item">
-                    <span class="skill-item-name">${s.name}</span>
-                    <span class="skill-item-desc">${s.desc}</span>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
+            <div class="plugin-desc" title="${p.description.replace(/"/g, '&quot;')}">${p.description}</div>
           </div>
           <button class="install-btn" onclick="event.stopPropagation(); openInstallModal('${p.name}')">install</button>
         </div>
       `).join('')}
     </div>
-  `).join('');
+  `;
 }
 
 function filterPlugins() {
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  document.querySelectorAll('.category').forEach(catEl => {
-    const plugins = catEl.querySelectorAll('.plugin');
-    let visible = 0;
-    plugins.forEach(p => {
-      const name = p.querySelector('.plugin-name').textContent.toLowerCase();
-      const desc = p.querySelector('.plugin-desc').textContent.toLowerCase();
-      const match = !q || name.includes(q) || desc.includes(q);
-      p.classList.toggle('hidden', !match);
-      if (match) visible++;
-    });
-    catEl.classList.toggle('hidden', visible === 0);
+  document.querySelectorAll('.plugin').forEach(p => {
+    const name = p.querySelector('.plugin-name').textContent.toLowerCase();
+    const desc = p.querySelector('.plugin-desc').textContent.toLowerCase();
+    const match = !q || name.includes(q) || desc.includes(q);
+    p.classList.toggle('hidden', !match);
   });
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-render();
+// Fetch plugins from GitHub raw content
+async function loadPlugins() {
+  try {
+    const response = await fetch('https://raw.githubusercontent.com/aiocean/claude-plugins/main/.claude-plugin/marketplace.json');
+    const data = await response.json();
+    allPluginsData = data.plugins.sort((a, b) => a.name.localeCompare(b.name));
+    renderPlugins(allPluginsData);
+  } catch (error) {
+    console.error('Error loading plugins:', error);
+    document.getElementById('pluginList').innerHTML = '<p style="color:var(--pink)">Failed to load plugins. Please check your connection or GitHub availability.</p>';
+  }
+}
 
+loadPlugins();
 // Floating particles
 (function() {
   const canvas = document.getElementById('particles');
