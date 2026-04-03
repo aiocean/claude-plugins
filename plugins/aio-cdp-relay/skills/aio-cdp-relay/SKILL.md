@@ -77,6 +77,14 @@ curl -X POST http://127.0.0.1:9223/stop
 # Or: kill $(cat /tmp/cdp_relay.pid)
 ```
 
+### Restart the relay server (rebuild + restart)
+
+```bash
+python3 "$CDP/cdp_tool.py" restart
+```
+
+This rebuilds the binary from source (`go install`), kills the running relay, and starts a fresh one. Useful after upgrading the relay code.
+
 ## How It Works
 
 A persistent HTTP relay holds one WebSocket to Chrome. Scripts talk to the relay — no new connections, no MCP approval prompts.
@@ -101,6 +109,7 @@ python3 "$CDP/cdp_tool.py" screenshot /tmp/page.png     # Screenshot
 python3 "$CDP/cdp_tool.py" navigate https://example.com # Navigate
 python3 "$CDP/cdp_tool.py" network 10          # Capture network for 10s
 python3 "$CDP/cdp_tool.py" stop                # Stop relay
+python3 "$CDP/cdp_tool.py" restart             # Rebuild, kill, restart relay
 ```
 
 ## Python Client Library
@@ -113,9 +122,8 @@ sys.path.insert(0, "<CLAUDE_PLUGIN_ROOT>/skills/aio-cdp-relay/scripts")
 from cdp_client import CDPClient
 
 with CDPClient() as cdp:
-    # Find and attach to a tab
-    tab = cdp.find_tab(url_contains="admin.shopify.com")
-    cdp.attach(tab["targetId"])
+    # Auto-attach to a tab by URL pattern (relay caches the session)
+    cdp.use_tab(url="*admin.shopify.com*")
 
     # Navigate
     cdp.navigate("https://example.com")
@@ -152,13 +160,16 @@ with CDPClient() as cdp:
 | `CDPClient(port=9223)` | Create client (relay must already be running) |
 | `cdp.stop_relay()` | Gracefully stop relay |
 
-### Targets
+### Targets (auto-attach)
 
 | Method | Description |
 |--------|-------------|
+| `cdp.use_tab(url="*pattern*")` | **Recommended.** Auto-attach by URL/title glob pattern. Relay caches session. |
+| `cdp.use_tab(title="*pattern*")` | Auto-attach by title pattern |
+| `cdp.use_tab(target_id="...")` | Auto-attach by exact target ID |
 | `cdp.targets(type="page")` | List targets, filter by type |
-| `cdp.find_tab(url_contains=..., title_contains=...)` | Find tab by URL/title |
-| `cdp.attach(target_id)` | Attach to target, returns session_id |
+| `cdp.find_tab(url_contains=..., title_contains=...)` | Find tab by URL/title (client-side) |
+| `cdp.attach(target_id)` | Manual attach to target, returns session_id |
 | `cdp.detach()` | Detach from current session |
 
 ### Navigation
@@ -180,6 +191,26 @@ with CDPClient() as cdp:
 | `cdp.drain_events()` | Drain events immediately |
 | `cdp.network_requests(events)` | Extract requests from events |
 | `cdp.find_request(events, url_contains)` | Find request by URL |
+
+### Event Filtering
+
+| Method | Description |
+|--------|-------------|
+| `cdp.subscribe(["Network.*", "Page.loadEventFired"])` | Only buffer matching events |
+| `cdp.unsubscribe()` | Revert to buffering all events |
+
+### Network Interception
+
+| Method | Description |
+|--------|-------------|
+| `cdp.intercept([{"urlPattern": "*api*", "action": "log"}])` | Start intercepting matching requests |
+| `cdp.intercepted()` | Get and clear captured requests |
+| `cdp.stop_intercept()` | Stop intercepting |
+
+Intercept actions:
+- `"log"` — capture request details, let it continue normally
+- `"block"` — reject the request (BlockedByClient)
+- `"mock"` — return a fake response (set `mockStatus`, `mockBody`, `mockHeaders`)
 
 ### Cookies
 
@@ -221,13 +252,39 @@ curl http://127.0.0.1:9223/health
 # List targets
 curl http://127.0.0.1:9223/targets
 
-# Send CDP command
+# Auto-attach to a tab by URL pattern — returns sessionId
+curl -X POST http://127.0.0.1:9223/attach \
+  -H 'Content-Type: application/json' \
+  -d '{"url": "*github*"}'
+
+# Send CDP command with auto-attach (no manual sessionId needed)
+curl -X POST http://127.0.0.1:9223/cdp \
+  -H 'Content-Type: application/json' \
+  -d '{"method":"Runtime.evaluate","params":{"expression":"document.title","returnByValue":true},"targetSelector":{"url":"*github*"}}'
+
+# Send CDP command with explicit sessionId
 curl -X POST http://127.0.0.1:9223/cdp \
   -H 'Content-Type: application/json' \
   -d '{"method":"Runtime.evaluate","params":{"expression":"1+1","returnByValue":true},"sessionId":"..."}'
 
+# Subscribe to specific events only
+curl -X POST http://127.0.0.1:9223/subscribe \
+  -H 'Content-Type: application/json' \
+  -d '{"sessionId":"...","events":["Network.*","Page.loadEventFired"]}'
+
 # Drain events
 curl "http://127.0.0.1:9223/events?sessionId=..."
+
+# Intercept network requests
+curl -X POST http://127.0.0.1:9223/intercept \
+  -H 'Content-Type: application/json' \
+  -d '{"sessionId":"...","rules":[{"urlPattern":"*api*","action":"log"}]}'
+
+# Get intercepted requests
+curl http://127.0.0.1:9223/intercepted
+
+# Stop intercepting
+curl -X DELETE "http://127.0.0.1:9223/intercept?sessionId=..."
 
 # Stop relay
 curl -X POST http://127.0.0.1:9223/stop
@@ -239,8 +296,7 @@ curl -X POST http://127.0.0.1:9223/stop
 
 ```python
 with CDPClient() as cdp:
-    tab = cdp.find_tab(url_contains="admin.shopify.com")
-    cdp.attach(tab["targetId"])
+    cdp.use_tab(url="*admin.shopify.com*")
     cdp.network_enable()
     cdp.reload()
     events = cdp.wait_events(timeout=10)
@@ -254,7 +310,7 @@ with CDPClient() as cdp:
 
 ```python
 with CDPClient() as cdp:
-    cdp.attach(cdp.targets(type="page")[0]["targetId"])
+    cdp.use_tab(url="*example.com*")
     data = cdp.evaluate_async("""
         (async () => {
             const resp = await fetch('/api/data');
@@ -267,17 +323,66 @@ with CDPClient() as cdp:
 
 ```python
 with CDPClient() as cdp:
-    tabs = cdp.targets(type="page")
-
-    # Work with tab 1
-    cdp.attach(tabs[0]["targetId"])
+    # Switch tabs by URL pattern — relay caches sessions per target
+    cdp.use_tab(url="*github*")
     title1 = cdp.evaluate("document.title")
-    cdp.detach()
 
-    # Work with tab 2
-    cdp.attach(tabs[1]["targetId"])
+    cdp.use_tab(url="*docs*")
     title2 = cdp.evaluate("document.title")
-    cdp.detach()
+```
+
+### Intercept and log API calls
+
+```python
+with CDPClient() as cdp:
+    cdp.use_tab(url="*myapp*")
+    cdp.intercept([{"urlPattern": "*api*", "action": "log"}])
+    cdp.reload()
+    import time; time.sleep(5)
+    reqs = cdp.intercepted()
+    for r in reqs:
+        print(f"  {r['method']} {r['url']}")
+    cdp.stop_intercept()
+```
+
+### Block analytics / ads
+
+```python
+with CDPClient() as cdp:
+    cdp.use_tab(url="*myapp*")
+    cdp.intercept([
+        {"urlPattern": "*google-analytics*", "action": "block"},
+        {"urlPattern": "*doubleclick*", "action": "block"},
+    ])
+    cdp.reload()
+```
+
+### Mock an API response
+
+```python
+with CDPClient() as cdp:
+    cdp.use_tab(url="*myapp*")
+    cdp.intercept([{
+        "urlPattern": "*api/users*",
+        "action": "mock",
+        "mockStatus": 200,
+        "mockBody": '{"users": [{"name": "Test User"}]}',
+        "mockHeaders": {"Content-Type": "application/json"},
+    }])
+    cdp.reload()
+```
+
+### Filter events to reduce noise
+
+```python
+with CDPClient() as cdp:
+    cdp.use_tab(url="*myapp*")
+    cdp.subscribe(["Network.responseReceived", "Page.loadEventFired"])
+    cdp.network_enable()
+    cdp.reload()
+    events = cdp.wait_events(timeout=5)
+    # Only Network.responseReceived and Page.loadEventFired are returned
+    cdp.unsubscribe()
 ```
 
 ## Prerequisites

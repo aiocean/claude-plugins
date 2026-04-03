@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"golang.org/x/sync/singleflight"
 )
 
 var chromeUserDataDirs = []string{
@@ -56,48 +57,85 @@ type pendingRequest struct {
 type CDPConnection struct {
 	ws           *websocket.Conn
 	mu           sync.Mutex
+	writeMu      sync.Mutex // serializes WebSocket writes (gorilla disallows concurrent writes)
 	msgID        atomic.Int64
 	pending      map[int64]*pendingRequest
 	pendingMu    sync.Mutex
 	events       map[string][]json.RawMessage
 	eventsMu     sync.Mutex
 	reconnecting atomic.Bool // prevents multiple concurrent autoReconnect goroutines
+	dedup        singleflight.Group
+
+	// Connection gating: prevents multiple simultaneous Dial attempts.
+	connectGroup singleflight.Group
+
+	// Auto-attach: caches targetId -> sessionId
+	sessions *sessionCache
+	// Event filtering: controls which events get buffered per session
+	filters *eventFilter
+	// Network interception: handles Fetch.requestPaused events
+	interceptor *interceptor
 }
 
 // NewCDPConnection creates a new CDPConnection.
 func NewCDPConnection() *CDPConnection {
 	return &CDPConnection{
-		pending: make(map[int64]*pendingRequest),
-		events:  make(map[string][]json.RawMessage),
+		pending:     make(map[int64]*pendingRequest),
+		events:      make(map[string][]json.RawMessage),
+		sessions:    newSessionCache(),
+		filters:     newEventFilter(),
+		interceptor: newInterceptor(),
 	}
 }
 
 // EnsureConnected connects to Chrome if not already connected.
+// Uses singleflight so that only one Dial is in flight at a time —
+// if Chrome is showing an "accept connection" prompt, all callers
+// wait for that single attempt instead of spawning more prompts.
 func (c *CDPConnection) EnsureConnected() error {
 	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	if c.ws != nil {
+		c.mu.Unlock()
 		return nil
 	}
+	c.mu.Unlock()
 
-	port, wsPath, err := readCDPEndpoint()
-	if err != nil {
-		return fmt.Errorf("cannot find Chrome: %w", err)
-	}
+	// All concurrent callers share a single Dial attempt.
+	_, err, shared := c.connectGroup.Do("connect", func() (interface{}, error) {
+		// Double-check under lock (another caller may have connected while we waited).
+		c.mu.Lock()
+		if c.ws != nil {
+			c.mu.Unlock()
+			return nil, nil
+		}
+		c.mu.Unlock()
 
-	wsURL := fmt.Sprintf("ws://127.0.0.1:%d%s", port, wsPath)
-	dialer := websocket.Dialer{
-		HandshakeTimeout: 15 * time.Second,
-	}
-	conn, _, err := dialer.Dial(wsURL, nil)
-	if err != nil {
-		return fmt.Errorf("connection failed: %w", err)
-	}
+		port, wsPath, err := readCDPEndpoint()
+		if err != nil {
+			return nil, fmt.Errorf("cannot find Chrome: %w", err)
+		}
 
-	c.ws = conn
-	go c.recvLoop()
-	return nil
+		wsURL := fmt.Sprintf("ws://127.0.0.1:%d%s", port, wsPath)
+		log.Printf("[relay] Dialing Chrome at %s ...", wsURL)
+		dialer := websocket.Dialer{
+			HandshakeTimeout: 30 * time.Second,
+		}
+		conn, _, err := dialer.Dial(wsURL, nil)
+		if err != nil {
+			return nil, fmt.Errorf("connection failed: %w", err)
+		}
+
+		c.mu.Lock()
+		c.ws = conn
+		c.mu.Unlock()
+		go c.recvLoop()
+		log.Printf("[relay] Connected to Chrome.")
+		return nil, nil
+	})
+	if shared {
+		log.Printf("[relay] Connection attempt shared (waited for existing Dial).")
+	}
+	return err
 }
 
 // recvLoop reads messages from the WebSocket and routes them.
@@ -143,13 +181,39 @@ func (c *CDPConnection) recvLoop() {
 			}
 			c.pendingMu.Unlock()
 		} else if msg.Method != "" {
-			// Event — buffer by sessionId
 			sid := msg.SessionID
-			if sid == "" {
-				sid = "__global__"
+			bufferKey := sid
+			if bufferKey == "" {
+				bufferKey = "__global__"
 			}
+
+			// Handle target lifecycle — invalidate session cache
+			if msg.Method == "Target.targetDestroyed" {
+				var evt struct {
+					Params struct {
+						TargetID string `json:"targetId"`
+					} `json:"params"`
+				}
+				if json.Unmarshal(raw, &evt) == nil && evt.Params.TargetID != "" {
+					c.sessions.remove(evt.Params.TargetID)
+					log.Printf("[relay] Target destroyed, cache cleared: %s", evt.Params.TargetID[:min(16, len(evt.Params.TargetID))])
+				}
+			}
+
+			// Handle Fetch.requestPaused — dispatch to interceptor
+			if msg.Method == "Fetch.requestPaused" && c.interceptor.IsEnabled() {
+				go c.interceptor.HandlePaused(c, raw, sid)
+				continue
+			}
+
+			// Apply event filter
+			if !c.filters.ShouldBuffer(bufferKey, msg.Method) {
+				continue
+			}
+
+			// Buffer event
 			c.eventsMu.Lock()
-			c.events[sid] = append(c.events[sid], raw)
+			c.events[bufferKey] = append(c.events[bufferKey], raw)
 			c.eventsMu.Unlock()
 		}
 	}
@@ -254,11 +318,13 @@ func (c *CDPConnection) sendOnce(method string, params json.RawMessage, sessionI
 	c.pending[id] = pr
 	c.pendingMu.Unlock()
 
-	// Send
+	// Send — serialize writes to avoid concurrent write panics
+	c.writeMu.Lock()
 	c.mu.Lock()
 	ws := c.ws
 	c.mu.Unlock()
 	if ws == nil {
+		c.writeMu.Unlock()
 		c.pendingMu.Lock()
 		delete(c.pending, id)
 		c.pendingMu.Unlock()
@@ -266,11 +332,13 @@ func (c *CDPConnection) sendOnce(method string, params json.RawMessage, sessionI
 	}
 
 	data, _ := json.Marshal(msg)
-	if err := ws.WriteMessage(websocket.TextMessage, data); err != nil {
+	writeErr := ws.WriteMessage(websocket.TextMessage, data)
+	c.writeMu.Unlock()
+	if writeErr != nil {
 		c.pendingMu.Lock()
 		delete(c.pending, id)
 		c.pendingMu.Unlock()
-		return nil, fmt.Errorf("send failed: %w", err)
+		return nil, fmt.Errorf("send failed: %w", writeErr)
 	}
 
 	// Wait for response
