@@ -82,6 +82,27 @@ class CDPClient:
             return [t for t in all_targets if t.get("type") == type]
         return all_targets
 
+    def use_tab(self, url=None, title=None, target_id=None):
+        """Auto-attach to a tab by URL/title pattern via the relay.
+        The relay caches the session — no manual attach/detach needed.
+
+        Args:
+            url: Glob pattern for URL (e.g., "*github*")
+            title: Glob pattern for title
+            target_id: Exact target ID
+        Returns: dict with sessionId, targetId, url, title
+        """
+        selector = {}
+        if url:
+            selector["url"] = url
+        if title:
+            selector["title"] = title
+        if target_id:
+            selector["targetId"] = target_id
+        resp = self._post("/attach", selector)
+        self.session_id = resp.get("sessionId")
+        return resp
+
     def find_tab(self, url_contains=None, title_contains=None):
         """Find a page tab by URL or title substring."""
         for t in self.targets(type="page"):
@@ -110,12 +131,14 @@ class CDPClient:
 
     # -- CDP commands --
 
-    def send(self, method, params=None, timeout=15):
-        """Send a raw CDP command."""
+    def send(self, method, params=None, timeout=15, target_selector=None):
+        """Send a raw CDP command. Optionally auto-attach via target_selector."""
         body = {"method": method, "timeout": timeout}
         if params:
             body["params"] = params
-        if self.session_id:
+        if target_selector:
+            body["targetSelector"] = target_selector
+        elif self.session_id:
             body["sessionId"] = self.session_id
         return self._post("/cdp", body)
 
@@ -263,6 +286,59 @@ class CDPClient:
             "mobile": mobile,
         })
 
+    # -- Event filtering --
+
+    def subscribe(self, events):
+        """Filter which events get buffered. Only matching events are kept.
+        Supports exact names ('Network.responseReceived') and domain wildcards ('Network.*').
+        """
+        body = {"events": events}
+        if self.session_id:
+            body["sessionId"] = self.session_id
+        return self._post("/subscribe", body)
+
+    def unsubscribe(self):
+        """Clear event filter — revert to buffering all events."""
+        sid_param = f"?sessionId={self.session_id}" if self.session_id else ""
+        req = urllib.request.Request(
+            f"{self.base}/subscribe{sid_param}",
+            method="DELETE",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    # -- Network interception --
+
+    def intercept(self, rules):
+        """Start intercepting network requests.
+
+        Args:
+            rules: list of dicts with keys:
+                urlPattern: glob pattern (e.g., "*api.example.com*")
+                action: "log" (capture + continue), "block", or "mock"
+                mockStatus: HTTP status for mock (default 200)
+                mockBody: response body for mock
+                mockHeaders: dict of response headers for mock
+        """
+        body = {"rules": rules}
+        if self.session_id:
+            body["sessionId"] = self.session_id
+        return self._post("/intercept", body)
+
+    def stop_intercept(self):
+        """Stop intercepting network requests."""
+        sid_param = f"?sessionId={self.session_id}" if self.session_id else ""
+        req = urllib.request.Request(
+            f"{self.base}/intercept{sid_param}",
+            method="DELETE",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    def intercepted(self):
+        """Get and clear all intercepted requests."""
+        return self._get("/intercepted")
+
     # -- HTTP helpers --
 
     def _get(self, path):
@@ -278,4 +354,9 @@ class CDPClient:
             headers={"Content-Type": "application/json"},
         )
         with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+            result = json.loads(resp.read().decode("utf-8"))
+            # Capture auto-attached sessionId from relay
+            sid = resp.headers.get("X-CDP-Session-ID")
+            if sid:
+                self.session_id = sid
+            return result

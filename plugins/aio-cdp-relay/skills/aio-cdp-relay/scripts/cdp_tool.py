@@ -11,6 +11,7 @@ Usage:
     python3 cdp_tool.py navigate <url>      # Navigate active tab
     python3 cdp_tool.py network <seconds>   # Capture network requests
     python3 cdp_tool.py stop                # Stop the relay
+    python3 cdp_tool.py restart             # Rebuild, kill, and restart relay
 """
 
 import json
@@ -140,6 +141,70 @@ def cmd_stop(cdp, args):
     print("Relay stopping.")
 
 
+def cmd_restart(cdp, args):
+    """Kill the running relay and start a new one."""
+    import os
+    import subprocess
+    import time
+
+    # 1. Try graceful stop via API
+    try:
+        cdp.stop_relay()
+        print("Sent stop signal to relay.")
+    except Exception:
+        pass
+
+    # 2. Wait for process to die, then force kill via PID file
+    pid_file = "/tmp/cdp_relay.pid"
+    for _ in range(10):
+        time.sleep(0.3)
+        try:
+            cdp._get("/health")
+        except Exception:
+            break
+    else:
+        # Still running — force kill
+        try:
+            pid = int(open(pid_file).read().strip())
+            os.kill(pid, 9)
+            print(f"Force killed pid {pid}.")
+            time.sleep(0.5)
+        except Exception:
+            pass
+
+    # 3. Rebuild binary
+    relay_go_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "relay-go")
+    print("Building cdp-relay...")
+    result = subprocess.run(["go", "install", "."], cwd=relay_go_dir, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Build failed: {result.stderr}")
+        return
+
+    # 4. Find the binary
+    binary = None
+    for candidate in ["cdp-relay", os.path.expanduser("~/go/bin/cdp-relay"), "/tmp/cdp-relay"]:
+        if os.path.isfile(candidate) or subprocess.run(["which", candidate], capture_output=True).returncode == 0:
+            binary = candidate
+            break
+    if not binary:
+        print("ERROR: cdp-relay binary not found after build.")
+        return
+
+    # 5. Start new relay
+    log_file = open("/tmp/cdp_relay.log", "a")
+    subprocess.Popen([binary], stdout=log_file, stderr=log_file, start_new_session=True)
+    time.sleep(1)
+
+    # 6. Verify
+    try:
+        new_cdp = CDPClient()
+        data = new_cdp._get("/health")
+        print(f"Relay restarted (pid={data.get('pid', '?')}).")
+    except Exception as e:
+        print(f"WARNING: Relay may not have started: {e}")
+        print("Check: tail -f /tmp/cdp_relay.log")
+
+
 COMMANDS = {
     "status": cmd_status,
     "targets": cmd_targets,
@@ -149,6 +214,7 @@ COMMANDS = {
     "navigate": cmd_navigate,
     "network": cmd_network,
     "stop": cmd_stop,
+    "restart": cmd_restart,
 }
 
 

@@ -1,7 +1,7 @@
 ---
 name: aio-gitnexus
-description: Install, configure, and manage the GitNexus code intelligence engine — index codebase, setup MCP, check status, troubleshoot. Triggers: "setup gitnexus", "index codebase", "gitnexus status", "rebuild index", "setup code intelligence".
-when_to_use: setup gitnexus, index codebase, gitnexus status, rebuild index, code intelligence, knowledge graph, install gitnexus, configure mcp, gitnexus troubleshoot, analyze codebase
+description: Install, configure, and manage the GitNexus code intelligence engine — index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows. Triggers: "setup gitnexus", "index codebase", "gitnexus status", "rebuild index", "setup code intelligence".
+when_to_use: Use when setting up GitNexus, indexing a codebase, checking GitNexus status, rebuilding a stale index, troubleshooting GitNexus, or documenting how to keep a GitNexus index fresh with local git hooks on the master branch.
 effort: medium
 ---
 
@@ -13,7 +13,7 @@ effort: medium
 - gitnexus: !`npx gitnexus --version 2>/dev/null || echo "NOT INSTALLED (will be fetched via npx)"`
 - .mcp.json: !`[ -f ".mcp.json" ] && echo "present" || echo "NOT FOUND"`
 
-Manages the GitNexus zero-server code intelligence engine — install, setup MCP, run analysis, check status, and troubleshoot.
+Manages the GitNexus zero-server code intelligence engine — install, setup MCP, run analysis, check status, troubleshoot, and document local git-hook refresh workflows.
 
 GitNexus turns any codebase into a knowledge graph (nodes, edges, clusters, flows) with hybrid search (BM25 + semantic). Zero infrastructure — no databases, no Docker, no API keys required.
 
@@ -122,6 +122,56 @@ npx gitnexus analyze --embeddings
 npx gitnexus analyze --embeddings --force
 ```
 
+### Keep the Index Fresh with Local Git Hooks
+
+Use this only when the user explicitly wants automatic GitNexus refresh tied to git operations.
+
+#### Rules
+- Use **git hooks only** for this workflow.
+- Do **not** use Claude `PostToolUse` hooks for this auto-refresh workflow.
+- Restrict automatic refresh to the `master` branch only.
+- Run refresh asynchronously so git operations stay responsive.
+- Use a lock directory and a log file so concurrent triggers do not pile up silently.
+
+#### Recommended hooks
+- `post-commit`
+- `post-merge`
+- `post-checkout`
+
+#### Recommended behavior
+1. Resolve `repo_root` with `git rev-parse --show-toplevel`
+2. Resolve current branch with `git rev-parse --abbrev-ref HEAD`
+3. Skip unless branch is exactly `master`
+4. Start `npx gitnexus analyze --embeddings` in background
+5. Use a lockdir such as `.git/gitnexus-refresh.lock`
+6. Append output to a log such as `.git/gitnexus-hooks.log`
+
+#### Example pattern
+```bash
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ "$branch" = "master" ] && [ -n "$repo_root" ] && command -v npx >/dev/null 2>&1; then
+    nohup sh -c '
+        cd "$1" || exit 1
+        lockdir=".git/gitnexus-refresh.lock"
+        if mkdir "$lockdir" 2>/dev/null; then
+            trap "rmdir \"$lockdir\"" EXIT
+            npx gitnexus analyze --embeddings >> .git/gitnexus-hooks.log 2>&1
+        fi
+    ' sh "$repo_root" >/dev/null 2>&1 &
+fi
+```
+
+#### Verification
+- On a non-`master` branch, triggering the hook should **not** create `.git/gitnexus-hooks.log`
+- On `master`, the hook should create or append to the log
+- Hook files must be executable (`chmod +x`)
+
+#### Gotchas
+- This workflow is **master-only**
+- Git hooks are local to `.git/hooks/` and are not shared by commit unless separately distributed
+
 ### Clean / Delete Index
 
 ```bash
@@ -191,7 +241,7 @@ TypeScript, JavaScript, Python, Rust, Go, Java, C, C++, C#, Ruby, PHP, Swift, Ko
 
 ## Integration with Codebase Oracle
 
-After running GitNexus, use the doc-writer skill to write documentation:
+After running `npx gitnexus analyze --embeddings`, use the doc-writer skill to write documentation:
 
 1. `npx gitnexus analyze --embeddings` — builds knowledge graph (always with embeddings)
 2. `/aio-codebase-oracle:doc-writer` — Oracle reads the graph and writes all docs
@@ -208,7 +258,7 @@ GitNexus provides the **knowledge graph** (structure, dependencies, clusters, fl
 | MCP tools not showing up | Re-run `npx gitnexus setup` or manually add MCP server |
 | Embedding generation slow | Normal for first run; subsequent runs are faster. Do not skip embeddings |
 | Want to start fresh | `npx gitnexus clean` then `npx gitnexus analyze --embeddings` |
-| Embedding generation slow | Normal for first run. Always keep `--embeddings` — the search quality tradeoff is not worth it |
 | Index exists but queries empty | Git commit unchanged — use `--force` to rebuild |
 | `.gitnexus/` in git | GitNexus auto-adds to `.gitignore`. If not, add it manually |
 | Multiple repos, single MCP | GitNexus MCP server auto-routes to all indexed repos via `~/.gitnexus/registry.json` |
+| Auto-refresh not running | Confirm you are on `master`, hooks are executable, and check `.git/gitnexus-hooks.log` |

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "i need to listen to a kafka topic in go, do some processing, and push to another topic. can you help me set this up?",
+    "should_trigger": true
+  },
+  {
+    "query": "my go microservice needs to adopt cqrs to separate read and write models, how do i wire up command and event buses?",
+    "should_trigger": true
+  },
+  {
+    "query": "scaffold a basic go project using the gin framework for a rest api",
+    "should_trigger": false
+  },
+  {
+    "query": "can you set up a watermill router with retries and a dead letter queue?",
+    "should_trigger": true
+  },
+  {
+    "query": "how do i implement the saga pattern in my distributed go system?",
+    "should_trigger": false
+  },
+  {
+    "query": "we are migrating from rabbitmq to redis streams and need to update our publisher and subscriber interfaces. help me scaffold the redis implementation.",
+    "should_trigger": true
+  },
+  {
+    "query": "write a go function that reads a large file concurrently and counts word frequencies",
+    "should_trigger": false
+  },
+  {
+    "query": "im building an event sourced system in golang. what is the best way to handle commands and publish events? give me a template",
+    "should_trigger": true
+  },
+  {
+    "query": "can you explain what watermill is and why I might use it instead of directly using the confluent kafka client?",
+    "should_trigger": false
+  },
+  {
+    "query": "i want to use gochannel to mock out my pub sub logic for testing my event handlers. can you show me a complete example of the setup?",
+    "should_trigger": true
+  },
+  {
+    "query": "how do i configure a connection pool for postgres in golang?",
+    "should_trigger": false
+  },
+  {
+    "query": "we have a legacy system and need to introduce an event bus. generate a cqrs setup using watermill that connects to our existing sns/sqs queues.",
+    "should_trigger": true
+  },
+  {
+    "query": "give me a tutorial on how to use goroutines and channels to build a worker pool",
+    "should_trigger": false
+  },
+  {
+    "query": "can you scaffold a pub/sub mechanism in go that connects to google cloud pubsub?",
+    "should_trigger": true
+  },
+  {
+    "query": "i need to write a grpc server and client in go.",
+    "should_trigger": false
+  },
+  {
+    "query": "my watermill consumer keeps crashing. how do I add a recoverer middleware to the router?",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I use standard library go templates to render an html page?",
+    "should_trigger": false
+  },
+  {
+    "query": "help me implement an event processor that listens to user.created events and sends an email. use watermill.",
+    "should_trigger": true
+  },
+  {
+    "query": "what is the difference between a command and an event in ddd?",
+    "should_trigger": false
+  },
+  {
+    "query": "scaffold a go microservice that consumes a kafka topic, parses JSON, and writes to postgres. focus on the messaging part.",
+    "should_trigger": true
+  }
+]

@@ -53,6 +53,10 @@ func main() {
 	mux.HandleFunc("/targets", handleTargets)
 	mux.HandleFunc("/events", handleEvents)
 	mux.HandleFunc("/cdp", handleCDP)
+	mux.HandleFunc("/attach", handleAttach)
+	mux.HandleFunc("/subscribe", handleSubscribe)
+	mux.HandleFunc("/intercept", handleIntercept)
+	mux.HandleFunc("/intercepted", handleIntercepted)
 	mux.HandleFunc("/stop", handleStop)
 
 	server := &http.Server{

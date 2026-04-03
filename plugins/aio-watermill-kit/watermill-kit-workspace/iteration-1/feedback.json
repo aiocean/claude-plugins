@@ -1,0 +1,7 @@
+{
+  "reviews": [
+    {"run_id": "eval-0-with_skill", "feedback": "Code is fine, but I don't see any instructions on how to actually test or use the router. Maybe the skill description could mention testing.", "timestamp": "2024-05-24T12:00:00Z"},
+    {"run_id": "eval-1-with_skill", "feedback": "This setup is decent, but misses explaining why CQRS is used here. A short explainer in the generated code comments would be nice.", "timestamp": "2024-05-24T12:05:00Z"}
+  ],
+  "status": "complete"
+}
