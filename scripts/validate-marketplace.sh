@@ -203,6 +203,15 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
       fail "SKILL.md '$skill_name' missing frontmatter 'name' field"
     fi
 
+    # Check skill name has aio- prefix
+    if [ -n "$fm_name" ]; then
+      if [[ "$fm_name" == aio-* ]]; then
+        pass "SKILL.md '$skill_name' name has 'aio-' prefix"
+      else
+        fail "SKILL.md '$skill_name' name '$fm_name' missing 'aio-' prefix"
+      fi
+    fi
+
     # Check frontmatter has "description" field
     fm_desc="$(echo "$frontmatter" | grep -E '^description:\s*' || true)"
     if [ -n "$fm_desc" ]; then

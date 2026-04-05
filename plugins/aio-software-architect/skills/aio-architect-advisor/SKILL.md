@@ -1,5 +1,5 @@
 ---
-name: architect-advisor
+name: aio-architect-advisor
 description: |
   Architecture decision advisor powered by 137 in-depth articles. Use when designing systems,
   evaluating architecture trade-offs, choosing patterns, reviewing architecture decisions,

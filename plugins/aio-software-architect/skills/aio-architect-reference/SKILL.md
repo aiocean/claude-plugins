@@ -1,5 +1,5 @@
 ---
-name: architect-reference
+name: aio-architect-reference
 description: |
   Software architecture encyclopedia with 137 in-depth articles. Look up any architecture
   pattern, principle, or concept. Search semantically, browse by category, or compare
@@ -95,5 +95,5 @@ Common pattern clusters:
 
 - **For quick lookups**: Search → Read the specific section you need
 - **For learning a topic**: List a volume → Read articles in order (they build on each other)
-- **For decision-making**: Use the `architect-advisor` skill instead — it provides a guided workflow
+- **For decision-making**: Use the `aio-architect-advisor` skill instead — it provides a guided workflow
 - **For comparing options**: Use the compare command or read both articles and cross-reference their trade-off sections
