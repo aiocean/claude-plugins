@@ -125,8 +125,8 @@
     {
       "name": "aio-claude-toolkit",
       "source": "./plugins/aio-claude-toolkit",
-      "description": "Claude Code management toolkit \u2014 skill management, plugin install, session reflection, memory consolidation, skill capture, and feedback.",
-      "version": "1.0.0",
+      "description": "Claude Code toolkit — patch Claude behavior, capture workflows as skills, and submit feedback.",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
