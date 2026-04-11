@@ -176,7 +176,7 @@
   },
   {
     "name": "aio-claude-toolkit",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "desc": "Claude Code toolkit \u2014 patch Claude behavior, capture workflows as skills, and submit feedback.",
     "skills": [
       {
