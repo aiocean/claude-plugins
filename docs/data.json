@@ -176,32 +176,20 @@
   },
   {
     "name": "aio-claude-toolkit",
-    "version": "1.0.0",
-    "desc": "Claude Code management toolkit \u2014 skill management, plugin install, session reflection, memory consolidation, skill capture, and feedback.",
+    "version": "2.0.0",
+    "desc": "Claude Code toolkit \u2014 patch Claude behavior, capture workflows as skills, and submit feedback.",
     "skills": [
       {
         "name": "aio-skillify",
         "desc": "Capture this session's repeatable process into a reusable SKILL.md file via guided interview. Triggers: \"skillify\", \"capture this workflow\", \"save this as a skill\", \"turn this into a skill\", \"make a skill from this session\"."
       },
       {
-        "name": "aio-claude-manager",
-        "desc": "Manage and optimize Claude Code skills \u2014 enable, disable, analyze usage, and apply project-type presets. Triggers: \"manage skills\", \"disable skills\", \"reduce clutter\", \"apply preset\", \"too many skills\", switching project types (frontend, backend, data, ai)."
+        "name": "aio-patch-claude",
+        "desc": "Patch Claude Code system prompts to maximize quality over token efficiency. Rebalances brevity-biased instructions in cli.js for thorough, senior-developer-level output."
       },
       {
         "name": "aio-feedback",
         "desc": "Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: \"submit feedback\", \"report bug\", \"request feature\", \"request plugin\", \"file issue\"."
-      },
-      {
-        "name": "aio-install",
-        "desc": "Install, enable, disable, and list aiocean plugins for the current project. Triggers: \"install plugin\", \"add plugin\", \"enable plugin\", \"disable plugin\", \"list plugins\", \"available plugins\"."
-      },
-      {
-        "name": "aio-reflect",
-        "desc": "Evaluate past Claude Code sessions and extract reusable knowledge as CLAUDE.md updates or new skills. Triggers: \"reflect on sessions\", \"what did we learn\", \"save this knowledge\", \"extract learnings\", after completing significant tasks."
-      },
-      {
-        "name": "aio-dream",
-        "desc": "Memory consolidation \u2014 review, merge, prune and re-index your memory files so future sessions orient quickly. Triggers: \"dream\", \"consolidate memory\", \"clean up memories\", \"organize memories\", \"memory maintenance\", \"prune memories\"."
       }
     ]
   },
