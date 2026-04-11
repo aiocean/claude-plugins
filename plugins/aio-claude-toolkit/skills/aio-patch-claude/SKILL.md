@@ -21,14 +21,39 @@ This skill patches `cli.js` to rebalance those prompts. The philosophy:
 
 The Claude Code binary is a wrapper. Find the real `cli.js`:
 
-```
-Read /usr/local/bin/claude    # or: which claude
+```bash
+which claude
+# Then: file $(which claude)   — check if it's a script or binary
 ```
 
-Follow the chain to find the actual `cli.js`. Common locations:
-- `~/.vite-plus/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/cli.js`
+**CRITICAL — Multiple `claude` binaries**: Users often have multiple `claude` binaries in PATH. Run `type -a claude` (or `which -a claude`) to list ALL of them. Common setups:
+
+```
+~/.vite-plus/js_runtime/node/<version>/bin/claude  — node symlink → js_runtime cli.js
+/usr/local/bin/claude                               — bash wrapper → calls ~/.vite-plus/bin/claude
+/opt/homebrew/bin/claude                            — homebrew install (may be older version!)
+~/.vite-plus/bin/claude                             — vp Mach-O binary → loads packages/ cli.js
+```
+
+**You MUST patch ALL copies of cli.js** because different invocation paths load different files:
+
+1. `~/.vite-plus/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/cli.js` — loaded by vp binary (`~/.vite-plus/bin/claude`)
+2. `~/.vite-plus/js_runtime/node/<version>/lib/node_modules/@anthropic-ai/claude-code/cli.js` — loaded by node symlink in js_runtime/bin/
+
+Find ALL copies:
+```bash
+find ~/.vite-plus -name "cli.js" -path "*claude-code*" 2>/dev/null
+```
+
+**Patch one, then copy to all others** — don't patch each independently:
+```bash
+cp <patched-cli.js> <other-cli.js-location>
+```
+
+Also check for standalone installs:
 - `~/.npm/lib/node_modules/@anthropic-ai/claude-code/cli.js`
 - `~/.local/share/claude/versions/<version>/cli.js`
+- `/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js`
 
 Verify with: `grep "Version:" <path>/cli.js | head -1`
 
@@ -121,7 +146,7 @@ Complete the user's search request thoroughly and report your findings clearly.
 
 ## Step 4: Add Verification Banner
 
-After all patches, inject a visible banner at the top of cli.js so the user can confirm the patched file is actually loaded when they start Claude Code.
+After all patches, inject a `process.stderr.write` line at the top of cli.js to confirm the patched file is loaded.
 
 Find this line near the top of cli.js:
 ```
@@ -130,10 +155,16 @@ Find this line near the top of cli.js:
 
 Add immediately after it:
 ```javascript
-console.log("\x1b[32m✓ PATCHED cli.js loaded (aio-patch-claude)\x1b[0m");
+if(!process.argv.includes("-p")&&!process.argv.includes("--print"))process.stderr.write("\x1b[32m✓ PATCHED cli.js loaded (aio-patch-claude)\x1b[0m\n");
 ```
 
-This prints a green `✓ PATCHED cli.js loaded (aio-patch-claude)` line when Claude starts. Ask the user to open a new terminal and run `claude` to verify. Once confirmed, ask if they want to keep or remove the banner.
+**Why skip `-p`/`--print`**: Print mode pipes output directly — stderr banner would pollute scripted/piped usage.
+
+**Why `process.stderr.write`**: Claude Code's TUI (ink/react) takes over `stdout` — any `console.log` gets wiped during render. `stderr` is not captured by the TUI, so the message persists. No `setTimeout` needed — write immediately.
+
+**Why NOT patching the version display**: The TUI header (`LogoV2.tsx`) renders version through multiple code paths (compact mode, border title, Welcome screen themes, Apple Terminal themes) with minified variable names that change between versions. Reliably patching all paths is fragile. A stderr banner is simpler and version-proof.
+
+Ask the user to run `claude --version` to confirm the green `✓ PATCHED` line appears before the version output.
 
 ## Step 5: Verify Patched File Runs
 
