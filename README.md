@@ -57,6 +57,12 @@ Grouped plugins bundling multiple related skills into a single install.
 | **aio-cdp-relay** | 1.2.2 | Persistent CDP relay for browser automation — no MCP, no approval prompts.<br>`npx skills add aiocean/claude-plugins -s aio-cdp-relay` |
 | **aio-browser-cookie** | 2.0.3 | Extract browser cookies with rookiepy for authenticated requests.<br>`npx skills add aiocean/claude-plugins -s aio-browser-cookie` |
 
+### Database
+
+| Plugin | Version | Description |
+|--------|---------|-------------|
+| **aio-starrocks** | 1.0.0 | StarRocks best practices and query tuning — 2 skills: best-practices (partitioning, bucketing, sort keys, PK tuning, auth, resource groups) and query-tuning (EXPLAIN plans, Query Profile, operator metrics, tuning recipes, hints).<br>`npx skills add aiocean/claude-plugins -s aio-starrocks` |
+
 ### Observability & Utilities
 
 | Plugin | Version | Description |

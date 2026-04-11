@@ -211,6 +211,15 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "aio-starrocks",
+      "source": "./plugins/aio-starrocks",
+      "description": "StarRocks best practices and query tuning — table design (partitioning, bucketing, sort keys, PK tuning, auth, resource groups) and query performance (EXPLAIN plans, Query Profile, operator metrics, tuning recipes, schema optimization, query hints).",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }
