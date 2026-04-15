@@ -90,7 +90,38 @@ For each patch in the table below, follow this agentic workflow:
 4. **Replace** using the Edit tool with exact string matching
 5. **Verify** the replacement took effect by grepping for a unique fragment of the replacement
 
-**IMPORTANT**: If a search string is NOT found, DO NOT skip silently. Instead:
+### Replacement rules
+
+- **Replace ALL instances, not just the first.** Some prompts appear multiple times in cli.js (Opus vs Sonnet variants). Using `replace(s, r, 1)` or `Edit` without `replace_all=true` leaves duplicates unpatched. Use `str.replace(s, r)` (Python, no count) or `Edit` with `replace_all: true`.
+- When building a scripted patcher, **count occurrences before replacing** so the report can show `B3×2` when a string was replaced in 2 locations.
+
+### Verbose reporting (REQUIRED)
+
+The patch run MUST produce a per-file report with three groups, and for each entry include the patch ID **and a preview of the string (first ~80 chars, newlines collapsed)** — not just the ID. This makes debugging trivial when prompts shift between versions.
+
+```
+== <path>
+  banner: added | already | version-line-not-found
+
+  ✅ APPLIED (N):
+    [A1×2] Your responses should be short and concise.
+    [B3]   Don't add error handling, fallbacks, or validation for scenarios…
+
+  ⏭  ALREADY PATCHED (N):
+    [A2]   Brief is good — silent is not. Give enough detail for the user…
+
+  ❌ MISSING / NOT FOUND (N):
+    [D5]   NOTE: You are meant to be a fast agent that returns output as…
+           → wording may have changed; manual review needed
+```
+
+Classification rules per patch (applied independently to each file):
+
+- **APPLIED** — search string found (1+ times) and replaced. Suffix `×N` if N > 1.
+- **ALREADY PATCHED** — replacement string present AND search string absent (previous run already did it).
+- **MISSING** — neither search nor replacement string present. Likely the prompt was reworded in this version; surface for manual review.
+
+**IMPORTANT**: If a search string is NOT found, DO NOT skip silently. Investigate:
 - Search for key fragments (3-5 word phrases) to see if the wording changed
 - Read nearby code to understand what replaced it
 - Adapt the replacement to match the current version's wording
