@@ -37,6 +37,7 @@ Grouped plugins bundling multiple related skills into a single install.
 |--------|---------|-------------|
 | **aio-epub-translate** | 3.5.1 | EPUB translation via ConnectRPC API — 9 skills: analyze, translate, review, quality, manage, upload, export, setup, vn-style.<br>`npx skills add aiocean/claude-plugins -s aio-epub-translate` |
 | **aio-mental-models** | 2.1.3 | Decision advisor using 50+ mental models.<br>`npx skills add aiocean/claude-plugins -s aio-mental-models` |
+| **aio-threat-models** | 1.0.0 | Threat modeling knowledge advisor with semantic search across 27 frameworks — STRIDE, LINDDUN, PASTA, OCTAVE, Attack Trees, MITRE ATT&CK/ATLAS, Kill Chain, NIST AI RMF, OWASP LLM Top 10, Kubernetes Threat Matrix.<br>`npx skills add aiocean/claude-plugins -s aio-threat-models` |
 | **aio-youtube** | 1.1.3 | YouTube search and transcript extraction via yt-dlp.<br>`npx skills add aiocean/claude-plugins -s aio-youtube` |
 | **aio-gherkin-refine** | 2.0.2 | BDD field guide — Gherkin with Example Mapping, 3 Amigos, anti-patterns.<br>`npx skills add aiocean/claude-plugins -s aio-gherkin-refine` |
 

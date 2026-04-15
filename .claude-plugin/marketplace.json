@@ -60,6 +60,15 @@
       }
     },
     {
+      "name": "aio-threat-models",
+      "source": "./plugins/aio-threat-models",
+      "description": "Threat modeling knowledge advisor with semantic search across 27 frameworks \u2014 STRIDE, LINDDUN, PASTA, OCTAVE, Attack Trees, MITRE ATT&CK/ATLAS, Kill Chain, Diamond Model, CAPEC, NIST AI RMF, OWASP LLM Top 10, Kubernetes Threat Matrix, Continuous Threat Modeling. Guides framework selection, application, and cross-framework composition for security, privacy, and AI threat modeling.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
       "name": "aio-monitoring-observability",
       "source": "./plugins/aio-monitoring-observability",
       "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
