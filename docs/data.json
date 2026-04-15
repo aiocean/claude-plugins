@@ -5,8 +5,32 @@
     "desc": "EPUB book translation via ConnectRPC API. Nine skills: aio-epub-analyze (pre-translation intelligence \u2014 style, characters, glossary), aio-epub-review (deep literary review with T\u00edn-\u0110\u1ea1t-Nh\u00e3 scoring), aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API, edit & update), aio-epub-quality (mechanical quality detection & re-translation), aio-epub-manage (browse, progress, guidelines, community, fork, reset, usage stats), aio-epub-upload (upload, prepare, unmark & change tags), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
     "skills": [
       {
+        "name": "aio-epub-vn-style",
+        "desc": "Use when translating Vietnamese literature, asking how to translate naturally, reviewing a translated passage for quality, or needing guidance on word choice, sentence rhythm, genre style, or common errors. Triggers: \"d\u1ecbch sao cho hay\", \"d\u1ecbch th\u1ebf n\u00e0o\", \"phong c\u00e1ch d\u1ecbch\", \"nguy\u00ean t\u1eafc d\u1ecbch\", \"translation style\", \"how to translate\", \"d\u1ecbch v\u0103n h\u1ecdc\", \"style guide\"."
+      },
+      {
         "name": "aio-epub-translate",
         "desc": "Translate EPUB book chapters with literary Vietnamese quality via ConnectRPC API. Triggers: \"d\u1ecbch s\u00e1ch\", \"translate epub\", \"translate chapter\", \"d\u1ecbch ti\u1ebfp\", \"continue translating\", \"d\u1ecbch ch\u01b0\u01a1ng\", \"translate book\"."
+      },
+      {
+        "name": "aio-epub-setup",
+        "desc": "Setup guide for EPUB translation service. Register account, purchase license, configure API key. Triggers: \"setup epub\", \"c\u00e0i \u0111\u1eb7t epub\", \"epub setup\", \"register account\", \"\u0111\u0103ng k\u00fd t\u00e0i kho\u1ea3n\", \"buy license\", \"mua license\", \"configure api key\", \"c\u1ea5u h\u00ecnh api key\"."
+      },
+      {
+        "name": "aio-epub-quality",
+        "desc": "Check translation quality and find chapters that need re-translation. Triggers: \"check quality\", \"ki\u1ec3m tra ch\u1ea5t l\u01b0\u1ee3ng\", \"quality report\", \"b\u00e1o c\u00e1o ch\u1ea5t l\u01b0\u1ee3ng\", \"find bad translations\", \"t\u00ecm b\u1ea3n d\u1ecbch k\u00e9m\"."
+      },
+      {
+        "name": "aio-epub-upload",
+        "desc": "Upload and prepare EPUB books for translation. Triggers: \"upload epub\", \"t\u1ea3i s\u00e1ch l\u00ean\", \"prepare book\", \"chu\u1ea9n b\u1ecb s\u00e1ch\", \"add book\"."
+      },
+      {
+        "name": "aio-epub-analyze",
+        "desc": "Pre-translation analysis for EPUB books. Analyze writing style, characters, tone, and build glossary before translating. Triggers: \"analyze book\", \"ph\u00e2n t\u00edch s\u00e1ch\", \"pre-translate\", \"chu\u1ea9n b\u1ecb d\u1ecbch\", \"book analysis\", \"character list\", \"danh s\u00e1ch nh\u00e2n v\u1eadt\", \"glossary\", \"thu\u1eadt ng\u1eef\"."
+      },
+      {
+        "name": "aio-epub-export",
+        "desc": "Pack and export translated EPUB books. Bilingual or translation-only output. Triggers: \"export epub\", \"xu\u1ea5t s\u00e1ch\", \"pack epub\", \"\u0111\u00f3ng g\u00f3i s\u00e1ch\", \"download epub\", \"t\u1ea3i s\u00e1ch\", \"send to kindle\"."
       },
       {
         "name": "aio-epub-manage",
@@ -15,30 +39,6 @@
       {
         "name": "aio-epub-review",
         "desc": "Deep literary review of translated EPUB chapters. Evaluate translation quality, fix consistency issues, and check cross-chapter coherence. Triggers: \"review translation\", \"\u0111\u00e1nh gi\u00e1 b\u1ea3n d\u1ecbch\", \"review chapter\", \"ki\u1ec3m tra d\u1ecbch\", \"consistency check\", \"ki\u1ec3m tra nh\u1ea5t qu\u00e1n\", \"fix translation\", \"s\u1eeda b\u1ea3n d\u1ecbch\", \"literary review\"."
-      },
-      {
-        "name": "aio-epub-export",
-        "desc": "Pack and export translated EPUB books. Bilingual or translation-only output. Triggers: \"export epub\", \"xu\u1ea5t s\u00e1ch\", \"pack epub\", \"\u0111\u00f3ng g\u00f3i s\u00e1ch\", \"download epub\", \"t\u1ea3i s\u00e1ch\", \"send to kindle\"."
-      },
-      {
-        "name": "aio-epub-upload",
-        "desc": "Upload and prepare EPUB books for translation. Triggers: \"upload epub\", \"t\u1ea3i s\u00e1ch l\u00ean\", \"prepare book\", \"chu\u1ea9n b\u1ecb s\u00e1ch\", \"add book\"."
-      },
-      {
-        "name": "aio-epub-quality",
-        "desc": "Check translation quality and find chapters that need re-translation. Triggers: \"check quality\", \"ki\u1ec3m tra ch\u1ea5t l\u01b0\u1ee3ng\", \"quality report\", \"b\u00e1o c\u00e1o ch\u1ea5t l\u01b0\u1ee3ng\", \"find bad translations\", \"t\u00ecm b\u1ea3n d\u1ecbch k\u00e9m\"."
-      },
-      {
-        "name": "aio-epub-vn-style",
-        "desc": "Use when translating Vietnamese literature, asking how to translate naturally, reviewing a translated passage for quality, or needing guidance on word choice, sentence rhythm, genre style, or common errors. Triggers: \"d\u1ecbch sao cho hay\", \"d\u1ecbch th\u1ebf n\u00e0o\", \"phong c\u00e1ch d\u1ecbch\", \"nguy\u00ean t\u1eafc d\u1ecbch\", \"translation style\", \"how to translate\", \"d\u1ecbch v\u0103n h\u1ecdc\", \"style guide\"."
-      },
-      {
-        "name": "aio-epub-setup",
-        "desc": "Setup guide for EPUB translation service. Register account, purchase license, configure API key. Triggers: \"setup epub\", \"c\u00e0i \u0111\u1eb7t epub\", \"epub setup\", \"register account\", \"\u0111\u0103ng k\u00fd t\u00e0i kho\u1ea3n\", \"buy license\", \"mua license\", \"configure api key\", \"c\u1ea5u h\u00ecnh api key\"."
-      },
-      {
-        "name": "aio-epub-analyze",
-        "desc": "Pre-translation analysis for EPUB books. Analyze writing style, characters, tone, and build glossary before translating. Triggers: \"analyze book\", \"ph\u00e2n t\u00edch s\u00e1ch\", \"pre-translate\", \"chu\u1ea9n b\u1ecb d\u1ecbch\", \"book analysis\", \"character list\", \"danh s\u00e1ch nh\u00e2n v\u1eadt\", \"glossary\", \"thu\u1eadt ng\u1eef\"."
       }
     ]
   },
@@ -195,12 +195,12 @@
         "desc": "Capture this session's repeatable process into a reusable SKILL.md file via guided interview. Triggers: \"skillify\", \"capture this workflow\", \"save this as a skill\", \"turn this into a skill\", \"make a skill from this session\"."
       },
       {
-        "name": "aio-feedback",
-        "desc": "Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: \"submit feedback\", \"report bug\", \"request feature\", \"request plugin\", \"file issue\"."
-      },
-      {
         "name": "aio-patch-claude",
         "desc": "Patch Claude Code system prompts to maximize quality over token efficiency. Rebalances brevity-biased instructions in cli.js for thorough, senior-developer-level output."
+      },
+      {
+        "name": "aio-feedback",
+        "desc": "Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: \"submit feedback\", \"report bug\", \"request feature\", \"request plugin\", \"file issue\"."
       }
     ]
   },
@@ -210,12 +210,12 @@
     "desc": "DevOps toolkit \u2014 GitHub/GitLab management and git worktree workflows. Three skills: aio-github (GitHub CLI for repos, PRs, issues), aio-gitlab (GitLab CLI for projects, MRs, pipelines), aio-worktree (",
     "skills": [
       {
-        "name": "aio-github",
-        "desc": "Manage GitHub repos, PRs, and issues via github-mcp (auto-installs if missing). Triggers: \"list repos\", \"create PR\", \"review PR\", \"get issue\", \"comment on issue\", github repository, pull request."
-      },
-      {
         "name": "aio-worktree",
         "desc": "Manage git worktrees for parallel development workflows \u2014 create, sync, and spotlight preview. Triggers: \"create worktree\", \"sync worktree\", \"manage worktrees\", \"parallel development\", worktree."
+      },
+      {
+        "name": "aio-github",
+        "desc": "Manage GitHub repos, PRs, and issues via github-mcp (auto-installs if missing). Triggers: \"list repos\", \"create PR\", \"review PR\", \"get issue\", \"comment on issue\", github repository, pull request."
       },
       {
         "name": "aio-gitlab",
@@ -233,12 +233,12 @@
         "desc": "Use when designing or reviewing web UI \u2014 layouts, components, color, typography, animations, accessibility, or design systems. Covers UX psychology, interaction patterns, WCAG compliance, responsive design, and modern CSS. Triggers: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens."
       },
       {
-        "name": "aio-neobrutalism",
-        "desc": "Use when applying neobrutalism design to a web project. Detects tech stack, generates CSS tokens, and transforms existing UI components. Triggers: \"apply neobrutalism\", \"create brutalist design\", \"add bold borders\", \"use hard shadows\", neobrutalism, brutalist, bold design, high-contrast aesthetic."
-      },
-      {
         "name": "aio-react-minimal-effects",
         "desc": "Use when reviewing React code for unnecessary useEffect usage, refactoring to React 19 patterns, or as useEffect best practices reference. Scan mode actively finds and fixes problematic effects. Also use when user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop."
+      },
+      {
+        "name": "aio-neobrutalism",
+        "desc": "Use when applying neobrutalism design to a web project. Detects tech stack, generates CSS tokens, and transforms existing UI components. Triggers: \"apply neobrutalism\", \"create brutalist design\", \"add bold borders\", \"use hard shadows\", neobrutalism, brutalist, bold design, high-contrast aesthetic."
       }
     ]
   },
@@ -248,12 +248,12 @@
     "desc": "Diagram generation toolkit \u2014 Mermaid diagrams and Grafana dashboard diagrams. Two skills: aio-mermaid (shareable Mermaid diagram URLs), aio-grafana-diagram (auto-generate dashboard diagrams from codeb",
     "skills": [
       {
-        "name": "aio-grafana-diagram",
-        "desc": "Use when creating Grafana diagrams for system visualization. Analyzes codebase to auto-generate Mermaid diagrams with metric binding. Triggers: \"create grafana diagram\", \"mermaid in grafana\", \"diagram panel\", \"data-driven diagram\", \"dynamic diagram\", flowcharts, sequence/state/ER diagrams in Grafana dashboards. For standalone Mermaid diagrams use aio-mermaid instead."
-      },
-      {
         "name": "aio-mermaid",
         "desc": "Generate shareable MinimalMermaid diagram URLs via LZ-String compression. Triggers: \"share diagram\", \"generate diagram URL\", \"draw\", \"diagram\", \"visualize\", mermaid \u2014 even without explicit mention of Mermaid."
+      },
+      {
+        "name": "aio-grafana-diagram",
+        "desc": "Use when creating Grafana diagrams for system visualization. Analyzes codebase to auto-generate Mermaid diagrams with metric binding. Triggers: \"create grafana diagram\", \"mermaid in grafana\", \"diagram panel\", \"data-driven diagram\", \"dynamic diagram\", flowcharts, sequence/state/ER diagrams in Grafana dashboards. For standalone Mermaid diagrams use aio-mermaid instead."
       }
     ]
   },
@@ -263,12 +263,12 @@
     "desc": "Research toolkit \u2014 structured research workflows and vector search. Two skills: aio-research-kit (10-phase structured research), aio-rag-kit (RAG with Qdrant vector database).",
     "skills": [
       {
-        "name": "aio-rag-kit",
-        "desc": "Set up vector search and RAG pipelines using Qdrant via rag-kit (auto-installs if missing). Triggers: \"create vector collection\", \"index content\", \"semantic search\", \"RAG setup\", qdrant, embeddings."
-      },
-      {
         "name": "aio-research-kit",
         "desc": "Run structured 10-phase research workflows via research-cli (auto-installs if missing). Triggers: \"start research\", \"research a topic\", \"create research project\", \"structured research\", research-kit."
+      },
+      {
+        "name": "aio-rag-kit",
+        "desc": "Set up vector search and RAG pipelines using Qdrant via rag-kit (auto-installs if missing). Triggers: \"create vector collection\", \"index content\", \"semantic search\", \"RAG setup\", qdrant, embeddings."
       }
     ]
   },
@@ -278,36 +278,36 @@
     "desc": "Code analysis and planning toolkit \u2014 codebase understanding, planning, debugging, and code review. Four skills with 9 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), ai",
     "skills": [
       {
-        "name": "aio-code-review",
-        "desc": "Multi-phase code review pipeline with domain-specific analysis via GitNexus and parallel specialized agents. Triggers: \"review code\", \"code review\", \"review PR\", \"ultra review\". Use after aio-deep-plan or before merging."
-      },
-      {
-        "name": "aio-gitnexus",
-        "desc": "Install, configure, and manage the GitNexus code intelligence engine \u2014 index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows. Triggers: \"setup gitnexus\", \"index codebase\", \"gitnexus status\", \"rebuild index\", \"setup code intelligence\"."
-      },
-      {
-        "name": "aio-review",
-        "desc": "PROACTIVE planning \u2014 post-implementation validation in the aio-deep-plan pipeline. Use when validating completed work: \"check my changes\", \"before I commit\", \"did I miss anything\", \"review implementation\". Run snapshot before coding, then review after. NOT for debugging \u2014 use aio-debug. For full code review use aio-code-review."
-      },
-      {
         "name": "aio-plan",
         "desc": "PROACTIVE planning \u2014 third step in the aio-deep-plan pipeline. Use when the user needs a concrete implementation plan: \"plan implementation\", \"how should I implement\", \"approach\", \"strategy\", \"plan feature\", \"plan refactor\". Run discover and map first. NOT for debugging \u2014 use aio-debug instead."
-      },
-      {
-        "name": "aio-doc-writer",
-        "desc": "Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis. Triggers: \"analyze codebase\", \"map architecture\", \"document architecture\", \"what does this codebase do\", \"codebase oracle\"."
-      },
-      {
-        "name": "aio-snapshot",
-        "desc": "PROACTIVE planning \u2014 baseline step in the aio-deep-plan pipeline. Use when the user wants change tracking: \"create snapshot\", \"baseline\", \"before I start coding\". Enables change detection in the review skill after coding. NOT for debugging \u2014 use aio-debug instead."
       },
       {
         "name": "aio-debug",
         "desc": "REACTIVE debugging \u2014 use when something is broken and needs fixing. Triggers: \"debug\", \"fix bug\", \"fixbug\", \"investigate error\", \"troubleshoot\", \"why is this broken\", \"not working\", \"failing test\", \"unexpected behavior\", runtime error, stack trace, crash, regression, or any bug/error/test failure to investigate and fix. NOT for planning new features \u2014 use aio-deep-plan instead. Orchestrates codebase context \u2192 root cause investigation \u2192 minimal fix \u2192 code review validation."
       },
       {
+        "name": "aio-snapshot",
+        "desc": "PROACTIVE planning \u2014 baseline step in the aio-deep-plan pipeline. Use when the user wants change tracking: \"create snapshot\", \"baseline\", \"before I start coding\". Enables change detection in the review skill after coding. NOT for debugging \u2014 use aio-debug instead."
+      },
+      {
+        "name": "aio-review",
+        "desc": "PROACTIVE planning \u2014 post-implementation validation in the aio-deep-plan pipeline. Use when validating completed work: \"check my changes\", \"before I commit\", \"did I miss anything\", \"review implementation\". Run snapshot before coding, then review after. NOT for debugging \u2014 use aio-debug. For full code review use aio-code-review."
+      },
+      {
+        "name": "aio-gitnexus",
+        "desc": "Install, configure, and manage the GitNexus code intelligence engine \u2014 index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows. Triggers: \"setup gitnexus\", \"index codebase\", \"gitnexus status\", \"rebuild index\", \"setup code intelligence\"."
+      },
+      {
+        "name": "aio-code-review",
+        "desc": "Multi-phase code review pipeline with domain-specific analysis via GitNexus and parallel specialized agents. Triggers: \"review code\", \"code review\", \"review PR\", \"ultra review\". Use after aio-deep-plan or before merging."
+      },
+      {
         "name": "aio-discover",
         "desc": "PROACTIVE planning \u2014 first step in the aio-deep-plan pipeline. Use when exploring codebase before writing code: \"discover\", \"find code\", \"how does X work\", \"where is\", \"what handles\", \"understand codebase\", \"explore code\". Follow with map, then plan. NOT for debugging \u2014 use aio-debug instead."
+      },
+      {
+        "name": "aio-doc-writer",
+        "desc": "Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis. Triggers: \"analyze codebase\", \"map architecture\", \"document architecture\", \"what does this codebase do\", \"codebase oracle\"."
       },
       {
         "name": "aio-map",
@@ -329,12 +329,12 @@
         "desc": "Manage Jira issues, sprints, workflows, and Confluence pages via CLI. Triggers: \"create Jira issue\", \"search issues\", \"update issue status\", \"manage sprint\", \"search confluence\", \"create page\", \"update page\", jira, confluence, JQL, CQL, epic, wiki."
       },
       {
-        "name": "aio-google-workspace",
-        "desc": "Interact with Google Workspace services (Gmail, Drive, Calendar, Sheets, Docs, Tasks) via the gws CLI. Triggers: \"send email\", \"upload to drive\", \"create event\", \"read spreadsheet\", \"standup report\", gws, Google Workspace."
-      },
-      {
         "name": "aio-x",
         "desc": "Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing). Triggers: \"post tweet\", \"search twitter\", \"post thread\", \"get mentions\", twitter, x.com, tweet, timeline."
+      },
+      {
+        "name": "aio-google-workspace",
+        "desc": "Interact with Google Workspace services (Gmail, Drive, Calendar, Sheets, Docs, Tasks) via the gws CLI. Triggers: \"send email\", \"upload to drive\", \"create event\", \"read spreadsheet\", \"standup report\", gws, Google Workspace."
       }
     ]
   },
@@ -381,12 +381,12 @@
     "desc": "StarRocks best practices and query tuning \u2014 table design (partitioning, bucketing, sort keys, PK tuning, auth, resource groups) and query performance (EXPLAIN plans, Query Profile, operator metrics, tuning recipes, schema optimization, query hints).",
     "skills": [
       {
-        "name": "aio-starrocks-best-practices",
-        "desc": "StarRocks table design best practices \u2014 partitioning strategy, sort key selection, bucketing decisions, Primary Key table tuning, authentication/authorization, and resource group configuration. Use when designing new tables, optimizing existing schemas, reviewing DDL, choosing partition/bucket/sort strategies, or configuring access control and resource isolation."
-      },
-      {
         "name": "aio-starrocks-query-tuning",
         "desc": "StarRocks query performance tuning \u2014 EXPLAIN plans, Query Profile analysis, operator metrics, tuning recipes, schema optimization, query hints, and text-based profile analysis. Use when diagnosing slow queries, reading EXPLAIN output, analyzing query profiles, optimizing joins/scans/aggregations, applying query hints, or tuning StarRocks schema for performance."
+      },
+      {
+        "name": "aio-starrocks-best-practices",
+        "desc": "StarRocks table design best practices \u2014 partitioning strategy, sort key selection, bucketing decisions, Primary Key table tuning, authentication/authorization, and resource group configuration. Use when designing new tables, optimizing existing schemas, reviewing DDL, choosing partition/bucket/sort strategies, or configuring access control and resource isolation."
       }
     ]
   }
