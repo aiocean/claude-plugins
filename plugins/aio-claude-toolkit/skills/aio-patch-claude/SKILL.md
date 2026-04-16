@@ -22,56 +22,19 @@ This skill patches `cli.js` to rebalance those prompts. The philosophy:
 The Claude Code binary is a wrapper. Find the real `cli.js`:
 
 ```bash
+# 1. Find the real binary (resolve symlinks)
 which claude
-# Then: file $(which claude)   — check if it's a script or binary
+readlink -f $(which claude)
+
+# 2. If it's a shell script, grep for the cli.js path it invokes
+file $(which claude)
+grep -m1 "cli\.js" $(which claude)
+
+# 3. Fallback: search common install locations
+find ~/.npm ~/.local/share/claude /opt/homebrew/lib/node_modules -name "cli.js" -path "*claude-code*" 2>/dev/null | head -5
 ```
 
-**CRITICAL — Multiple `claude` binaries**: Users often have multiple `claude` binaries in PATH. Run `type -a claude` (or `which -a claude`) to list ALL of them. Common setups:
-
-```
-~/.vite-plus/js_runtime/node/<version>/bin/claude  — node symlink → js_runtime cli.js
-/usr/local/bin/claude                               — bash wrapper → calls ~/.vite-plus/bin/claude
-/opt/homebrew/bin/claude                            — homebrew install (may be older version!)
-~/.vite-plus/bin/claude                             — vp Mach-O binary → loads packages/ cli.js
-```
-
-**You MUST patch ALL copies of cli.js** because different invocation paths load different files:
-
-1. `~/.vite-plus/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/cli.js` — loaded by vp binary (`~/.vite-plus/bin/claude`)
-2. `~/.vite-plus/js_runtime/node/<version>/lib/node_modules/@anthropic-ai/claude-code/cli.js` — loaded by node symlink in js_runtime/bin/
-
-Find ALL copies:
-```bash
-find ~/.vite-plus -name "cli.js" -path "*claude-code*" 2>/dev/null
-```
-
-**Patch one, then copy to all others** — don't patch each independently:
-```bash
-cp <patched-cli.js> <other-cli.js-location>
-```
-
-### ⚠️ vite-plus users: ALWAYS patch `packages/`, NOT `js_runtime/`
-
-On vite-plus setups there are TWO copies of `cli.js`:
-
-1. `~/.vite-plus/packages/.../cli.js` — **source of truth**, survives updates until vite-plus pulls new version
-2. `~/.vite-plus/js_runtime/node/<ver>/lib/node_modules/.../cli.js` — **runtime copy** synced from `packages/` on activation; gets overwritten whenever vite-plus refreshes the runtime
-
-The `claude` binary symlink resolves to the runtime copy, so patching only the runtime gives immediate effect but is erased on next activation. Patching `packages/` is durable — the patched source propagates to runtime on next sync.
-
-**Detection:** if `find ~/.vite-plus -name cli.js -path "*claude-code*"` returns 2 paths with different inodes/mtimes/versions, you are on vite-plus. The `packages/` copy is usually newer (staged for next activation) and the `js_runtime/` copy reflects what's running right now.
-
-**Decision rule:**
-- Patch `packages/` always (durable).
-- If user needs immediate effect in current session AND runtime version matches packages, also patch runtime (re-verify strings — wording may differ between versions).
-- If versions differ, patch `packages/` only and have user trigger vite-plus activation to sync runtime.
-
-Also check for standalone installs:
-- `~/.npm/lib/node_modules/@anthropic-ai/claude-code/cli.js`
-- `~/.local/share/claude/versions/<version>/cli.js`
-- `/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/cli.js`
-
-Verify with: `grep "Version:" <path>/cli.js | head -1`
+One of these will give you the single `cli.js` path to patch.
 
 ## Step 2: Backup
 
@@ -97,7 +60,7 @@ For each patch in the table below, follow this agentic workflow:
 
 ### Verbose reporting (REQUIRED)
 
-The patch run MUST produce a per-file report with three groups, and for each entry include the patch ID **and a preview of the string (first ~80 chars, newlines collapsed)** — not just the ID. This makes debugging trivial when prompts shift between versions.
+The patch run MUST produce a report with three groups, and for each entry include the patch ID **and a preview of the string (first ~80 chars, newlines collapsed)** — not just the ID. This makes debugging trivial when prompts shift between versions.
 
 ```
 == <path>
@@ -115,7 +78,7 @@ The patch run MUST produce a per-file report with three groups, and for each ent
            → wording may have changed; manual review needed
 ```
 
-Classification rules per patch (applied independently to each file):
+Classification rules per patch:
 
 - **APPLIED** — search string found (1+ times) and replaced. Suffix `×N` if N > 1.
 - **ALREADY PATCHED** — replacement string present AND search string absent (previous run already did it).
