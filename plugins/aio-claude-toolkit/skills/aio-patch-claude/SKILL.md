@@ -19,22 +19,36 @@ This skill patches `cli.js` to rebalance those prompts. The philosophy:
 
 ## Step 1: Locate cli.js
 
-The Claude Code binary is a wrapper. Find the real `cli.js`:
+**Hard-coded path suffix** — every Claude Code install ends with exactly this tail:
 
-```bash
-# 1. Find the real binary (resolve symlinks)
-which claude
-readlink -f $(which claude)
-
-# 2. If it's a shell script, grep for the cli.js path it invokes
-file $(which claude)
-grep -m1 "cli\.js" $(which claude)
-
-# 3. Fallback: search common install locations
-find ~/.npm ~/.local/share/claude /opt/homebrew/lib/node_modules -name "cli.js" -path "*claude-code*" 2>/dev/null | head -5
+```
+@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/cli.js
 ```
 
-One of these will give you the single `cli.js` path to patch.
+Only the install prefix varies. **Search for this suffix directly using the Glob tool** — do not hand-roll `find` pipelines, and do not patch any file whose path does not end in this suffix.
+
+**Preferred discovery (do both, use whichever hits first):**
+
+1. **Glob** — match the suffix anywhere under the user's home directory and common global roots:
+   ```
+   **/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/cli.js
+   ```
+   Run the Glob tool with this pattern against likely roots: `~`, `/opt/homebrew/lib/node_modules`, `/usr/local/lib/node_modules`, `~/.claude`, `~/.npm`.
+
+2. **Resolve the binary** — follow symlinks from `which claude` and walk up to the install root:
+   ```bash
+   readlink -f "$(which claude)"
+   ```
+   Then append the hard-coded suffix above.
+
+Both methods must converge on the **same absolute path** before you proceed. If they diverge, stop and ask the user — multiple installs exist and patching the wrong one produces a silent failure.
+
+Common install roots (for reference — always verify, never guess):
+- `~/.claude/local/node_modules/` (local install)
+- `/opt/homebrew/lib/node_modules/` (Homebrew global on Apple Silicon)
+- `/usr/local/lib/node_modules/` (npm global)
+
+If resolution fails entirely, ask the user for the absolute path. Never patch a file whose path does not end in the hard-coded suffix above.
 
 ## Step 2: Backup
 
@@ -43,20 +57,63 @@ Before any changes, ALWAYS backup:
 cp <cli.js> <cli.js>.backup
 ```
 
-## Step 3: Grep, Verify, Replace
+## Step 3: Grep, Verify, Replace — MANUAL ONLY
 
-For each patch in the table below, follow this agentic workflow:
+**CRITICAL — do this by hand, one patch at a time.**
 
-1. **Grep** for the `Search String` in cli.js to confirm it exists
-2. **Read** the surrounding context (5-10 lines) to understand what the prompt does
-3. **Decide** if the replacement makes sense for this version — prompts evolve between versions
-4. **Replace** using the Edit tool with exact string matching
-5. **Verify** the replacement took effect by grepping for a unique fragment of the replacement
+DO NOT write a Python script, Node script, shell one-liner, `sed`/`awk` pipeline, or any other form of automated patcher. DO NOT spawn a sub-agent to "run all patches at once". DO NOT use `Bash` to pipe-and-substitute.
+
+Why: Anthropic rewords prompts between releases (sometimes between patch versions). A scripted patcher silently fails on reworded strings and produces a green report while leaving half the prompts unpatched. You must **read every candidate string in context and judge whether it still means what the patch table expects** — that judgment is the whole value of this skill.
+
+**Tools you are allowed to use, and only these:**
+- `Grep` — locate the search string
+- `Read` — inspect surrounding context
+- `Edit` — perform the replacement with `replace_all: true`
+
+For each patch in the table below, loop through this workflow patch-by-patch:
+
+1. **Grep** the `Search String` in cli.js. Record the occurrence count (you will need it for the `×N` suffix in the report).
+2. **Read** the surrounding 5–10 lines at each match. Confirm the prompt still means what the patch table expects.
+3. **Decide** — has the wording drifted? If yes, search for 3–5 word fragments to find the current equivalent, adapt the replacement to the new wording while preserving intent, and note the adaptation in the final report.
+4. **Edit** with the exact search string and `replace_all: true`. Never use `replace_all: false` — you will leave Opus/Sonnet duplicates behind.
+5. **Verify** — `Grep` for a unique fragment of the replacement string; confirm the expected occurrence count.
+6. **Move to the next patch.** Do not batch. Do not parallelize. One patch fully verified before the next begins.
 
 ### Replacement rules
 
-- **Replace ALL instances, not just the first.** Some prompts appear multiple times in cli.js (Opus vs Sonnet variants). Using `replace(s, r, 1)` or `Edit` without `replace_all=true` leaves duplicates unpatched. Use `str.replace(s, r)` (Python, no count) or `Edit` with `replace_all: true`.
-- When building a scripted patcher, **count occurrences before replacing** so the report can show `B3×2` when a string was replaced in 2 locations.
+- **Replace ALL instances, not just the first.** Prompts often appear twice (Opus vs Sonnet variants). Always `Edit` with `replace_all: true`.
+- **Count before replacing.** Run `Grep` with `output_mode: "count"` first so the final report can show `B3×2` when a string was replaced in 2 locations.
+- **Content-based anchors ONLY.** The Claude Code bundle is minified: function and variable names are 3-char identifiers that change every release (`HaY` → `Z6A` between v2.1.104 and v2.1.112). Never anchor on `function <name>(){return` — use the prompt content itself (unique markdown header + leading backtick if you need to land at the template-literal boundary, e.g. `` `# Executing actions with care ``). Every anchor in this table follows that rule; preserve it when adding new patches.
+
+### Evidence You MUST Surface (non-negotiable)
+
+The operator of this skill is an evidence-first senior engineer. Claims without data are rejected. At **every** patch step, surface the following artifacts inline — not at the end, not summarized:
+
+**Before the Edit (per patch):**
+1. **Pre-count** — output of `Grep` with `output_mode: "count"` for the search string. Print the raw number: `[B3] search string: 2 matches`.
+2. **Context proof** — for each match, `Read` ±5 lines and paste the surrounding snippet. The operator must be able to see that the prompt still means what the table expects. If you skip this, you are guessing.
+3. **Decision line** — one sentence stating the choice: either `→ wording matches table, applying as-is` OR `→ drifted: current wording is "<quoted fragment>", adapting replacement to: "<quoted new text>"`. The adaptation reasoning must be visible.
+
+**Edit call:**
+4. The `Edit` tool call itself shows exact old_string → new_string (the tool renders this diff). Do not hide it behind a subagent.
+
+**After the Edit (per patch):**
+5. **Post-verification** — two Greps:
+   - Search string count should be `0`.
+   - A unique 4-word fragment of the replacement string should equal the pre-count from step 1.
+   Print both numbers explicitly: `[B3] post: search=0, replacement=2 ✓` or `✗` with explanation.
+6. If post-verification mismatches the pre-count (e.g. pre=2, post-replacement=1), **halt**. Do not continue to the next patch until investigated — this indicates a partial replacement (likely a near-duplicate the Edit tool treated differently).
+
+**Drift / MISSING investigation (when pre-count is 0):**
+7. Show at least **two** progressively shorter fragment Greps (e.g. 5-word phrase, then 3-word phrase) and the counts they returned. Cite a `file:line` where a candidate replacement was found, or explicitly state "no candidate located — marking MISSING".
+8. Never adapt silently. If you rewrite a replacement to match drifted wording, paste both the old table text and your adapted text, side by side, in the final report.
+
+**Final report additions (extends "Verbose reporting" below):**
+- Each `APPLIED` entry includes the `×N` count from the pre-Grep (proof, not claim).
+- Each `MISSING` entry includes the fragments searched and what was found instead.
+- Each `ADAPTED` entry (new category when wording drifted) shows `table → actual → your replacement`.
+
+Rationale: the whole value of manual patching is judgment visible to the reviewer. A green checkmark with no underlying count is indistinguishable from a lie. The operator grades the run on the evidence, not the summary.
 
 ### Verbose reporting (REQUIRED)
 
@@ -68,21 +125,32 @@ The patch run MUST produce a report with three groups, and for each entry includ
 
   ✅ APPLIED (N):
     [A1×2] Your responses should be short and concise.
-    [B3]   Don't add error handling, fallbacks, or validation for scenarios…
+           pre=2 → post search=0, replacement=2 ✓
+    [B3×1] Don't add error handling, fallbacks, or validation for scenarios…
+           pre=1 → post search=0, replacement=1 ✓
 
   ⏭  ALREADY PATCHED (N):
     [A2]   Brief is good — silent is not. Give enough detail for the user…
+           pre=0, replacement present ×1
+
+  🔧 ADAPTED (N)  — wording drifted, replacement rewritten to match current version:
+    [B1]   table text: "Don't add features, refactor code, or make "improvements"…"
+           actual text in cli.js (line ~12345): "Don't add unrelated features beyond…"
+           applied text: "<your adapted replacement>"
+           pre=1 → post search=0, replacement=1 ✓
 
   ❌ MISSING / NOT FOUND (N):
     [D5]   NOTE: You are meant to be a fast agent that returns output as…
-           → wording may have changed; manual review needed
+           fragments searched: "fast agent that returns" (0), "meant to be a fast" (0)
+           → no candidate located; manual review needed
 ```
 
 Classification rules per patch:
 
-- **APPLIED** — search string found (1+ times) and replaced. Suffix `×N` if N > 1.
-- **ALREADY PATCHED** — replacement string present AND search string absent (previous run already did it).
-- **MISSING** — neither search nor replacement string present. Likely the prompt was reworded in this version; surface for manual review.
+- **APPLIED** — search string found (1+ times) and replaced with table replacement verbatim. Suffix `×N` with the pre-Grep count. Post-verification counts included.
+- **ALREADY PATCHED** — replacement string present AND search string absent (previous run already did it). Show both counts as proof.
+- **ADAPTED** — wording drifted; replacement was rewritten to match current version. Must show table text, actual text (with approximate line), applied text, and post-verification counts.
+- **MISSING** — neither search nor replacement string present, and no adapted candidate found. Must list the fragments searched and their counts. Surface for manual review.
 
 **IMPORTANT**: If a search string is NOT found, DO NOT skip silently. Investigate:
 - Search for key fragments (3-5 word phrases) to see if the wording changed
