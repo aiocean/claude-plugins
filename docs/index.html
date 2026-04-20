@@ -312,13 +312,28 @@
     margin-top: 0.25rem;
   }
 
-  .skills-list.open { max-height: 600px; }  .skill-item {
-    padding: 0.4rem 0;
+  .skills-list.open { max-height: 600px; }
+
+  .skill-item {
+    padding: 0.4rem 0.5rem 0.4rem 0.75rem;
     border-left: 2px solid rgba(255,0,255,0.3);
-    padding-left: 0.75rem;
     margin-left: 0.25rem;
     margin-bottom: 0.25rem;
     line-height: 1.4;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .skill-item:hover {
+    background: rgba(255,0,255,0.06);
+    border-left-color: var(--pink);
+    border-left-width: 3px;
+    padding-left: 0.85rem;
+  }
+
+  .skill-item:hover .skill-item-name {
+    text-shadow: 0 0 8px rgba(255,0,255,0.6);
   }
 
   .skill-item-name {
@@ -328,12 +343,170 @@
     color: var(--pink);
     display: inline-block;
     margin-right: 0.4rem;
+    transition: text-shadow 0.15s;
+  }
+
+  .skill-item-name::before {
+    content: '›';
+    margin-right: 0.3rem;
+    opacity: 0.5;
   }
 
   .skill-item-desc {
     color: rgba(0,255,255,0.5);
     font-size: 0.82rem;
     display: inline;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .skill-item-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    overflow: hidden;
+  }
+
+  .skill-item-line .skill-item-desc {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Skill detail modal — wider than install modal */
+  .modal.modal-skill {
+    max-width: 720px;
+  }
+
+  .skill-modal-body {
+    padding: 1rem 1.25rem 1.25rem;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .skill-modal-body::-webkit-scrollbar {
+    width: 8px;
+  }
+  .skill-modal-body::-webkit-scrollbar-track {
+    background: var(--black);
+  }
+  .skill-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(0,255,255,0.3);
+  }
+
+  .skill-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed rgba(0,255,255,0.2);
+  }
+
+  .skill-meta-item {
+    font-size: 0.7rem;
+    color: rgba(0,255,255,0.5);
+  }
+
+  .skill-meta-item strong {
+    color: var(--cyan);
+    font-weight: 600;
+    margin-right: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.65rem;
+  }
+
+  .skill-meta-item a {
+    color: var(--pink);
+    text-decoration: none;
+  }
+
+  .skill-meta-item a:hover {
+    text-shadow: 0 0 8px rgba(255,0,255,0.6);
+  }
+
+  .skill-section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255,0,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 1rem 0 0.4rem;
+  }
+
+  .skill-section-label:first-child {
+    margin-top: 0;
+  }
+
+  .skill-desc-full {
+    font-size: 0.85rem;
+    color: rgba(0,255,255,0.75);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 0.75rem;
+    background: rgba(0,255,255,0.03);
+    border-left: 2px solid var(--cyan);
+  }
+
+  .skill-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(0,255,255,0.2);
+  }
+
+  .skill-action-btn {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.45rem 0.8rem;
+    cursor: pointer;
+    border: 2px solid rgba(0,255,255,0.4);
+    background: transparent;
+    color: var(--cyan);
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .skill-action-btn:hover {
+    border-color: var(--cyan);
+    background: var(--cyan);
+    color: var(--black);
+    box-shadow: 0 0 15px rgba(0,255,255,0.4);
+  }
+
+  .skill-action-btn.pink {
+    border-color: rgba(255,0,255,0.4);
+    color: var(--pink);
+  }
+
+  .skill-action-btn.pink:hover {
+    border-color: var(--pink);
+    background: var(--pink);
+    color: var(--black);
+    box-shadow: 0 0 15px rgba(255,0,255,0.4);
+  }
+
+  .skill-action-btn.copied {
+    background: var(--cyan);
+    color: var(--black);
+    border-color: var(--cyan);
+  }
+
+  .skill-action-btn.pink.copied {
+    background: var(--pink);
+    color: var(--black);
+    border-color: var(--pink);
   }
 
 
@@ -692,6 +865,41 @@
   </div>
 </div>
 
+<!-- Skill Detail Modal — opened via click on skill-item, or via ?plugin=X&skill=Y URL param -->
+<div class="modal-overlay" id="skillModal" onclick="if(event.target===this)closeSkillModal()">
+  <div class="modal modal-skill">
+    <div class="modal-header">
+      <h3 id="skillModalTitle">skill</h3>
+      <div class="dots">
+        <div class="dot dot-pink"></div>
+        <div class="dot dot-cyan"></div>
+      </div>
+      <button class="modal-close" onclick="closeSkillModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="skill-modal-body">
+      <div class="skill-meta">
+        <div class="skill-meta-item"><strong>skill</strong><span id="skillModalName"></span></div>
+        <div class="skill-meta-item"><strong>plugin</strong><a href="#" id="skillModalPluginLink"></a></div>
+        <div class="skill-meta-item"><strong>version</strong><span id="skillModalVersion"></span></div>
+      </div>
+
+      <div class="skill-section-label">Description</div>
+      <div class="skill-desc-full" id="skillModalDesc"></div>
+
+      <div class="skill-section-label">Install the plugin containing this skill</div>
+      <div class="modal-cmd" id="skillModalInstallCmd" onclick="copyCmd(this, document.getElementById('skillModalInstallCode').textContent)">
+        <code id="skillModalInstallCode"></code>
+        <span class="copy-icon">copy</span>
+      </div>
+
+      <div class="skill-actions">
+        <button class="skill-action-btn pink" id="skillShareBtn" onclick="copyShareLink(this)">🔗 copy share link</button>
+        <button class="skill-action-btn" onclick="openInstallFromSkill()">⬇ full install steps</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">copied</div>
 
 <script>
@@ -699,9 +907,127 @@
 
 const MARKETPLACE = 'aiocean-plugins';
 let allPluginsData = [];
+let currentSkillRef = null; // { pluginName, skillName } while skill modal is open
 
 function installCmd(name) {
   return `claude plugin install ${name}@${MARKETPLACE}`;
+}
+
+// Escape helpers — user-provided data flows into HTML/attributes, so sanitize
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+// For values embedded inside single-quoted inline JS attribute values
+function encodeAttr(s) {
+  if (s == null) return '';
+  return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+// --- Skill Detail Modal ---------------------------------------------------
+function findSkill(pluginName, skillName) {
+  const plugin = allPluginsData.find(p => p.name === pluginName);
+  if (!plugin || !plugin.skills) return null;
+  const skill = plugin.skills.find(s => s.name === skillName);
+  if (!skill) return null;
+  return { plugin, skill };
+}
+
+function openSkillDetail(pluginName, skillName, opts) {
+  const found = findSkill(pluginName, skillName);
+  if (!found) {
+    // Not in data — likely a stale share link. Fallback: toast + no-op.
+    showToast('skill not found');
+    return;
+  }
+  const { plugin, skill } = found;
+  currentSkillRef = { pluginName, skillName };
+
+  document.getElementById('skillModalTitle').textContent = '$ skill · ' + skill.name;
+  document.getElementById('skillModalName').textContent = skill.name;
+  const pluginLink = document.getElementById('skillModalPluginLink');
+  pluginLink.textContent = plugin.name;
+  pluginLink.onclick = (e) => {
+    e.preventDefault();
+    closeSkillModal();
+    openInstallModal(plugin.name);
+  };
+  document.getElementById('skillModalVersion').textContent = plugin.version || '—';
+  document.getElementById('skillModalDesc').textContent = skill.desc || '(no description)';
+  document.getElementById('skillModalInstallCode').textContent = installCmd(plugin.name);
+
+  // Reset copy-state indicators
+  document.querySelectorAll('#skillModal .copy-icon').forEach(el => { el.textContent = 'copy'; });
+  document.querySelectorAll('#skillModal .modal-cmd').forEach(el => el.classList.remove('copied'));
+  const shareBtn = document.getElementById('skillShareBtn');
+  shareBtn.classList.remove('copied');
+  shareBtn.innerHTML = '🔗 copy share link';
+
+  document.getElementById('skillModal').classList.add('open');
+
+  // Sync URL unless we came FROM a URL change (avoid duplicate history entries)
+  if (!opts || !opts.fromUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('plugin', plugin.name);
+    url.searchParams.set('skill', skill.name);
+    history.pushState({ skill: skill.name, plugin: plugin.name }, '', url);
+  }
+}
+
+function closeSkillModal(opts) {
+  const modal = document.getElementById('skillModal');
+  if (!modal.classList.contains('open')) return;
+  modal.classList.remove('open');
+  currentSkillRef = null;
+  if (!opts || !opts.fromUrl) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('plugin') || url.searchParams.has('skill')) {
+      url.searchParams.delete('plugin');
+      url.searchParams.delete('skill');
+      history.pushState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
+    }
+  }
+}
+
+function copyShareLink(btn) {
+  if (!currentSkillRef) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set('plugin', currentSkillRef.pluginName);
+  url.searchParams.set('skill', currentSkillRef.skillName);
+  const shareUrl = url.toString();
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '✓ link copied';
+    showToast('share link copied');
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '🔗 copy share link';
+    }, 1800);
+  });
+}
+
+function openInstallFromSkill() {
+  if (!currentSkillRef) return;
+  const pluginName = currentSkillRef.pluginName;
+  closeSkillModal();
+  openInstallModal(pluginName);
+}
+
+// Read ?plugin=X&skill=Y on load and on popstate
+function syncSkillModalFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const pluginName = params.get('plugin');
+  const skillName = params.get('skill');
+  if (pluginName && skillName) {
+    openSkillDetail(pluginName, skillName, { fromUrl: true });
+  } else {
+    closeSkillModal({ fromUrl: true });
+  }
 }
 
 function openInstallModal(name) {
@@ -771,9 +1097,11 @@ function renderPlugins(plugins) {
             ${p.skills && p.skills.length > 0 ? `
               <div class="skills-list" id="skills-${p.name}">
                 ${p.skills.map(s => `
-                  <div class="skill-item">
-                    <span class="skill-item-name">${s.name}</span>
-                    <span class="skill-item-desc">${s.desc}</span>
+                  <div class="skill-item" onclick="event.stopPropagation(); openSkillDetail('${encodeAttr(p.name)}','${encodeAttr(s.name)}')" title="Click for details — ${escapeHtml(s.name)}">
+                    <div class="skill-item-line">
+                      <span class="skill-item-name">${escapeHtml(s.name)}</span>
+                      <span class="skill-item-desc">${escapeHtml(s.desc)}</span>
+                    </div>
                   </div>
                 `).join('')}
               </div>
@@ -806,7 +1134,18 @@ function filterPlugins() {
   });
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  // Prefer closing the topmost modal (skill detail takes priority)
+  if (document.getElementById('skillModal').classList.contains('open')) {
+    closeSkillModal();
+  } else {
+    closeModal();
+  }
+});
+
+// Browser back/forward should toggle the skill modal in sync with the URL
+window.addEventListener('popstate', syncSkillModalFromUrl);
 
 // Fetch compiled data.json from the same repository domain
 async function loadPlugins() {
@@ -816,6 +1155,7 @@ async function loadPlugins() {
     const data = await response.json();
     allPluginsData = data.sort((a, b) => a.name.localeCompare(b.name));
     renderPlugins(allPluginsData);
+    syncSkillModalFromUrl();
   } catch (error) {
     console.error('Error loading plugins:', error);
     // Fallback: try raw github link if local fails (e.g. running from file://)
@@ -824,6 +1164,7 @@ async function loadPlugins() {
       const fbData = await fbResponse.json();
       allPluginsData = fbData.sort((a, b) => a.name.localeCompare(b.name));
       renderPlugins(allPluginsData);
+      syncSkillModalFromUrl();
     } catch(err2) {
       document.getElementById('pluginList').innerHTML = '<p style="color:var(--pink)">Failed to load plugins. Please check your connection.</p>';
     }
