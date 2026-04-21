@@ -134,8 +134,8 @@
     {
       "name": "aio-claude-toolkit",
       "source": "./plugins/aio-claude-toolkit",
-      "description": "Claude Code toolkit — patch Claude behavior, capture workflows as skills, and submit feedback.",
-      "version": "2.4.0",
+      "description": "Claude Code toolkit — patch Claude behavior, capture workflows as skills, consolidate memories, and submit feedback. Four skills: aio-patch-claude, aio-skillify, aio-dream, feedback.",
+      "version": "2.6.0",
       "author": {
         "name": "aiocean"
       }
@@ -179,8 +179,8 @@
     {
       "name": "aio-planning",
       "source": "./plugins/aio-planning",
-      "description": "Code analysis and planning toolkit \u2014 codebase understanding, planning, debugging, and code review. Four skills with 9 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), ai",
-      "version": "1.0.0",
+      "description": "Code analysis and planning toolkit \u2014 codebase understanding, planning, debugging, and code review. Four skills with 10 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), aio-deep-plan (discover/map/plan/review/snapshot), aio-debug (systematic debug & fix), aio-rubber-duck (rubber duck debugging companion), aio-code-review (ultra code review).",
+      "version": "1.1.0",
       "author": {
         "name": "aiocean"
       }
