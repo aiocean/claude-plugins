@@ -187,8 +187,8 @@
   },
   {
     "name": "aio-claude-toolkit",
-    "version": "2.4.0",
-    "desc": "Claude Code toolkit \u2014 patch Claude behavior, capture workflows as skills, and submit feedback.",
+    "version": "2.6.0",
+    "desc": "Claude Code toolkit \u2014 patch Claude behavior, capture workflows as skills, consolidate memories, and submit feedback. Four skills: aio-patch-claude, aio-skillify, aio-dream, feedback.",
     "skills": [
       {
         "name": "aio-skillify",
@@ -201,6 +201,10 @@
       {
         "name": "aio-feedback",
         "desc": "Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: \"submit feedback\", \"report bug\", \"request feature\", \"request plugin\", \"file issue\"."
+      },
+      {
+        "name": "aio-dream",
+        "desc": "Memory consolidation \u2014 review, merge, prune and re-index your memory files so future sessions orient quickly. Triggers: \"dream\", \"consolidate memory\", \"clean up memories\", \"organize memories\", \"memory maintenance\", \"prune memories\"."
       }
     ]
   },
@@ -274,8 +278,8 @@
   },
   {
     "name": "aio-planning",
-    "version": "1.0.0",
-    "desc": "Code analysis and planning toolkit \u2014 codebase understanding, planning, debugging, and code review. Four skills with 9 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), ai",
+    "version": "1.1.0",
+    "desc": "Code analysis and planning toolkit \u2014 codebase understanding, planning, debugging, and code review. Four skills with 10 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), aio-deep-plan (discover/map/plan/review/snapshot), aio-debug (systematic debug & fix), aio-rubber-duck (rubber duck debugging companion), aio-code-review (ultra code review).",
     "skills": [
       {
         "name": "aio-plan",
