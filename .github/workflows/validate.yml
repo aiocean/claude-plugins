@@ -1,0 +1,27 @@
+name: Validate Marketplace
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+      - '.claude-plugin/**'
+      - 'scripts/validate-marketplace.sh'
+      - '.github/workflows/validate.yml'
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - '.claude-plugin/**'
+      - 'scripts/validate-marketplace.sh'
+      - '.github/workflows/validate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run marketplace validation
+        run: bash scripts/validate-marketplace.sh

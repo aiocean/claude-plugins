@@ -60,8 +60,9 @@ plugins/{plugin-name}/
 3. Add scripts/references as needed
 4. Register in `.claude-plugin/marketplace.json`
 5. Add description to `README.md`
-6. Update `docs/index.html` to include the new plugin
-7. Run `bash scripts/validate-marketplace.sh` to verify everything is correct
+6. Run `bash scripts/validate-marketplace.sh` to verify everything is correct
+
+**Note:** `docs/data.json` is **auto-generated** by the `pages.yml` GitHub Action (runs `python scripts/generate-docs-data.py` on every push to `main`) and auto-committed as `chore: auto-generate docs/data.json`. **Never edit `docs/data.json` by hand** — CI will overwrite it. `docs/index.html` renders the site dynamically from `data.json`, so adding a new plugin needs no manual docs change.
 
 ## SKILL.md Frontmatter Format
 
@@ -98,3 +99,5 @@ Use conventional commits: `feat:`, `fix:`, `chore:`, `docs:` prefixes (e.g., `fe
 ## Validation
 
 Run `bash scripts/validate-marketplace.sh` before considering any plugin work done. It checks plugin.json fields, folder naming, SKILL.md frontmatter, script existence, marketplace registration, and version sync.
+
+The **`validate.yml` GitHub Action** runs this same script on every push to `main` and every pull request that touches `plugins/` or `.claude-plugin/` — version drift between `plugin.json` and `marketplace.json` will fail CI.
