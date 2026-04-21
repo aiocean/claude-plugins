@@ -21,7 +21,7 @@ Grouped plugins bundling multiple related skills into a single install.
 
 | Plugin | Version | Skills | Description |
 |--------|---------|--------|-------------|
-| **aio-planning** | 1.0.0 | 9 | Code analysis & planning — codebase-oracle (GitNexus + doc-writer), deep-plan (discover/map/plan/review/snapshot), debug (4-phase pipeline), code-review (multi-agent with critic).<br>`npx skills add aiocean/claude-plugins -s aio-planning` |
+| **aio-planning** | 1.1.0 | 10 | Code analysis & planning — codebase-oracle (GitNexus + doc-writer), deep-plan (discover/map/plan/review/snapshot), debug (4-phase pipeline), rubber-duck (articulation companion), code-review (multi-agent with critic).<br>`npx skills add aiocean/claude-plugins -s aio-planning` |
 | **aio-claude-toolkit** | 1.0.0 | 6 | Claude Code management — claude-manager, install, reflect, dream, skillify, feedback.<br>`npx skills add aiocean/claude-plugins -s aio-claude-toolkit` |
 | **aio-devops** | 1.0.0 | 3 | DevOps — github (repos, PRs, issues), gitlab (MRs, pipelines), worktree (parallel development).<br>`npx skills add aiocean/claude-plugins -s aio-devops` |
 | **aio-design-system** | 1.0.0 | 3 | UI/UX design — uiux (design knowledge), neobrutalism (design system bootstrapper), react-minimal-effects (React 19).<br>`npx skills add aiocean/claude-plugins -s aio-design-system` |
