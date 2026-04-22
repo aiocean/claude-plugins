@@ -5,24 +5,16 @@
     "desc": "EPUB book translation via ConnectRPC API. Nine skills: aio-epub-analyze (pre-translation intelligence \u2014 style, characters, glossary), aio-epub-review (deep literary review with T\u00edn-\u0110\u1ea1t-Nh\u00e3 scoring), aio-epub-vn-style (Vietnamese literary translation style guide with 12 reference docs), aio-epub-translate (literary translation with batch API, edit & update), aio-epub-quality (mechanical quality detection & re-translation), aio-epub-manage (browse, progress, guidelines, community, fork, reset, usage stats), aio-epub-upload (upload, prepare, unmark & change tags), aio-epub-export (pack & kindle), aio-epub-setup (account & license config).",
     "skills": [
       {
-        "name": "aio-epub-vn-style",
-        "desc": "Use when translating Vietnamese literature, asking how to translate naturally, reviewing a translated passage for quality, or needing guidance on word choice, sentence rhythm, genre style, or common errors. Triggers: \"d\u1ecbch sao cho hay\", \"d\u1ecbch th\u1ebf n\u00e0o\", \"phong c\u00e1ch d\u1ecbch\", \"nguy\u00ean t\u1eafc d\u1ecbch\", \"translation style\", \"how to translate\", \"d\u1ecbch v\u0103n h\u1ecdc\", \"style guide\"."
-      },
-      {
         "name": "aio-epub-translate",
         "desc": "Translate EPUB book chapters with literary Vietnamese quality via ConnectRPC API. Triggers: \"d\u1ecbch s\u00e1ch\", \"translate epub\", \"translate chapter\", \"d\u1ecbch ti\u1ebfp\", \"continue translating\", \"d\u1ecbch ch\u01b0\u01a1ng\", \"translate book\"."
       },
       {
+        "name": "aio-epub-manage",
+        "desc": "Browse books, check translation progress, manage guidelines, view TOC, fork books, publish to community, reset chapters, and view usage stats. Triggers: \"list books\", \"li\u1ec7t k\u00ea s\u00e1ch\", \"check progress\", \"xem ti\u1ebfn \u0111\u1ed9\", \"update guideline\", \"c\u1eadp nh\u1eadt guideline\", \"book info\", \"th\u00f4ng tin s\u00e1ch\", \"fork book\", \"nh\u00e2n b\u1ea3n s\u00e1ch\", \"publish book\", \"\u0111\u0103ng s\u00e1ch\", \"community books\", \"s\u00e1ch c\u1ed9ng \u0111\u1ed3ng\", \"reset book\", \"reset chapter\", \"usage stats\", \"th\u1ed1ng k\u00ea\"."
+      },
+      {
         "name": "aio-epub-setup",
         "desc": "Setup guide for EPUB translation service. Register account, purchase license, configure API key. Triggers: \"setup epub\", \"c\u00e0i \u0111\u1eb7t epub\", \"epub setup\", \"register account\", \"\u0111\u0103ng k\u00fd t\u00e0i kho\u1ea3n\", \"buy license\", \"mua license\", \"configure api key\", \"c\u1ea5u h\u00ecnh api key\"."
-      },
-      {
-        "name": "aio-epub-quality",
-        "desc": "Check translation quality and find chapters that need re-translation. Triggers: \"check quality\", \"ki\u1ec3m tra ch\u1ea5t l\u01b0\u1ee3ng\", \"quality report\", \"b\u00e1o c\u00e1o ch\u1ea5t l\u01b0\u1ee3ng\", \"find bad translations\", \"t\u00ecm b\u1ea3n d\u1ecbch k\u00e9m\"."
-      },
-      {
-        "name": "aio-epub-upload",
-        "desc": "Upload and prepare EPUB books for translation. Triggers: \"upload epub\", \"t\u1ea3i s\u00e1ch l\u00ean\", \"prepare book\", \"chu\u1ea9n b\u1ecb s\u00e1ch\", \"add book\"."
       },
       {
         "name": "aio-epub-analyze",
@@ -33,8 +25,16 @@
         "desc": "Pack and export translated EPUB books. Bilingual or translation-only output. Triggers: \"export epub\", \"xu\u1ea5t s\u00e1ch\", \"pack epub\", \"\u0111\u00f3ng g\u00f3i s\u00e1ch\", \"download epub\", \"t\u1ea3i s\u00e1ch\", \"send to kindle\"."
       },
       {
-        "name": "aio-epub-manage",
-        "desc": "Browse books, check translation progress, manage guidelines, view TOC, fork books, publish to community, reset chapters, and view usage stats. Triggers: \"list books\", \"li\u1ec7t k\u00ea s\u00e1ch\", \"check progress\", \"xem ti\u1ebfn \u0111\u1ed9\", \"update guideline\", \"c\u1eadp nh\u1eadt guideline\", \"book info\", \"th\u00f4ng tin s\u00e1ch\", \"fork book\", \"nh\u00e2n b\u1ea3n s\u00e1ch\", \"publish book\", \"\u0111\u0103ng s\u00e1ch\", \"community books\", \"s\u00e1ch c\u1ed9ng \u0111\u1ed3ng\", \"reset book\", \"reset chapter\", \"usage stats\", \"th\u1ed1ng k\u00ea\"."
+        "name": "aio-epub-quality",
+        "desc": "Check translation quality and find chapters that need re-translation. Triggers: \"check quality\", \"ki\u1ec3m tra ch\u1ea5t l\u01b0\u1ee3ng\", \"quality report\", \"b\u00e1o c\u00e1o ch\u1ea5t l\u01b0\u1ee3ng\", \"find bad translations\", \"t\u00ecm b\u1ea3n d\u1ecbch k\u00e9m\"."
+      },
+      {
+        "name": "aio-epub-upload",
+        "desc": "Upload and prepare EPUB books for translation. Triggers: \"upload epub\", \"t\u1ea3i s\u00e1ch l\u00ean\", \"prepare book\", \"chu\u1ea9n b\u1ecb s\u00e1ch\", \"add book\"."
+      },
+      {
+        "name": "aio-epub-vn-style",
+        "desc": "Use when translating Vietnamese literature, asking how to translate naturally, reviewing a translated passage for quality, or needing guidance on word choice, sentence rhythm, genre style, or common errors. Triggers: \"d\u1ecbch sao cho hay\", \"d\u1ecbch th\u1ebf n\u00e0o\", \"phong c\u00e1ch d\u1ecbch\", \"nguy\u00ean t\u1eafc d\u1ecbch\", \"translation style\", \"how to translate\", \"d\u1ecbch v\u0103n h\u1ecdc\", \"style guide\"."
       },
       {
         "name": "aio-epub-review",
@@ -199,12 +199,12 @@
         "desc": "Patch Claude Code system prompts to maximize quality over token efficiency. Rebalances brevity-biased instructions in cli.js for thorough, senior-developer-level output."
       },
       {
-        "name": "aio-feedback",
-        "desc": "Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: \"submit feedback\", \"report bug\", \"request feature\", \"request plugin\", \"file issue\"."
-      },
-      {
         "name": "aio-dream",
         "desc": "Memory consolidation \u2014 review, merge, prune and re-index your memory files so future sessions orient quickly. Triggers: \"dream\", \"consolidate memory\", \"clean up memories\", \"organize memories\", \"memory maintenance\", \"prune memories\"."
+      },
+      {
+        "name": "aio-feedback",
+        "desc": "Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: \"submit feedback\", \"report bug\", \"request feature\", \"request plugin\", \"file issue\"."
       }
     ]
   },
@@ -218,12 +218,12 @@
         "desc": "Manage git worktrees for parallel development workflows \u2014 create, sync, and spotlight preview. Triggers: \"create worktree\", \"sync worktree\", \"manage worktrees\", \"parallel development\", worktree."
       },
       {
-        "name": "aio-github",
-        "desc": "Manage GitHub repos, PRs, and issues via github-mcp (auto-installs if missing). Triggers: \"list repos\", \"create PR\", \"review PR\", \"get issue\", \"comment on issue\", github repository, pull request."
-      },
-      {
         "name": "aio-gitlab",
         "desc": "Manage GitLab MRs, pipelines, branches, and CI jobs via gitlab-mcp (auto-installs if missing). Triggers: \"create MR\", \"accept MR\", \"trigger pipeline\", \"retry job\", gitlab, merge request, gitlab CI."
+      },
+      {
+        "name": "aio-github",
+        "desc": "Manage GitHub repos, PRs, and issues via github-mcp (auto-installs if missing). Triggers: \"list repos\", \"create PR\", \"review PR\", \"get issue\", \"comment on issue\", github repository, pull request."
       }
     ]
   },
@@ -233,16 +233,16 @@
     "desc": "UI/UX design toolkit \u2014 design systems, component patterns, and React optimization. Three skills: aio-uiux (comprehensive UI/UX design knowledge), aio-neobrutalism (neobrutalism design system bootstrap",
     "skills": [
       {
-        "name": "aio-uiux",
-        "desc": "Use when designing or reviewing web UI \u2014 layouts, components, color, typography, animations, accessibility, or design systems. Covers UX psychology, interaction patterns, WCAG compliance, responsive design, and modern CSS. Triggers: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens."
-      },
-      {
         "name": "aio-react-minimal-effects",
         "desc": "Use when reviewing React code for unnecessary useEffect usage, refactoring to React 19 patterns, or as useEffect best practices reference. Scan mode actively finds and fixes problematic effects. Also use when user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop."
       },
       {
         "name": "aio-neobrutalism",
         "desc": "Use when applying neobrutalism design to a web project. Detects tech stack, generates CSS tokens, and transforms existing UI components. Triggers: \"apply neobrutalism\", \"create brutalist design\", \"add bold borders\", \"use hard shadows\", neobrutalism, brutalist, bold design, high-contrast aesthetic."
+      },
+      {
+        "name": "aio-uiux",
+        "desc": "Use when designing or reviewing web UI \u2014 layouts, components, color, typography, animations, accessibility, or design systems. Covers UX psychology, interaction patterns, WCAG compliance, responsive design, and modern CSS. Triggers: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens."
       }
     ]
   },
@@ -282,24 +282,24 @@
     "desc": "Code analysis and planning toolkit \u2014 codebase understanding, planning, debugging, and code review. Four skills with 10 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), aio-deep-plan (discover/map/plan/review/snapshot), aio-debug (systematic debug & fix), aio-rubber-duck (rubber duck debugging companion), aio-code-review (ultra code review).",
     "skills": [
       {
-        "name": "aio-plan",
-        "desc": "PROACTIVE planning \u2014 third step in the aio-deep-plan pipeline. Use when the user needs a concrete implementation plan: \"plan implementation\", \"how should I implement\", \"approach\", \"strategy\", \"plan feature\", \"plan refactor\". Run discover and map first. NOT for debugging \u2014 use aio-debug instead."
+        "name": "aio-doc-writer",
+        "desc": "Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis. Triggers: \"analyze codebase\", \"map architecture\", \"document architecture\", \"what does this codebase do\", \"codebase oracle\"."
+      },
+      {
+        "name": "aio-gitnexus",
+        "desc": "Install, configure, and manage the GitNexus code intelligence engine \u2014 index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows. Triggers: \"setup gitnexus\", \"index codebase\", \"gitnexus status\", \"rebuild index\", \"setup code intelligence\"."
       },
       {
         "name": "aio-debug",
         "desc": "REACTIVE debugging \u2014 use when something is broken and needs fixing. Triggers: \"debug\", \"fix bug\", \"fixbug\", \"investigate error\", \"troubleshoot\", \"why is this broken\", \"not working\", \"failing test\", \"unexpected behavior\", runtime error, stack trace, crash, regression, or any bug/error/test failure to investigate and fix. NOT for planning new features \u2014 use aio-deep-plan instead. Orchestrates codebase context \u2192 root cause investigation \u2192 minimal fix \u2192 code review validation."
       },
       {
-        "name": "aio-snapshot",
-        "desc": "PROACTIVE planning \u2014 baseline step in the aio-deep-plan pipeline. Use when the user wants change tracking: \"create snapshot\", \"baseline\", \"before I start coding\". Enables change detection in the review skill after coding. NOT for debugging \u2014 use aio-debug instead."
+        "name": "aio-rubber-duck",
+        "desc": "Rubber duck debugging companion \u2014 Claude plays the duck, NOT the solver. Use when the user says \"be my rubber duck\", \"let me explain this\", \"walk me through\", \"talk me through\", \"I'm stuck\", \"help me think\", \"I don't understand why\", \"rubber duck\", \"duck debugging\", or wants to articulate a problem out loud to find their own bug. Role-invert: the user explains step by step; Claude listens, prompts, and probes assumptions \u2014 never rushes a solution. Distinct from aio-debug (heavy orchestration with codebase context) \u2014 this is a lightweight cognitive aid that externalizes reasoning."
       },
       {
-        "name": "aio-review",
-        "desc": "PROACTIVE planning \u2014 post-implementation validation in the aio-deep-plan pipeline. Use when validating completed work: \"check my changes\", \"before I commit\", \"did I miss anything\", \"review implementation\". Run snapshot before coding, then review after. NOT for debugging \u2014 use aio-debug. For full code review use aio-code-review."
-      },
-      {
-        "name": "aio-gitnexus",
-        "desc": "Install, configure, and manage the GitNexus code intelligence engine \u2014 index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows. Triggers: \"setup gitnexus\", \"index codebase\", \"gitnexus status\", \"rebuild index\", \"setup code intelligence\"."
+        "name": "aio-map",
+        "desc": "PROACTIVE planning \u2014 second step in the aio-deep-plan pipeline. Use when the user needs structural analysis: \"map dependencies\", \"show structure\", \"who calls this\", \"blast radius\", \"trace references\", \"impact analysis\". Run discover first, then follow with plan. NOT for debugging \u2014 use aio-debug instead."
       },
       {
         "name": "aio-code-review",
@@ -310,16 +310,16 @@
         "desc": "PROACTIVE planning \u2014 first step in the aio-deep-plan pipeline. Use when exploring codebase before writing code: \"discover\", \"find code\", \"how does X work\", \"where is\", \"what handles\", \"understand codebase\", \"explore code\". Follow with map, then plan. NOT for debugging \u2014 use aio-debug instead."
       },
       {
-        "name": "aio-doc-writer",
-        "desc": "Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis. Triggers: \"analyze codebase\", \"map architecture\", \"document architecture\", \"what does this codebase do\", \"codebase oracle\"."
+        "name": "aio-review",
+        "desc": "PROACTIVE planning \u2014 post-implementation validation in the aio-deep-plan pipeline. Use when validating completed work: \"check my changes\", \"before I commit\", \"did I miss anything\", \"review implementation\". Run snapshot before coding, then review after. NOT for debugging \u2014 use aio-debug. For full code review use aio-code-review."
       },
       {
-        "name": "aio-map",
-        "desc": "PROACTIVE planning \u2014 second step in the aio-deep-plan pipeline. Use when the user needs structural analysis: \"map dependencies\", \"show structure\", \"who calls this\", \"blast radius\", \"trace references\", \"impact analysis\". Run discover first, then follow with plan. NOT for debugging \u2014 use aio-debug instead."
+        "name": "aio-snapshot",
+        "desc": "PROACTIVE planning \u2014 baseline step in the aio-deep-plan pipeline. Use when the user wants change tracking: \"create snapshot\", \"baseline\", \"before I start coding\". Enables change detection in the review skill after coding. NOT for debugging \u2014 use aio-debug instead."
       },
       {
-        "name": "aio-rubber-duck",
-        "desc": "Rubber duck debugging companion \u2014 Claude plays the duck, NOT the solver. Use when the user says \"be my rubber duck\", \"let me explain this\", \"walk me through\", \"talk me through\", \"I'm stuck\", \"help me think\", \"I don't understand why\", \"rubber duck\", \"duck debugging\", or wants to articulate a problem out loud to find their own bug. Role-invert: the user explains step by step; Claude listens, prompts, and probes assumptions \u2014 never rushes a solution. Distinct from aio-debug (heavy orchestration with codebase context) \u2014 this is a lightweight cognitive aid that externalizes reasoning."
+        "name": "aio-plan",
+        "desc": "PROACTIVE planning \u2014 third step in the aio-deep-plan pipeline. Use when the user needs a concrete implementation plan: \"plan implementation\", \"how should I implement\", \"approach\", \"strategy\", \"plan feature\", \"plan refactor\". Run discover and map first. NOT for debugging \u2014 use aio-debug instead."
       }
     ]
   },
@@ -337,12 +337,12 @@
         "desc": "Manage Jira issues, sprints, workflows, and Confluence pages via CLI. Triggers: \"create Jira issue\", \"search issues\", \"update issue status\", \"manage sprint\", \"search confluence\", \"create page\", \"update page\", jira, confluence, JQL, CQL, epic, wiki."
       },
       {
-        "name": "aio-x",
-        "desc": "Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing). Triggers: \"post tweet\", \"search twitter\", \"post thread\", \"get mentions\", twitter, x.com, tweet, timeline."
-      },
-      {
         "name": "aio-google-workspace",
         "desc": "Interact with Google Workspace services (Gmail, Drive, Calendar, Sheets, Docs, Tasks) via the gws CLI. Triggers: \"send email\", \"upload to drive\", \"create event\", \"read spreadsheet\", \"standup report\", gws, Google Workspace."
+      },
+      {
+        "name": "aio-x",
+        "desc": "Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing). Triggers: \"post tweet\", \"search twitter\", \"post thread\", \"get mentions\", twitter, x.com, tweet, timeline."
       }
     ]
   },
@@ -374,12 +374,12 @@
     "desc": "Software architecture encyclopedia and decision advisor. 137 in-depth articles (415K+ words) covering architecture patterns, principles, and practices from Google, AWS, Microsoft, and 13 foundational books. Two skills: aio-architect-advisor (5-step decision workflow) and aio-architect-reference (semantic search encyclopedia). 10 volumes: foundations, architecture styles, cloud design patterns, resilience, data architecture, DDD, API design, distributed systems, operations, and modern paradigms.",
     "skills": [
       {
-        "name": "aio-architect-reference",
-        "desc": "Software architecture encyclopedia with 137 in-depth articles. Look up any architecture pattern, principle, or concept. Search semantically, browse by category, or compare patterns side-by-side. Covers cloud design patterns, resilience, data architecture, DDD, distributed systems, API design, operations, and modern paradigms. Triggers: what is, explain, look up, search pattern, compare patterns, list patterns, architecture reference, tell me about, define, describe, how does X work"
-      },
-      {
         "name": "aio-architect-advisor",
         "desc": "Architecture decision advisor powered by 137 in-depth articles. Use when designing systems, evaluating architecture trade-offs, choosing patterns, reviewing architecture decisions, planning migrations, or facing \"how should I build this\" questions. Guides through pattern selection, application, synthesis, and stress-testing with real-world insights from Google, AWS, Microsoft, and 13 foundational books. Triggers: architecture, system design, how to build, which pattern, trade-off, scale this, design review, architecture decision, microservices or monolith, how to handle failure, database choice, event driven, decompose, migration strategy"
+      },
+      {
+        "name": "aio-architect-reference",
+        "desc": "Software architecture encyclopedia with 137 in-depth articles. Look up any architecture pattern, principle, or concept. Search semantically, browse by category, or compare patterns side-by-side. Covers cloud design patterns, resilience, data architecture, DDD, distributed systems, API design, operations, and modern paradigms. Triggers: what is, explain, look up, search pattern, compare patterns, list patterns, architecture reference, tell me about, define, describe, how does X work"
       }
     ]
   },
@@ -389,12 +389,12 @@
     "desc": "StarRocks best practices and query tuning \u2014 table design (partitioning, bucketing, sort keys, PK tuning, auth, resource groups) and query performance (EXPLAIN plans, Query Profile, operator metrics, tuning recipes, schema optimization, query hints).",
     "skills": [
       {
-        "name": "aio-starrocks-query-tuning",
-        "desc": "StarRocks query performance tuning \u2014 EXPLAIN plans, Query Profile analysis, operator metrics, tuning recipes, schema optimization, query hints, and text-based profile analysis. Use when diagnosing slow queries, reading EXPLAIN output, analyzing query profiles, optimizing joins/scans/aggregations, applying query hints, or tuning StarRocks schema for performance."
-      },
-      {
         "name": "aio-starrocks-best-practices",
         "desc": "StarRocks table design best practices \u2014 partitioning strategy, sort key selection, bucketing decisions, Primary Key table tuning, authentication/authorization, and resource group configuration. Use when designing new tables, optimizing existing schemas, reviewing DDL, choosing partition/bucket/sort strategies, or configuring access control and resource isolation."
+      },
+      {
+        "name": "aio-starrocks-query-tuning",
+        "desc": "StarRocks query performance tuning \u2014 EXPLAIN plans, Query Profile analysis, operator metrics, tuning recipes, schema optimization, query hints, and text-based profile analysis. Use when diagnosing slow queries, reading EXPLAIN output, analyzing query profiles, optimizing joins/scans/aggregations, applying query hints, or tuning StarRocks schema for performance."
       }
     ]
   }
