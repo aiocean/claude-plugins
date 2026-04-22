@@ -34,6 +34,8 @@
   --bg-glow-b: rgba(202,255,51,0.05);
   --scan-opacity: 0;
 
+  --matrix-fade:  rgba(5, 5, 7, 0.085);
+
   --f-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --f-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
@@ -63,6 +65,8 @@
   --bg-glow-a: rgba(255,0,122,0.10);
   --bg-glow-b: rgba(0,212,255,0.07);
   --scan-opacity: 0.18;
+
+  --matrix-fade:  rgba(0, 0, 0, 0.085);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -98,6 +102,18 @@ body::before {
   background-attachment: fixed;
 }
 
+/* matrix rain — bottom-up background effect (sits below grid overlay) */
+#matrix-rain {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.42;
+}
+@media (prefers-reduced-motion: reduce) {
+  #matrix-rain { display: none; }
+}
+
 /* scanline overlay (VOID mode) */
 body::after {
   content: '';
@@ -116,48 +132,6 @@ a { color: var(--cyan); text-decoration: none; }
 a:hover { color: var(--lime); }
 
 button { font-family: inherit; cursor: pointer; }
-
-/* ────────────────────────────────────────────────────────────
-   TOP BAR — sticky status line
-   ──────────────────────────────────────────────────────────── */
-.topbar {
-  position: sticky; top: 0; z-index: 50;
-  background: var(--bg);
-  border-bottom: 2px solid var(--line);
-}
-.topbar-inner {
-  max-width: 1280px; margin: 0 auto;
-  padding: 10px 32px;
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  font-family: var(--f-mono); font-size: 11px;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--ink-mute);
-}
-.topbar .wm {
-  color: var(--lime); font-weight: 700; letter-spacing: -2px;
-  border: 2px solid var(--lime); padding: 1px 6px;
-  box-shadow: 3px 3px 0 0 var(--magenta);
-  font-size: 14px;
-}
-.topbar .tb-title { color: var(--ink); font-weight: 700; }
-.topbar .tb-sep { color: var(--ink-mute); opacity: 0.5; }
-.topbar .tb-status { display: inline-flex; align-items: center; gap: 6px; color: var(--lime); }
-.topbar .tb-status .led {
-  width: 8px; height: 8px; background: var(--lime); display: inline-block;
-  border: 1px solid var(--lime);
-  animation: blink 1.4s steps(2, end) infinite;
-}
-.topbar .tb-nav { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; }
-.topbar .tb-nav a { color: var(--ink-dim); }
-.topbar .tb-nav a:hover { color: var(--lime); }
-.topbar .tb-theme {
-  font-family: var(--f-mono); font-size: 11px;
-  background: transparent; color: var(--ink-mute);
-  border: 2px solid var(--ink-mute); padding: 2px 8px;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  transition: all 80ms ease;
-}
-.topbar .tb-theme:hover { color: var(--cyan); border-color: var(--cyan); }
 
 /* ────────────────────────────────────────────────────────────
    LAYOUT
@@ -1046,7 +1020,6 @@ footer {
 }
 @media (max-width: 640px) {
   .container { padding: 24px 16px 80px; }
-  .topbar-inner { padding: 10px 16px; gap: 10px; }
   .hero { padding: 24px 18px 20px; }
   .hero-rail { left: 20px; }
   .hero-main h1 { font-size: 40px; }
@@ -1060,26 +1033,7 @@ footer {
 </head>
 <body>
 
-<!-- ================= TOP BAR ================= -->
-<header class="topbar" role="banner">
-  <div class="topbar-inner">
-    <span class="wm">▚▚</span>
-    <span class="tb-title">duoc<span style="color:var(--magenta)">//</span>claude</span>
-    <span class="tb-sep">·</span>
-    <span class="tb-status"><span class="led" aria-hidden="true"></span> ONLINE</span>
-    <span class="tb-sep">·</span>
-    <span id="tb-version">loading…</span>
-    <nav class="tb-nav" aria-label="primary">
-      <a href="#principles">principles</a>
-      <a href="#claudemd">claude.md</a>
-      <a href="#stack">stack</a>
-      <a href="#flows">flows</a>
-      <a href="#plugins">plugins</a>
-      <a href="#doctrine">doctrine</a>
-      <button class="tb-theme" onclick="toggleTheme()" id="themeBtn" title="Shift+D to toggle">[ signal ]</button>
-    </nav>
-  </div>
-</header>
+<canvas id="matrix-rain" aria-hidden="true"></canvas>
 
 <main class="container">
 
@@ -2162,6 +2116,193 @@ document.addEventListener('keydown', (e) => {
 });
 
 loadClaudeMd();
+
+/* ────────────────────────────────────────────────────────────
+   MATRIX RAIN — bottom-up, multi-tint, variable size/speed
+   Classic fade-trick: semi-transparent fill each frame leaves
+   a ghost trail opposite the head motion. Head rises → trail
+   extends downward naturally.
+
+   Easter egg: ~1 column per few seconds swaps its random glyphs
+   for a readable phrase that rises one row per frame — fast
+   enough that you miss it if you're not watching a given column.
+   ──────────────────────────────────────────────────────────── */
+(function matrixRain() {
+  const canvas = document.getElementById('matrix-rain');
+  if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = canvas.getContext('2d', { alpha: true });
+
+  const GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789░▒▓:=+*<>?/|_';
+
+  // hidden manifesto — mix of site doctrine + Matrix nods
+  const PHRASES = [
+    'evidence > assertion',
+    'verify before done',
+    'hypothesis > opinion',
+    'root cause first',
+    'explicit > implicit',
+    'colocation wins',
+    'iteration first',
+    'greenfield only',
+    'cognitive load = debt',
+    'ship the signal',
+    'aiocean/plugins',
+    'duoc//claude',
+    'nullsect ::',
+    'signal intact',
+    'void mode',
+    'wake up',
+    'follow the rabbit',
+    'there is no spoon',
+    'you are the one',
+    'system online',
+    'read the source',
+    '// bottom up //',
+  ];
+
+  // per-theme color weights: [weight, headHex, trailHex]
+  const PALETTES = {
+    signal: [
+      [0.70, '#f4ffd0', '#9fd61e'], // lime (main)
+      [0.14, '#ffd1f4', '#c41fa9'], // magenta
+      [0.10, '#c0f8ff', '#22e6ff'], // cyan
+      [0.06, '#ffe2b0', '#d68a15'], // amber
+    ],
+    void: [
+      [0.60, '#ffd1f4', '#c41fa9'], // magenta (main)
+      [0.18, '#c0f8ff', '#00d4ff'], // cyan
+      [0.15, '#f4ffd0', '#82a81a'], // lime
+      [0.07, '#ffe2b0', '#d68a15'], // amber
+    ],
+  };
+
+  function pickColor(pal) {
+    const r = Math.random();
+    let acc = 0;
+    for (const [w, head, trail] of pal) {
+      acc += w;
+      if (r < acc) return { head, trail };
+    }
+    const last = pal[pal.length - 1];
+    return { head: last[1], trail: last[2] };
+  }
+
+  function currentPalette() {
+    const theme = document.documentElement.getAttribute('data-theme') || 'signal';
+    return PALETTES[theme] || PALETTES.signal;
+  }
+
+  function currentFade() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue('--matrix-fade').trim() || 'rgba(0,0,0,0.085)';
+  }
+
+  let w = 0, h = 0;
+  let columns = [];
+  let palette = currentPalette();
+  let fadeColor = currentFade();
+  let resizeTimer = 0;
+
+  function buildColumns() {
+    columns = [];
+    let x = 0;
+    while (x < w) {
+      const size = 12 + ((Math.random() * 9) | 0); // 12–20 px
+      // smaller glyphs drift faster → parallax depth
+      const speed = 1.6 + Math.random() * 3.8 + (20 - size) * 0.35;
+      columns.push({
+        x,
+        size,
+        speed,
+        color: pickColor(palette),
+        // scatter across full viewport + a bit below → no empty-screen moment
+        y: Math.random() * h * 1.5 - h * 0.25,
+        phrase: null,
+        phraseIdx: 0,
+        phraseDelay: (Math.random() * 600) | 0,
+      });
+      x += size * 0.95; // slight overlap for denser rain
+    }
+  }
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width  = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    buildColumns();
+  }
+
+  function draw() {
+    ctx.fillStyle = fadeColor;
+    ctx.fillRect(0, 0, w, h);
+    ctx.textBaseline = 'top';
+
+    for (let i = 0; i < columns.length; i++) {
+      const c = columns[i];
+
+      // continuous respawn — no chance gate, no visible gap
+      if (c.y < -c.size * 2) {
+        c.y = h + c.size * (1 + Math.random() * 3);
+        c.color = pickColor(palette);
+        c.size = 12 + ((Math.random() * 9) | 0);
+        c.speed = 1.6 + Math.random() * 3.8 + (20 - c.size) * 0.35;
+        c.phrase = null;
+        c.phraseIdx = 0;
+      }
+
+      ctx.font = `${c.size}px "JetBrains Mono", ui-monospace, monospace`;
+
+      if (c.phrase) {
+        // easter-egg phrase: chars stack 1 row/frame, bright so it's readable
+        const ch = c.phrase.charAt(c.phraseIdx);
+        ctx.fillStyle = c.color.head;
+        ctx.fillText(ch, c.x, c.y);
+        c.y -= c.size;
+        c.phraseIdx++;
+        if (c.phraseIdx >= c.phrase.length) {
+          c.phrase = null;
+          c.phraseIdx = 0;
+          c.phraseDelay = 500 + ((Math.random() * 1800) | 0);
+        }
+      } else {
+        // uniform trail color — no bright-head flares, no visible reset points
+        const ch = GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
+        ctx.fillStyle = c.color.trail;
+        ctx.fillText(ch, c.x, c.y);
+        c.y -= c.speed;
+
+        if (c.phraseDelay > 0) {
+          c.phraseDelay--;
+        } else if (Math.random() < 0.00035) {
+          c.phrase = PHRASES[(Math.random() * PHRASES.length) | 0];
+          c.phraseIdx = 0;
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 120);
+  });
+
+  new MutationObserver(() => {
+    palette = currentPalette();
+    fadeColor = currentFade();
+    for (const c of columns) c.color = pickColor(palette);
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  requestAnimationFrame(draw);
+})();
 </script>
 </body>
 </html>
