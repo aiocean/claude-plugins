@@ -110,7 +110,7 @@ body::after {
 /* ════ GHOSTTY-WEB TERMINAL — fills the viewport ════ */
 #ghostty-terminal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 28px;
+  top: 0; left: 0; right: 0; bottom: 0;
   z-index: 1;
   background: #000;
   overflow: hidden;
@@ -122,48 +122,34 @@ body::after {
 #ghostty-terminal .xterm-screen { height: 100% !important; width: 100% !important; }
 #ghostty-terminal .xterm-viewport { background: #000 !important; }
 
-/* ════ NORTON COMMANDER F-KEY STATUS BAR ════ */
-.dos-statusbar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  z-index: 10;
-  height: 28px;
-  padding: 5px 8px;
-  box-sizing: border-box;
-  background: var(--cyan-2);
-  color: #000;
-  font: 700 12px/1.6 var(--f-mono);
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  letter-spacing: 0.5px;
-  border-top: 1px solid #000;
-  user-select: none;
-}
-.dos-statusbar .fk {
-  display: inline-flex;
-  gap: 4px;
-  align-items: baseline;
-}
-.dos-statusbar .fk b {
-  background: #000;
-  color: var(--amber);
-  padding: 1px 5px;
-  font-weight: 700;
-  font-family: var(--f-mono);
-}
-[data-theme="void"] .dos-statusbar {
-  background: var(--amber-2);
-  color: #000;
-}
-[data-theme="void"] .dos-statusbar .fk b {
-  color: var(--amber);
-}
-
 /* small screens */
 @media (max-width: 640px) {
-  .dos-statusbar { gap: 8px; font-size: 11px; overflow-x: auto; white-space: nowrap; }
-  #ghostty-terminal { bottom: 28px; padding: 4px 2px; }
+  #ghostty-terminal { padding: 4px 2px; }
+}
+
+/* ════ CUSTOM DOS BLOCK CURSOR — hides native mouse, follows movement ════ */
+html, body, #ghostty-terminal, #ghostty-terminal * {
+  cursor: none !important;
+}
+#dos-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 10px;
+  height: 18px;
+  background: var(--lime);
+  box-shadow: 0 0 6px var(--lime);
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  transform: translate3d(-50px, -50px, 0);
+  will-change: transform;
+}
+#dos-cursor.active {
+  animation: dos-cursor-blink 1.06s steps(2, start) infinite;
+}
+@keyframes dos-cursor-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 </style>
 </head>
@@ -172,14 +158,8 @@ body::after {
 <!-- ══ FULL-VIEWPORT GHOSTTY-WEB TERMINAL (hosts BIOS POST + TUI) ══ -->
 <div id="ghostty-terminal" role="application" aria-label="claude-plugins TUI"></div>
 
-<!-- ══ NORTON COMMANDER F-KEY STATUS BAR ══ -->
-<nav class="dos-statusbar" aria-label="keyboard shortcuts" role="navigation">
-  <span class="fk"><b>1</b>Help</span>
-  <span class="fk"><b>3</b>Plugins</span>
-  <span class="fk"><b>5</b>Refresh</span>
-  <span class="fk"><b>8</b>Theme</span>
-  <span class="fk"><b>10</b>Quit</span>
-</nav>
+<!-- ══ CUSTOM DOS BLOCK CURSOR (mouse-follower, replaces native pointer) ══ -->
+<div id="dos-cursor" aria-hidden="true"></div>
 
 <script type="module">
 import { init, Terminal, FitAddon } from 'https://esm.sh/ghostty-web@0.4.0';
@@ -232,7 +212,23 @@ let history = [];
 let historyIndex = -1; // -1 = current line, >=0 = viewing history
 let savedBuffer = ''; // saved current line when scrolling into history
 let isRunning = true; // false after quit
+let autoPlayPhase = false;
+let skipAutoPlay = false;
+let animatedOutput = false;
+const LINE_DELAY = 18;
 const PROMPT = C.bgreen + 'C:' + C.bmagenta + '\\CLAUDE' + RESET + '> ';
+
+function pause(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* writes each line; pauses between them only when animatedOutput is on.
+   Commands run with animatedOutput=false → loop stays fully sync (no microtask yield),
+   so subsequent prompt printing sees the correct write order. */
+async function writeLines(lines) {
+  for (const l of lines) {
+    term.write(l);
+    if (animatedOutput && !skipAutoPlay) await pause(LINE_DELAY);
+  }
+}
 
 /* BIOS POST state (phase before welcome, once per session) */
 let biosPhase = false;
@@ -420,18 +416,20 @@ const FLOWS = [
 /* ══════════════════════════════════════════════════════════════
    SECTION RENDERERS
    ══════════════════════════════════════════════════════════════ */
-function renderSectionHeader(idx, title, meta) {
+async function renderSectionHeader(idx, title, meta) {
   const cols = (term && term.cols) || 80;
   const w = Math.min(cols - 4, 84);
   const left = '══ ' + idx + ' ' + title.toUpperCase() + ' ';
   const metaChunk = meta ? (C.grey + meta + RESET + ' ' + C.bmagenta + '══') : '══';
   const metaLen = meta ? meta.length + 4 : 2;
   const fill = Math.max(2, w - left.length - metaLen);
-  term.write('\r\n');
-  term.write('  ' + C.bmagenta + BOLD + left + '═'.repeat(fill) + ' ' + metaChunk + RESET + '\r\n\r\n');
+  await writeLines([
+    '\r\n',
+    '  ' + C.bmagenta + BOLD + left + '═'.repeat(fill) + ' ' + metaChunk + RESET + '\r\n\r\n',
+  ]);
 }
 
-function renderPrincipleCard(rule) {
+async function renderPrincipleCard(rule) {
   const cols = (term && term.cols) || 80;
   const w = Math.min(cols - 4, 84);
   const inner = w - 4;
@@ -444,19 +442,17 @@ function renderPrincipleCard(rule) {
   const bodyLines = wrapText(rule.body, inner, '').split('\r\n').slice(0, 4);
   const quoteLines = wrapText('"' + rule.quote + '"', inner, '').split('\r\n').slice(0, 2);
 
-  term.write(pad + col + '╔' + hLine + '╗' + RESET + '\r\n');
-  term.write(pad + col + '║ ' + RESET + BOLD + col + rule.title + RESET + ' '.repeat(titleGap) + C.byellow + numTxt + RESET + col + ' ║' + RESET + '\r\n');
-  term.write(pad + col + '╟' + sLine + '╢' + RESET + '\r\n');
-  bodyLines.forEach(line => {
-    term.write(pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
-  });
-  quoteLines.forEach(line => {
-    term.write(pad + col + '║ ' + RESET + BOLD + col + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
-  });
-  term.write(pad + col + '╚' + hLine + '╝' + RESET + '\r\n');
+  await writeLines([
+    pad + col + '╔' + hLine + '╗' + RESET + '\r\n',
+    pad + col + '║ ' + RESET + BOLD + col + rule.title + RESET + ' '.repeat(titleGap) + C.byellow + numTxt + RESET + col + ' ║' + RESET + '\r\n',
+    pad + col + '╟' + sLine + '╢' + RESET + '\r\n',
+    ...bodyLines.map(line => pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
+    ...quoteLines.map(line => pad + col + '║ ' + RESET + BOLD + col + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
+    pad + col + '╚' + hLine + '╝' + RESET + '\r\n',
+  ]);
 }
 
-function renderStackItem(item) {
+async function renderStackItem(item) {
   const cols = (term && term.cols) || 80;
   const w = Math.min(cols - 4, 84);
   const inner = w - 4;
@@ -467,29 +463,31 @@ function renderStackItem(item) {
   const headGap = Math.max(1, inner - head.length - item.tag.length);
   const descLines = wrapText(item.desc, inner, '').split('\r\n').slice(0, 3);
 
-  term.write(pad + col + '╔' + hLine + '╗' + RESET + '\r\n');
-  term.write(pad + col + '║ ' + RESET + BOLD + col + head + RESET + ' '.repeat(headGap) + C.grey + item.tag + RESET + col + ' ║' + RESET + '\r\n');
-  descLines.forEach(line => {
-    term.write(pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
-  });
-  term.write(pad + col + '╚' + hLine + '╝' + RESET + '\r\n');
+  await writeLines([
+    pad + col + '╔' + hLine + '╗' + RESET + '\r\n',
+    pad + col + '║ ' + RESET + BOLD + col + head + RESET + ' '.repeat(headGap) + C.grey + item.tag + RESET + col + ' ║' + RESET + '\r\n',
+    ...descLines.map(line => pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
+    pad + col + '╚' + hLine + '╝' + RESET + '\r\n',
+  ]);
 }
 
-function renderFlowCard(flow) {
-  term.write('  ' + C.bcyan + flow.eyebrow + RESET + '\r\n');
-  term.write('  ' + BOLD + C.bmagenta + flow.title.toUpperCase() + RESET + '\r\n');
-  term.write('  ' + C.grey + flow.sub + RESET + '\r\n');
-  flow.steps.forEach((s, i) => {
-    const col = colorFor(s.color);
-    const idx = String(i + 1).padStart(2, '0');
-    const phase = s.phase.padEnd(12);
-    const node = s.node.padEnd(28);
-    term.write('    ' + C.byellow + idx + RESET + '  ' + BOLD + phase + RESET + '· ' + col + node + RESET + C.grey + '// ' + s.desc + RESET + '\r\n');
-  });
-  term.write('\r\n');
+async function renderFlowCard(flow) {
+  await writeLines([
+    '  ' + C.bcyan + flow.eyebrow + RESET + '\r\n',
+    '  ' + BOLD + C.bmagenta + flow.title.toUpperCase() + RESET + '\r\n',
+    '  ' + C.grey + flow.sub + RESET + '\r\n',
+    ...flow.steps.map((s, i) => {
+      const col = colorFor(s.color);
+      const idx = String(i + 1).padStart(2, '0');
+      const phase = s.phase.padEnd(12);
+      const node = s.node.padEnd(28);
+      return '    ' + C.byellow + idx + RESET + '  ' + BOLD + phase + RESET + '· ' + col + node + RESET + C.grey + '// ' + s.desc + RESET + '\r\n';
+    }),
+    '\r\n',
+  ]);
 }
 
-function renderQuoteCard(q) {
+async function renderQuoteCard(q) {
   const cols = (term && term.cols) || 80;
   const w = Math.min(cols - 4, 84);
   const inner = w - 4;
@@ -502,26 +500,20 @@ function renderQuoteCard(q) {
   const quoteLines = wrapText('"' + q.quote + '"', inner, '').split('\r\n').slice(0, 2);
   const narrLines = wrapText(q.narrator, inner, '').split('\r\n').slice(0, 3);
 
-  term.write(pad + col + '╔' + hLine + '╗' + RESET + '\r\n');
-  term.write(pad + col + '║ ' + RESET + BOLD + col + badgeTxt + RESET + ' '.repeat(badgeGap) + col + ' ║' + RESET + '\r\n');
-  term.write(pad + col + '╟' + sLine + '╢' + RESET + '\r\n');
-  quoteLines.forEach(line => {
-    term.write(pad + col + '║ ' + RESET + BOLD + C.bwhite + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
-  });
-  term.write(pad + col + '╟' + sLine + '╢' + RESET + '\r\n');
-  narrLines.forEach(line => {
-    term.write(pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
-  });
-  term.write(pad + col + '╚' + hLine + '╝' + RESET + '\r\n');
+  await writeLines([
+    pad + col + '╔' + hLine + '╗' + RESET + '\r\n',
+    pad + col + '║ ' + RESET + BOLD + col + badgeTxt + RESET + ' '.repeat(badgeGap) + col + ' ║' + RESET + '\r\n',
+    pad + col + '╟' + sLine + '╢' + RESET + '\r\n',
+    ...quoteLines.map(line => pad + col + '║ ' + RESET + BOLD + C.bwhite + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
+    pad + col + '╟' + sLine + '╢' + RESET + '\r\n',
+    ...narrLines.map(line => pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
+    pad + col + '╚' + hLine + '╝' + RESET + '\r\n',
+  ]);
 }
 
 /* ══════════════════════════════════════════════════════════════
    AUTOPLAY — renders all sections line by line after BIOS
    ══════════════════════════════════════════════════════════════ */
-let autoPlayPhase = false;
-let skipAutoPlay = false;
-
-function pause(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function renderHeroSection() {
   const banner = [
@@ -563,6 +555,7 @@ async function renderHeroSection() {
 async function autoPlay() {
   autoPlayPhase = true;
   skipAutoPlay = false;
+  animatedOutput = true;
   term.write(CLEAR_SCREEN);
 
   // 1. Hero
@@ -571,16 +564,16 @@ async function autoPlay() {
   await pause(400);
 
   // 2. /01 Principles
-  renderSectionHeader('/01', 'operating principles', 'from ~/.claude/CLAUDE.md');
+  await renderSectionHeader('/01', 'operating principles', 'from ~/.claude/CLAUDE.md');
   for (const rule of PRINCIPLES) {
     if (skipAutoPlay) return finishAutoPlay();
-    renderPrincipleCard(rule);
+    await renderPrincipleCard(rule);
     await pause(220);
   }
 
   // 3. /02 Manifesto
   if (skipAutoPlay) return finishAutoPlay();
-  renderSectionHeader('/02', 'manifesto', 'CLAUDE.md as discipline');
+  await renderSectionHeader('/02', 'manifesto', 'CLAUDE.md as discipline');
   for (const line of MANIFESTO_INTRO_LINES) {
     if (skipAutoPlay) return finishAutoPlay();
     term.write('  ' + C.grey + line + RESET + '\r\n');
@@ -588,7 +581,7 @@ async function autoPlay() {
   }
   for (const q of MANIFESTO_QUOTES) {
     if (skipAutoPlay) return finishAutoPlay();
-    renderQuoteCard(q);
+    await renderQuoteCard(q);
     await pause(220);
   }
   for (const line of MANIFESTO_STRUCTURE_LINES) {
@@ -599,28 +592,28 @@ async function autoPlay() {
 
   // 4. /03 Stack
   if (skipAutoPlay) return finishAutoPlay();
-  renderSectionHeader('/03', 'stack', '7 tools · 1 tradeoff each');
+  await renderSectionHeader('/03', 'stack', '7 tools · 1 tradeoff each');
   for (const it of STACK_ITEMS) {
     if (skipAutoPlay) return finishAutoPlay();
-    renderStackItem(it);
+    await renderStackItem(it);
     await pause(180);
   }
 
   // 5. /04 Workflows
   if (skipAutoPlay) return finishAutoPlay();
-  renderSectionHeader('/04', 'workflows', 'pipelines across plugins');
+  await renderSectionHeader('/04', 'workflows', 'pipelines across plugins');
   for (const f of FLOWS) {
     if (skipAutoPlay) return finishAutoPlay();
-    renderFlowCard(f);
+    await renderFlowCard(f);
     await pause(220);
   }
 
   // 6. /05 Plugins
   if (skipAutoPlay) return finishAutoPlay();
-  renderSectionHeader('/05', 'plugins', pluginsData.length + ' installable skill packs');
+  await renderSectionHeader('/05', 'plugins', pluginsData.length + ' installable skill packs');
   for (const p of pluginsData) {
     if (skipAutoPlay) return finishAutoPlay();
-    renderPluginCard(p);
+    await renderPluginCard(p);
     await pause(80);
   }
 
@@ -637,6 +630,7 @@ async function autoPlay() {
 
 function finishAutoPlay() {
   autoPlayPhase = false;
+  animatedOutput = false;
   term.write('\r\n');
   term.write('  type ' + C.bcyan + 'help' + RESET + ' for commands · or try: ' + C.byellow + 'plugins' + RESET + ', ' + C.byellow + 'manifest' + RESET + ', ' + C.byellow + 'install <name>' + RESET + '\r\n');
   printPrompt();
@@ -685,7 +679,7 @@ function cmdFlows() {
   FLOWS.forEach(f => renderFlowCard(f));
 }
 
-function renderPluginCard(p) {
+async function renderPluginCard(p) {
   const cols = (term && term.cols) || 80;
   const w = Math.min(cols - 4, 84);
   const inner = w - 4;
@@ -704,14 +698,14 @@ function renderPluginCard(p) {
   const installTxt = 'install ' + p.name;
   const footerGap = Math.max(2, inner - skillTxt.length - installTxt.length);
 
-  term.write(pad + C.bmagenta + '╔' + hLine + '╗' + RESET + '\r\n');
-  term.write(pad + C.bmagenta + '║ ' + RESET + BOLD + C.bmagenta + name + RESET + ' '.repeat(titleGap) + C.byellow + ver + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
-  term.write(pad + C.bmagenta + '╟' + sLine + '╢' + RESET + '\r\n');
-  descLines.forEach(line => {
-    term.write(pad + C.bmagenta + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
-  });
-  term.write(pad + C.bmagenta + '║ ' + RESET + C.bcyan + skillTxt + RESET + ' '.repeat(footerGap) + C.grey + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
-  term.write(pad + C.bmagenta + '╚' + hLine + '╝' + RESET + '\r\n');
+  await writeLines([
+    pad + C.bmagenta + '╔' + hLine + '╗' + RESET + '\r\n',
+    pad + C.bmagenta + '║ ' + RESET + BOLD + C.bmagenta + name + RESET + ' '.repeat(titleGap) + C.byellow + ver + RESET + C.bmagenta + ' ║' + RESET + '\r\n',
+    pad + C.bmagenta + '╟' + sLine + '╢' + RESET + '\r\n',
+    ...descLines.map(line => pad + C.bmagenta + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + C.bmagenta + ' ║' + RESET + '\r\n'),
+    pad + C.bmagenta + '║ ' + RESET + C.bcyan + skillTxt + RESET + ' '.repeat(footerGap) + C.grey + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n',
+    pad + C.bmagenta + '╚' + hLine + '╝' + RESET + '\r\n',
+  ]);
 }
 
 function cmdPlugins() {
@@ -1018,6 +1012,50 @@ try {
   const saved = localStorage.getItem('nsct-theme');
   if (saved === 'void' || saved === 'signal') document.documentElement.setAttribute('data-theme', saved);
 } catch (e) {}
+
+/* ══════════════════════════════════════════════════════════════
+   CUSTOM DOS BLOCK CURSOR — snaps to character grid, blinks once moved
+   cursor snaps to terminal cell (floor of mouse / cellSize) so it
+   jumps line-by-line like an MS-DOS text-mode pointer, never free-floats
+   ══════════════════════════════════════════════════════════════ */
+const dosCursor = document.getElementById('dos-cursor');
+let dosCursorStarted = false;
+// fallback derived from Terminal config (fontSize: 14) — overridden by measureCell when term DOM ready
+let cellW = 14 * 0.6, cellH = 14 * 1.2;
+let cellOriginX = 0, cellOriginY = 0;
+
+function measureCell() {
+  if (!term || !term.cols || !term.rows) return;
+  const container = document.getElementById('ghostty-terminal');
+  if (!container) return;
+  // ghostty-web may or may not expose xterm.js class names — try common selectors in order
+  const el = container.querySelector('.xterm-screen')
+          || container.querySelector('.xterm-rows')
+          || container.querySelector('.xterm')
+          || container.querySelector('canvas')
+          || container;
+  const r = el.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  cellW = r.width / term.cols;
+  cellH = r.height / term.rows;
+  cellOriginX = r.left;
+  cellOriginY = r.top;
+  dosCursor.style.width  = cellW + 'px';
+  dosCursor.style.height = cellH + 'px';
+}
+
+let measured = false;
+window.addEventListener('resize', () => { measured = false; }, { passive: true });
+
+document.addEventListener('mousemove', (e) => {
+  if (!measured) { measureCell(); measured = true; }
+  if (!dosCursorStarted) { dosCursor.classList.add('active'); dosCursorStarted = true; }
+  const gx = Math.floor((e.clientX - cellOriginX) / cellW);
+  const gy = Math.floor((e.clientY - cellOriginY) / cellH);
+  const x = cellOriginX + gx * cellW;
+  const y = cellOriginY + gy * cellH;
+  dosCursor.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+}, { passive: true });
 
 /* Start boot sequence (WASM load → BIOS POST in terminal → welcome) */
 boot();
