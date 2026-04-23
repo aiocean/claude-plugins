@@ -4,2305 +4,1023 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>duoc // claude playbook · aiocean/claude-plugins</title>
-<meta name="description" content="how I work with Claude Code — CLAUDE.md, tooling, and 20+ personal plugins. cyberpunk-brutalism by NULLSECT//">
+<meta name="description" content="how I work with Claude Code — full MS-DOS terminal playbook powered by ghostty-web. type 'help' to start">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ────────────────────────────────────────────────────────────
-   NULLSECT// tokens — cyberpunk-brutalism
-   ──────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   MS-DOS TERMINAL MODE · CP437 · VGA 16-color · CRT scanlines
+   signal = green-on-black (default DOS)
+   void   = amber-on-black (monochrome CRT alt)
+   ════════════════════════════════════════════════════════════════ */
 :root, [data-theme="signal"] {
-  --bg:        #050507;
-  --bg-2:      #0d0d11;
-  --bg-3:      #15151b;
-  --ink:       #ededea;
-  --ink-dim:   #a7a79d;
-  --ink-mute:  #5c5c55;
-  --line:      #ededea;
+  --bg:        #000000;
+  --bg-2:      #000000;
+  --bg-3:      #0a0f0a;
+  --ink:       #c0c0c0;
+  --ink-dim:   #a8a8a8;
+  --ink-mute:  #555555;
+  --line:      #c0c0c0;
 
-  --lime:      #caff33;
-  --lime-2:    #9fd61e;
-  --magenta:   #ff2bd6;
-  --magenta-2: #c41fa9;
-  --cyan:      #22e6ff;
-  --amber:     #ffb020;
-  --red:       #ff4f4f;
+  --lime:      #55ff55;   /* DOS bright green  #10 */
+  --lime-2:    #00aa00;   /* DOS green         #02 */
+  --magenta:   #ff55ff;   /* DOS bright mag    #13 */
+  --magenta-2: #aa00aa;   /* DOS magenta       #05 */
+  --cyan:      #55ffff;   /* DOS bright cyan   #11 */
+  --cyan-2:    #00aaaa;   /* DOS cyan          #03 */
+  --amber:     #ffff55;   /* DOS yellow        #14 */
+  --amber-2:   #aa5500;   /* DOS brown         #06 */
+  --red:       #ff5555;   /* DOS bright red    #12 */
+  --blue:      #5555ff;   /* DOS bright blue   #09 */
+  --white:     #ffffff;
 
-  --grid-tint: rgba(202,255,51,0.035);
-  --bg-glow-a: rgba(255,43,214,0.06);
-  --bg-glow-b: rgba(202,255,51,0.05);
-  --scan-opacity: 0;
+  --grid-tint:    rgba(85,255,85,0.025);
+  --scan-opacity: 0.26;
 
-  --matrix-fade:  rgba(5, 5, 7, 0.085);
-
-  --f-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --f-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-
-  --border-w: 3px;
-  --shadow-d: 8px;
-  --radius:   0px;
+  --f-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Menlo', 'Monaco', 'Courier New', monospace;
+  --f-vga:  'VT323', 'IBM Plex Mono', 'Courier New', monospace;
 }
 
 [data-theme="void"] {
-  --bg:        #000000;
-  --bg-2:      #070308;
-  --bg-3:      #0c060e;
-  --ink:       #e6d8ea;
-  --ink-dim:   #e4d8e8;
-  --ink-mute:  #e0d2e6;
-  --line:      #8b3fb3;
+  --bg:        #0c0600;
+  --bg-2:      #110a02;
+  --bg-3:      #1a0e04;
+  --ink:       #ffb86b;
+  --ink-dim:   #d4924b;
+  --ink-mute:  #6b4420;
+  --line:      #ffb86b;
 
-  --lime:      #a8d622;
-  --lime-2:    #82a81a;
-  --magenta:   #ff007a;
-  --magenta-2: #c4005f;
-  --cyan:      #00d4ff;
-  --amber:     #ff8a00;
-  --red:       #ff2a6d;
+  --lime:      #ffaa00;
+  --lime-2:    #aa6600;
+  --magenta:   #ff8844;
+  --magenta-2: #cc6622;
+  --cyan:      #ffcc88;
+  --cyan-2:    #bb8844;
+  --amber:     #ffd866;
+  --amber-2:   #aa6600;
+  --red:       #ff5555;
+  --blue:      #ffaa00;
+  --white:     #fff3d0;
 
-  --grid-tint: rgba(255,0,122,0.045);
-  --bg-glow-a: rgba(255,0,122,0.10);
-  --bg-glow-b: rgba(0,212,255,0.07);
-  --scan-opacity: 0.18;
-
-  --matrix-fade:  rgba(0, 0, 0, 0.085);
+  --grid-tint:    rgba(255,184,107,0.03);
+  --scan-opacity: 0.22;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: auto; }
-
-html::selection, body::selection { background: var(--magenta); color: var(--bg); }
-::selection { background: var(--magenta); color: var(--bg); }
-
-body {
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--f-mono);
   font-size: 14px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-  background-image:
-    radial-gradient(ellipse at 10% 0%, var(--bg-glow-a), transparent 55%),
-    radial-gradient(ellipse at 90% 100%, var(--bg-glow-b), transparent 55%);
-  background-attachment: fixed, fixed;
+  line-height: 1.4;
+  height: 100vh;
+  overflow: hidden;
 }
+::selection { background: var(--lime); color: #000; }
 
-/* grid overlay */
+/* subtle grid tint */
 body::before {
-  content: '';
+  content: "";
   position: fixed; inset: 0;
+  background:
+    repeating-linear-gradient(0deg,  transparent 0 19px, var(--grid-tint) 19px 20px),
+    repeating-linear-gradient(90deg, transparent 0 19px, var(--grid-tint) 19px 20px);
   pointer-events: none;
-  z-index: 1;
-  background-image:
-    linear-gradient(var(--grid-tint) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-tint) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-attachment: fixed;
-}
-
-/* matrix rain — bottom-up background effect (sits below grid overlay) */
-#matrix-rain {
-  position: fixed; inset: 0;
-  width: 100%; height: 100%;
   z-index: 0;
-  pointer-events: none;
-  opacity: 0.42;
-}
-@media (prefers-reduced-motion: reduce) {
-  #matrix-rain { display: none; }
 }
 
-/* scanline overlay (VOID mode) */
+/* CRT scanlines — aggressive on top of terminal for the TUI feel */
 body::after {
-  content: '';
+  content: "";
   position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 9998;
   background: repeating-linear-gradient(
-    180deg, transparent 0px, transparent 2px,
-    rgba(0,0,0,0.55) 2px, rgba(0,0,0,0.55) 3px
+    0deg,
+    rgba(0,0,0,var(--scan-opacity)) 0,
+    rgba(0,0,0,var(--scan-opacity)) 1px,
+    transparent 1px,
+    transparent 3px
   );
-  opacity: var(--scan-opacity, 0);
+  pointer-events: none;
+  z-index: 5;
   mix-blend-mode: multiply;
 }
 
-a { color: var(--cyan); text-decoration: none; }
-a:hover { color: var(--lime); }
-
-button { font-family: inherit; cursor: pointer; }
-
-/* ────────────────────────────────────────────────────────────
-   LAYOUT
-   ──────────────────────────────────────────────────────────── */
-.container {
-  max-width: 1280px; margin: 0 auto;
-  padding: 40px 32px 120px;
-  position: relative; z-index: 2;
-}
-
-.sec { margin-top: 64px; }
-.sec:first-of-type { margin-top: 32px; }
-
-.sec-head {
-  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
-  padding-bottom: 12px; margin-bottom: 24px;
-  border-bottom: var(--border-w) solid var(--line);
-}
-.sec-head .idx {
-  font-family: var(--f-mono); color: var(--lime);
-  font-size: 13px; font-weight: 700;
-}
-.sec-head .title {
-  font-family: var(--f-display); font-weight: 700; font-size: 28px;
-  text-transform: uppercase; letter-spacing: -0.02em;
-  color: var(--ink);
-}
-.sec-head .meta {
-  margin-left: auto; color: var(--ink-mute); font-size: 12px;
-}
-.sec-head .meta b { color: var(--magenta); font-weight: 700; }
-
-/* ────────────────────────────────────────────────────────────
-   HERO
-   ──────────────────────────────────────────────────────────── */
-.hero {
-  position: relative;
-  border: var(--border-w) solid var(--line);
-  box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--lime);
-  background: var(--bg-2);
-  padding: 28px 32px 24px;
-  margin-bottom: 18px;
-}
-.hero-rail {
-  position: absolute; top: -3px; left: 40px;
-  background: var(--bg); border: 3px solid var(--line);
-  padding: 6px 10px 4px; transform: translateY(-50%);
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--lime);
-}
-.hero-corner {
-  position: absolute; pointer-events: none;
-  width: 22px; height: 22px;
-  border-color: var(--magenta);
-}
-.hero-corner.tl { top: -3px; left: -3px; border-top: 3px solid; border-left: 3px solid; }
-.hero-corner.tr { top: -3px; right: -3px; border-top: 3px solid; border-right: 3px solid; }
-.hero-corner.bl { bottom: -3px; left: -3px; border-bottom: 3px solid; border-left: 3px solid; }
-.hero-corner.br { bottom: -3px; right: -3px; border-bottom: 3px solid; border-right: 3px solid; }
-
-.hero-grid {
-  display: grid; grid-template-columns: 1.5fr 1fr; gap: 32px; align-items: stretch;
-  padding-top: 14px;
-}
-.hero-main .eyebrow {
-  font-family: var(--f-mono); font-size: 11px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--magenta); margin-bottom: 14px;
-}
-.hero-main h1 {
-  font-family: var(--f-display); font-weight: 700;
-  font-size: clamp(36px, 6vw, 64px); line-height: 0.94;
-  text-transform: uppercase; letter-spacing: -0.03em;
-  color: var(--ink);
-}
-.hero-main h1 em { font-style: normal; color: var(--lime); }
-.hero-main h1 b { font-weight: 700; color: var(--magenta); }
-.hero-main .lede {
-  margin-top: 20px; font-size: 14px; color: var(--ink-dim);
-  max-width: 560px;
-}
-.hero-main .lede .c { color: var(--cyan); }
-.hero-main .lede .m { color: var(--magenta); }
-
-.hero-actions {
-  margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;
-}
-
-.hero-payload {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
-  align-content: start;
-}
-.pay-cell {
-  border: 1.5px solid var(--ink-mute);
-  background: var(--bg);
-  padding: 12px 14px;
-  display: flex; flex-direction: column; gap: 4px;
-  min-height: 68px; justify-content: center;
-}
-.pay-cell .k {
-  font: 700 9px/1 var(--f-mono); color: var(--ink-mute);
-  letter-spacing: 0.16em; text-transform: uppercase;
-}
-.pay-cell .v {
-  font: 700 20px/1 var(--f-display); letter-spacing: -0.01em;
-  text-transform: uppercase; color: var(--ink);
-}
-.pay-cell.lime  { border-color: var(--lime); }
-.pay-cell.lime  .v { color: var(--lime); }
-.pay-cell.cyan  { border-color: var(--cyan); }
-.pay-cell.cyan  .v { color: var(--cyan); }
-.pay-cell.mag   { border-color: var(--magenta); }
-.pay-cell.mag   .v { color: var(--magenta); }
-.pay-cell.amber { border-color: var(--amber); }
-.pay-cell.amber .v { color: var(--amber); }
-
-.hero-meta {
-  margin-top: 24px; padding-top: 14px;
-  border-top: 2px dashed var(--ink-mute);
-  display: flex; gap: 18px; flex-wrap: wrap;
-  font-family: var(--f-mono); font-size: 10px;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink-mute);
-}
-.hero-meta .dim { opacity: 0.6; }
-.hero-meta .on { color: var(--lime); }
-
-/* ────────────────────────────────────────────────────────────
-   BUTTONS
-   ──────────────────────────────────────────────────────────── */
-.btn {
-  font-family: var(--f-mono); font-weight: 700; font-size: 12px;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  padding: 11px 16px;
-  border: var(--border-w) solid var(--line);
-  background: var(--bg-2); color: var(--ink);
-  box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--line);
-  transition: transform 80ms ease, box-shadow 80ms ease, background 80ms ease;
-  display: inline-flex; align-items: center; gap: 8px;
-  text-decoration: none;
-}
-.btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 10px 10px 0 0 var(--line);
-  color: var(--ink);
-}
-.btn:active { transform: translate(var(--shadow-d), var(--shadow-d)); box-shadow: 0 0 0 0 var(--line); }
-
-.btn-primary {
-  background: var(--lime); color: #0a0a0b; border-color: var(--lime);
-  box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--line);
-}
-.btn-primary:hover { background: var(--lime); color: #0a0a0b; box-shadow: 10px 10px 0 0 var(--magenta); border-color: var(--lime); }
-
-.btn-mag {
-  background: var(--magenta); color: #0a0a0b; border-color: var(--magenta);
-}
-.btn-mag:hover { box-shadow: 10px 10px 0 0 var(--lime); color: #0a0a0b; }
-
-.btn-ghost { background: transparent; }
-.btn-ghost:hover { background: transparent; }
-
-.btn-sm { padding: 7px 11px; font-size: 10px; box-shadow: 5px 5px 0 0 var(--line); }
-.btn-sm:hover { box-shadow: 7px 7px 0 0 var(--line); }
-
-/* ────────────────────────────────────────────────────────────
-   MARQUEE
-   ──────────────────────────────────────────────────────────── */
-.marquee {
-  border: var(--border-w) solid var(--magenta);
-  background: var(--bg-2);
-  box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--magenta);
+/* ════ GHOSTTY-WEB TERMINAL — fills the viewport ════ */
+#ghostty-terminal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 28px;
+  z-index: 1;
+  background: #000;
   overflow: hidden;
-  margin-bottom: 24px;
-  position: relative;
+  padding: 8px 6px 4px 8px;
 }
-.marquee::before, .marquee::after {
-  content: ''; position: absolute; top: 0; bottom: 0; width: 80px;
-  pointer-events: none; z-index: 2;
-}
-.marquee::before { left: 0; background: linear-gradient(90deg, var(--bg-2), transparent); }
-.marquee::after { right: 0; background: linear-gradient(270deg, var(--bg-2), transparent); }
-.marquee-track {
-  display: flex; gap: 32px; padding: 10px 0;
-  white-space: nowrap;
-  animation: scroll 45s linear infinite;
-  will-change: transform;
-}
-.marquee-track span {
-  font-family: var(--f-mono); font-size: 11px;
-  text-transform: uppercase; letter-spacing: 0.14em;
-  color: var(--ink-dim);
-}
-.marquee-track span b { color: var(--magenta); font-weight: 700; }
-.marquee-track span i { color: var(--lime); font-style: normal; font-weight: 700; }
-.marquee-track span em { color: var(--cyan); font-style: normal; font-weight: 700; }
-@keyframes scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
+#ghostty-terminal canvas { display: block; }
+#ghostty-terminal .xterm,
+#ghostty-terminal .xterm-viewport,
+#ghostty-terminal .xterm-screen { height: 100% !important; width: 100% !important; }
+#ghostty-terminal .xterm-viewport { background: #000 !important; }
 
-/* ────────────────────────────────────────────────────────────
-   COPY PILL
-   ──────────────────────────────────────────────────────────── */
-.copy-pill {
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  padding: 4px 10px;
-  border: 2px solid var(--ink-mute); background: transparent;
-  color: var(--ink-mute);
-  transition: all 80ms ease;
-}
-.copy-pill:hover { border-color: var(--lime); color: var(--lime); }
-.copy-pill.copied { border-color: var(--lime); background: var(--lime); color: #0a0a0b; }
-
-/* ────────────────────────────────────────────────────────────
-   MANIFESTO — personal narrative · pull-quotes · raw link
-   ──────────────────────────────────────────────────────────── */
-.manifesto {
-  display: grid;
-  gap: 40px;
-  margin-top: 8px;
-  max-width: 1120px;
-}
-.manifesto-intro {
-  font-family: var(--f-display);
-  font-weight: 500; font-size: clamp(20px, 2.2vw, 26px); line-height: 1.5;
-  letter-spacing: -0.01em;
-  color: var(--ink-dim);
-  margin: 0;
-}
-.manifesto-intro .m-lead {
-  color: var(--lime); font-family: var(--f-mono); font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.14em;
-  display: block; margin-bottom: 14px;
-}
-.manifesto-intro b { color: var(--ink); font-weight: 700; }
-.manifesto-intro em { color: var(--magenta); font-style: italic; font-weight: 600; }
-
-.manifesto-quotes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-.quote-card {
-  position: relative;
-  padding: 24px 24px 22px;
-  border: var(--border-w) solid var(--line);
-  background: var(--bg-2);
-  box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--line);
-  display: flex; flex-direction: column; gap: 16px;
-  transition: transform 80ms ease, box-shadow 80ms ease;
-}
-.quote-card.q-lime  { border-color: var(--lime);    box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--lime); }
-.quote-card.q-mag   { border-color: var(--magenta); box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--magenta); }
-.quote-card.q-cyan  { border-color: var(--cyan);    box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--cyan); }
-.quote-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 10px 10px 0 0 var(--line);
-}
-.quote-card.q-lime:hover  { box-shadow: 10px 10px 0 0 var(--lime); }
-.quote-card.q-mag:hover   { box-shadow: 10px 10px 0 0 var(--magenta); }
-.quote-card.q-cyan:hover  { box-shadow: 10px 10px 0 0 var(--cyan); }
-
-.quote-badge {
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.14em;
-  color: var(--ink-mute);
-  padding-bottom: 10px;
-  border-bottom: 2px dashed rgba(237,237,234,0.1);
-}
-.q-lime .quote-badge  { color: var(--lime); border-bottom-color: rgba(202,255,51,0.25); }
-.q-mag  .quote-badge  { color: var(--magenta); border-bottom-color: rgba(255,43,214,0.25); }
-.q-cyan .quote-badge  { color: var(--cyan); border-bottom-color: rgba(0,255,209,0.25); }
-
-.quote-text {
-  font-family: var(--f-display); font-weight: 700;
-  font-size: clamp(18px, 1.5vw, 21px); line-height: 1.35;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  margin: 0;
-  text-indent: -0.42em;
-  padding-left: 0.42em;
-}
-.quote-text::before {
-  content: '“';
-  color: var(--lime);
-  font-weight: 700;
-  margin-right: 0.08em;
-}
-.q-mag  .quote-text::before { color: var(--magenta); }
-.q-cyan .quote-text::before { color: var(--cyan); }
-.quote-text::after {
-  content: '”';
-  color: var(--lime);
-  font-weight: 700;
-  margin-left: 0.08em;
-}
-.q-mag  .quote-text::after { color: var(--magenta); }
-.q-cyan .quote-text::after { color: var(--cyan); }
-
-.quote-narrator {
-  font-family: var(--f-mono); font-size: 12.5px; line-height: 1.65;
-  color: var(--ink-dim);
-  padding-top: 14px;
-  border-top: 2px dashed rgba(237,237,234,0.1);
-  margin-top: auto;
-}
-.quote-narrator b { color: var(--ink); font-weight: 700; }
-.quote-narrator em { color: var(--magenta); font-style: italic; }
-
-.manifesto-struct {
-  padding: 20px 24px;
-  border: 2px dashed rgba(237,237,234,0.18);
-  background: rgba(237,237,234,0.015);
-  font-family: var(--f-mono); font-size: 13px; line-height: 1.75;
-  color: var(--ink-dim);
-  max-width: 780px;
-}
-.manifesto-struct b { color: var(--lime); font-weight: 700; }
-.manifesto-struct em { color: var(--magenta); font-style: italic; }
-
-.manifesto-raw {
-  display: inline-flex; align-items: center; gap: 16px;
-  padding: 13px 20px;
-  border: 2px solid var(--ink-mute);
-  background: var(--bg);
-  font-family: var(--f-mono); font-size: 12px;
-  color: var(--ink-dim);
-  text-decoration: none;
-  transition: all 100ms ease;
-  width: fit-content;
-}
-.manifesto-raw:hover {
-  border-color: var(--lime);
-  color: var(--lime);
-  background: rgba(202,255,51,0.04);
-}
-.manifesto-raw .raw-cmd { color: var(--ink-dim); }
-.manifesto-raw:hover .raw-cmd { color: var(--lime); }
-.manifesto-raw .raw-arrow { color: var(--lime); letter-spacing: 0.1em; font-weight: 700; }
-
-/* ────────────────────────────────────────────────────────────
-   SECTION INTROS — narrative paragraph before a section's grid
-   ──────────────────────────────────────────────────────────── */
-.sec-intro {
-  font-family: var(--f-mono); font-size: 14px; line-height: 1.7;
-  color: var(--ink-dim);
-  margin: 4px 0 28px;
-  padding-left: 16px;
-  border-left: 3px solid var(--lime);
-}
-.sec-intro b { color: var(--ink); font-weight: 700; }
-.sec-intro em { color: var(--magenta); font-style: italic; }
-.sec-intro .c { color: var(--cyan); }
-
-/* ────────────────────────────────────────────────────────────
-   PANELS (principles, doctrine, stack)
-   ──────────────────────────────────────────────────────────── */
-.panels {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
-}
-.panel {
-  position: relative;
-  border: var(--border-w) solid var(--line);
-  background: var(--bg-2);
-  box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--line);
-  padding: 22px 22px 18px;
-  display: flex; flex-direction: column; gap: 12px;
-  transition: transform 80ms ease, box-shadow 80ms ease;
-}
-.panel[data-section] { cursor: copy; }
-.panel[data-section]:focus-visible { outline: 2px dashed var(--lime); outline-offset: 4px; }
-.panel-hint {
-  position: absolute; top: 8px; right: 10px;
-  font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.08em;
-  color: var(--ink-mute); text-transform: uppercase;
-  opacity: 0; transition: opacity 120ms ease;
-  pointer-events: none;
-}
-.panel[data-section]:hover .panel-hint,
-.panel[data-section]:focus-visible .panel-hint { opacity: 0.85; }
-.panel.copied .panel-hint { opacity: 1; color: var(--lime); }
-.panel.copied .panel-hint::before { content: '✓ '; }
-.panel-lime  { border-color: var(--lime);    box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--lime); }
-.panel-mag   { border-color: var(--magenta); box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--magenta); }
-.panel-cyan  { border-color: var(--cyan);    box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--cyan); }
-.panel-amber { border-color: var(--amber);   box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--amber); }
-.panel:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 10px 10px 0 0 var(--line);
-}
-.panel-lime:hover  { box-shadow: 10px 10px 0 0 var(--lime); }
-.panel-mag:hover   { box-shadow: 10px 10px 0 0 var(--magenta); }
-.panel-cyan:hover  { box-shadow: 10px 10px 0 0 var(--cyan); }
-.panel-amber:hover { box-shadow: 10px 10px 0 0 var(--amber); }
-.panel.copied { animation: panelCopiedFlash 520ms ease; }
-@keyframes panelCopiedFlash {
-  0%   { background: var(--bg-2); }
-  30%  { background: color-mix(in srgb, var(--lime) 14%, var(--bg-2)); }
-  100% { background: var(--bg-2); }
-}
-
-.panel-head {
-  display: flex; align-items: baseline; gap: 10px;
-  padding-bottom: 10px;
-  border-bottom: 2px dashed rgba(237,237,234,0.1);
-}
-.panel-n {
-  font-family: var(--f-mono); font-size: 11px; font-weight: 700;
-  color: var(--ink-mute); letter-spacing: 0.1em;
-  padding: 2px 7px; border: 2px solid var(--ink-mute);
-}
-.panel-lime  .panel-n { color: var(--lime);    border-color: var(--lime); }
-.panel-mag   .panel-n { color: var(--magenta); border-color: var(--magenta); }
-.panel-cyan  .panel-n { color: var(--cyan);    border-color: var(--cyan); }
-.panel-amber .panel-n { color: var(--amber);   border-color: var(--amber); }
-.panel-t {
-  font-family: var(--f-display); font-weight: 700; font-size: 22px;
-  text-transform: uppercase; letter-spacing: -0.01em;
-  color: var(--ink);
-}
-.panel-body { color: var(--ink-dim); font-size: 13px; line-height: 1.55; }
-.panel-body b { color: var(--ink); font-weight: 700; }
-.panel-body em { color: var(--magenta); font-style: normal; font-weight: 700; }
-.panel-body code {
-  font-family: var(--f-mono); background: var(--bg);
-  border: 1px solid var(--ink-mute); padding: 0 4px;
-  color: var(--lime); font-size: 12px;
-}
-.panel-quote {
-  font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute);
-  border-left: 3px solid var(--magenta); padding: 4px 10px;
-  background: var(--bg); margin-top: 4px; font-style: italic;
-}
-
-/* ────────────────────────────────────────────────────────────
-   STACK GRID
-   ──────────────────────────────────────────────────────────── */
-.stack-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+/* ════ NORTON COMMANDER F-KEY STATUS BAR ════ */
+.dos-statusbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 10;
+  height: 28px;
+  padding: 5px 8px;
+  box-sizing: border-box;
+  background: var(--cyan-2);
+  color: #000;
+  font: 700 12px/1.6 var(--f-mono);
+  display: flex;
   gap: 14px;
-}
-.stack-item {
-  border: var(--border-w) solid var(--line); background: var(--bg-2);
-  box-shadow: 5px 5px 0 0 var(--line);
-  padding: 16px;
-  display: flex; flex-direction: column; gap: 8px;
-  transition: transform 80ms ease, box-shadow 80ms ease;
-}
-.stack-item:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0 0 var(--accent, var(--lime));
-  border-color: var(--accent, var(--lime));
-}
-.stack-item[data-accent="lime"]  { --accent: var(--lime); }
-.stack-item[data-accent="cyan"]  { --accent: var(--cyan); }
-.stack-item[data-accent="mag"]   { --accent: var(--magenta); }
-.stack-item[data-accent="amber"] { --accent: var(--amber); }
-
-.stack-head { display: flex; align-items: center; gap: 10px; }
-.stack-glyph {
-  font-family: var(--f-mono); font-size: 16px; font-weight: 700;
-  width: 28px; height: 28px; display: inline-flex;
-  align-items: center; justify-content: center;
-  border: 2px solid var(--accent, var(--lime));
-  color: var(--accent, var(--lime));
-}
-.stack-name {
-  font-family: var(--f-display); font-weight: 700; font-size: 18px;
-  text-transform: uppercase; letter-spacing: -0.01em;
-  color: var(--ink); flex: 1;
-}
-.stack-ver {
-  font-family: var(--f-mono); font-size: 10px;
-  color: var(--ink-mute); letter-spacing: 0.1em;
-}
-.stack-desc { color: var(--ink-dim); font-size: 12px; line-height: 1.5; }
-.stack-tag {
-  margin-top: 4px;
-  font-family: var(--f-mono); font-size: 9px; font-weight: 700;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--accent, var(--lime));
-}
-
-/* ────────────────────────────────────────────────────────────
-   FLOWS (workflows)
-   ──────────────────────────────────────────────────────────── */
-.flows {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-}
-.flow {
-  border: var(--border-w) solid var(--line); background: var(--bg-2);
-  box-shadow: 6px 6px 0 0 var(--line);
-  padding: 20px;
-}
-.flow-eyebrow {
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--magenta); margin-bottom: 8px;
-}
-.flow-title {
-  font-family: var(--f-display); font-weight: 700; font-size: 22px;
-  text-transform: uppercase; letter-spacing: -0.01em;
-  color: var(--ink); margin-bottom: 6px;
-}
-.flow-sub {
-  font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute);
-  margin-bottom: 16px; letter-spacing: 0.02em;
-}
-
-.timeline {
-  list-style: none; margin: 0; padding: 4px 0 0;
-}
-.tl-step {
-  display: grid; grid-template-columns: 32px 1fr; gap: 14px;
-  padding-bottom: 14px; position: relative;
-}
-.tl-step:last-child { padding-bottom: 0; }
-.tl-step:not(:last-child)::before {
-  content: ''; position: absolute;
-  left: 15px; top: 28px; bottom: 0; width: 2px;
-  background: repeating-linear-gradient(
-    to bottom,
-    var(--ink-mute) 0 3px,
-    transparent 3px 6px
-  );
-}
-.tl-idx {
-  width: 32px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  color: var(--ink); background: var(--bg);
-  border: 2px solid var(--line); letter-spacing: 0.05em;
-}
-.tl-body { min-width: 0; padding-top: 1px; }
-.tl-head {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-.tl-phase {
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.14em;
-  color: var(--ink-mute);
-}
-.tl-sep { color: var(--ink-mute); font-family: var(--f-mono); }
-.tl-node {
-  font-family: var(--f-mono); font-size: 11px; font-weight: 700;
-  color: var(--lime); background: transparent;
-  padding: 2px 8px; border: 2px solid var(--lime);
-}
-.tl-node.mag   { color: var(--magenta); border-color: var(--magenta); }
-.tl-node.cyan  { color: var(--cyan);    border-color: var(--cyan); }
-.tl-node.amber { color: var(--amber);   border-color: var(--amber); }
-.tl-desc {
-  font-family: var(--f-mono); font-size: 11px; color: var(--ink-mute);
-  line-height: 1.55;
-}
-
-/* ────────────────────────────────────────────────────────────
-   SEARCH
-   ──────────────────────────────────────────────────────────── */
-.search-bar { margin-bottom: 20px; position: relative; }
-.search-bar input {
-  width: 100%;
-  font-family: var(--f-mono); font-size: 14px;
-  padding: 14px 16px 14px 44px;
-  background: var(--bg); color: var(--ink);
-  border: var(--border-w) solid var(--line);
-  box-shadow: 5px 5px 0 0 var(--line);
-  outline: none;
-  transition: all 80ms ease;
-}
-.search-bar input::placeholder { color: var(--ink-mute); }
-.search-bar input:focus {
-  border-color: var(--lime);
-  box-shadow: 5px 5px 0 0 var(--lime);
-}
-.search-bar .s-glyph {
-  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-  color: var(--lime); font-family: var(--f-mono); font-weight: 700;
-  pointer-events: none;
-}
-
-/* ────────────────────────────────────────────────────────────
-   PLUGIN CARD
-   ──────────────────────────────────────────────────────────── */
-#pluginList { display: flex; flex-direction: column; gap: 14px; }
-
-.plugin {
-  position: relative;
-  border: var(--border-w) solid var(--line); background: var(--bg-2);
-  box-shadow: 6px 6px 0 0 var(--line);
-  padding: 18px 22px;
-  transition: transform 80ms ease, box-shadow 80ms ease;
-}
-.plugin:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 0 var(--cyan); border-color: var(--cyan); }
-.plugin.has-skills { cursor: pointer; }
-.plugin.has-skills:hover { box-shadow: 8px 8px 0 0 var(--magenta); border-color: var(--magenta); }
-.plugin.hidden { display: none; }
-
-.plugin-main {
-  display: flex; align-items: flex-start; gap: 18px;
-}
-.plugin-info { flex: 1; min-width: 0; }
-
-.plugin-top {
-  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-.plugin-name {
-  font-family: var(--f-display); font-weight: 700; font-size: 20px;
-  text-transform: uppercase; letter-spacing: -0.01em;
-  color: var(--ink);
-}
-.plugin-version {
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  color: var(--amber); letter-spacing: 0.1em;
-  padding: 2px 6px; border: 1.5px solid var(--amber);
-}
-.skill-count {
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  color: #0a0a0b; background: var(--magenta); border: 1.5px solid var(--magenta);
-  padding: 2px 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  align-items: center;
+  letter-spacing: 0.5px;
+  border-top: 1px solid #000;
   user-select: none;
 }
-.skill-count::after { content: ' ▾'; font-size: 9px; }
-.skill-count.open::after { content: ' ▴'; }
-
-.plugin-desc {
-  font-size: 13px; color: var(--ink-dim); line-height: 1.55;
-  margin-top: 6px;
+.dos-statusbar .fk {
+  display: inline-flex;
+  gap: 4px;
+  align-items: baseline;
 }
-.plugin:not(.has-skills) .plugin-desc {
-  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
-  -webkit-box-orient: vertical; overflow: hidden;
+.dos-statusbar .fk b {
+  background: #000;
+  color: var(--amber);
+  padding: 1px 5px;
+  font-weight: 700;
+  font-family: var(--f-mono);
 }
-
-.install-btn {
-  font-family: var(--f-mono); font-weight: 700; font-size: 11px;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  padding: 8px 14px;
-  border: 2px solid var(--lime); color: var(--lime);
-  background: transparent;
-  box-shadow: 3px 3px 0 0 var(--lime);
-  transition: all 80ms ease;
-  flex-shrink: 0; white-space: nowrap;
+[data-theme="void"] .dos-statusbar {
+  background: var(--amber-2);
+  color: #000;
 }
-.install-btn:hover {
-  background: var(--lime); color: #0a0a0b;
-  transform: translate(-1px, -1px); box-shadow: 4px 4px 0 0 var(--lime);
+[data-theme="void"] .dos-statusbar .fk b {
+  color: var(--amber);
 }
 
-/* skills list */
-.skills-list {
-  max-height: 0; overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-.skills-list.open { max-height: 2000px; margin-top: 16px; }
-.skills-inner {
-  border-top: 2px dashed rgba(237,237,234,0.1);
-  padding-top: 12px;
-  display: grid; gap: 6px;
-}
-.skill-item {
-  display: flex; align-items: baseline; gap: 10px;
-  padding: 8px 12px;
-  border-left: 3px solid var(--magenta);
-  background: rgba(255,43,214,0.03);
-  cursor: pointer;
-  transition: all 80ms ease;
-}
-.skill-item:hover {
-  background: rgba(255,43,214,0.08);
-  transform: translateX(2px);
-}
-.skill-item-name {
-  font-family: var(--f-mono); font-weight: 700; font-size: 12px;
-  color: var(--magenta); white-space: nowrap;
-}
-.skill-item-name::before { content: '› '; opacity: 0.5; }
-.skill-item-desc {
-  font-size: 11px; color: var(--ink-dim); line-height: 1.5;
-  display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1;
-  -webkit-box-orient: vertical; overflow: hidden; flex: 1; min-width: 0;
-}
-
-/* ────────────────────────────────────────────────────────────
-   MODAL
-   ──────────────────────────────────────────────────────────── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(5,5,7,0.88);
-  background-image:
-    repeating-linear-gradient(45deg,
-      transparent, transparent 20px,
-      rgba(255,43,214,0.03) 20px, rgba(255,43,214,0.03) 40px);
-  z-index: 200;
-  align-items: center; justify-content: center;
-  padding: 24px;
-  animation: fadein 0.15s ease;
-}
-.modal-overlay.open { display: flex; }
-@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-
-.modal {
-  background: var(--bg-2);
-  border: var(--border-w) solid var(--lime);
-  box-shadow: var(--shadow-d) var(--shadow-d) 0 0 var(--magenta);
-  width: 100%; max-width: 640px;
-  max-height: 90vh; overflow: hidden;
-  display: flex; flex-direction: column;
-}
-.modal.modal-skill { max-width: 780px; }
-
-.modal-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--bg); border-bottom: 2px solid var(--line);
-}
-.modal-head h3 {
-  font-family: var(--f-mono); font-size: 12px; font-weight: 700;
-  color: var(--lime); text-transform: uppercase; letter-spacing: 0.12em;
-}
-.modal-dots { display: inline-flex; gap: 5px; }
-.modal-dots i {
-  width: 10px; height: 10px; display: inline-block;
-  border: 1.5px solid var(--magenta);
-}
-.modal-dots i.fill { background: var(--cyan); border-color: var(--cyan); }
-
-.modal-close {
-  background: transparent; border: 2px solid var(--ink-mute);
-  color: var(--ink-mute); width: 26px; height: 26px;
-  font-family: var(--f-mono); font-size: 14px;
-  transition: all 80ms ease;
-}
-.modal-close:hover { color: var(--red); border-color: var(--red); }
-
-.modal-body { padding: 18px 20px; overflow-y: auto; flex: 1; }
-.modal-body p.mono {
-  font-family: var(--f-mono); font-size: 11px;
-  color: var(--ink-mute); margin-bottom: 8px;
-  text-transform: uppercase; letter-spacing: 0.1em;
-}
-
-.modal-cmd {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--bg); border: 2px solid var(--line);
-  padding: 12px 14px;
-  transition: all 80ms ease;
-  margin-bottom: 14px;
-  cursor: pointer;
-}
-.modal-cmd:hover { border-color: var(--lime); box-shadow: 4px 4px 0 0 var(--lime); transform: translate(-1px, -1px); }
-.modal-cmd code {
-  font-family: var(--f-mono); font-size: 13px;
-  color: var(--ink); flex: 1; user-select: all; word-break: break-all;
-}
-.modal-cmd .copy-pill { margin-left: auto; }
-.modal-cmd.copied { border-color: var(--lime); }
-
-.skill-modal-meta {
-  display: flex; flex-wrap: wrap; gap: 10px 20px;
-  padding-bottom: 12px; margin-bottom: 14px;
-  border-bottom: 2px dashed rgba(237,237,234,0.1);
-}
-.skill-modal-meta .mi {
-  font-family: var(--f-mono); font-size: 11px;
-  color: var(--ink-mute);
-}
-.skill-modal-meta .mi b {
-  color: var(--cyan); font-weight: 700; margin-right: 6px;
-  text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px;
-}
-.skill-modal-meta .mi a { color: var(--magenta); text-decoration: none; }
-.skill-modal-meta .mi a:hover { color: var(--lime); }
-
-.skill-label {
-  font-family: var(--f-mono); font-size: 10px; font-weight: 700;
-  color: var(--magenta); text-transform: uppercase; letter-spacing: 0.14em;
-  margin: 14px 0 8px;
-}
-.skill-label:first-child { margin-top: 0; }
-
-.skill-desc-full {
-  font-size: 13px; color: var(--ink-dim); line-height: 1.6;
-  padding: 12px 14px; background: var(--bg);
-  border-left: 3px solid var(--lime);
-  white-space: pre-wrap; word-break: break-word;
-}
-
-.skill-actions {
-  display: flex; gap: 10px; flex-wrap: wrap;
-  margin-top: 16px; padding-top: 14px;
-  border-top: 2px dashed rgba(237,237,234,0.1);
-}
-
-/* ────────────────────────────────────────────────────────────
-   TOAST
-   ──────────────────────────────────────────────────────────── */
-.toast {
-  position: fixed; bottom: 32px; left: 50%;
-  transform: translateX(-50%) translateY(30px);
-  background: var(--lime); color: #0a0a0b;
-  border: 2px solid var(--lime);
-  box-shadow: 4px 4px 0 0 var(--magenta);
-  padding: 8px 16px;
-  font-family: var(--f-mono); font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.12em;
-  opacity: 0; pointer-events: none;
-  transition: all 0.22s cubic-bezier(0.5, 0, 0, 1.2);
-  z-index: 400;
-}
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* ────────────────────────────────────────────────────────────
-   FOOTER
-   ──────────────────────────────────────────────────────────── */
-footer {
-  margin-top: 80px; padding-top: 24px;
-  border-top: var(--border-w) solid var(--line);
-  display: flex; justify-content: space-between; align-items: flex-start;
-  flex-wrap: wrap; gap: 20px;
-}
-.foot-brand {
-  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
-}
-.foot-brand .wm {
-  color: var(--lime); font-family: var(--f-mono); font-weight: 700;
-  letter-spacing: -2px; font-size: 18px;
-  border: 2px solid var(--lime); padding: 2px 6px;
-  box-shadow: 3px 3px 0 0 var(--magenta);
-}
-.foot-brand h4 {
-  font-family: var(--f-display); font-weight: 700; font-size: 22px;
-  text-transform: uppercase; letter-spacing: -0.02em;
-  color: var(--ink);
-}
-.foot-brand h4 span { color: var(--magenta); }
-.foot-meta {
-  font-family: var(--f-mono); font-size: 10px;
-  color: var(--ink-mute); text-transform: uppercase;
-  letter-spacing: 0.14em;
-  display: flex; flex-direction: column; gap: 6px; text-align: right;
-}
-.foot-meta a { color: var(--cyan); }
-.foot-meta a:hover { color: var(--lime); }
-.foot-bottom {
-  width: 100%; margin-top: 14px; padding-top: 14px;
-  border-top: 2px dashed var(--ink-mute);
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-  font-family: var(--f-mono); font-size: 10px;
-  color: var(--ink-mute); letter-spacing: 0.12em; text-transform: uppercase;
-}
-
-/* ────────────────────────────────────────────────────────────
-   ANIM
-   ──────────────────────────────────────────────────────────── */
-@keyframes blink { 50% { opacity: 0; } }
-.cursor::after {
-  content: '_';
-  display: inline-block;
-  color: var(--lime);
-  animation: blink 1s steps(2, end) infinite;
-  margin-left: 2px;
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.sec { animation: slide-up 0.4s ease-out both; }
-
-/* ────────────────────────────────────────────────────────────
-   RESPONSIVE
-   ──────────────────────────────────────────────────────────── */
-@media (max-width: 960px) {
-  .hero-grid { grid-template-columns: 1fr; }
-  .flows { grid-template-columns: 1fr; }
-}
+/* small screens */
 @media (max-width: 640px) {
-  .container { padding: 24px 16px 80px; }
-  .hero { padding: 24px 18px 20px; }
-  .hero-rail { left: 20px; }
-  .hero-main h1 { font-size: 40px; }
-  .plugin { padding: 16px; }
-  .plugin-main { flex-direction: column; gap: 12px; }
-  .install-btn { align-self: flex-start; }
-  .sec-head { gap: 10px; }
-  .sec-head .meta { width: 100%; margin-left: 0; }
+  .dos-statusbar { gap: 8px; font-size: 11px; overflow-x: auto; white-space: nowrap; }
+  #ghostty-terminal { bottom: 28px; padding: 4px 2px; }
 }
 </style>
 </head>
 <body>
 
-<canvas id="matrix-rain" aria-hidden="true"></canvas>
-
-<main class="container">
-
-  <!-- ================= HERO ================= -->
-  <section class="hero" aria-label="intro">
-    <span class="hero-corner tl"></span>
-    <span class="hero-corner tr"></span>
-    <span class="hero-corner bl"></span>
-    <span class="hero-corner br"></span>
-    <div class="hero-rail">/ROOT · claude playbook · v2.0</div>
-
-    <div class="hero-grid">
-      <div class="hero-main">
-        <div class="eyebrow">▸ operator · duoc · @nguyenvanduocit · 2026.04</div>
-        <h1>HOW I WORK<br/>WITH <em>CLAUDE</em>.<span class="cursor"></span></h1>
-        <p class="lede">
-          // <span class="c">iteration-first</span>. evidence-before-assertion. delegate to agent teams.<br/>
-          // this page is the shape of my setup — <span class="m">CLAUDE.md</span>, tooling, and the <span class="m">20+ plugins</span> I built for claude code.<br/>
-          // stop reading. start shipping.
-        </p>
-        <div class="hero-actions">
-          <button class="btn btn-primary" onclick="copySetup()">▸ INSTALL MARKETPLACE</button>
-          <a href="#plugins" class="btn">BROWSE PLUGINS ›</a>
-          <a href="https://github.com/aiocean/claude-plugins" class="btn btn-ghost" target="_blank" rel="noopener">SOURCE ›</a>
-        </div>
-      </div>
-
-      <div class="hero-payload" aria-label="stats">
-        <div class="pay-cell lime"><span class="k">plugins</span><span class="v" id="stat-plugins">—</span></div>
-        <div class="pay-cell cyan"><span class="k">skills</span><span class="v" id="stat-skills">—</span></div>
-        <div class="pay-cell mag"><span class="k">model</span><span class="v">OPUS 4.7</span></div>
-        <div class="pay-cell amber"><span class="k">ctx</span><span class="v">1M</span></div>
-        <div class="pay-cell"><span class="k">stack</span><span class="v">RTK</span></div>
-        <div class="pay-cell"><span class="k">license</span><span class="v">MIT</span></div>
-      </div>
-    </div>
-
-    <div class="hero-meta">
-      <span class="on">● MARKETPLACE · aiocean-plugins</span>
-      <span>▸ 0xCAFE·33</span>
-      <span>◆ build 2026.04.22</span>
-      <span class="dim">// press <b style="color:var(--lime)">shift+D</b> to toggle void theme</span>
-    </div>
-  </section>
-
-  <!-- ================= MARQUEE ================= -->
-  <div class="marquee" role="none">
-    <div class="marquee-track" id="marqueeTrack"></div>
-  </div>
-
-  <!-- ================= /01 PRINCIPLES ================= -->
-  <section id="principles" class="sec" aria-label="operating principles">
-    <div class="sec-head">
-      <span class="idx">/01</span>
-      <span class="title">operating principles</span>
-      <span class="meta">// from ~/.claude/CLAUDE.md · how claude behaves on my box</span>
-    </div>
-
-    <div class="panels">
-      <div class="panel panel-lime" data-section="Iteration-First Development" onclick="copyPrinciple(this, event)" role="button" tabindex="0" aria-label="copy iteration-first section from CLAUDE.md">
-        <div class="panel-hint">⎘ click to copy</div>
-        <div class="panel-head">
-          <span class="panel-n">R1</span>
-          <span class="panel-t">iteration-first</span>
-        </div>
-        <div class="panel-body">
-          // every change must be <b>easy to iterate</b>, modify, and evolve. <em>never use workaround solutions</em> — they create debt. never go against framework conventions.
-        </div>
-        <div class="panel-quote">"how easy would it be to change this tomorrow?"</div>
-      </div>
-
-      <div class="panel panel-mag" data-section="AI Is Not A Follower, AI Is A Partner, Advisor, Mentor" onclick="copyPrinciple(this, event)" role="button" tabindex="0" aria-label="copy AI-is-a-partner section from CLAUDE.md">
-        <div class="panel-hint">⎘ click to copy</div>
-        <div class="panel-head">
-          <span class="panel-n">R2</span>
-          <span class="panel-t">AI is a partner</span>
-        </div>
-        <div class="panel-body">
-          // not a blind executor. humans are often <b>confused, misinformed, operating on incomplete info</b>. <em>challenge flawed reasoning.</em> propose before executing. refuse unsound tasks explicitly.
-        </div>
-        <div class="panel-quote">"agreement for the sake of agreement = disrespect."</div>
-      </div>
-
-      <div class="panel panel-cyan" data-section="Always Delegate to Agent Teams" onclick="copyPrinciple(this, event)" role="button" tabindex="0" aria-label="copy delegate-to-agent-teams section from CLAUDE.md">
-        <div class="panel-hint">⎘ click to copy</div>
-        <div class="panel-head">
-          <span class="panel-n">R3</span>
-          <span class="panel-t">delegate to agent teams</span>
-        </div>
-        <div class="panel-body">
-          // lead coordinates — doesn't write code unless trivial (<code>&lt; 20 lines</code>). small: 1 implementer. medium: implementer + observer. <em>when in doubt → delegate.</em>
-        </div>
-        <div class="panel-quote">"you are the team lead, not a solo developer."</div>
-      </div>
-
-      <div class="panel panel-amber" data-section="Evidence Over Assertion" onclick="copyPrinciple(this, event)" role="button" tabindex="0" aria-label="copy evidence-over-assertion section from CLAUDE.md">
-        <div class="panel-hint">⎘ click to copy</div>
-        <div class="panel-head">
-          <span class="panel-n">R4</span>
-          <span class="panel-t">evidence over assertion</span>
-        </div>
-        <div class="panel-body">
-          // "I think X" is invalid. "<code>foo.go:42</code> shows X" is valid. every claim needs a <b>file:line, command output, or test result</b>. label confidence <em>HIGH / MEDIUM / LOW</em>.
-        </div>
-        <div class="panel-quote">"citation &gt; confidence. don't fabricate to fill gaps."</div>
-      </div>
-
-      <div class="panel" data-section="Verify Before Claiming Done" onclick="copyPrinciple(this, event)" role="button" tabindex="0" aria-label="copy verify-before-done section from CLAUDE.md">
-        <div class="panel-hint">⎘ click to copy</div>
-        <div class="panel-head">
-          <span class="panel-n">R5</span>
-          <span class="panel-t">verify before done</span>
-        </div>
-        <div class="panel-body">
-          // did not run verify command → <b>not allowed to claim "done / fixed / passing"</b>. typecheck + lint + test before commit. self-approval in same context <em>doesn't count</em>.
-        </div>
-        <div class="panel-quote">"evidence before assertions. always."</div>
-      </div>
-
-      <div class="panel panel-mag" data-section="Hypothesis-Driven Debugging||7. Hypothesis-PoC Model (Giả thuyết - Kiểm chứng)" onclick="copyPrinciple(this, event)" role="button" tabindex="0" aria-label="copy hypothesis-PoC-model section from CLAUDE.md">
-        <div class="panel-hint">⎘ click to copy</div>
-        <div class="panel-head">
-          <span class="panel-n">R6</span>
-          <span class="panel-t">hypothesis-PoC model</span>
-        </div>
-        <div class="panel-body">
-          // trace to root cause → generate <b>competing hypotheses</b> → design minimal PoC to <em>falsify</em> each → eliminate. passing test = test passes, not feature works. 5 whys before coding.
-        </div>
-        <div class="panel-quote">"the PoC is the judge. opinions don't overrule empirical evidence."</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= /02 MANIFESTO ================= -->
-  <section id="claudemd" class="sec" aria-label="claude.md manifesto">
-    <div class="sec-head">
-      <span class="idx">/02</span>
-      <span class="title">manifesto</span>
-      <span class="meta">// why · <code style="font-family:var(--f-mono);color:var(--lime);background:var(--bg);padding:1px 6px;border:1px solid var(--ink-mute);font-size:11px;">claude.md</code> as discipline, not config</span>
-    </div>
-
-    <div class="manifesto">
-      <p class="manifesto-intro">
-        <span class="m-lead">// first-person · why i wrote this file</span>
-        CLAUDE.md của tôi không phải là config file. nó là <b>kỷ luật tôi học bằng cách fail</b> — mỗi dòng trong đó là một lần AI làm sai và tôi nhận ra vấn đề không ở AI, mà ở <em>cách tôi yêu cầu</em>. AI đọc nó để behave đúng với tôi; tôi đọc lại nó khi chính mình đang lười.
-      </p>
-
-      <div class="manifesto-quotes">
-        <div class="quote-card q-lime">
-<span class="quote-badge">▸ anti-sycophancy</span>
-          <p class="quote-text">Agreement for the sake of agreement = disrespect.</p>
-          <div class="quote-narrator">
-            // tôi không cần AI làm vừa lòng. tôi cần nó <b>cãi lại</b> khi tôi sai — và cãi có bằng chứng. yes-man không giúp ship được feature đúng.
-          </div>
-        </div>
-
-        <div class="quote-card q-mag">
-<span class="quote-badge">▸ evidence over assertion</span>
-          <p class="quote-text">"I think X" is invalid. "foo.go:42 shows X" is valid.</p>
-          <div class="quote-narrator">
-            // sau nhiều lần bị AI fabricate function name không tồn tại, tôi chốt một rule: <b>không citation → không claim</b>. kèm confidence label — HIGH / MEDIUM / LOW.
-          </div>
-        </div>
-
-        <div class="quote-card q-cyan">
-<span class="quote-badge">▸ hypothesis-PoC model</span>
-          <p class="quote-text">The PoC is the judge. Opinions don't overrule empirical evidence.</p>
-          <div class="quote-narrator">
-            // cái đau nhất là ship <em>"should work"</em> code rồi bug phọt ra prod. giờ quy tắc là: hypothesis → PoC falsifies → chỉ survivor mới được ship.
-          </div>
-        </div>
-      </div>
-
-      <div class="manifesto-struct">
-        // file structure: <b>golden rules</b> (không được vi phạm) → <b>working principles</b> (cách reason, cách verify) → <b>code style</b> (simplicity trên mọi thứ) → <b>engineering principles</b> (7 nguyên tắc từ Zakirullin, Pike, Bernhardt, Feynman). trộn tiếng Việt + Anh cố ý — não tôi nghĩ bằng <em>cả hai</em>, và file phải khớp với cách tôi nghĩ, không phải ngược lại.
-      </div>
-
-      <a class="manifesto-raw" href="https://github.com/aiocean/claude-plugins/blob/main/docs/CLAUDE.md" target="_blank" rel="noopener" aria-label="view raw claude.md on github">
-        <span class="raw-cmd">$ cat ~/.claude/CLAUDE.md</span>
-        <span class="raw-arrow">› VIEW RAW · 233 LINES · 17.2KB</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- ================= /03 STACK ================= -->
-  <section id="stack" class="sec" aria-label="tools stack">
-    <div class="sec-head">
-      <span class="idx">/03</span>
-      <span class="title">stack</span>
-      <span class="meta">// 7 tools · mỗi cái thắng một tradeoff · CLAUDE.md ra luật, stack thi hành</span>
-    </div>
-
-    <p class="sec-intro">
-      // tôi không chọn tool vì hype. mỗi cái dưới đây <b>thắng một tradeoff cụ thể</b> Claude sẽ thua nếu thiếu — <span class="c">token economy</span>, <em>semantic search</em>, <b>noise removal</b>. CLAUDE.md ở trên là <b>luật</b>; stack dưới đây là <b>phần cứng thi hành luật đó</b>. không card nào ở đây chỉ vì "tôi đã quen" — đã có thử nghiệm <em>và</em> bỏ cái không thắng.
-    </p>
-
-    <div class="stack-grid">
-      <div class="stack-item" data-accent="lime">
-        <div class="stack-head">
-          <span class="stack-glyph">▸</span>
-          <span class="stack-name">RTK</span>
-          <span class="stack-ver">v0.35</span>
-        </div>
-        <div class="stack-desc"><b style="color:var(--ink)">output &gt;100 dòng boilerplate → RTK thắng.</b> 60–90% token saved trên git/curl/test/build. hook tự động rewrite — tôi không gõ <code>rtk</code> bằng tay.</div>
-        <div class="stack-tag">/opt/homebrew/bin/rtk</div>
-      </div>
-
-      <div class="stack-item" data-accent="cyan">
-        <div class="stack-head">
-          <span class="stack-glyph">◆</span>
-          <span class="stack-name">Bun</span>
-          <span class="stack-ver">latest</span>
-        </div>
-        <div class="stack-desc"><b style="color:var(--ink)">never <code>npm</code>.</b> chạy <code>.ts</code> trực tiếp, install gấp 10 lần, bundler sẵn trong box. default runtime trên mọi project từ 2024.</div>
-        <div class="stack-tag">// bun over node, every time</div>
-      </div>
-
-      <div class="stack-item" data-accent="mag">
-        <div class="stack-head">
-          <span class="stack-glyph">⌕</span>
-          <span class="stack-name">ripgrep</span>
-          <span class="stack-ver">rg</span>
-        </div>
-        <div class="stack-desc"><b style="color:var(--ink)">never <code>grep</code>.</b> gitignore-aware, type-filtered, 10× nhanh hơn. default cho mọi text scan dưới 50 match — trên ngưỡng đó, chuyển <code>sg</code> hoặc LSP.</div>
-        <div class="stack-tag">// rg -t go "pattern"</div>
-      </div>
-
-      <div class="stack-item" data-accent="amber">
-        <div class="stack-head">
-          <span class="stack-glyph">⎇</span>
-          <span class="stack-name">ast-grep</span>
-          <span class="stack-ver">sg</span>
-        </div>
-        <div class="stack-desc"><b style="color:var(--ink)">regex thua khi gặp syntax.</b> <code>sg</code> match AST pattern — refactor 200 file mà không đụng string trong comment, string literal, hay tên biến trùng keyword.</div>
-        <div class="stack-tag">// structural, not textual</div>
-      </div>
-
-      <div class="stack-item" data-accent="lime">
-        <div class="stack-head">
-          <span class="stack-glyph">●</span>
-          <span class="stack-name">LSP</span>
-          <span class="stack-ver">mcp</span>
-        </div>
-        <div class="stack-desc"><b style="color:var(--ink)">semantic &gt; textual.</b> go-to-def, references, diagnostics qua MCP — Claude thấy cái <em>compiler</em> thấy, không chỉ chữ trong file. rename an toàn, find-refs không miss.</div>
-        <div class="stack-tag">// mcp__oh-my-claudecode_t__lsp_*</div>
-      </div>
-
-      <div class="stack-item" data-accent="cyan">
-        <div class="stack-head">
-          <span class="stack-glyph">◆</span>
-          <span class="stack-name">GitNexus</span>
-          <span class="stack-ver">mcp</span>
-        </div>
-        <div class="stack-desc"><b style="color:var(--ink)">graph &gt; grep.</b> symbol references + impact radius TRƯỚC khi chạm code. powers <code>aio-planning</code> — biết cái gì sẽ vỡ <em>trước khi</em> sửa.</div>
-        <div class="stack-tag">// blast radius first, edit second</div>
-      </div>
-
-      <div class="stack-item" data-accent="mag">
-        <div class="stack-head">
-          <span class="stack-glyph">▲</span>
-          <span class="stack-name">markitdown</span>
-          <span class="stack-ver">cli</span>
-        </div>
-        <div class="stack-desc"><b style="color:var(--ink)">web → clean markdown.</b> strip JS-rendered noise, nav, cookie banner. feed Claude text <em>có nghĩa</em>, không phải HTML slop — tiết kiệm context cho việc chính.</div>
-        <div class="stack-tag">// markitdown &lt;url&gt;</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= /04 WORKFLOWS ================= -->
-  <section id="flows" class="sec" aria-label="workflows">
-    <div class="sec-head">
-      <span class="idx">/04</span>
-      <span class="title">workflows</span>
-      <span class="meta">// pipelines across plugins · pick one, ship it</span>
-    </div>
-
-    <p class="sec-intro">
-      // không plugin nào đơn độc. chúng <b>dây chuyền hoá</b>: <span class="c">discover → map → plan → code → review</span>. tôi là <em>nhạc trưởng</em>, không phải nhạc công — AI viết code, skill kiểm soát quy trình, tôi chọn đúng pipeline và <b>ngắt nhịp</b> khi lệch. mỗi workflow dưới đây là một <em>dàn nhạc</em> tôi đã chạy đủ nhiều lần để trust.
-    </p>
-
-    <div class="flows">
-      <div class="flow">
-        <div class="flow-eyebrow">▸ pipeline /01 · feature dev</div>
-        <div class="flow-title">build a feature</div>
-        <div class="flow-sub">clarify → understand → implement → review</div>
-        <ol class="timeline">
-          <li class="tl-step">
-            <span class="tl-idx">01</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">clarify</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node">gherkin-refine</span>
-              </div>
-              <div class="tl-desc">// turn vague ask into testable spec</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">02</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">understand</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node mag">aio-planning · discover</span>
-              </div>
-              <div class="tl-desc">// map unknowns in the codebase</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">03</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">plan</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node mag">aio-planning · plan</span>
-              </div>
-              <div class="tl-desc">// pick approach, break into tasks</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">04</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">implement</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node cyan">xstate / design-system</span>
-              </div>
-              <div class="tl-desc">// state machine + ui kit, typed</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">05</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">review</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node amber">aio-planning · code-review</span>
-              </div>
-              <div class="tl-desc">// catch defects before commit</div>
-            </div>
-          </li>
-        </ol>
-      </div>
-
-      <div class="flow">
-        <div class="flow-eyebrow">▸ pipeline /02 · debug</div>
-        <div class="flow-title">find the bug</div>
-        <div class="flow-sub">investigate → reproduce → observe → visualize</div>
-        <ol class="timeline">
-          <li class="tl-step">
-            <span class="tl-idx">01</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">investigate</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node mag">aio-planning · debug</span>
-              </div>
-              <div class="tl-desc">// trace symptom to root cause</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">02</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">reproduce</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node cyan">ios-device-debug</span>
-              </div>
-              <div class="tl-desc">// pull logs from the real device</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">03</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">observe</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node">monitoring-observability</span>
-              </div>
-              <div class="tl-desc">// instrument + watch the fix at runtime</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">04</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">visualize</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node amber">aio-diagramming</span>
-              </div>
-              <div class="tl-desc">// diagram the flow, share with team</div>
-            </div>
-          </li>
-        </ol>
-      </div>
-
-      <div class="flow">
-        <div class="flow-eyebrow">▸ pipeline /03 · content</div>
-        <div class="flow-title">research → publish</div>
-        <div class="flow-sub">research → think → document → publish</div>
-        <ol class="timeline">
-          <li class="tl-step">
-            <span class="tl-idx">01</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">research</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node cyan">youtube</span>
-              </div>
-              <div class="tl-desc">// harvest transcripts + timestamps</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">02</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">think</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node">mental-models</span>
-              </div>
-              <div class="tl-desc">// pick the lens that explains it</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">03</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">document</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node mag">aio-planning · oracle</span>
-              </div>
-              <div class="tl-desc">// turn notes into structured doc</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">04</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">publish</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node amber">epub-translate</span>
-              </div>
-              <div class="tl-desc">// package for offline + translate</div>
-            </div>
-          </li>
-        </ol>
-      </div>
-
-      <div class="flow">
-        <div class="flow-eyebrow">▸ pipeline /04 · bootstrap</div>
-        <div class="flow-title">new project</div>
-        <div class="flow-sub">scaffold → design → parallelize → learn</div>
-        <ol class="timeline">
-          <li class="tl-step">
-            <span class="tl-idx">01</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">scaffold</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node">bun-fullstack-setup</span>
-              </div>
-              <div class="tl-desc">// vite + bun + ts in one shot</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">02</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">design</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node mag">aio-design-system</span>
-              </div>
-              <div class="tl-desc">// lock colors, spacing, type</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">03</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">parallelize</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node cyan">aio-devops · worktree</span>
-              </div>
-              <div class="tl-desc">// isolate branches for parallel agents</div>
-            </div>
-          </li>
-          <li class="tl-step">
-            <span class="tl-idx">04</span>
-            <div class="tl-body">
-              <div class="tl-head">
-                <span class="tl-phase">learn</span>
-                <span class="tl-sep">·</span>
-                <span class="tl-node amber">aio-claude-toolkit · reflect</span>
-              </div>
-              <div class="tl-desc">// extract pattern into new skill</div>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= /05 PLUGINS ================= -->
-  <section id="plugins" class="sec" aria-label="plugins">
-    <div class="sec-head">
-      <span class="idx">/05</span>
-      <span class="title">plugins</span>
-      <span class="meta">// <b id="pluginCount">—</b> registered · click for skills · share links supported</span>
-    </div>
-
-    <p class="sec-intro">
-      // mỗi plugin ở đây là một <b>quy trình đã đóng gói</b> — việc tôi đã làm đủ nhiều lần để nhận ra pattern, rồi extract ra thành skill để không phải gõ lại. tôi không dùng plugin vì nó <em>"xịn"</em>; tôi dùng vì <b>não có giới hạn</b> — delegate quy trình ra khỏi đầu là cách duy nhất để scale bản thân. cái nào dùng ≥3 lần → extract thành skill.
-    </p>
-
-    <div class="search-bar">
-      <span class="s-glyph">⌕</span>
-      <input type="text" id="searchInput" placeholder="$ filter by name, skill, trigger keyword..." oninput="filterPlugins()" aria-label="filter plugins">
-    </div>
-
-    <div id="pluginList" aria-live="polite"></div>
-  </section>
-
-  <!-- ================= /06 DOCTRINE ================= -->
-  <section id="doctrine" class="sec" aria-label="code doctrine">
-    <div class="sec-head">
-      <span class="idx">/06</span>
-      <span class="title">code doctrine</span>
-      <span class="meta">// 7 engineering principles I enforce · from CLAUDE.md</span>
-    </div>
-
-    <div class="panels">
-      <div class="panel panel-lime">
-        <div class="panel-head">
-          <span class="panel-n">/01</span>
-          <span class="panel-t">cognitive load</span>
-        </div>
-        <div class="panel-body">
-          // minimize <b>extraneous mental effort</b> for the reader. intrinsic complexity (domain) is unavoidable; extraneous (poor naming, clever tricks) <em>must be eliminated</em>.
-        </div>
-      </div>
-
-      <div class="panel panel-cyan">
-        <div class="panel-head">
-          <span class="panel-n">/02</span>
-          <span class="panel-t">colocation</span>
-        </div>
-        <div class="panel-body">
-          // code that's <b>used together must be declared together</b>. group by feature, not by type. vue composition-API over options-API. fewer jumps.
-        </div>
-      </div>
-
-      <div class="panel panel-mag">
-        <div class="panel-head">
-          <span class="panel-n">/03</span>
-          <span class="panel-t">flat packages</span>
-        </div>
-        <div class="panel-body">
-          // named by what they provide, not where they sit. <em>no controller→service→repository→domain chains</em>. go's <code>net/http</code> is the reference.
-        </div>
-      </div>
-
-      <div class="panel panel-amber">
-        <div class="panel-head">
-          <span class="panel-n">/04</span>
-          <span class="panel-t">functional core, imperative shell</span>
-        </div>
-        <div class="panel-body">
-          // <b>pure functions</b> at the core, I/O at the boundary. leverage value semantics, first-class functions, explicit error threading.
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <span class="panel-n">/05</span>
-          <span class="panel-t">explicitness</span>
-        </div>
-        <div class="panel-body">
-          // <em>no magic</em>. no hidden side effects. explicit deps, explicit errors, explicit config. "tường minh" — the reader must not look elsewhere to understand.
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <span class="panel-n">/06</span>
-          <span class="panel-t">consistency is kindness</span>
-        </div>
-        <div class="panel-body">
-          // same problem → <b>same solution</b> → same pattern → same name. everywhere. consistency reduces cognitive load more than any abstraction. <em>"nhất quán."</em>
-        </div>
-      </div>
-
-      <div class="panel panel-lime">
-        <div class="panel-head">
-          <span class="panel-n">/07</span>
-          <span class="panel-t">hypothesis → PoC → ship</span>
-        </div>
-        <div class="panel-body">
-          // trace root cause → generate hypotheses → PoC falsifies → only survivors ship. <em>100% feasible</em>, not "should work". the PoC is the judge.
-        </div>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<!-- ================= INSTALL MODAL ================= -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this) closeModal()" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 id="modalTitle">$ install</h3>
-      <div class="modal-dots"><i></i><i class="fill"></i></div>
-      <button class="modal-close" onclick="closeModal()" aria-label="close">✕</button>
-    </div>
-    <div class="modal-body">
-      <p class="mono">// step /01 · add marketplace (one-time)</p>
-      <div class="modal-cmd" onclick="copyCmd(this, 'claude plugin marketplace add aiocean/claude-plugins')">
-        <code>claude plugin marketplace add aiocean/claude-plugins</code>
-        <span class="copy-pill">copy</span>
-      </div>
-      <p class="mono">// step /02 · install plugin</p>
-      <div class="modal-cmd" id="modalCmd" onclick="copyCmd(this, document.getElementById('modalCode').textContent)">
-        <code id="modalCode"></code>
-        <span class="copy-pill">copy</span>
-      </div>
-      <p class="mono">// plugin not found? refresh the cache</p>
-      <div class="modal-cmd" onclick="copyCmd(this, 'claude plugin marketplace update aiocean-plugins')">
-        <code>claude plugin marketplace update aiocean-plugins</code>
-        <span class="copy-pill">copy</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ================= SKILL MODAL ================= -->
-<div class="modal-overlay" id="skillModal" onclick="if(event.target===this) closeSkillModal()" role="dialog" aria-modal="true" aria-labelledby="skillModalTitle">
-  <div class="modal modal-skill">
-    <div class="modal-head">
-      <h3 id="skillModalTitle">$ skill</h3>
-      <div class="modal-dots"><i></i><i class="fill"></i></div>
-      <button class="modal-close" onclick="closeSkillModal()" aria-label="close">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="skill-modal-meta">
-        <div class="mi"><b>skill</b><span id="skillModalName"></span></div>
-        <div class="mi"><b>plugin</b><a href="#" id="skillModalPluginLink"></a></div>
-        <div class="mi"><b>version</b><span id="skillModalVersion"></span></div>
-      </div>
-
-      <div class="skill-label">// description · triggers</div>
-      <div class="skill-desc-full" id="skillModalDesc"></div>
-
-      <div class="skill-label">// install the parent plugin</div>
-      <div class="modal-cmd" id="skillModalInstallCmd" onclick="copyCmd(this, document.getElementById('skillModalInstallCode').textContent)">
-        <code id="skillModalInstallCode"></code>
-        <span class="copy-pill">copy</span>
-      </div>
-
-      <div class="skill-actions">
-        <button class="btn btn-sm" id="skillShareBtn" onclick="copyShareLink(this)">▸ copy share link</button>
-        <button class="btn btn-sm btn-primary" onclick="openInstallFromSkill()">⬇ full install steps</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ================= FOOTER ================= -->
-<footer class="container">
-  <div class="foot-brand">
-    <span class="wm">▚▚</span>
-    <h4>aiocean<span>//</span>claude-plugins</h4>
-  </div>
-  <div class="foot-meta">
-    <span>// MIT · fork freely · no paywall</span>
-    <span>// built on <a href="https://github.com/aiocean/claude-plugins">github.com/aiocean/claude-plugins</a></span>
-    <span>// design: NULLSECT// cyberpunk-brutalism</span>
-  </div>
-  <div class="foot-bottom">
-    <span>// the system is the system.</span>
-    <span>// stop reading. start shipping.</span>
-    <span>// shift+D toggles void</span>
-  </div>
-</footer>
-
-<div class="toast" id="toast" role="status" aria-live="polite">copied</div>
-
-<script>
-/* ──────────────────────────────────────────────────────
-   THEME TOGGLE
-   ────────────────────────────────────────────────────── */
-function toggleTheme() {
-  const root = document.documentElement;
-  const next = root.getAttribute('data-theme') === 'void' ? 'signal' : 'void';
-  root.setAttribute('data-theme', next);
-  try { localStorage.setItem('nsct-theme', next); } catch (e) {}
-  const btn = document.getElementById('themeBtn');
-  if (btn) btn.textContent = '[ ' + next + ' ]';
-}
-(function initTheme() {
-  try {
-    const stored = localStorage.getItem('nsct-theme');
-    if (stored === 'void' || stored === 'signal') {
-      document.documentElement.setAttribute('data-theme', stored);
-      const btn = document.getElementById('themeBtn');
-      if (btn) btn.textContent = '[ ' + stored + ' ]';
-    }
-  } catch (e) {}
-})();
-document.addEventListener('keydown', e => {
-  if (e.shiftKey && (e.key === 'D' || e.key === 'd')) {
-    // avoid intercepting when typing in an input
-    if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-    e.preventDefault();
-    toggleTheme();
-  }
-});
-
-/* ──────────────────────────────────────────────────────
-   MARQUEE TICKER (dup-twice for seamless loop)
-   ────────────────────────────────────────────────────── */
-(function initMarquee() {
-  const track = document.getElementById('marqueeTrack');
-  if (!track) return;
-  const items = [
-    ['// ', 'EVIDENCE', 'b', ' OVER ', 'ASSERTION', 'i'],
-    ['// ', 'VERIFY', 'i', ' BEFORE ', 'CLAIM DONE', 'b'],
-    ['// ', 'DELEGATE', 'em', ' TO AGENT ', 'TEAMS', 'b'],
-    ['// ', 'ITERATION-FIRST', 'b'],
-    ['// ', 'HYPOTHESIS', 'em', ' → ', 'POC', 'i', ' → ', 'SHIP', 'b'],
-    ['// ', 'NO WORKAROUNDS', 'b'],
-    ['// ', 'NO ABSTRACTIONS', 'em', ' UNTIL ', 'PROVEN', 'b'],
-    ['// ', 'EXPLICITNESS', 'i', ' OVER ', 'MAGIC', 'em'],
-    ['// ', 'CONSISTENCY', 'b', ' IS ', 'KINDNESS', 'em'],
-    ['// ', 'THE SYSTEM', 'i', ' IS THE ', 'SYSTEM', 'em'],
-  ];
-  function renderOne() {
-    return items.map(item => {
-      let html = '<span>';
-      for (let i = 0; i < item.length; i++) {
-        const part = item[i];
-        if (part === 'b' || part === 'i' || part === 'em') continue;
-        const next = item[i+1];
-        if (next === 'b' || next === 'i' || next === 'em') {
-          html += '<' + next + '>' + part + '</' + next + '>';
-        } else {
-          html += part;
-        }
-      }
-      html += '</span>';
-      return html;
-    }).join('');
-  }
-  track.innerHTML = renderOne() + renderOne();
-})();
-
-/* ──────────────────────────────────────────────────────
-   PLUGINS
-   ────────────────────────────────────────────────────── */
-const MARKETPLACE = 'aiocean-plugins';
-let allPluginsData = [];
-let currentSkillRef = null;
-
-function installCmd(name) {
-  return `claude plugin install ${name}@${MARKETPLACE}`;
-}
-
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-function encodeAttr(s) {
-  if (s == null) return '';
-  return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-}
-
-/* --- skill modal ----------------------------------- */
-function findSkill(pluginName, skillName) {
-  const plugin = allPluginsData.find(p => p.name === pluginName);
-  if (!plugin || !plugin.skills) return null;
-  const skill = plugin.skills.find(s => s.name === skillName);
-  if (!skill) return null;
-  return { plugin, skill };
-}
-
-function openSkillDetail(pluginName, skillName, opts) {
-  const found = findSkill(pluginName, skillName);
-  if (!found) { showToast('skill not found'); return; }
-  const { plugin, skill } = found;
-  currentSkillRef = { pluginName, skillName };
-
-  document.getElementById('skillModalTitle').textContent = '$ skill · ' + skill.name;
-  document.getElementById('skillModalName').textContent = skill.name;
-  const link = document.getElementById('skillModalPluginLink');
-  link.textContent = plugin.name;
-  link.onclick = (e) => { e.preventDefault(); closeSkillModal(); openInstallModal(plugin.name); };
-  document.getElementById('skillModalVersion').textContent = plugin.version || '—';
-  document.getElementById('skillModalDesc').textContent = skill.desc || '(no description)';
-  document.getElementById('skillModalInstallCode').textContent = installCmd(plugin.name);
-
-  document.querySelectorAll('#skillModal .copy-pill').forEach(el => { el.textContent = 'copy'; });
-  document.querySelectorAll('#skillModal .modal-cmd').forEach(el => el.classList.remove('copied'));
-  const shareBtn = document.getElementById('skillShareBtn');
-  shareBtn.classList.remove('copied');
-  shareBtn.textContent = '▸ copy share link';
-
-  document.getElementById('skillModal').classList.add('open');
-
-  if (!opts || !opts.fromUrl) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('plugin', plugin.name);
-    url.searchParams.set('skill', skill.name);
-    history.pushState({ skill: skill.name, plugin: plugin.name }, '', url);
-  }
-}
-
-function closeSkillModal(opts) {
-  const modal = document.getElementById('skillModal');
-  if (!modal.classList.contains('open')) return;
-  modal.classList.remove('open');
-  currentSkillRef = null;
-  if (!opts || !opts.fromUrl) {
-    const url = new URL(window.location.href);
-    if (url.searchParams.has('plugin') || url.searchParams.has('skill')) {
-      url.searchParams.delete('plugin');
-      url.searchParams.delete('skill');
-      history.pushState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
-    }
-  }
-}
-
-function copyShareLink(btn) {
-  if (!currentSkillRef) return;
-  const url = new URL(window.location.href);
-  url.searchParams.set('plugin', currentSkillRef.pluginName);
-  url.searchParams.set('skill', currentSkillRef.skillName);
-  navigator.clipboard.writeText(url.toString()).then(() => {
-    btn.classList.add('copied');
-    btn.textContent = '✓ link copied';
-    showToast('share link copied');
-    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '▸ copy share link'; }, 1800);
+<!-- ══ FULL-VIEWPORT GHOSTTY-WEB TERMINAL (hosts BIOS POST + TUI) ══ -->
+<div id="ghostty-terminal" role="application" aria-label="claude-plugins TUI"></div>
+
+<!-- ══ NORTON COMMANDER F-KEY STATUS BAR ══ -->
+<nav class="dos-statusbar" aria-label="keyboard shortcuts" role="navigation">
+  <span class="fk"><b>1</b>Help</span>
+  <span class="fk"><b>3</b>Plugins</span>
+  <span class="fk"><b>5</b>Refresh</span>
+  <span class="fk"><b>8</b>Theme</span>
+  <span class="fk"><b>10</b>Quit</span>
+</nav>
+
+<script type="module">
+import { init, Terminal, FitAddon } from 'https://esm.sh/ghostty-web@0.4.0';
+
+/* ══════════════════════════════════════════════════════════════
+   THEMES (DOS VGA 16-color palette for signal, amber monochrome for void)
+   ══════════════════════════════════════════════════════════════ */
+const SIGNAL_THEME = {
+  background: '#000000', foreground: '#c0c0c0',
+  cursor: '#55ff55', cursorAccent: '#000000',
+  selectionBackground: '#55ff5544',
+  black: '#000000', red: '#aa0000', green: '#00aa00', yellow: '#aa5500',
+  blue: '#0000aa', magenta: '#aa00aa', cyan: '#00aaaa', white: '#c0c0c0',
+  brightBlack: '#555555', brightRed: '#ff5555', brightGreen: '#55ff55',
+  brightYellow: '#ffff55', brightBlue: '#5555ff', brightMagenta: '#ff55ff',
+  brightCyan: '#55ffff', brightWhite: '#ffffff',
+};
+const VOID_THEME = {
+  background: '#000000', foreground: '#ffb86b',
+  cursor: '#ffd866', cursorAccent: '#000000',
+  selectionBackground: '#ffb86b44',
+  black: '#000000', red: '#cc4422', green: '#aa5500', yellow: '#aa6600',
+  blue: '#884400', magenta: '#cc6622', cyan: '#bb8844', white: '#ffb86b',
+  brightBlack: '#6b4420', brightRed: '#ff5555', brightGreen: '#ffaa00',
+  brightYellow: '#ffd866', brightBlue: '#ffaa00', brightMagenta: '#ff8844',
+  brightCyan: '#ffcc88', brightWhite: '#ffffff',
+};
+const currentTheme = () => document.documentElement.getAttribute('data-theme') === 'void' ? VOID_THEME : SIGNAL_THEME;
+
+/* ══════════════════════════════════════════════════════════════
+   ANSI helpers
+   ══════════════════════════════════════════════════════════════ */
+const CSI = '\x1b[';
+const CLEAR_SCREEN = CSI + '2J' + CSI + 'H';
+const RESET = CSI + '0m', BOLD = CSI + '1m', UNDERLINE = CSI + '4m';
+const FG = (n) => CSI + n + 'm';
+const C = {
+  cyan: FG(36), grey: FG(90),
+  bred: FG(91), bgreen: FG(92), byellow: FG(93),
+  bmagenta: FG(95), bcyan: FG(96), bwhite: FG(97),
+};
+
+/* ══════════════════════════════════════════════════════════════
+   GLOBAL STATE
+   ══════════════════════════════════════════════════════════════ */
+let term;
+let pluginsData = [];
+let inputBuffer = '';
+let history = [];
+let historyIndex = -1; // -1 = current line, >=0 = viewing history
+let savedBuffer = ''; // saved current line when scrolling into history
+let isRunning = true; // false after quit
+const PROMPT = C.bgreen + 'C:' + C.bmagenta + '\\CLAUDE' + RESET + '> ';
+
+/* BIOS POST state (phase before welcome, once per session) */
+let biosPhase = false;
+let biosResolve = null;
+let biosTypingDone = false;
+let biosLineIndex = 0;
+
+const BIOS_LINES = [
+  'AMI BIOS (C) 1992 American Megatrends, Inc.',
+  'CPU: Intel(R) 80486DX2 @ 66MHz',
+  'Memory Test: ' + C.bgreen + '640K OK' + RESET,
+  'Extended Memory: ' + C.bgreen + '32768K OK' + RESET,
+  'HDD0: ' + C.bgreen + 'CLAUDE-PLUGINS' + RESET + ' [2 GB]',
+  'CDROM0: DOSLAND',
+  '',
+  'Press ' + BOLD + C.bmagenta + 'DEL' + RESET + ' to enter SETUP',
+  '',
+  'Starting MS-DOS...',
+  '',
+  'HIMEM is testing extended memory..........' + C.bgreen + 'done.' + RESET,
+  'EMM386 successfully installed.',
+  '',
+  'C:\\AUTOEXEC.BAT',
+  '@ECHO OFF',
+  'PATH C:\\DOS;C:\\AIOCEAN;C:\\CLAUDE',
+  'SET PROMPT=$P$G',
+  'LH C:\\DOS\\MOUSE.COM',
+  'LH C:\\DOS\\DOSKEY',
+  '',
+  ' [INIT] mounting marketplace ........ ' + C.bgreen + 'OK' + RESET,
+  ' [INIT] 40+ plugins registered ...... ' + C.bgreen + 'OK' + RESET,
+  ' [INIT] RTK hook active ............. ' + C.bgreen + 'OK' + RESET,
+  ' [INIT] ghostty-web WASM booted ..... ' + C.bgreen + 'OK' + RESET,
+  ' [WARN] user\'s attention span ....... ' + BOLD + C.bmagenta + 'LOW' + RESET,
+  ' [WARN] backlog of unread blogs ..... ' + BOLD + C.byellow + 'CRITICAL' + RESET,
+  '',
+  'C:\\> ' + C.bgreen + 'CLAUDE.EXE --playbook /ROOT' + RESET,
+  '',
+  C.byellow + '>' + RESET + ' Press ' + BOLD + C.bmagenta + 'ENTER' + RESET + ' to continue',
+];
+
+function renderBIOS() {
+  return new Promise((resolve) => {
+    biosPhase = true;
+    biosResolve = resolve;
+    biosTypingDone = false;
+    biosLineIndex = 0;
+    term.write(CLEAR_SCREEN);
+    typeBiosLine();
   });
 }
 
-function openInstallFromSkill() {
-  if (!currentSkillRef) return;
-  const p = currentSkillRef.pluginName;
-  closeSkillModal();
-  openInstallModal(p);
-}
-
-function syncSkillModalFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const pluginName = params.get('plugin');
-  const skillName = params.get('skill');
-  if (pluginName && skillName) openSkillDetail(pluginName, skillName, { fromUrl: true });
-  else closeSkillModal({ fromUrl: true });
-}
-
-/* --- install modal --------------------------------- */
-function openInstallModal(name) {
-  document.getElementById('modalTitle').textContent = '$ install · ' + name;
-  document.getElementById('modalCode').textContent = installCmd(name);
-  document.querySelectorAll('#modal .modal-cmd').forEach(el => {
-    el.classList.remove('copied');
-    el.querySelector('.copy-pill').textContent = 'copy';
-  });
-  document.getElementById('modal').classList.add('open');
-}
-
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-
-function copyCmd(el, text) {
-  navigator.clipboard.writeText(text).then(() => {
-    const icon = el.querySelector('.copy-pill');
-    if (icon) icon.textContent = 'copied';
-    el.classList.add('copied');
-    showToast('copied');
-    setTimeout(() => {
-      if (icon) icon.textContent = 'copy';
-      el.classList.remove('copied');
-    }, 1500);
-  });
-}
-
-function copySetup() {
-  navigator.clipboard.writeText('claude plugin marketplace add aiocean/claude-plugins').then(() => showToast('marketplace cmd copied'));
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => t.classList.remove('show'), 1800);
-}
-
-function toggleSkills(name) {
-  const el = document.getElementById('skills-' + name);
-  const badge = document.getElementById('badge-' + name);
-  if (el) {
-    el.classList.toggle('open');
-    if (badge) badge.classList.toggle('open');
-  }
-}
-
-/* --- rendering ------------------------------------- */
-function renderPlugins(plugins) {
-  const container = document.getElementById('pluginList');
-  container.innerHTML = plugins.map(p => {
-    const has = p.skills && p.skills.length > 0;
-    const id = p.name;
-    const desc = escapeHtml(p.desc || p.description || '');
-    return `
-      <article class="plugin${has ? ' has-skills' : ''}" ${has ? `onclick="toggleSkills('${encodeAttr(id)}')"` : ''}>
-        <div class="plugin-main">
-          <div class="plugin-info">
-            <div class="plugin-top">
-              <span class="plugin-name">${escapeHtml(p.name)}</span>
-              <span class="plugin-version">v${escapeHtml(p.version || '—')}</span>
-              ${has ? `<span class="skill-count" id="badge-${encodeAttr(id)}">${p.skills.length} skills</span>` : ''}
-            </div>
-            <div class="plugin-desc">${desc}</div>
-            ${has ? `
-              <div class="skills-list" id="skills-${encodeAttr(id)}">
-                <div class="skills-inner">
-                  ${p.skills.map(s => `
-                    <div class="skill-item" onclick="event.stopPropagation(); openSkillDetail('${encodeAttr(p.name)}','${encodeAttr(s.name)}')" title="click for details — ${escapeHtml(s.name)}">
-                      <span class="skill-item-name">${escapeHtml(s.name)}</span>
-                      <span class="skill-item-desc">${escapeHtml(s.desc || '')}</span>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            ` : ''}
-          </div>
-          <button class="install-btn" onclick="event.stopPropagation(); openInstallModal('${encodeAttr(p.name)}')">▸ install</button>
-        </div>
-      </article>
-    `;
-  }).join('');
-
-  // stats
-  const skillsCount = plugins.reduce((n, p) => n + (p.skills ? p.skills.length : 0), 0);
-  const pc = document.getElementById('pluginCount');
-  const sp = document.getElementById('stat-plugins');
-  const ss = document.getElementById('stat-skills');
-  if (pc) pc.textContent = plugins.length;
-  if (sp) sp.textContent = plugins.length;
-  if (ss) ss.textContent = skillsCount;
-}
-
-function filterPlugins() {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  let shown = 0;
-  document.querySelectorAll('.plugin').forEach(p => {
-    const name = p.querySelector('.plugin-name').textContent.toLowerCase();
-    const desc = p.querySelector('.plugin-desc').textContent.toLowerCase();
-    let skillMatch = false;
-    p.querySelectorAll('.skill-item').forEach(s => {
-       const sn = s.querySelector('.skill-item-name').textContent.toLowerCase();
-       const sd = s.querySelector('.skill-item-desc').textContent.toLowerCase();
-       if (sn.includes(q) || sd.includes(q)) skillMatch = true;
-    });
-    const match = !q || name.includes(q) || desc.includes(q) || skillMatch;
-    p.classList.toggle('hidden', !match);
-    if (match) shown++;
-  });
-  const pc = document.getElementById('pluginCount');
-  if (pc) pc.textContent = shown + (q ? ' / ' + allPluginsData.length : '');
-}
-
-/* --- esc / popstate -------------------------------- */
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  if (document.getElementById('skillModal').classList.contains('open')) closeSkillModal();
-  else if (document.getElementById('modal').classList.contains('open')) closeModal();
-});
-window.addEventListener('popstate', syncSkillModalFromUrl);
-
-/* --- load ------------------------------------------ */
-async function loadPlugins() {
-  const setVersion = () => {
-    const el = document.getElementById('tb-version');
-    if (el) el.textContent = allPluginsData.length + ' plugins';
-  };
-  try {
-    const response = await fetch('./data.json');
-    if (!response.ok) throw new Error('data.json not found');
-    const data = await response.json();
-    allPluginsData = data.sort((a, b) => a.name.localeCompare(b.name));
-    renderPlugins(allPluginsData);
-    setVersion();
-    syncSkillModalFromUrl();
-  } catch (error) {
-    console.error('Error loading plugins:', error);
-    try {
-      const fb = await fetch('https://raw.githubusercontent.com/aiocean/claude-plugins/main/docs/data.json');
-      const fbData = await fb.json();
-      allPluginsData = fbData.sort((a, b) => a.name.localeCompare(b.name));
-      renderPlugins(allPluginsData);
-      setVersion();
-      syncSkillModalFromUrl();
-    } catch (err2) {
-      document.getElementById('pluginList').innerHTML = `
-        <div class="plugin" style="border-color:var(--red); box-shadow:6px 6px 0 0 var(--red);">
-          <div class="plugin-info">
-            <div class="plugin-top"><span class="plugin-name" style="color:var(--red);">// ERR · load failed</span></div>
-            <div class="plugin-desc">could not fetch data.json. check network / open via http, not file://</div>
-          </div>
-        </div>`;
-    }
-  }
-}
-
-loadPlugins();
-
-/* ──────────────────────────────────────────────────────
-   CLAUDE.MD LOADER — fetch docs/CLAUDE.md
-   used by /02 panels' copy-section-to-clipboard
-   ────────────────────────────────────────────────────── */
-let __claudeMdSource = '';
-
-async function loadClaudeMd() {
-  try {
-    const res = await fetch('CLAUDE.md', { cache: 'no-cache' });
-    if (res.ok) __claudeMdSource = (await res.text()).replace(/\r\n/g, '\n');
-  } catch (e) { /* served via http only — copy buttons will toast error */ }
-}
-
-/* Extract a top-level section by ## heading, keeping its ### subsections.
-   Stops at the next # or ## (not ###). Trims trailing blank lines. */
-function extractSection(headingText) {
-  if (!__claudeMdSource) return '';
-  const lines = __claudeMdSource.split('\n');
-  const target = '## ' + headingText;
-  let start = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].trim() === target) { start = i; break; }
-  }
-  if (start === -1) return '';
-  let end = lines.length;
-  for (let i = start + 1; i < lines.length; i++) {
-    if (/^#{1,2} /.test(lines[i])) { end = i; break; }
-  }
-  const slice = lines.slice(start, end);
-  while (slice.length && slice[slice.length - 1].trim() === '') slice.pop();
-  return slice.join('\n');
-}
-
-function copyPrinciple(panel, event) {
-  // don't hijack text-selection attempts
-  if (window.getSelection && window.getSelection().toString().length > 0) return;
-  const sectionAttr = panel.getAttribute('data-section');
-  if (!sectionAttr) return;
-  const headings = sectionAttr.split('||').map(s => s.trim()).filter(Boolean);
-  const parts = headings.map(h => extractSection(h)).filter(Boolean);
-  if (!parts.length) {
-    showToast('section not loaded yet — try again');
+function typeBiosLine() {
+  if (!biosPhase) return;
+  if (biosLineIndex >= BIOS_LINES.length) {
+    biosTypingDone = true;
     return;
   }
-  const text = parts.join('\n\n');
-  navigator.clipboard.writeText(text).then(() => {
-    panel.classList.add('copied');
-    const title = (panel.querySelector('.panel-t') || {}).textContent || 'principle';
-    showToast('copied · ' + title.trim() + ' · ' + text.length + ' chars');
-    setTimeout(() => panel.classList.remove('copied'), 1800);
-  }).catch(() => showToast('copy failed'));
+  term.write(BIOS_LINES[biosLineIndex] + '\r\n');
+  const plain = BIOS_LINES[biosLineIndex].replace(/\x1b\[[0-9;]*m/g, '');
+  biosLineIndex++;
+  const d = !plain.trim() ? 110 : (25 + Math.random() * 55);
+  setTimeout(typeBiosLine, d);
 }
 
-/* keyboard a11y — Enter / Space activates a focused panel */
+function biosEnterPressed() {
+  if (!biosTypingDone) {
+    while (biosLineIndex < BIOS_LINES.length) {
+      term.write(BIOS_LINES[biosLineIndex] + '\r\n');
+      biosLineIndex++;
+    }
+    biosTypingDone = true;
+  } else {
+    biosPhase = false;
+    const r = biosResolve;
+    biosResolve = null;
+    r && r();
+  }
+}
+
+function printPrompt() {
+  term.write('\r\n' + PROMPT);
+  inputBuffer = '';
+  historyIndex = -1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION DATA (single source of truth for autoPlay + commands)
+   ══════════════════════════════════════════════════════════════ */
+const COLOR_MAP = { lime: C.bgreen, magenta: C.bmagenta, cyan: C.bcyan, amber: C.byellow };
+const colorFor = (k) => COLOR_MAP[k] || C.bmagenta;
+
+const PRINCIPLES = [
+  { num: 'R1', title: 'iteration-first', color: 'lime',
+    body: 'every change must be easy to iterate, modify, and evolve. never use workaround solutions — they create debt. never go against framework conventions.',
+    quote: 'how easy would it be to change this tomorrow?' },
+  { num: 'R2', title: 'AI is a partner', color: 'magenta',
+    body: 'not a blind executor. humans are often confused, misinformed, operating on incomplete info. challenge flawed reasoning. propose before executing. refuse unsound tasks explicitly.',
+    quote: 'agreement for the sake of agreement = disrespect.' },
+  { num: 'R3', title: 'delegate to agent teams', color: 'cyan',
+    body: "lead coordinates — doesn't write code unless trivial (< 20 lines). small: 1 implementer. medium: implementer + observer. when in doubt → delegate.",
+    quote: 'you are the team lead, not a solo developer.' },
+  { num: 'R4', title: 'evidence over assertion', color: 'amber',
+    body: '"I think X" is invalid. "foo.go:42 shows X" is valid. every claim needs a file:line, command output, or test result. label confidence HIGH / MEDIUM / LOW.',
+    quote: "citation > confidence. don't fabricate to fill gaps." },
+  { num: 'R5', title: 'verify before done', color: 'lime',
+    body: "did not run verify command → not allowed to claim \"done / fixed / passing\". typecheck + lint + test before commit. self-approval in same context doesn't count.",
+    quote: 'evidence before assertions. always.' },
+  { num: 'R6', title: 'hypothesis-PoC model', color: 'magenta',
+    body: 'trace to root cause → generate competing hypotheses → design minimal PoC to falsify each → eliminate. passing test = test passes, not feature works. 5 whys before coding.',
+    quote: "the PoC is the judge. opinions don't overrule empirical evidence." },
+];
+
+const STACK_ITEMS = [
+  { glyph: '▸', name: 'RTK', ver: 'v0.35', color: 'lime', tag: '/opt/homebrew/bin/rtk',
+    desc: 'output >100 dòng boilerplate → RTK thắng. 60–90% token saved trên git/curl/test/build. hook tự động rewrite — tôi không gõ rtk bằng tay.' },
+  { glyph: '◆', name: 'Bun', ver: 'latest', color: 'cyan', tag: '// bun over node, every time',
+    desc: 'never npm. chạy .ts trực tiếp, install gấp 10 lần, bundler sẵn trong box. default runtime trên mọi project từ 2024.' },
+  { glyph: '⌕', name: 'ripgrep', ver: 'rg', color: 'magenta', tag: '// rg -t go "pattern"',
+    desc: 'never grep. gitignore-aware, type-filtered, 10× nhanh hơn. default cho mọi text scan dưới 50 match — trên ngưỡng đó, chuyển sg hoặc LSP.' },
+  { glyph: '⎇', name: 'ast-grep', ver: 'sg', color: 'amber', tag: '// structural, not textual',
+    desc: 'regex thua khi gặp syntax. sg match AST pattern — refactor 200 file mà không đụng string trong comment, string literal, hay tên biến trùng keyword.' },
+  { glyph: '●', name: 'LSP', ver: 'mcp', color: 'lime', tag: '// mcp__oh-my-claudecode_t__lsp_*',
+    desc: 'semantic > textual. go-to-def, references, diagnostics qua MCP — Claude thấy cái compiler thấy, không chỉ chữ trong file. rename an toàn, find-refs không miss.' },
+  { glyph: '◆', name: 'GitNexus', ver: 'mcp', color: 'cyan', tag: '// blast radius first, edit second',
+    desc: 'graph > grep. symbol references + impact radius TRƯỚC khi chạm code. powers aio-planning — biết cái gì sẽ vỡ trước khi sửa.' },
+  { glyph: '▲', name: 'markitdown', ver: 'cli', color: 'magenta', tag: '// markitdown <url>',
+    desc: 'web → clean markdown. strip JS-rendered noise, nav, cookie banner. feed Claude text có nghĩa, không phải HTML slop — tiết kiệm context cho việc chính.' },
+];
+
+const MANIFESTO_INTRO_LINES = [
+  '',
+  'REM first-person · why i wrote this file',
+  '',
+  'CLAUDE.md của tôi không phải là config file. nó là kỷ luật tôi học bằng cách fail —',
+  'mỗi dòng trong đó là một lần AI làm sai và tôi nhận ra vấn đề không ở AI, mà ở',
+  'CÁCH TÔI YÊU CẦU. AI đọc nó để behave đúng với tôi; tôi đọc lại nó khi chính mình',
+  'đang lười.',
+  '',
+];
+
+const MANIFESTO_QUOTES = [
+  { badge: 'anti-sycophancy', color: 'lime',
+    quote: 'Agreement for the sake of agreement = disrespect.',
+    narrator: 'tôi không cần AI làm vừa lòng. tôi cần nó cãi lại khi tôi sai — và cãi có bằng chứng. yes-man không giúp ship được feature đúng.' },
+  { badge: 'evidence over assertion', color: 'magenta',
+    quote: '"I think X" is invalid. "foo.go:42 shows X" is valid.',
+    narrator: 'sau nhiều lần bị AI fabricate function name không tồn tại, tôi chốt một rule: không citation → không claim. kèm confidence label — HIGH / MEDIUM / LOW.' },
+  { badge: 'hypothesis-PoC model', color: 'cyan',
+    quote: "The PoC is the judge. Opinions don't overrule empirical evidence.",
+    narrator: 'cái đau nhất là ship "should work" code rồi bug phọt ra prod. giờ quy tắc là: hypothesis → PoC falsifies → chỉ survivor mới được ship.' },
+];
+
+const MANIFESTO_STRUCTURE_LINES = [
+  '',
+  'REM file structure: golden rules (không được vi phạm) → working principles (cách',
+  'reason, cách verify) → code style (simplicity trên mọi thứ) → engineering principles',
+  '(7 nguyên tắc từ Zakirullin, Pike, Bernhardt, Feynman). trộn tiếng Việt + Anh cố ý',
+  '— não tôi nghĩ bằng CẢ HAI, và file phải khớp với cách tôi nghĩ, không phải ngược lại.',
+  '',
+  'C:\\> TYPE CLAUDE.MD    → VIEW RAW · 233 LINES · 17.2KB',
+  'https://github.com/aiocean/claude-plugins/blob/main/docs/CLAUDE.md',
+];
+
+const FLOWS = [
+  { eyebrow: '▸ pipeline /01 · feature dev', title: 'build a feature',
+    sub: 'clarify → understand → implement → review',
+    steps: [
+      { phase: 'clarify',    node: 'gherkin-refine',               color: 'lime',    desc: 'turn vague ask into testable spec' },
+      { phase: 'understand', node: 'aio-planning · discover',      color: 'magenta', desc: 'map unknowns in the codebase' },
+      { phase: 'plan',       node: 'aio-planning · plan',          color: 'magenta', desc: 'pick approach, break into tasks' },
+      { phase: 'implement',  node: 'xstate / design-system',       color: 'cyan',    desc: 'state machine + ui kit, typed' },
+      { phase: 'review',     node: 'aio-planning · code-review',   color: 'amber',   desc: 'catch defects before commit' },
+    ]},
+  { eyebrow: '▸ pipeline /02 · debug', title: 'find the bug',
+    sub: 'investigate → reproduce → observe → visualize',
+    steps: [
+      { phase: 'investigate', node: 'aio-planning · debug',        color: 'magenta', desc: 'trace symptom to root cause' },
+      { phase: 'reproduce',   node: 'ios-device-debug',            color: 'cyan',    desc: 'pull logs from the real device' },
+      { phase: 'observe',     node: 'monitoring-observability',    color: 'lime',    desc: 'instrument + watch the fix at runtime' },
+      { phase: 'visualize',   node: 'aio-diagramming',             color: 'amber',   desc: 'generate diagrams from code state' },
+    ]},
+];
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION RENDERERS
+   ══════════════════════════════════════════════════════════════ */
+function renderSectionHeader(idx, title, meta) {
+  const cols = (term && term.cols) || 80;
+  const w = Math.min(cols - 4, 84);
+  const left = '══ ' + idx + ' ' + title.toUpperCase() + ' ';
+  const metaChunk = meta ? (C.grey + meta + RESET + ' ' + C.bmagenta + '══') : '══';
+  const metaLen = meta ? meta.length + 4 : 2;
+  const fill = Math.max(2, w - left.length - metaLen);
+  term.write('\r\n');
+  term.write('  ' + C.bmagenta + BOLD + left + '═'.repeat(fill) + ' ' + metaChunk + RESET + '\r\n\r\n');
+}
+
+function renderPrincipleCard(rule) {
+  const cols = (term && term.cols) || 80;
+  const w = Math.min(cols - 4, 84);
+  const inner = w - 4;
+  const pad = '  ';
+  const hLine = '═'.repeat(w - 2);
+  const sLine = '─'.repeat(w - 2);
+  const col = colorFor(rule.color);
+  const numTxt = 'Rule ' + rule.num;
+  const titleGap = Math.max(1, inner - rule.title.length - numTxt.length);
+  const bodyLines = wrapText(rule.body, inner, '').split('\r\n').slice(0, 4);
+  const quoteLines = wrapText('"' + rule.quote + '"', inner, '').split('\r\n').slice(0, 2);
+
+  term.write(pad + col + '╔' + hLine + '╗' + RESET + '\r\n');
+  term.write(pad + col + '║ ' + RESET + BOLD + col + rule.title + RESET + ' '.repeat(titleGap) + C.byellow + numTxt + RESET + col + ' ║' + RESET + '\r\n');
+  term.write(pad + col + '╟' + sLine + '╢' + RESET + '\r\n');
+  bodyLines.forEach(line => {
+    term.write(pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
+  });
+  quoteLines.forEach(line => {
+    term.write(pad + col + '║ ' + RESET + BOLD + col + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
+  });
+  term.write(pad + col + '╚' + hLine + '╝' + RESET + '\r\n');
+}
+
+function renderStackItem(item) {
+  const cols = (term && term.cols) || 80;
+  const w = Math.min(cols - 4, 84);
+  const inner = w - 4;
+  const pad = '  ';
+  const hLine = '═'.repeat(w - 2);
+  const col = colorFor(item.color);
+  const head = item.glyph + ' ' + item.name + '   ' + item.ver;
+  const headGap = Math.max(1, inner - head.length - item.tag.length);
+  const descLines = wrapText(item.desc, inner, '').split('\r\n').slice(0, 3);
+
+  term.write(pad + col + '╔' + hLine + '╗' + RESET + '\r\n');
+  term.write(pad + col + '║ ' + RESET + BOLD + col + head + RESET + ' '.repeat(headGap) + C.grey + item.tag + RESET + col + ' ║' + RESET + '\r\n');
+  descLines.forEach(line => {
+    term.write(pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
+  });
+  term.write(pad + col + '╚' + hLine + '╝' + RESET + '\r\n');
+}
+
+function renderFlowCard(flow) {
+  term.write('  ' + C.bcyan + flow.eyebrow + RESET + '\r\n');
+  term.write('  ' + BOLD + C.bmagenta + flow.title.toUpperCase() + RESET + '\r\n');
+  term.write('  ' + C.grey + flow.sub + RESET + '\r\n');
+  flow.steps.forEach((s, i) => {
+    const col = colorFor(s.color);
+    const idx = String(i + 1).padStart(2, '0');
+    const phase = s.phase.padEnd(12);
+    const node = s.node.padEnd(28);
+    term.write('    ' + C.byellow + idx + RESET + '  ' + BOLD + phase + RESET + '· ' + col + node + RESET + C.grey + '// ' + s.desc + RESET + '\r\n');
+  });
+  term.write('\r\n');
+}
+
+function renderQuoteCard(q) {
+  const cols = (term && term.cols) || 80;
+  const w = Math.min(cols - 4, 84);
+  const inner = w - 4;
+  const pad = '  ';
+  const hLine = '═'.repeat(w - 2);
+  const sLine = '─'.repeat(w - 2);
+  const col = colorFor(q.color);
+  const badgeTxt = '[ ' + q.badge + ' ]';
+  const badgeGap = Math.max(1, inner - badgeTxt.length);
+  const quoteLines = wrapText('"' + q.quote + '"', inner, '').split('\r\n').slice(0, 2);
+  const narrLines = wrapText(q.narrator, inner, '').split('\r\n').slice(0, 3);
+
+  term.write(pad + col + '╔' + hLine + '╗' + RESET + '\r\n');
+  term.write(pad + col + '║ ' + RESET + BOLD + col + badgeTxt + RESET + ' '.repeat(badgeGap) + col + ' ║' + RESET + '\r\n');
+  term.write(pad + col + '╟' + sLine + '╢' + RESET + '\r\n');
+  quoteLines.forEach(line => {
+    term.write(pad + col + '║ ' + RESET + BOLD + C.bwhite + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
+  });
+  term.write(pad + col + '╟' + sLine + '╢' + RESET + '\r\n');
+  narrLines.forEach(line => {
+    term.write(pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n');
+  });
+  term.write(pad + col + '╚' + hLine + '╝' + RESET + '\r\n');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AUTOPLAY — renders all sections line by line after BIOS
+   ══════════════════════════════════════════════════════════════ */
+let autoPlayPhase = false;
+let skipAutoPlay = false;
+
+function pause(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function renderHeroSection() {
+  const banner = [
+    ' ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗',
+    '██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝',
+    '██║     ██║     ███████║██║   ██║██║  ██║█████╗  ',
+    '██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝  ',
+    '╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗',
+    ' ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝',
+  ];
+  term.write('\r\n');
+  for (const l of banner) {
+    if (skipAutoPlay) return;
+    term.write(C.bmagenta + BOLD + l + RESET + '\r\n');
+    await pause(40);
+  }
+  term.write('\r\n');
+  if (skipAutoPlay) return;
+  term.write(C.cyan + '  duoc // claude playbook · aiocean/claude-plugins' + RESET + '\r\n');
+  await pause(80);
+  term.write(C.grey + '  operator: @nguyenvanduocit · build 2026.04.23 · MIT' + RESET + '\r\n\r\n');
+  await pause(120);
+  if (skipAutoPlay) return;
+  term.write('  REM ' + C.bgreen + 'iteration-first' + RESET + ' · ' + C.bcyan + 'evidence-before-assertion' + RESET + ' · ' + C.bmagenta + 'delegate to teams' + RESET + '\r\n');
+  await pause(80);
+  term.write('  REM stop reading. start shipping.\r\n\r\n');
+  await pause(120);
+
+  const stat = pluginsData.length;
+  const skillCount = pluginsData.reduce((acc, p) => acc + (p.skills ? p.skills.length : 0), 0);
+  if (skipAutoPlay) return;
+  term.write('  ' + C.byellow + '┌─ stats ──────────────────────────────────────┐' + RESET + '\r\n');
+  term.write('  ' + C.byellow + '│' + RESET + '  ' + C.bgreen + String(stat).padStart(3) + RESET + ' plugins    ' + C.bcyan + String(skillCount).padStart(3) + RESET + ' skills    ' + C.bmagenta + 'Opus 4.7' + RESET + '    ' + C.byellow + '│' + RESET + '\r\n');
+  term.write('  ' + C.byellow + '│' + RESET + '  ctx ' + C.bwhite + '1M' + RESET + '         stack ' + C.bwhite + 'RTK' + RESET + '       license ' + C.bwhite + 'MIT' + RESET + '    ' + C.byellow + '│' + RESET + '\r\n');
+  term.write('  ' + C.byellow + '└──────────────────────────────────────────────┘' + RESET + '\r\n');
+  await pause(160);
+}
+
+async function autoPlay() {
+  autoPlayPhase = true;
+  skipAutoPlay = false;
+  term.write(CLEAR_SCREEN);
+
+  // 1. Hero
+  await renderHeroSection();
+  if (skipAutoPlay) return finishAutoPlay();
+  await pause(400);
+
+  // 2. /01 Principles
+  renderSectionHeader('/01', 'operating principles', 'from ~/.claude/CLAUDE.md');
+  for (const rule of PRINCIPLES) {
+    if (skipAutoPlay) return finishAutoPlay();
+    renderPrincipleCard(rule);
+    await pause(220);
+  }
+
+  // 3. /02 Manifesto
+  if (skipAutoPlay) return finishAutoPlay();
+  renderSectionHeader('/02', 'manifesto', 'CLAUDE.md as discipline');
+  for (const line of MANIFESTO_INTRO_LINES) {
+    if (skipAutoPlay) return finishAutoPlay();
+    term.write('  ' + C.grey + line + RESET + '\r\n');
+    await pause(line.trim() ? 60 : 110);
+  }
+  for (const q of MANIFESTO_QUOTES) {
+    if (skipAutoPlay) return finishAutoPlay();
+    renderQuoteCard(q);
+    await pause(220);
+  }
+  for (const line of MANIFESTO_STRUCTURE_LINES) {
+    if (skipAutoPlay) return finishAutoPlay();
+    term.write('  ' + C.grey + line + RESET + '\r\n');
+    await pause(line.trim() ? 60 : 110);
+  }
+
+  // 4. /03 Stack
+  if (skipAutoPlay) return finishAutoPlay();
+  renderSectionHeader('/03', 'stack', '7 tools · 1 tradeoff each');
+  for (const it of STACK_ITEMS) {
+    if (skipAutoPlay) return finishAutoPlay();
+    renderStackItem(it);
+    await pause(180);
+  }
+
+  // 5. /04 Workflows
+  if (skipAutoPlay) return finishAutoPlay();
+  renderSectionHeader('/04', 'workflows', 'pipelines across plugins');
+  for (const f of FLOWS) {
+    if (skipAutoPlay) return finishAutoPlay();
+    renderFlowCard(f);
+    await pause(220);
+  }
+
+  // 6. /05 Plugins
+  if (skipAutoPlay) return finishAutoPlay();
+  renderSectionHeader('/05', 'plugins', pluginsData.length + ' installable skill packs');
+  for (const p of pluginsData) {
+    if (skipAutoPlay) return finishAutoPlay();
+    renderPluginCard(p);
+    await pause(80);
+  }
+
+  // 7. Footer
+  if (skipAutoPlay) return finishAutoPlay();
+  await pause(400);
+  term.write('\r\n' + C.bmagenta + BOLD + '  ## aiocean//claude-plugins' + RESET + '\r\n');
+  term.write('  ' + C.grey + 'REM MIT · fork freely · no paywall' + RESET + '\r\n');
+  term.write('  ' + C.grey + 'REM built on ' + RESET + C.cyan + UNDERLINE + 'github.com/aiocean/claude-plugins' + RESET + '\r\n');
+  term.write('\r\n  ' + C.bmagenta + 'REM the system is the system. stop reading. start shipping.' + RESET + '\r\n');
+
+  finishAutoPlay();
+}
+
+function finishAutoPlay() {
+  autoPlayPhase = false;
+  term.write('\r\n');
+  term.write('  type ' + C.bcyan + 'help' + RESET + ' for commands · or try: ' + C.byellow + 'plugins' + RESET + ', ' + C.byellow + 'manifest' + RESET + ', ' + C.byellow + 'install <name>' + RESET + '\r\n');
+  printPrompt();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMMAND HANDLERS
+   ══════════════════════════════════════════════════════════════ */
+function cmdHelp() {
+  const rows = [
+    ['help, ?',              'show this help'],
+    ['plugins, ls, dir',     'list all plugins'],
+    ['cat <name>',           'show plugin detail + skills'],
+    ['install <name>',       'copy install command to clipboard'],
+    ['search <query>',       'filter plugins by name/desc/skill'],
+    ['principles',           'operating principles (6 rules)'],
+    ['stack',                'tooling stack (7 items)'],
+    ['flows',                'workflow pipelines'],
+    ['manifest, claude.md',  'print CLAUDE.md manifesto'],
+    ['play, replay',         're-run full auto-play'],
+    ['theme [signal|void]',  'toggle or set theme'],
+    ['clear, cls',           'clear screen'],
+    ['source',               'open github repo URL'],
+    ['whoami',               'author info'],
+    ['quit, exit',           'stop input'],
+  ];
+  term.write('\r\n' + C.bmagenta + BOLD + '-- commands --' + RESET + '\r\n');
+  rows.forEach(([cmd, desc]) => {
+    term.write('  ' + C.bcyan + cmd.padEnd(26) + RESET + C.grey + desc + RESET + '\r\n');
+  });
+  term.write('\r\n' + C.grey + '  F-keys: F1 help · F3 plugins · F5 replay · F8 theme · F10 quit' + RESET + '\r\n');
+}
+
+function cmdPrinciples() {
+  renderSectionHeader('/01', 'operating principles', 'from ~/.claude/CLAUDE.md');
+  PRINCIPLES.forEach(rule => renderPrincipleCard(rule));
+}
+
+function cmdStack() {
+  renderSectionHeader('/03', 'stack', '7 tools · 1 tradeoff each');
+  STACK_ITEMS.forEach(it => renderStackItem(it));
+}
+
+function cmdFlows() {
+  renderSectionHeader('/04', 'workflows', 'pipelines across plugins');
+  FLOWS.forEach(f => renderFlowCard(f));
+}
+
+function renderPluginCard(p) {
+  const cols = (term && term.cols) || 80;
+  const w = Math.min(cols - 4, 84);
+  const inner = w - 4;
+  const pad = '  ';
+  const hLine = '═'.repeat(w - 2);
+  const sLine = '─'.repeat(w - 2);
+
+  const name = (p.name || '').slice(0, Math.max(1, inner - 12));
+  const ver = 'v' + (p.version || '?');
+  const titleGap = Math.max(1, inner - name.length - ver.length);
+
+  const descLines = wrapText(p.desc, inner, '').split('\r\n').slice(0, 3);
+
+  const skillCount = p.skills ? p.skills.length : 0;
+  const skillTxt = skillCount + ' skill' + (skillCount === 1 ? '' : 's');
+  const installTxt = 'install ' + p.name;
+  const footerGap = Math.max(2, inner - skillTxt.length - installTxt.length);
+
+  term.write(pad + C.bmagenta + '╔' + hLine + '╗' + RESET + '\r\n');
+  term.write(pad + C.bmagenta + '║ ' + RESET + BOLD + C.bmagenta + name + RESET + ' '.repeat(titleGap) + C.byellow + ver + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
+  term.write(pad + C.bmagenta + '╟' + sLine + '╢' + RESET + '\r\n');
+  descLines.forEach(line => {
+    term.write(pad + C.bmagenta + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
+  });
+  term.write(pad + C.bmagenta + '║ ' + RESET + C.bcyan + skillTxt + RESET + ' '.repeat(footerGap) + C.grey + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
+  term.write(pad + C.bmagenta + '╚' + hLine + '╝' + RESET + '\r\n');
+}
+
+function cmdPlugins() {
+  if (pluginsData.length === 0) {
+    term.write('\r\n' + C.bred + 'no plugins loaded' + RESET + '\r\n');
+    return;
+  }
+  term.write('\r\n' + C.bmagenta + BOLD + '-- plugins --' + RESET + '\r\n\r\n');
+  pluginsData.forEach(p => renderPluginCard(p));
+  const total = pluginsData.reduce((a, p) => a + (p.skills ? p.skills.length : 0), 0);
+  term.write('\r\n' + C.grey + '-- ' + pluginsData.length + ' plugins · ' + total + ' skills total --' + RESET + '\r\n');
+}
+
+function wrapText(text, width, indent) {
+  indent = indent || '';
+  const words = String(text || '').split(/\s+/);
+  const lines = []; let line = '';
+  for (const w of words) {
+    if ((line + ' ' + w).trim().length > width) { if (line) lines.push(line); line = w; }
+    else line = line ? line + ' ' + w : w;
+  }
+  if (line) lines.push(line);
+  return lines.map(l => indent + l).join('\r\n');
+}
+
+function cmdCat(arg) {
+  if (!arg) { term.write('\r\nusage: ' + C.bcyan + 'cat <plugin-name>' + RESET + '\r\n'); return; }
+  const p = pluginsData.find(x => x.name === arg || x.name === arg.toLowerCase());
+  if (!p) {
+    term.write('\r\n' + C.bred + 'No such plugin: ' + arg + RESET + '\r\n');
+    term.write('try: ' + C.bcyan + 'plugins' + RESET + ' to list, or ' + C.bcyan + 'search ' + arg + RESET + '\r\n');
+    return;
+  }
+  term.write('\r\n' + C.bmagenta + BOLD + p.name + RESET + ' ' + C.byellow + 'v' + (p.version || '?') + RESET + '\r\n');
+  term.write(C.grey + '─'.repeat(Math.min(70, term.cols || 70)) + RESET + '\r\n');
+  term.write(wrapText(p.desc, 76, '  ') + '\r\n');
+  if (p.skills && p.skills.length) {
+    term.write('\r\n' + C.bcyan + '  skills (' + p.skills.length + '):' + RESET + '\r\n');
+    p.skills.forEach(sk => {
+      term.write('    ' + C.bmagenta + '> ' + sk.name + RESET + '\r\n');
+      const d = (sk.desc || '').split('\n')[0].slice(0, 160);
+      term.write(wrapText(d, 74, '      ' + C.grey) + RESET + '\r\n');
+    });
+  }
+  term.write('\r\n' + C.grey + 'run: ' + C.bcyan + 'install ' + p.name + RESET + '\r\n');
+}
+
+function cmdInstall(arg) {
+  if (!arg) { term.write('\r\nusage: ' + C.bcyan + 'install <plugin-name>' + RESET + '\r\n'); return; }
+  const p = pluginsData.find(x => x.name === arg);
+  if (!p) {
+    term.write('\r\n' + C.bred + 'No such plugin: ' + arg + RESET + '\r\n');
+    term.write('try: ' + C.bcyan + 'plugins' + RESET + '\r\n');
+    return;
+  }
+  const cmds = '/plugin marketplace add aiocean/claude-plugins\n/plugin install ' + p.name + '@aiocean-plugins';
+  term.write('\r\n  ' + C.bcyan + '/plugin marketplace add aiocean/claude-plugins' + RESET + '\r\n');
+  term.write('  ' + C.bcyan + '/plugin install ' + p.name + '@aiocean-plugins' + RESET + '\r\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(cmds).then(() => {
+      term.write('\r\n' + C.bgreen + '✓' + RESET + ' copied to clipboard\r\n');
+    }, () => {
+      term.write('\r\n' + C.byellow + '⚠' + RESET + ' clipboard denied — select + copy manually\r\n');
+    });
+  } else {
+    term.write('\r\n' + C.byellow + '⚠' + RESET + ' clipboard API unavailable — select + copy manually\r\n');
+  }
+}
+
+function cmdSearch(arg) {
+  if (!arg) { term.write('\r\nusage: ' + C.bcyan + 'search <query>' + RESET + '\r\n'); return; }
+  const q = arg.toLowerCase();
+  const matches = pluginsData.filter(p =>
+    (p.name || '').toLowerCase().includes(q) ||
+    (p.desc || '').toLowerCase().includes(q) ||
+    (p.skills || []).some(s => (s.name || '').toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q))
+  );
+  if (!matches.length) { term.write('\r\n' + C.bred + 'No match for: ' + arg + RESET + '\r\n'); return; }
+  term.write('\r\n' + C.bmagenta + BOLD + '-- ' + matches.length + ' match(es) for "' + arg + '" --' + RESET + '\r\n\r\n');
+  matches.forEach(p => renderPluginCard(p));
+}
+
+function cmdManifest() {
+  renderSectionHeader('/02', 'manifesto', 'CLAUDE.md as discipline');
+  MANIFESTO_INTRO_LINES.forEach(line => {
+    term.write('  ' + C.grey + line + RESET + '\r\n');
+  });
+  MANIFESTO_QUOTES.forEach(q => renderQuoteCard(q));
+  MANIFESTO_STRUCTURE_LINES.forEach(line => {
+    term.write('  ' + C.grey + line + RESET + '\r\n');
+  });
+}
+
+function cmdTheme(arg) {
+  let next;
+  if (!arg) next = document.documentElement.getAttribute('data-theme') === 'void' ? 'signal' : 'void';
+  else if (arg === 'void' || arg === 'amber') next = 'void';
+  else if (arg === 'signal' || arg === 'green') next = 'signal';
+  else { term.write('\r\nusage: ' + C.bcyan + 'theme [signal|void]' + RESET + '\r\n'); return; }
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('nsct-theme', next); } catch (e) {}
+  term.write('\r\n' + C.bgreen + '✓' + RESET + ' theme = ' + C.bwhite + next.toUpperCase() + RESET + '\r\n');
+}
+
+function cmdClear() { term.write(CLEAR_SCREEN); }
+
+function cmdSource() {
+  term.write('\r\n  ' + C.cyan + UNDERLINE + 'https://github.com/aiocean/claude-plugins' + RESET + '\r\n');
+}
+
+function cmdWhoami() {
+  term.write('\r\n  ' + C.bgreen + '@nguyenvanduocit' + RESET + ' · operator · 2026.04\r\n');
+  term.write('  ' + C.grey + 'Vietnam · build stuff with AI · ship early · iterate hard' + RESET + '\r\n');
+}
+
+function cmdQuit() {
+  term.write('\r\n' + C.bmagenta + BOLD + 'stop reading. start shipping.' + RESET + '\r\n');
+  term.write(C.grey + 'program terminated · refresh to restart' + RESET + '\r\n');
+  isRunning = false;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMMAND DISPATCHER
+   ══════════════════════════════════════════════════════════════ */
+function dispatch(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  history.push(trimmed);
+  const parts = trimmed.split(/\s+/);
+  const cmd = parts[0].toLowerCase();
+  const arg = parts.slice(1).join(' ');
+  switch (cmd) {
+    case 'help': case '?': cmdHelp(); break;
+    case 'plugins': case 'ls': case 'dir': cmdPlugins(); break;
+    case 'cat': cmdCat(arg); break;
+    case 'install': cmdInstall(arg); break;
+    case 'search': case 'find': cmdSearch(arg); break;
+    case 'principles': case 'rules': cmdPrinciples(); break;
+    case 'stack': case 'tools': cmdStack(); break;
+    case 'flows': case 'workflows': case 'pipelines': cmdFlows(); break;
+    case 'manifest': case 'claude.md': case 'claudemd': cmdManifest(); break;
+    case 'play': case 'replay': term.write('\r\n'); autoPlay(); return true;
+    case 'theme': cmdTheme(arg.toLowerCase()); break;
+    case 'clear': case 'cls': cmdClear(); break;
+    case 'source': case 'repo': case 'github': cmdSource(); break;
+    case 'whoami': case 'who': cmdWhoami(); break;
+    case 'quit': case 'exit': cmdQuit(); break;
+    default:
+      term.write('\r\n' + C.bred + "Bad command or file name: " + parts[0] + RESET + '\r\n');
+      term.write('  type ' + C.bcyan + 'help' + RESET + ' to see commands\r\n');
+  }
+  return false;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INPUT HANDLER — supports printable chars, backspace, Enter,
+   Ctrl+C, Ctrl+L, Up/Down history
+   ══════════════════════════════════════════════════════════════ */
+function handleInput(data) {
+  if (biosPhase) {
+    if (data === '\r' || data === '\n') biosEnterPressed();
+    return;
+  }
+  if (autoPlayPhase) {
+    if (data === '\r' || data === '\n' || data === '\x1b' || data === '\x03') {
+      skipAutoPlay = true;
+    }
+    return;
+  }
+  if (!isRunning) return;
+  // Handle CSI arrow sequences: ESC [ A/B/C/D
+  if (data === '\x1b[A') { // up
+    if (history.length === 0) return;
+    if (historyIndex === -1) { savedBuffer = inputBuffer; historyIndex = history.length - 1; }
+    else if (historyIndex > 0) { historyIndex--; }
+    else return;
+    redrawInput(history[historyIndex]);
+    return;
+  }
+  if (data === '\x1b[B') { // down
+    if (historyIndex === -1) return;
+    if (historyIndex < history.length - 1) { historyIndex++; redrawInput(history[historyIndex]); }
+    else { historyIndex = -1; redrawInput(savedBuffer); savedBuffer = ''; }
+    return;
+  }
+  // Process each char (can be multi-char paste)
+  for (const ch of data) {
+    const code = ch.charCodeAt(0);
+    if (ch === '\r' || ch === '\n') { // Enter
+      const cmd = inputBuffer;
+      const skipPrompt = dispatch(cmd);
+      if (!skipPrompt) printPrompt();
+      return;
+    } else if (code === 0x7f || code === 0x08) { // Backspace or Ctrl+H
+      if (inputBuffer.length > 0) {
+        inputBuffer = inputBuffer.slice(0, -1);
+        term.write('\b \b');
+      }
+    } else if (code === 0x03) { // Ctrl+C
+      term.write(C.grey + '^C' + RESET);
+      printPrompt();
+      return;
+    } else if (code === 0x0c) { // Ctrl+L
+      term.write(CLEAR_SCREEN + PROMPT + inputBuffer);
+    } else if (code >= 0x20 && code < 0x7f) { // printable ASCII
+      inputBuffer += ch;
+      term.write(ch);
+    }
+    // silently ignore other control chars
+  }
+}
+
+function redrawInput(newLine) {
+  // Erase current input visually, then redraw
+  const eraseLen = inputBuffer.length;
+  term.write('\b \b'.repeat(eraseLen));
+  inputBuffer = newLine;
+  term.write(newLine);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BOOT
+   ══════════════════════════════════════════════════════════════ */
+async function boot() {
+  try {
+    // Load plugins data in parallel with WASM init
+    const [_, dataResp] = await Promise.all([
+      init(),
+      fetch('./data.json').then(r => r.ok ? r.json() : []).catch(() => []),
+    ]);
+    pluginsData = Array.isArray(dataResp) ? dataResp : [];
+
+    term = new Terminal({
+      cursorBlink: true,
+      fontSize: 14,
+      fontFamily: 'Monaco, Menlo, "Courier New", monospace',
+      theme: currentTheme(),
+      scrollback: 5000,
+    });
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('ghostty-terminal'));
+    fitAddon.fit();
+    fitAddon.observeResize();
+    window.addEventListener('resize', () => fitAddon.fit());
+
+    term.onData(handleInput);
+    term.focus();
+
+    // BIOS POST phase — once per session unless ?reboot
+    const forceReboot = /[?&]reboot(=|&|$)/.test(location.search);
+    if (forceReboot) { try { sessionStorage.removeItem('dos-booted'); } catch (e) {} }
+    let alreadyBooted = false;
+    try { alreadyBooted = sessionStorage.getItem('dos-booted') === '1'; } catch (e) {}
+    if (!alreadyBooted) {
+      await renderBIOS();
+      try { sessionStorage.setItem('dos-booted', '1'); } catch (e) {}
+    }
+    await autoPlay();
+  } catch (err) {
+    console.error('[tui] boot failed:', err);
+    const el = document.getElementById('ghostty-terminal');
+    if (el) el.innerHTML = '<pre style="color:#ff5555;padding:20px;font:14px monospace;">TUI boot failed. see console.\n\n' + String(err).replace(/[<>&]/g,'') + '</pre>';
+  }
+}
+
+/* Theme sync with page-level attribute changes */
+const themeObserver = new MutationObserver(() => {
+  if (term) {
+    try { term.options.theme = currentTheme(); }
+    catch (e) { console.warn('[tui] theme sync failed:', e); }
+  }
+});
+themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* F-key shortcuts + Shift+D theme toggle */
 document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter' && e.key !== ' ') return;
-  const el = document.activeElement;
-  if (el && el.classList && el.classList.contains('panel') && el.hasAttribute('data-section')) {
+  if (!term || !isRunning) return;
+  // Shift+D toggles theme — only when input buffer empty (avoid wiping mid-command)
+  if ((e.key === 'D' || e.key === 'd') && e.shiftKey && !e.ctrlKey && !e.metaKey && inputBuffer.length === 0) {
     e.preventDefault();
-    copyPrinciple(el, e);
+    cmdTheme('');
+    printPrompt();
+    return;
+  }
+  // F-keys: map to commands
+  const fKeyMap = {
+    F1:  () => cmdHelp(),
+    F3:  () => cmdPlugins(),
+    F5:  () => autoPlay(),
+    F8:  () => cmdTheme(''),
+    F10: () => cmdQuit(),
+  };
+  if (fKeyMap[e.key]) {
+    e.preventDefault();
+    if (e.key === 'F5') { /* replay runs full autoplay, includes own prompt */ fKeyMap[e.key](); return; }
+    fKeyMap[e.key]();
+    if (isRunning) printPrompt();
   }
 });
 
-loadClaudeMd();
+/* Persist theme from localStorage */
+try {
+  const saved = localStorage.getItem('nsct-theme');
+  if (saved === 'void' || saved === 'signal') document.documentElement.setAttribute('data-theme', saved);
+} catch (e) {}
 
-/* ────────────────────────────────────────────────────────────
-   MATRIX RAIN — bottom-up, multi-tint, variable size/speed
-   Classic fade-trick: semi-transparent fill each frame leaves
-   a ghost trail opposite the head motion. Head rises → trail
-   extends downward naturally.
-
-   Easter egg: ~1 column per few seconds swaps its random glyphs
-   for a readable phrase that rises one row per frame — fast
-   enough that you miss it if you're not watching a given column.
-   ──────────────────────────────────────────────────────────── */
-(function matrixRain() {
-  const canvas = document.getElementById('matrix-rain');
-  if (!canvas) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  const ctx = canvas.getContext('2d', { alpha: true });
-
-  const GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789░▒▓:=+*<>?/|_';
-
-  // hidden manifesto — mix of site doctrine + Matrix nods
-  const PHRASES = [
-    'evidence > assertion',
-    'verify before done',
-    'hypothesis > opinion',
-    'root cause first',
-    'explicit > implicit',
-    'colocation wins',
-    'iteration first',
-    'greenfield only',
-    'cognitive load = debt',
-    'ship the signal',
-    'aiocean/plugins',
-    'duoc//claude',
-    'nullsect ::',
-    'signal intact',
-    'void mode',
-    'wake up',
-    'follow the rabbit',
-    'there is no spoon',
-    'you are the one',
-    'system online',
-    'read the source',
-    '// bottom up //',
-  ];
-
-  // per-theme color weights: [weight, headHex, trailHex]
-  const PALETTES = {
-    signal: [
-      [0.70, '#f4ffd0', '#9fd61e'], // lime (main)
-      [0.14, '#ffd1f4', '#c41fa9'], // magenta
-      [0.10, '#c0f8ff', '#22e6ff'], // cyan
-      [0.06, '#ffe2b0', '#d68a15'], // amber
-    ],
-    void: [
-      [0.60, '#ffd1f4', '#c41fa9'], // magenta (main)
-      [0.18, '#c0f8ff', '#00d4ff'], // cyan
-      [0.15, '#f4ffd0', '#82a81a'], // lime
-      [0.07, '#ffe2b0', '#d68a15'], // amber
-    ],
-  };
-
-  function pickColor(pal) {
-    const r = Math.random();
-    let acc = 0;
-    for (const [w, head, trail] of pal) {
-      acc += w;
-      if (r < acc) return { head, trail };
-    }
-    const last = pal[pal.length - 1];
-    return { head: last[1], trail: last[2] };
-  }
-
-  function currentPalette() {
-    const theme = document.documentElement.getAttribute('data-theme') || 'signal';
-    return PALETTES[theme] || PALETTES.signal;
-  }
-
-  function currentFade() {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue('--matrix-fade').trim() || 'rgba(0,0,0,0.085)';
-  }
-
-  let w = 0, h = 0;
-  let columns = [];
-  let palette = currentPalette();
-  let fadeColor = currentFade();
-  let resizeTimer = 0;
-
-  function buildColumns() {
-    columns = [];
-    let x = 0;
-    while (x < w) {
-      const size = 12 + ((Math.random() * 9) | 0); // 12–20 px
-      // smaller glyphs drift faster → parallax depth
-      const speed = 1.6 + Math.random() * 3.8 + (20 - size) * 0.35;
-      columns.push({
-        x,
-        size,
-        speed,
-        color: pickColor(palette),
-        // scatter across full viewport + a bit below → no empty-screen moment
-        y: Math.random() * h * 1.5 - h * 0.25,
-        phrase: null,
-        phraseIdx: 0,
-        phraseDelay: (Math.random() * 600) | 0,
-      });
-      x += size * 0.95; // slight overlap for denser rain
-    }
-  }
-
-  function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width  = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    canvas.style.width  = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    buildColumns();
-  }
-
-  function draw() {
-    ctx.fillStyle = fadeColor;
-    ctx.fillRect(0, 0, w, h);
-    ctx.textBaseline = 'top';
-
-    for (let i = 0; i < columns.length; i++) {
-      const c = columns[i];
-
-      // continuous respawn — no chance gate, no visible gap
-      if (c.y < -c.size * 2) {
-        c.y = h + c.size * (1 + Math.random() * 3);
-        c.color = pickColor(palette);
-        c.size = 12 + ((Math.random() * 9) | 0);
-        c.speed = 1.6 + Math.random() * 3.8 + (20 - c.size) * 0.35;
-        c.phrase = null;
-        c.phraseIdx = 0;
-      }
-
-      ctx.font = `${c.size}px "JetBrains Mono", ui-monospace, monospace`;
-
-      if (c.phrase) {
-        // easter-egg phrase: chars stack 1 row/frame, bright so it's readable
-        const ch = c.phrase.charAt(c.phraseIdx);
-        ctx.fillStyle = c.color.head;
-        ctx.fillText(ch, c.x, c.y);
-        c.y -= c.size;
-        c.phraseIdx++;
-        if (c.phraseIdx >= c.phrase.length) {
-          c.phrase = null;
-          c.phraseIdx = 0;
-          c.phraseDelay = 500 + ((Math.random() * 1800) | 0);
-        }
-      } else {
-        // uniform trail color — no bright-head flares, no visible reset points
-        const ch = GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
-        ctx.fillStyle = c.color.trail;
-        ctx.fillText(ch, c.x, c.y);
-        c.y -= c.speed;
-
-        if (c.phraseDelay > 0) {
-          c.phraseDelay--;
-        } else if (Math.random() < 0.00035) {
-          c.phrase = PHRASES[(Math.random() * PHRASES.length) | 0];
-          c.phraseIdx = 0;
-        }
-      }
-    }
-    requestAnimationFrame(draw);
-  }
-
-  resize();
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 120);
-  });
-
-  new MutationObserver(() => {
-    palette = currentPalette();
-    fadeColor = currentFade();
-    for (const c of columns) c.color = pickColor(palette);
-  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-  requestAnimationFrame(draw);
-})();
+/* Start boot sequence (WASM load → BIOS POST in terminal → welcome) */
+boot();
 </script>
 </body>
 </html>
