@@ -129,11 +129,6 @@ body::after {
     drop-shadow(0 0 1px rgba(85, 255, 85, 0.55))
     drop-shadow(0 0 4px rgba(85, 255, 85, 0.22));
 }
-#ghostty-terminal .xterm,
-#ghostty-terminal .xterm-viewport,
-#ghostty-terminal .xterm-screen { height: 100% !important; width: 100% !important; }
-#ghostty-terminal .xterm-viewport { background: #000 !important; }
-
 /* small screens */
 @media (max-width: 640px) {
   #ghostty-terminal { padding: 4px 2px; }
@@ -205,7 +200,16 @@ const currentTheme = () => document.documentElement.getAttribute('data-theme') =
    ANSI helpers
    ══════════════════════════════════════════════════════════════ */
 const CSI = '\x1b[';
-const CLEAR_SCREEN = CSI + '2J' + CSI + 'H';
+// Scroll-preserving clear. ESC[2J erases visible cells in place without
+// pushing them into scrollback (per VT spec, honored by ghostty-web's
+// parser) — so first-boot BIOS POST vanishes when autoPlay clears and
+// the user can't scroll up to read it. Instead: move cursor to last row,
+// emit \n × rows to scroll the viewport into scrollback, then home.
+// Falls back to 24 rows if term isn't ready yet.
+function clearScreen() {
+  const rows = (term && term.rows) || 24;
+  return CSI + rows + ';1H' + '\n'.repeat(rows) + CSI + 'H';
+}
 const RESET = CSI + '0m', BOLD = CSI + '1m', UNDERLINE = CSI + '4m';
 const FG = (n) => CSI + n + 'm';
 const C = {
@@ -288,7 +292,10 @@ function renderBIOS() {
     biosResolve = resolve;
     biosTypingDone = false;
     biosLineIndex = 0;
-    term.write(CLEAR_SCREEN);
+    // Terminal is fresh at boot — just home the cursor. Calling clearScreen()
+    // here would pollute scrollback with `term.rows` empty lines users would
+    // hit when scrolling up.
+    term.write(CSI + 'H');
     typeBiosLine();
   });
 }
@@ -568,7 +575,7 @@ async function autoPlay() {
   autoPlayPhase = true;
   skipAutoPlay = false;
   animatedOutput = true;
-  term.write(CLEAR_SCREEN);
+  term.write(clearScreen());
 
   // 1. Hero
   await renderHeroSection();
@@ -853,7 +860,7 @@ function cmdTheme(arg) {
   term.write('\r\n' + C.bgreen + '✓' + RESET + ' theme = ' + C.bwhite + next.toUpperCase() + RESET + '\r\n');
 }
 
-function cmdClear() { term.write(CLEAR_SCREEN); }
+function cmdClear() { term.write(clearScreen()); }
 
 function cmdSource() {
   term.write('\r\n  ' + C.cyan + UNDERLINE + 'https://github.com/aiocean/claude-plugins' + RESET + '\r\n');
@@ -952,7 +959,7 @@ function handleInput(data) {
       printPrompt();
       return;
     } else if (code === 0x0c) { // Ctrl+L
-      term.write(CLEAR_SCREEN + PROMPT + inputBuffer);
+      term.write(clearScreen() + PROMPT + inputBuffer);
     } else if (code >= 0x20 && code < 0x7f) { // printable ASCII
       inputBuffer += ch;
       term.write(ch);
@@ -986,7 +993,14 @@ async function boot() {
       fontSize: 14,
       fontFamily: 'Monaco, Menlo, "Courier New", monospace',
       theme: currentTheme(),
-      scrollback: 50000,
+      // ghostty-web forwards `scrollback` to `scrollbackLimit` in the WASM
+      // config (verified in ghostty-web@0.4.0 buildWasmConfig), where it
+      // is measured in BYTES — same unit as Ghostty desktop's
+      // `scrollback-limit`. 50_000 bytes is barely a screen-worth on a wide
+      // viewport, so autoPlay overflows and BIOS POST + early plugins
+      // evict. 10MB matches Ghostty desktop's default.
+      // ref: https://ghostty.org/docs/config/reference#scrollback-limit
+      scrollback: 10_000_000,
     });
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
@@ -1071,12 +1085,9 @@ function measureCell() {
   if (!term || !term.cols || !term.rows) return;
   const container = document.getElementById('ghostty-terminal');
   if (!container) return;
-  // ghostty-web may or may not expose xterm.js class names — try common selectors in order
-  const el = container.querySelector('.xterm-screen')
-          || container.querySelector('.xterm-rows')
-          || container.querySelector('.xterm')
-          || container.querySelector('canvas')
-          || container;
+  // ghostty-web renders into a <canvas>; measure that for cell size.
+  // Fall back to the container if the canvas hasn't mounted yet.
+  const el = container.querySelector('canvas') || container;
   const r = el.getBoundingClientRect();
   if (!r.width || !r.height) return;
   cellW = r.width / term.cols;
