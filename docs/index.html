@@ -7,7 +7,7 @@
 <meta name="description" content="how I work with Claude Code — full MS-DOS terminal playbook powered by ghostty-web. type 'help' to start">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════════════
    MS-DOS TERMINAL MODE · CP437 · VGA 16-color · CRT scanlines
@@ -15,54 +15,18 @@
    void   = amber-on-black (monochrome CRT alt)
    ════════════════════════════════════════════════════════════════ */
 :root, [data-theme="signal"] {
-  --bg:        #000000;
-  --bg-2:      #000000;
-  --bg-3:      #0a0f0a;
-  --ink:       #c0c0c0;
-  --ink-dim:   #a8a8a8;
-  --ink-mute:  #555555;
-  --line:      #c0c0c0;
-
-  --lime:      #55ff55;   /* DOS bright green  #10 */
-  --lime-2:    #00aa00;   /* DOS green         #02 */
-  --magenta:   #ff55ff;   /* DOS bright mag    #13 */
-  --magenta-2: #aa00aa;   /* DOS magenta       #05 */
-  --cyan:      #55ffff;   /* DOS bright cyan   #11 */
-  --cyan-2:    #00aaaa;   /* DOS cyan          #03 */
-  --amber:     #ffff55;   /* DOS yellow        #14 */
-  --amber-2:   #aa5500;   /* DOS brown         #06 */
-  --red:       #ff5555;   /* DOS bright red    #12 */
-  --blue:      #5555ff;   /* DOS bright blue   #09 */
-  --white:     #ffffff;
-
+  --bg:           #000000;
+  --ink:          #c0c0c0;
+  --lime:         #55ff55;
   --grid-tint:    rgba(85,255,85,0.05);
   --scan-opacity: 0.12;
-
   --f-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Menlo', 'Monaco', 'Courier New', monospace;
-  --f-vga:  'VT323', 'IBM Plex Mono', 'Courier New', monospace;
 }
 
 [data-theme="void"] {
-  --bg:        #0c0600;
-  --bg-2:      #110a02;
-  --bg-3:      #1a0e04;
-  --ink:       #ffb86b;
-  --ink-dim:   #d4924b;
-  --ink-mute:  #6b4420;
-  --line:      #ffb86b;
-
-  --lime:      #ffaa00;
-  --lime-2:    #aa6600;
-  --magenta:   #ff8844;
-  --magenta-2: #cc6622;
-  --cyan:      #ffcc88;
-  --cyan-2:    #bb8844;
-  --amber:     #ffd866;
-  --amber-2:   #aa6600;
-  --red:       #ff5555;
-  --blue:      #ffaa00;
-  --white:     #fff3d0;
-
+  --bg:           #0c0600;
+  --ink:          #ffb86b;
+  --lime:         #ffaa00;
   --grid-tint:    rgba(255,184,107,0.03);
   --scan-opacity: 0.22;
 }
@@ -993,14 +957,13 @@ async function boot() {
       fontSize: 14,
       fontFamily: 'Monaco, Menlo, "Courier New", monospace',
       theme: currentTheme(),
-      // ghostty-web forwards `scrollback` to `scrollbackLimit` in the WASM
-      // config (verified in ghostty-web@0.4.0 buildWasmConfig), where it
-      // is measured in BYTES — same unit as Ghostty desktop's
-      // `scrollback-limit`. 50_000 bytes is barely a screen-worth on a wide
-      // viewport, so autoPlay overflows and BIOS POST + early plugins
-      // evict. 10MB matches Ghostty desktop's default.
+      // ghostty-web's `scrollback` is forwarded to the WASM core's
+      // `scrollbackLimit`, measured in BYTES. The WASM default (10000
+      // bytes) is barely a screenful — autoPlay overflows scrollback
+      // and BIOS POST + early plugins evict before the user can scroll
+      // back to read them. Match Ghostty desktop's 10 MiB default.
       // ref: https://ghostty.org/docs/config/reference#scrollback-limit
-      scrollback: 10_000_000,
+      scrollback: 10 * 1024 * 1024,
     });
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
