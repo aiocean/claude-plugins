@@ -1,9 +1,9 @@
 ---
 name: aio-browser-cookie
-description: Extract cookies from local browsers (Chrome/Firefox/Safari) and export them as JSON or Netscape format for authenticated requests. Triggers: "extract browser cookies", "reuse browser session", "export cookies", "cookie jar", rookiepy.
-when_to_use: extract cookies, browser cookies, export cookies, cookie jar, reuse session, authenticated request, chrome cookies, firefox cookies, safari cookies, rookiepy, netscape cookies, session replay
+description: |
+  Extract cookies from local browsers (Chrome/Firefox/Safari) and export them as JSON or Netscape format for authenticated requests.
+when_to_use: extract browser cookies, reuse browser session, export cookies, cookie jar, rookiepy, extract cookies, browser cookies, reuse session, authenticated request, chrome cookies, firefox cookies, safari cookies, netscape cookies, session replay
 argument-hint: "Domain or URL to extract cookies for"
-effort: medium
 ---
 
 # Browser Cookie
@@ -11,41 +11,41 @@ effort: medium
 ## Environment
 - python3: !`which python3 2>/dev/null || echo "NOT INSTALLED"`
 - rookiepy: !`python3 -c "import rookiepy" 2>/dev/null && echo "installed" || echo "NOT INSTALLED — pip3 install -U rookiepy"`
-- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-browser-cookie"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-browser-cookie/scripts"`
 
 Use this skill to extract cookies from local browsers with `rookiepy`, export them as JSON or Netscape, or replay an authenticated request with the extracted session.
 
 ```bash
-BCOOKIE="${CLAUDE_PLUGIN_ROOT}/skills/aio-browser-cookie"
+BCOOKIE="${CLAUDE_PLUGIN_ROOT}/skills/aio-browser-cookie/scripts"
 ```
 
 Then run:
 
 ```bash
-python3 "$BCOOKIE/scripts/rookie_tool.py" ...
+python3 "$BCOOKIE/rookie_tool.py" ...
 ```
 
 ## Quick Start
 
 ```bash
 # Check environment and rookiepy availability
-python3 "$BCOOKIE/scripts/rookie_tool.py" doctor
+python3 "$BCOOKIE/rookie_tool.py" doctor
 
 # Show supported browser loaders on this machine
-python3 "$BCOOKIE/scripts/rookie_tool.py" list
+python3 "$BCOOKIE/rookie_tool.py" list
 
 # Extract cookies for one browser and one domain
-python3 "$BCOOKIE/scripts/rookie_tool.py" extract --browser chrome --domain github.com
+python3 "$BCOOKIE/rookie_tool.py" extract --browser chrome --domain github.com
 
 # Export Netscape cookies for curl / yt-dlp / wget style tooling
-python3 "$BCOOKIE/scripts/rookie_tool.py" extract \
+python3 "$BCOOKIE/rookie_tool.py" extract \
   --browser brave \
   --domain github.com \
   --format netscape \
   --output /tmp/github.cookies
 
 # Replay a request using the browser session
-python3 "$BCOOKIE/scripts/rookie_tool.py" request \
+python3 "$BCOOKIE/rookie_tool.py" request \
   --browser chrome \
   --domain github.com \
   --url https://github.com/settings/profile
@@ -91,7 +91,7 @@ Supported browser names depend on platform, but commonly include:
 ### Export cookie header for another tool
 
 ```bash
-python3 "$BCOOKIE/scripts/rookie_tool.py" extract \
+python3 "$BCOOKIE/rookie_tool.py" extract \
   --browser chrome \
   --domain example.com \
   --format header
@@ -100,7 +100,7 @@ python3 "$BCOOKIE/scripts/rookie_tool.py" extract \
 ### Save cookies for curl
 
 ```bash
-python3 "$BCOOKIE/scripts/rookie_tool.py" extract \
+python3 "$BCOOKIE/rookie_tool.py" extract \
   --browser chrome \
   --domain example.com \
   --format netscape \
@@ -112,7 +112,7 @@ curl --cookie /tmp/example.cookies https://example.com/account
 ### Replay an authenticated API call
 
 ```bash
-python3 "$BCOOKIE/scripts/rookie_tool.py" request \
+python3 "$BCOOKIE/rookie_tool.py" request \
   --browser brave \
   --domain app.example.com \
   --url https://app.example.com/api/me \

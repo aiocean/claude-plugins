@@ -1,8 +1,8 @@
 ---
 name: aio-cdp-relay
-description: Interact with Chrome browser via a persistent CDP relay — navigate, capture network, read cookies, evaluate JS, take screenshots. No MCP tool calls, no approval prompts. Use when needing browser automation in scripts. Triggers: "cdp relay", "browser relay", "chrome relay", "capture network", "browser cookies cdp", "screenshot cdp", "evaluate js in browser".
-when_to_use: cdp relay, browser relay, chrome relay, capture network, browser automation, screenshot, evaluate js, navigate browser, read cookies, chrome devtools protocol, headless chrome, network capture
-effort: medium
+description: |
+  Interact with Chrome browser via a persistent CDP relay — navigate, capture network, read cookies, evaluate JS, take screenshots. No MCP tool calls, no approval prompts.
+when_to_use: cdp relay, browser relay, chrome relay, capture network, browser cookies cdp, screenshot cdp, evaluate js in browser, browser automation, screenshot, evaluate js, navigate browser, read cookies, chrome devtools protocol, headless chrome, network capture
 ---
 
 # CDP Relay — Browser Automation Without MCP

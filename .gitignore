@@ -7,3 +7,8 @@ plugins/aio-tui/examples/gold-monitor/gold-monitor
 
 # superpowers skill scratch — plans/specs are session-local, not for public
 docs/superpowers/
+
+# Local IDE / app workspace state — not for public marketplace
+.claudian/
+.obsidian/
+.wrangler/

@@ -1,8 +1,8 @@
 ---
 name: aio-worktree
-description: Manage git worktrees for parallel development workflows — create, sync, and spotlight preview. Triggers: "create worktree", "sync worktree", "manage worktrees", "parallel development", worktree.
+description: |
+  Manage git worktrees for parallel development workflows — create, sync, and spotlight preview.
 when_to_use: create worktree, sync worktree, manage worktrees, parallel development, worktree, git worktree, branch isolation, spotlight, worktree merge, worktree cleanup
-effort: medium
 argument-hint: <branch-name>
 ---
 

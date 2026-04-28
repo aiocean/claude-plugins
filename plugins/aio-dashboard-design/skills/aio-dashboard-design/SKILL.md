@@ -1,46 +1,8 @@
 ---
 name: aio-dashboard-design
 description: |
-  Research-backed design advisor for SaaS analytics dashboards. Synthesizes Tufte, Few,
-  Cleveland–McGill, Bertin, Munzner, Shneiderman, Knaflic, Cairo, Segel–Heer, NN/g UX
-  research, WCAG 2.2, Chartability, and modern design systems (IBM Carbon, Shopify
-  Polaris, Atlassian, Material, Fluent) with real patterns from Stripe, Linear, Vercel,
-  Datadog, Shopify Admin, Plausible, GitHub. Use when designing, reviewing, or debating
-  dashboards, KPI cards, charts, chart selection, metric tiles, analytics pages, admin
-  overviews, executive summaries, or operational monitors. Also use for chart
-  anti-pattern review, data-visualization accessibility (WCAG/Chartability), data-ink
-  discipline, annotation/storytelling layer, color palette selection (Okabe-Ito,
-  Viridis, RdBu), truthfulness (zero baseline, dual-axis, truncated axis, Simpson's
-  Paradox), information hierarchy (typography/spacing/grid), and performance budgets
-  (RAIL, skeleton, LTTB, optimistic UI). Aggressively trigger whenever the user
-  mentions dashboard, analytics surface, data visualization, chart, KPI, metric
-  display, admin panel, or asks to improve the clarity, accuracy, accessibility, or
-  performance of any data display — even without those exact words. Triggers: dashboard,
-  analytics, data visualization, dataviz, chart, chart selection, bar chart, line
-  chart, pie chart, bullet graph, sparkline, heatmap, calendar heatmap, treemap,
-  scatter, funnel, cohort, KPI card, metric card, metric tile, information hierarchy,
-  chart anti-pattern, Tufte, Stephen Few, Cleveland-McGill, Bertin, Munzner,
-  Shneiderman mantra, storytelling with data, Knaflic, Cairo, Segel-Heer, Martini
-  Glass, Big Idea worksheet, data-ink ratio, lie factor, chartjunk, Okabe-Ito,
-  Viridis, RdBu, Chartability, WCAG 2.2, dual-axis, zero baseline, Simpson's Paradox,
-  SaaS analytics, Shopify analytics, admin dashboard, executive dashboard, operational
-  dashboard, strategic dashboard, analytical dashboard, Stripe dashboard, Linear UI,
-  Vercel Analytics, Datadog dashboard, Plausible, Shopify Admin, in-context analytics,
-  chart review, dashboard review, dashboard accessibility, color palette dashboard,
-  dark mode dashboard, small multiples, annotation layer, tabular numerals.
-when_to_use: dashboard, dashboard design, analytics dashboard, SaaS analytics,
-  data visualization, dataviz, chart selection, chart design, chart review, KPI card
-  design, metric card, information hierarchy, review dashboard, design review
-  dashboard, WCAG dashboard, accessible chart, a11y chart, Tufte, Few, storytelling
-  with data, Big Idea, Martini Glass, data-ink, chartjunk, lie factor, dual-axis,
-  zero baseline, truncated axis, Simpson's Paradox, color palette, Okabe-Ito,
-  Viridis, RdBu, dark mode chart, small multiples, sparkline, bullet graph, annotation
-  layer, dashboard anti-pattern, chart anti-pattern, dashboard performance, skeleton
-  screen, LTTB, optimistic UI, dashboard mobile, responsive dashboard, dashboard
-  typography, tabular numerals, in-context analytics, admin panel, executive
-  dashboard, operational monitor, Plausible, Stripe dashboard, Linear dashboard,
-  Datadog, Shopify analytics, gauge, speedometer, pie chart too many slices
-effort: high
+  Research-backed design advisor for SaaS analytics dashboards. Synthesizes Tufte, Few, Cleveland-McGill, Bertin, Munzner, Shneiderman, Knaflic, Cairo, Segel-Heer, NN/g UX research, WCAG 2.2, Chartability, and modern design systems (IBM Carbon, Shopify Polaris, Atlassian, Material, Fluent) with real patterns from Stripe, Linear, Vercel, Datadog, Shopify Admin, Plausible, GitHub. Covers chart selection, anti-pattern review, data-visualization accessibility, data-ink discipline, annotation/storytelling, color palettes, truthfulness checks, information hierarchy, and performance budgets.
+when_to_use: dashboard, dashboard design, analytics dashboard, SaaS analytics, data visualization, dataviz, chart selection, chart design, chart review, KPI card design, metric card, metric tile, information hierarchy, review dashboard, design review dashboard, WCAG dashboard, accessible chart, a11y chart, Tufte, Few, Stephen Few, Cleveland-McGill, Bertin, Munzner, Shneiderman mantra, storytelling with data, Knaflic, Cairo, Segel-Heer, Big Idea, Martini Glass, data-ink, chartjunk, lie factor, dual-axis, zero baseline, truncated axis, Simpson's Paradox, color palette, Okabe-Ito, Viridis, RdBu, Chartability, WCAG 2.2, dark mode chart, small multiples, sparkline, bullet graph, bar chart, line chart, pie chart, heatmap, calendar heatmap, treemap, scatter, funnel, cohort, annotation layer, dashboard anti-pattern, chart anti-pattern, dashboard performance, skeleton screen, LTTB, optimistic UI, dashboard mobile, responsive dashboard, dashboard typography, tabular numerals, in-context analytics, admin panel, executive dashboard, operational monitor, strategic dashboard, analytical dashboard, Plausible, Stripe dashboard, Linear dashboard, Vercel Analytics, Datadog dashboard, Shopify analytics, Shopify Admin, gauge, speedometer, pie chart too many slices, dashboard accessibility, color palette dashboard, dark mode dashboard
 ---
 
 # SaaS Dashboard Design Advisor

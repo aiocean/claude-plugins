@@ -1,8 +1,8 @@
 ---
 name: aio-rag-kit
-description: Set up vector search and RAG pipelines using Qdrant via rag-kit (auto-installs if missing). Triggers: "create vector collection", "index content", "semantic search", "RAG setup", qdrant, embeddings.
+description: |
+  Set up vector search and RAG pipelines using Qdrant via rag-kit (auto-installs if missing).
 when_to_use: create vector collection, index content, semantic search, RAG setup, qdrant, embeddings, vector database, retrieval-augmented generation, vector search, rag-kit, similarity search
-effort: medium
 ---
 
 # RAG Kit Skill

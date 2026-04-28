@@ -1,7 +1,7 @@
 {
   "name": "aio-gherkin-refine",
   "description": "Comprehensive BDD field guide — writes and reviews Gherkin with expert quality. Includes Example Mapping, 3 Amigos, anti-patterns catalog, and declarative style guide.",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "author": {
     "name": "aiocean"
   },

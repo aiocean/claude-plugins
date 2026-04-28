@@ -1,8 +1,8 @@
 ---
 name: aio-remove-bg
-description: Remove image backgrounds using threshold (fast) or rembg AI (complex images) and trim transparent edges. Triggers: "remove background", "make image transparent", "cutout image", bgrem, rembg.
-when_to_use: remove background, transparent background, cutout image, bgrem, rembg, image background removal, make transparent, trim edges, background eraser
-effort: medium
+description: |
+  Remove image backgrounds using threshold (fast) or rembg AI (complex images) and trim transparent edges.
+when_to_use: remove background, make image transparent, cutout image, bgrem, rembg, transparent background, image background removal, make transparent, trim edges, background eraser
 argument-hint: <image-path> [--rembg]
 ---
 

@@ -1,8 +1,8 @@
 ---
 name: aio-xstate
-description: Implement XState v5 state machines with strict patterns — setup().createMachine(), actors, and TypeScript typing. Triggers: "create state machine", "implement XState", "design statechart", "add actor", XState, statecharts, fromPromise.
+description: |
+  Implement XState v5 state machines with strict patterns — setup().createMachine(), actors, and TypeScript typing.
 when_to_use: create state machine, implement XState, design statechart, add actor, XState, statecharts, fromPromise, state machine, finite state, XState v5, createMachine, state transitions
-effort: low
 ---
 
 ## Environment

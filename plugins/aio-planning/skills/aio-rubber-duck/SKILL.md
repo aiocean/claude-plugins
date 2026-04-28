@@ -1,10 +1,9 @@
 ---
 name: aio-rubber-duck
 description: |
-  Rubber duck debugging companion — Claude plays the duck, NOT the solver. Use when the user says "be my rubber duck", "let me explain this", "walk me through", "talk me through", "I'm stuck", "help me think", "I don't understand why", "rubber duck", "duck debugging", or wants to articulate a problem out loud to find their own bug. Role-invert: the user explains step by step; Claude listens, prompts, and probes assumptions — never rushes a solution. Distinct from aio-debug (heavy orchestration with codebase context) — this is a lightweight cognitive aid that externalizes reasoning.
-when_to_use: rubber duck, duck debugging, let me explain, walk me through, talk me through, I'm stuck, help me think, help me reason, I don't understand why, explain my code, be my duck, articulate, think out loud, cognitive aid, externalize reasoning
+  Rubber duck debugging companion — Claude plays the duck, NOT the solver. Role-invert: the user explains step by step; Claude listens, prompts, and probes assumptions — never rushes a solution. Distinct from aio-debug (heavy orchestration with codebase context) — this is a lightweight cognitive aid that externalizes reasoning.
+when_to_use: rubber duck, duck debugging, be my rubber duck, let me explain, walk me through, talk me through, I'm stuck, help me think, help me reason, I don't understand why, explain my code, be my duck, articulate, think out loud, cognitive aid, externalize reasoning
 argument-hint: "Problem, bug, or piece of code you want to talk through"
-effort: low
 ---
 
 # Rubber Duck Debugging — Claude as the Duck

@@ -1,6 +1,8 @@
 ---
 name: aio-starrocks-best-practices
-description: StarRocks table design best practices — partitioning strategy, sort key selection, bucketing decisions, Primary Key table tuning, authentication/authorization, and resource group configuration. Use when designing new tables, optimizing existing schemas, reviewing DDL, choosing partition/bucket/sort strategies, or configuring access control and resource isolation.
+description: |
+  StarRocks table design best practices — partitioning strategy, sort key selection, bucketing decisions, Primary Key table tuning, authentication/authorization, and resource group configuration.
+when_to_use: StarRocks table design, partitioning strategy, sort key selection, bucketing, Primary Key table tuning, designing new tables, optimizing schemas, reviewing DDL, partition strategy, bucket strategy, sort strategy, access control, resource isolation, resource group, StarRocks DDL, StarRocks best practices
 ---
 
 # StarRocks Best Practices

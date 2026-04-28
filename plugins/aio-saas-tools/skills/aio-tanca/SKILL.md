@@ -1,8 +1,8 @@
 ---
 name: aio-tanca
-description: Manage employee timekeeping, shifts, and attendance via tanca-mcp (auto-installs if missing). Triggers: "check in", "check out", "list employees", "get shift", tanca, HR timekeeping, attendance.
+description: |
+  Manage employee timekeeping, shifts, and attendance via tanca-mcp (auto-installs if missing).
 when_to_use: check in, check out, list employees, get shift, tanca, HR, timekeeping, attendance, employee schedule, shift management, clock in, clock out
-effort: medium
 ---
 
 # Tanca Skill

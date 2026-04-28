@@ -1,8 +1,8 @@
 ---
 name: aio-epub-manage
-description: Browse books, check translation progress, manage guidelines, view TOC, fork books, publish to community, reset chapters, and view usage stats. Triggers: "list books", "liệt kê sách", "check progress", "xem tiến độ", "update guideline", "cập nhật guideline", "book info", "thông tin sách", "fork book", "nhân bản sách", "publish book", "đăng sách", "community books", "sách cộng đồng", "reset book", "reset chapter", "usage stats", "thống kê".
+description: |
+  Browse books, check translation progress, manage guidelines, view TOC, fork books, publish to community, reset chapters, and view usage stats.
 when_to_use: list books, liệt kê sách, check progress, xem tiến độ, update guideline, cập nhật guideline, book info, thông tin sách, fork book, nhân bản sách, publish book, đăng sách, community books, sách cộng đồng, reset book, reset chapter, usage stats, thống kê, browse books, translation progress, TOC
-effort: medium
 argument-hint: book ID (optional)
 ---
 

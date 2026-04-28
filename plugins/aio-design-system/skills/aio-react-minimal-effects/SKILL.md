@@ -1,8 +1,8 @@
 ---
 name: aio-react-minimal-effects
-description: Use when reviewing React code for unnecessary useEffect usage, refactoring to React 19 patterns, or as useEffect best practices reference. Scan mode actively finds and fixes problematic effects. Also use when user has multiple useEffect calls, derived state via effect+setState, effect chains, polling patterns, or asks about React 19 patterns, React Compiler, useActionState, useOptimistic, ref as prop.
+description: |
+  Review React code for unnecessary useEffect usage, refactor to React 19 patterns, and scan-fix problematic effects including derived state via effect+setState, effect chains, and polling patterns.
 when_to_use: useEffect, React 19, refactor effects, derived state, setState in effect, effect chains, polling, React Compiler, useActionState, useOptimistic, ref as prop, reduce effects, unnecessary effect, react hooks audit, scan useEffect
-effort: low
 ---
 
 ## Environment

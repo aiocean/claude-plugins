@@ -1,8 +1,8 @@
 ---
 name: aio-x
-description: Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing). Triggers: "post tweet", "search twitter", "post thread", "get mentions", twitter, x.com, tweet, timeline.
+description: |
+  Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing).
 when_to_use: post tweet, search twitter, post thread, get mentions, twitter, x.com, tweet, timeline, social media, X post, retweet, Twitter API
-effort: medium
 argument-hint: <tweet-text or search-query>
 ---
 

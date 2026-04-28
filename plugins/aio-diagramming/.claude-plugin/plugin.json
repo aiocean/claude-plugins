@@ -1,7 +1,7 @@
 {
   "name": "aio-diagramming",
   "description": "Diagram generation toolkit — Mermaid diagrams and Grafana dashboard diagrams. Two skills: aio-mermaid (shareable Mermaid diagram URLs), aio-grafana-diagram (auto-generate dashboard diagrams from codebase).",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "aiocean"
   }

@@ -1,17 +1,9 @@
 ---
 name: aio-kanban
 description: |
-  Markdown-based kanban board for AI agent task management.
-  Use when: "kanban", "board", "tasks", "backlog", "show board",
-  "what's next", "task status", "add task", "init kanban",
-  "sprint", "todo list", "track progress", "prioritize tasks",
-  "plan work", "move task", "archive done".
-when_to_use: |
-  kanban, board, tasks, backlog, show board, what's next, task status,
-  add task, init kanban, sprint, todo list, track progress, move task,
-  prioritize, plan work, archive, show tasks, current tasks
+  Markdown-based kanban board for AI agent task management — init, add, move, archive tasks across backlog/doing/done columns.
+when_to_use: kanban, board, tasks, backlog, show board, what's next, task status, add task, init kanban, sprint, todo list, track progress, move task, prioritize, plan work, archive, show tasks, current tasks, prioritize tasks, archive done
 argument-hint: "init | status | add <title> | archive"
-effort: medium
 ---
 
 !`bash "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/scripts/kanban-status.sh" 2>/dev/null`

@@ -1,8 +1,8 @@
 ---
 name: aio-gitlab
-description: Manage GitLab MRs, pipelines, branches, and CI jobs via gitlab-mcp (auto-installs if missing). Triggers: "create MR", "accept MR", "trigger pipeline", "retry job", gitlab, merge request, gitlab CI.
+description: |
+  Manage GitLab MRs, pipelines, branches, and CI jobs via gitlab-mcp (auto-installs if missing).
 when_to_use: create MR, accept MR, trigger pipeline, retry job, gitlab, merge request, gitlab CI, branch, CI/CD, pipeline status, gitlab-mcp
-effort: medium
 ---
 
 # GitLab Skill

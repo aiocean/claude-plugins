@@ -1,6 +1,8 @@
 ---
 name: aio-starrocks-query-tuning
-description: StarRocks query performance tuning — EXPLAIN plans, Query Profile analysis, operator metrics, tuning recipes, schema optimization, query hints, and text-based profile analysis. Use when diagnosing slow queries, reading EXPLAIN output, analyzing query profiles, optimizing joins/scans/aggregations, applying query hints, or tuning StarRocks schema for performance.
+description: |
+  StarRocks query performance tuning — EXPLAIN plans, Query Profile analysis, operator metrics, tuning recipes, schema optimization, query hints, and text-based profile analysis.
+when_to_use: StarRocks query tuning, EXPLAIN plan, Query Profile, slow queries, operator metrics, query hints, schema optimization, diagnosing slow queries, reading EXPLAIN output, analyzing query profiles, optimizing joins, optimizing scans, optimizing aggregations, StarRocks performance, StarRocks EXPLAIN
 ---
 
 # StarRocks Query Tuning

@@ -1,7 +1,7 @@
 {
   "name": "aio-software-architect",
   "description": "Software architecture encyclopedia and decision advisor. 137 in-depth articles covering architecture patterns, principles, and practices from Google, AWS, Microsoft, 13 foundational books, and modern trends. Semantic search across 10 volumes: foundations, architecture styles, cloud design patterns, resilience, data architecture, DDD, API design, distributed systems, operations, and modern paradigms.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "aiocean"
   },

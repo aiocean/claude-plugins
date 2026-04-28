@@ -1,8 +1,8 @@
 ---
 name: aio-feedback
-description: Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues. Triggers: "submit feedback", "report bug", "request feature", "request plugin", "file issue".
+description: |
+  Submit bug reports, feature requests, and plugin requests to aiocean/claude-plugins via GitHub Issues.
 when_to_use: submit feedback, report bug, request feature, request plugin, file issue, bug report, feature request, plugin request, github issue, file a bug
-effort: medium
 ---
 
 # Feedback — Submit Issues for aiocean Plugins

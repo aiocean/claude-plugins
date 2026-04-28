@@ -1,8 +1,8 @@
 ---
 name: aio-doc-writer
-description: Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis. Triggers: "analyze codebase", "map architecture", "document architecture", "what does this codebase do", "codebase oracle".
+description: |
+  Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis.
 when_to_use: analyze codebase, map architecture, document architecture, codebase oracle, generate docs, architecture documentation, what does this codebase do, codebase documentation, module docs, dependency map
-effort: high
 context: fork
 agent: oh-my-claudecode:architect
 ---

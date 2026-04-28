@@ -1,8 +1,8 @@
 ---
 name: aio-review
-description: PROACTIVE planning — post-implementation validation in the aio-deep-plan pipeline. Use when validating completed work: "check my changes", "before I commit", "did I miss anything", "review implementation". Run snapshot before coding, then review after. NOT for debugging — use aio-debug. For full code review use aio-code-review.
+description: |
+  PROACTIVE planning — post-implementation validation in the aio-deep-plan pipeline. Run snapshot before coding, then review after. NOT for debugging — use aio-debug. For full code review use aio-code-review.
 when_to_use: check my changes, before I commit, did I miss anything, review implementation, validate changes, post-implementation review, verify work, change validation, pre-commit check
-effort: high
 context: fork
 ---
 

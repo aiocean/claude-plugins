@@ -1,9 +1,9 @@
 ---
 name: aio-plan
-description: PROACTIVE planning — third step in the aio-deep-plan pipeline. Use when the user needs a concrete implementation plan: "plan implementation", "how should I implement", "approach", "strategy", "plan feature", "plan refactor". Run discover and map first. NOT for debugging — use aio-debug instead.
+description: |
+  PROACTIVE planning — third step in the aio-deep-plan pipeline. Synthesize discovery and mapping into a concrete, actionable implementation plan. Run discover and map first. NOT for debugging — use aio-debug instead.
 when_to_use: plan implementation, how should I implement, approach, strategy, plan feature, plan refactor, implementation plan, design approach, task breakdown, execution plan, feature planning
 argument-hint: "Feature or refactor to plan implementation for"
-effort: high
 context: fork
 agent: oh-my-claudecode:planner
 ---

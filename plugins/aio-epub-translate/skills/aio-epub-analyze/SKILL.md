@@ -1,8 +1,8 @@
 ---
 name: aio-epub-analyze
-description: Pre-translation analysis for EPUB books. Analyze writing style, characters, tone, and build glossary before translating. Triggers: "analyze book", "phân tích sách", "pre-translate", "chuẩn bị dịch", "book analysis", "character list", "danh sách nhân vật", "glossary", "thuật ngữ".
+description: |
+  Pre-translation analysis for EPUB books — analyze writing style, characters, tone, and build glossary before translating.
 when_to_use: analyze book, phân tích sách, pre-translate, chuẩn bị dịch, book analysis, character list, danh sách nhân vật, glossary, thuật ngữ, writing style analysis, tone analysis, prepare translation
-effort: high
 argument-hint: book ID or title
 ---
 

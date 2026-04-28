@@ -1,8 +1,8 @@
 ---
 name: aio-gitnexus
-description: Install, configure, and manage the GitNexus code intelligence engine — index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows. Triggers: "setup gitnexus", "index codebase", "gitnexus status", "rebuild index", "setup code intelligence".
-when_to_use: Use when setting up GitNexus, indexing a codebase, checking GitNexus status, rebuilding a stale index, troubleshooting GitNexus, or documenting how to keep a GitNexus index fresh with local git hooks on the master branch.
-effort: medium
+description: |
+  Install, configure, and manage the GitNexus code intelligence engine — index codebase, setup MCP, check status, troubleshoot, and document local git-hook auto-refresh for master-only workflows.
+when_to_use: setup gitnexus, index codebase, gitnexus status, rebuild index, setup code intelligence, troubleshoot gitnexus, git hook refresh, manage gitnexus, configure gitnexus
 ---
 
 # GitNexus Manager

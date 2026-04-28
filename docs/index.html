@@ -35,8 +35,8 @@
   --blue:      #5555ff;   /* DOS bright blue   #09 */
   --white:     #ffffff;
 
-  --grid-tint:    rgba(85,255,85,0.025);
-  --scan-opacity: 0.26;
+  --grid-tint:    rgba(85,255,85,0.05);
+  --scan-opacity: 0.12;
 
   --f-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Menlo', 'Monaco', 'Courier New', monospace;
   --f-vga:  'VT323', 'IBM Plex Mono', 'Courier New', monospace;
@@ -117,6 +117,18 @@ body::after {
   padding: 8px 6px 4px 8px;
 }
 #ghostty-terminal canvas { display: block; }
+
+/* ════ SIGNAL: neon glow on terminal text + soft vignette ════ */
+[data-theme="signal"] body {
+  background:
+    radial-gradient(ellipse 95% 75% at center, rgba(12, 36, 22, 0.55) 0%, transparent 70%),
+    #000000;
+}
+[data-theme="signal"] #ghostty-terminal canvas {
+  filter:
+    drop-shadow(0 0 1px rgba(85, 255, 85, 0.55))
+    drop-shadow(0 0 4px rgba(85, 255, 85, 0.22));
+}
 #ghostty-terminal .xterm,
 #ghostty-terminal .xterm-viewport,
 #ghostty-terminal .xterm-screen { height: 100% !important; width: 100% !important; }
@@ -693,19 +705,50 @@ async function renderPluginCard(p) {
 
   const descLines = wrapText(p.desc, inner, '').split('\r\n').slice(0, 3);
 
-  const skillCount = p.skills ? p.skills.length : 0;
-  const skillTxt = skillCount + ' skill' + (skillCount === 1 ? '' : 's');
+  const skills = p.skills || [];
   const installTxt = 'install ' + p.name;
-  const footerGap = Math.max(2, inner - skillTxt.length - installTxt.length);
+  const footerGap = Math.max(0, inner - installTxt.length);
 
-  await writeLines([
+  // Each skill = "▸ name" header + word-wrapped full desc lines (indented)
+  const skillLines = skills.flatMap(sk => {
+    const sn = (sk.name || '').slice(0, Math.max(1, inner - 4));
+    const headerVis = 2 + sn.length;
+    const headerPad = Math.max(0, inner - headerVis);
+    const headerLine = pad + C.bmagenta + '║ ' + RESET +
+      C.bgreen + '▸ ' + RESET +
+      BOLD + C.bcyan + sn + RESET +
+      ' '.repeat(headerPad) +
+      C.bmagenta + ' ║' + RESET + '\r\n';
+
+    const rawDesc = (sk.desc || '').replace(/\s+/g, ' ').trim();
+    const wrapped = rawDesc
+      ? wrapText(rawDesc, inner - 2, '').split('\r\n')
+      : [];
+    const descRows = wrapped.map(line => {
+      const visible = '  ' + line;
+      return pad + C.bmagenta + '║ ' + RESET +
+        C.grey + visible.padEnd(inner) + RESET +
+        C.bmagenta + ' ║' + RESET + '\r\n';
+    });
+    return [headerLine, ...descRows];
+  });
+
+  const lines = [
     pad + C.bmagenta + '╔' + hLine + '╗' + RESET + '\r\n',
     pad + C.bmagenta + '║ ' + RESET + BOLD + C.bmagenta + name + RESET + ' '.repeat(titleGap) + C.byellow + ver + RESET + C.bmagenta + ' ║' + RESET + '\r\n',
     pad + C.bmagenta + '╟' + sLine + '╢' + RESET + '\r\n',
     ...descLines.map(line => pad + C.bmagenta + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + C.bmagenta + ' ║' + RESET + '\r\n'),
-    pad + C.bmagenta + '║ ' + RESET + C.bcyan + skillTxt + RESET + ' '.repeat(footerGap) + C.grey + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n',
-    pad + C.bmagenta + '╚' + hLine + '╝' + RESET + '\r\n',
-  ]);
+  ];
+
+  if (skillLines.length) {
+    lines.push(pad + C.bmagenta + '╟' + sLine + '╢' + RESET + '\r\n');
+    lines.push(...skillLines);
+  }
+
+  lines.push(pad + C.bmagenta + '║ ' + RESET + ' '.repeat(footerGap) + C.grey + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
+  lines.push(pad + C.bmagenta + '╚' + hLine + '╝' + RESET + '\r\n');
+
+  await writeLines(lines);
 }
 
 function cmdPlugins() {
@@ -943,7 +986,7 @@ async function boot() {
       fontSize: 14,
       fontFamily: 'Monaco, Menlo, "Courier New", monospace',
       theme: currentTheme(),
-      scrollback: 5000,
+      scrollback: 50000,
     });
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);

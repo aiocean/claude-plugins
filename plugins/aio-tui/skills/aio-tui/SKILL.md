@@ -1,8 +1,8 @@
 ---
 name: aio-tui
-description: Build interactive terminal UIs with Go Bubbletea and lipgloss — architecture, styling, and patterns. Triggers: "build a TUI", "create terminal UI", "Bubbletea app", "interactive dashboard", TUI, lipgloss.
-when_to_use: build TUI, create terminal UI, Bubbletea, interactive dashboard, TUI, lipgloss, terminal app, CLI UI, Go terminal, Elm architecture, charmbracelet
-effort: low
+description: |
+  Build interactive terminal UIs with Go Bubbletea and lipgloss — architecture, styling, and patterns.
+when_to_use: build a TUI, create terminal UI, Bubbletea app, interactive dashboard, TUI, lipgloss, build TUI, Bubbletea, terminal app, CLI UI, Go terminal, Elm architecture, charmbracelet
 ---
 
 ## Environment

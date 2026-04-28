@@ -1,8 +1,8 @@
 ---
 name: aio-dream
-description: Memory consolidation — review, merge, prune and re-index your memory files so future sessions orient quickly. Triggers: "dream", "consolidate memory", "clean up memories", "organize memories", "memory maintenance", "prune memories".
+description: |
+  Memory consolidation — review, merge, prune and re-index memory files so future sessions orient quickly.
 when_to_use: dream, consolidate memory, clean up memories, organize memories, memory maintenance, prune memories, merge memories, memory review
-effort: medium
 context: fork
 ---
 

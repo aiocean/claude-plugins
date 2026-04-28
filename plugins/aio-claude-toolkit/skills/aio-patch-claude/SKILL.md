@@ -1,8 +1,8 @@
 ---
 name: aio-patch-claude
-description: Patch Claude Code system prompts to maximize quality over token efficiency. Rebalances brevity-biased instructions in cli.js for thorough, senior-developer-level output.
+description: |
+  Patch Claude Code system prompts to maximize quality over token efficiency — rebalances brevity-biased instructions in cli.js for thorough, senior-developer-level output.
 when_to_use: patch claude, patch prompts, fix claude prompts, unbloat claude, improve claude quality, rebalance prompts, remove brevity limits, patch cli.js, upgrade claude output
-effort: medium
 ---
 
 # Patch Claude Code Prompts for Maximum Quality

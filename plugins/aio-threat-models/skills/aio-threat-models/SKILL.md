@@ -1,11 +1,8 @@
 ---
 name: aio-threat-models
 description: |
-  Use when analyzing security or privacy risks of a system, designing secure architecture, reviewing attack surface, or selecting a threat modeling framework.
-  Actively guides you through framework selection, application, and cross-framework composition for threat modeling tasks.
-  Triggers: threat model, threat modeling, STRIDE, LINDDUN, PASTA, OCTAVE, Attack Tree, MITRE ATT&CK, ATLAS, Kill Chain, Diamond Model, DREAD, CAPEC, Trike, VAST, hTMM, Persona non Grata, Security Cards, DPIA, GDPR Article 35, OWASP LLM Top 10, NIST AI RMF, adversarial ML, Kubernetes threat, cloud threat modeling, continuous threat modeling, shared responsibility, DFD, trust boundary, security risk analysis, privacy risk, attack surface, secure design, security architecture review, privacy engineering, data protection impact assessment, search threat models, find framework, which framework.
-when_to_use: threat modeling, security review, privacy review, attack surface, risk analysis, secure design, secure architecture, STRIDE, LINDDUN, PASTA, OCTAVE, Attack Tree, Kill Chain, MITRE ATT&CK, ATLAS, Diamond Model, CAPEC, DREAD, Trike, VAST, hTMM, Persona non Grata, Security Cards, DPIA, GDPR, OWASP LLM, NIST AI RMF, adversarial ML, Kubernetes security, cloud security, shared responsibility, DFD, trust boundary, threat model as code, continuous threat modeling, pytm, Threagile, Threat Dragon, Microsoft TMT, search threat models, find framework
-effort: high
+  Threat modeling framework advisor for analyzing security or privacy risks, designing secure architecture, reviewing attack surface, or selecting frameworks. Actively guides through framework selection, application, and cross-framework composition.
+when_to_use: threat model, threat modeling, STRIDE, LINDDUN, PASTA, OCTAVE, Attack Tree, MITRE ATT&CK, ATLAS, Kill Chain, Diamond Model, DREAD, CAPEC, Trike, VAST, hTMM, Persona non Grata, Security Cards, DPIA, GDPR Article 35, OWASP LLM Top 10, NIST AI RMF, adversarial ML, Kubernetes threat, cloud threat modeling, continuous threat modeling, shared responsibility, DFD, trust boundary, security risk analysis, privacy risk, attack surface, secure design, security architecture review, privacy engineering, data protection impact assessment, search threat models, find framework, which framework, security review, privacy review, risk analysis, secure architecture, Kubernetes security, cloud security, threat model as code, pytm, Threagile, Threat Dragon, Microsoft TMT
 ---
 
 # Threat Modeling Framework Advisor
