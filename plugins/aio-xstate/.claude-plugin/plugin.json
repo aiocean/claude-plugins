@@ -1,7 +1,7 @@
 {
   "name": "aio-xstate",
-  "description": "XState v5 strict ruleset for TypeScript state machines. setup().createMachine() patterns, actor types, design-first planning, anti-god-machine enforcement, and canonical patterns.",
-  "version": "1.0.7",
+  "description": "Build XState v5 state machines the right way — design-first planning, params-first typing, and canonical actor patterns for TypeScript and React, with anti-god-machine enforcement.",
+  "version": "1.0.8",
   "author": {
     "name": "aiocean"
   }

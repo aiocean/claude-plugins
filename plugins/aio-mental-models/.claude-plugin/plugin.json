@@ -1,7 +1,7 @@
 {
   "name": "aio-mental-models",
-  "description": "Objective-driven decision advisor using 50+ mental models. Guides you through model selection, application, synthesis, and stress-testing for decisions, trade-offs, and complex problems.",
-  "version": "2.1.4",
+  "description": "Reach better decisions faster — picks the right mental model (first principles, inversion, second-order, opportunity cost, …) and walks you through applying it to your problem.",
+  "version": "2.1.5",
   "author": {
     "name": "aiocean"
   },

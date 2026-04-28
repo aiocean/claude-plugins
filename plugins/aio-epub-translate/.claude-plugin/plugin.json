@@ -1,7 +1,7 @@
 {
   "name": "aio-epub-translate",
-  "description": "EPUB book translation via ConnectRPC API. Upload EPUBs, translate chapters with literary Vietnamese quality, check translation quality, manage books, and export bilingual EPUBs. Claude acts as literary translator — reading full chapters, maintaining consistency, and producing publication-quality Vietnamese.",
-  "version": "3.5.2",
+  "description": "Translate EPUB books into literary Vietnamese end-to-end — upload, pre-translation analysis, chapter translation with consistency checks, quality review, and bilingual export.",
+  "version": "3.5.3",
   "author": {
     "name": "aiocean"
   },

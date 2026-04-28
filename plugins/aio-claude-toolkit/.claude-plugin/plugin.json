@@ -1,7 +1,7 @@
 {
   "name": "aio-claude-toolkit",
-  "description": "Claude Code toolkit — patch Claude behavior, capture workflows as skills, consolidate memories, and submit feedback. Four skills: aio-patch-claude, aio-skillify, aio-dream, feedback.",
-  "version": "2.6.1",
+  "description": "Sharpen Claude Code itself — patch system prompts for senior-grade output, capture this session's workflow as a reusable skill, consolidate memory, and ship feedback to the marketplace.",
+  "version": "2.6.2",
   "author": {
     "name": "aiocean"
   }

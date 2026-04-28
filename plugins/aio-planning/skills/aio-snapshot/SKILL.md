@@ -1,7 +1,7 @@
 ---
 name: aio-snapshot
 description: |
-  PROACTIVE planning — baseline step in the aio-deep-plan pipeline. Enables change detection in the review skill after coding. NOT for debugging — use aio-debug instead.
+  Capture a GitNexus baseline of the codebase before coding so aio-review can detect what changed afterwards.
 when_to_use: create snapshot, baseline, before I start coding, change tracking, save state, capture baseline, before coding
 ---
 

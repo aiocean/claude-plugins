@@ -1,7 +1,7 @@
 {
   "name": "aio-starrocks",
-  "description": "StarRocks best practices and query tuning — table design (partitioning, bucketing, sort keys, PK tuning, auth, resource groups) and query performance (EXPLAIN plans, Query Profile, operator metrics, tuning recipes, schema optimization, query hints).",
-  "version": "1.0.1",
+  "description": "Design StarRocks tables and tune slow queries — partitioning, bucketing, sort keys, and PK tuning, plus EXPLAIN/Query Profile reading and concrete tuning recipes.",
+  "version": "1.0.2",
   "author": {
     "name": "aiocean"
   }

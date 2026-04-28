@@ -1,8 +1,8 @@
 ---
 name: aio-bun-fullstack-setup
 description: |
-  Scaffold a Bun fullstack project with single-port server, Vite proxy, monorepo layout, and Docker config. Detects existing files and generates only what is missing.
-when_to_use: scaffold, fullstack, bun server, vite proxy, single port, monorepo, docker bun, new project, bootstrap, setup bun, bun fullstack, project scaffold, fullstack Bun, creating a fullstack app, configuring single port server
+  Scaffold a Bun fullstack project — single-port server, Vite dev proxy, monorepo layout, and Docker config.
+when_to_use: scaffold bun, bun fullstack, bun server, vite proxy, single port, monorepo bun, docker bun, bootstrap bun project, new fullstack project
 ---
 
 ## Environment

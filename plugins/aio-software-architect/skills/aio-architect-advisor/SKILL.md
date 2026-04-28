@@ -1,8 +1,8 @@
 ---
 name: aio-architect-advisor
 description: |
-  Architecture decision advisor powered by 137 in-depth articles. Guides through pattern selection, application, synthesis, and stress-testing with real-world insights from Google, AWS, Microsoft, and 13 foundational books.
-when_to_use: architecture, system design, how to build, which pattern, trade-off, scale this, design review, architecture decision, microservices or monolith, how to handle failure, database choice, event driven, decompose, migration strategy, design decision, pattern selection, trade-off analysis, scale, resilience, how to architect, which database, microservices vs monolith, event-driven, CQRS, decomposition, migration, reliability, availability, consistency, distributed, API design, domain modeling
+  Architecture decision advisor — guides pattern selection, application, synthesis, and stress-testing for system design, scaling, resilience, and migration decisions.
+when_to_use: architecture decision, system design, which pattern, design review, microservices vs monolith, scale this, decompose, migration strategy, database choice, event-driven, CQRS, resilience, availability, consistency, distributed system, API design, domain modeling, trade-off analysis
 ---
 
 # Software Architecture Advisor

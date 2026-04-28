@@ -1,7 +1,7 @@
 {
   "name": "aio-saas-tools",
-  "description": "SaaS integration toolkit — Atlassian, Google Workspace, Tanca HR, and X/Twitter. Four skills: aio-atlassian (Jira + Confluence CLI), aio-google-workspace (Drive, Gmail, Calendar, Sheets, Docs), aio-tanca (employee timekeeping + HR), aio-x (X/Twitter management).",
-  "version": "1.0.1",
+  "description": "Drive Jira, Confluence, Google Workspace (Drive/Gmail/Calendar/Sheets/Docs), Tanca HR, and X/Twitter from your terminal — one CLI per service, no context switching.",
+  "version": "1.0.2",
   "author": {
     "name": "aiocean"
   }

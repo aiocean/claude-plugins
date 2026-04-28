@@ -1,7 +1,7 @@
 ---
 name: aio-debug
 description: |
-  REACTIVE debugging — use when something is broken and needs fixing. Orchestrates codebase context, root cause investigation, minimal fix, and code review validation. NOT for planning new features — use aio-deep-plan instead.
+  Debug broken code — orchestrates codebase context gathering, root cause investigation, minimal fix, and code review validation via debugger agent.
 when_to_use: debug, fix bug, fixbug, investigate error, troubleshoot, why is this broken, not working, failing test, unexpected behavior, runtime error, stack trace, crash, regression, root cause, bug fix
 argument-hint: "Error message, failing test name, or description of broken behavior"
 context: fork

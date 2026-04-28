@@ -1,7 +1,7 @@
 ---
 name: aio-discover
 description: |
-  PROACTIVE planning — first step in the aio-deep-plan pipeline. Explore codebase before writing code. Follow with map, then plan. NOT for debugging — use aio-debug instead.
+  Find code, locate implementations, and understand how features work via parallel Explore agents. First step of the aio-deep-plan pipeline (followed by aio-map and aio-plan).
 when_to_use: discover, find code, how does X work, where is, what handles, understand codebase, explore code, search codebase, locate, find implementation, code discovery
 argument-hint: "Feature, component, or concept to discover in the codebase"
 context: fork

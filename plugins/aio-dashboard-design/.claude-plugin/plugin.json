@@ -1,7 +1,7 @@
 {
   "name": "aio-dashboard-design",
-  "description": "Research-backed SaaS analytics dashboard design advisor. Synthesizes Tufte, Few, Cleveland–McGill, Bertin, Munzner, Shneiderman, Knaflic, Cairo, Segel–Heer, NN/g UX research, WCAG 2.2, Chartability, and design systems (IBM Carbon, Shopify Polaris, Atlassian, Material, Fluent) with real patterns from Stripe, Linear, Vercel, Datadog, Shopify Admin, Plausible, GitHub. 10 core principles, chart selection matrix, 20-point anti-pattern checklist, accessibility and performance budgets. Use as both design reference and review standard.",
-  "version": "1.0.1",
+  "description": "Design and review SaaS analytics dashboards with research-backed standards — chart selection, anti-pattern checks, accessibility, and storytelling. Pre-ship review without leaving the terminal.",
+  "version": "1.0.2",
   "author": {
     "name": "aiocean"
   },

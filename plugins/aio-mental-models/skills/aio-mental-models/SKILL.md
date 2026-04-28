@@ -1,8 +1,8 @@
 ---
 name: aio-mental-models
 description: |
-  Structured thinking framework advisor for decisions, trade-offs, and complex problems. Actively guides you through model selection and application.
-when_to_use: decision, trade-off, mental model, think through, evaluate options, strategic thinking, problem-solving, structured reasoning, second-order thinking, second-order, first principles, inversion, search mental models, find model, which model, framework, reasoning
+  Decision and reasoning advisor — picks and applies mental models (first principles, inversion, second-order, opportunity cost, etc.) for trade-offs and complex problems.
+when_to_use: mental model, decision, trade-off, think through, evaluate options, structured reasoning, first principles, inversion, second-order thinking, opportunity cost, which model, problem-solving framework
 ---
 
 # Mental Models Decision Advisor

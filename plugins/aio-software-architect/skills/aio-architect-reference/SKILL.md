@@ -1,8 +1,8 @@
 ---
 name: aio-architect-reference
 description: |
-  Software architecture encyclopedia with 137 in-depth articles. Look up any architecture pattern, principle, or concept. Search semantically, browse by category, or compare patterns side-by-side. Covers cloud design patterns, resilience, data architecture, DDD, distributed systems, API design, operations, and modern paradigms.
-when_to_use: what is, explain, look up, search pattern, compare patterns, list patterns, architecture reference, tell me about, define, describe, how does X work, what is CQRS, explain circuit breaker, compare saga vs 2PC, list resilience patterns, search for caching, look up DDD, tell me about event sourcing, browse architecture patterns, define bounded context, describe hexagonal, how does consistent hashing work
+  Look up architecture patterns and concepts via semantic search — read the full article on demand, compare patterns side-by-side, or browse by volume.
+when_to_use: architecture pattern, look up pattern, what is CQRS, explain circuit breaker, compare patterns, list patterns, browse architecture, DDD, bounded context, hexagonal, event sourcing, consistent hashing, saga, 2PC, resilience pattern, caching pattern, cloud design pattern, distributed system pattern
 ---
 
 # Software Architecture Reference

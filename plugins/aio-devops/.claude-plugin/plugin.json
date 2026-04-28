@@ -1,7 +1,7 @@
 {
   "name": "aio-devops",
-  "description": "DevOps toolkit — GitHub/GitLab management and git worktree workflows. Three skills: aio-github (GitHub CLI for repos, PRs, issues), aio-gitlab (GitLab CLI for projects, MRs, pipelines), aio-worktree (git worktree management for parallel development).",
-  "version": "1.0.1",
+  "description": "GitHub, GitLab, and git worktree workflows in one toolkit — manage repos, PRs, MRs, pipelines, and parallel branches without juggling CLIs.",
+  "version": "1.0.2",
   "author": {
     "name": "aiocean"
   }

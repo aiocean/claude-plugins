@@ -1,7 +1,7 @@
 {
   "name": "aio-planning",
-  "description": "Code analysis and planning toolkit — codebase understanding, planning, debugging, and code review. Four skills with 10 sub-skills: aio-codebase-oracle (codebase analysis with GitNexus + doc-writer), aio-deep-plan (discover/map/plan/review/snapshot), aio-debug (systematic debug & fix), aio-rubber-duck (rubber duck debugging companion), aio-code-review (ultra code review).",
-  "version": "1.1.1",
+  "description": "Understand, plan, debug, and review code as one coordinated flow — codebase discovery, dependency mapping, implementation planning, root-cause debugging, and pre-merge review.",
+  "version": "1.1.2",
   "author": {
     "name": "aiocean"
   }

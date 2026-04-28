@@ -1,7 +1,7 @@
 {
   "name": "aio-watermill-kit",
-  "description": "Skills and generators for working with the Go Watermill messaging library (Pub/Sub, CQRS, Routers).",
-  "version": "0.1.1",
+  "description": "Build event-driven Go apps with Watermill — Router, middleware, Pub/Sub, CQRS, and integrations for Kafka, AMQP, NATS, Redis Streams, and SQL.",
+  "version": "0.1.2",
   "author": {
     "name": "aiocean"
   }

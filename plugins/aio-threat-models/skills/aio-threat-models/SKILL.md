@@ -1,8 +1,8 @@
 ---
 name: aio-threat-models
 description: |
-  Threat modeling framework advisor for analyzing security or privacy risks, designing secure architecture, reviewing attack surface, or selecting frameworks. Actively guides through framework selection, application, and cross-framework composition.
-when_to_use: threat model, threat modeling, STRIDE, LINDDUN, PASTA, OCTAVE, Attack Tree, MITRE ATT&CK, ATLAS, Kill Chain, Diamond Model, DREAD, CAPEC, Trike, VAST, hTMM, Persona non Grata, Security Cards, DPIA, GDPR Article 35, OWASP LLM Top 10, NIST AI RMF, adversarial ML, Kubernetes threat, cloud threat modeling, continuous threat modeling, shared responsibility, DFD, trust boundary, security risk analysis, privacy risk, attack surface, secure design, security architecture review, privacy engineering, data protection impact assessment, search threat models, find framework, which framework, security review, privacy review, risk analysis, secure architecture, Kubernetes security, cloud security, threat model as code, pytm, Threagile, Threat Dragon, Microsoft TMT
+  Threat modeling framework advisor — selects, applies, and composes frameworks (STRIDE, LINDDUN, PASTA, MITRE ATT&CK/ATLAS, Attack Trees, etc.) for security, privacy, AI/ML, cloud, and Kubernetes risk analysis.
+when_to_use: threat model, security risk analysis, privacy risk, attack surface, secure architecture review, STRIDE, LINDDUN, PASTA, MITRE ATT&CK, ATLAS, Attack Tree, Kill Chain, DPIA, OWASP LLM Top 10, NIST AI RMF, adversarial ML, cloud threat modeling, Kubernetes threat, threat model as code, DFD, trust boundary
 ---
 
 # Threat Modeling Framework Advisor

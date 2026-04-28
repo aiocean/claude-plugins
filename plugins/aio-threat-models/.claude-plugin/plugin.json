@@ -1,7 +1,7 @@
 {
   "name": "aio-threat-models",
-  "description": "Threat modeling knowledge advisor with semantic search across 27 frameworks — STRIDE, LINDDUN, PASTA, OCTAVE, Attack Trees, MITRE ATT&CK/ATLAS, Kill Chain, NIST AI RMF, OWASP LLM Top 10, and more. Guides framework selection, application, and cross-framework composition for security, privacy, and AI threat modeling.",
-  "version": "1.0.1",
+  "description": "Pick and apply the right threat-modeling framework — STRIDE, LINDDUN, PASTA, MITRE ATT&CK/ATLAS, Attack Trees, and 22 more — for security, privacy, and AI/ML risk analysis.",
+  "version": "1.0.2",
   "author": {
     "name": "aiocean"
   },
