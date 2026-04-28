@@ -88,16 +88,11 @@ body::after {
 }
 #ghostty-terminal canvas { display: block; }
 
-/* ════ SIGNAL: neon glow on terminal text + soft vignette ════ */
+/* ════ SIGNAL: soft vignette behind terminal ════ */
 [data-theme="signal"] body {
   background:
     radial-gradient(ellipse 95% 75% at center, rgba(12, 36, 22, 0.55) 0%, transparent 70%),
     #000000;
-}
-[data-theme="signal"] #ghostty-terminal canvas {
-  filter:
-    drop-shadow(0 0 1px rgba(85, 255, 85, 0.55))
-    drop-shadow(0 0 4px rgba(85, 255, 85, 0.22));
 }
 /* small screens */
 @media (max-width: 640px) {
@@ -759,16 +754,43 @@ async function renderPluginCard(p) {
 
   const name = (p.name || '').slice(0, Math.max(1, inner - 12));
   const ver = 'v' + (p.version || '?');
-  const titleGap = Math.max(1, inner - name.length - ver.length);
-
-  const descLines = wrapText(p.desc, inner, '').split('\r\n').slice(0, 3);
-
-  const skills = p.skills || [];
   // installLabel() is the single source of truth — the LinkProvider regex
   // (installLabelPattern) parses output produced here, so renaming the format
   // means changing both via that helper, not editing two places.
   const installTxt = installLabel(p.name);
-  const footerGap = Math.max(0, inner - installTxt.length);
+
+  // Header layout: name + " " + ver + (gap, ≥1) + installTxt — all on the
+  // title row. Falls back to the legacy "install on its own footer row"
+  // layout when terminal is too narrow to fit everything in one line.
+  const headerNeeded = name.length + 1 + ver.length + 1 + installTxt.length;
+  const headerFits = headerNeeded <= inner;
+  let headerLine;
+  let installFooterLine = null;
+  if (headerFits) {
+    const headerGap = inner - name.length - 1 - ver.length - installTxt.length;
+    headerLine = pad + C.bmagenta + '║ ' + RESET +
+      BOLD + C.bmagenta + name + RESET + ' ' +
+      C.byellow + ver + RESET +
+      ' '.repeat(headerGap) +
+      BOLD + C.bcyan + installTxt + RESET +
+      C.bmagenta + ' ║' + RESET + '\r\n';
+  } else {
+    const titleGap = Math.max(1, inner - name.length - ver.length);
+    headerLine = pad + C.bmagenta + '║ ' + RESET +
+      BOLD + C.bmagenta + name + RESET +
+      ' '.repeat(titleGap) +
+      C.byellow + ver + RESET +
+      C.bmagenta + ' ║' + RESET + '\r\n';
+    const footerGap = Math.max(0, inner - installTxt.length);
+    installFooterLine = pad + C.bmagenta + '║ ' + RESET +
+      ' '.repeat(footerGap) +
+      BOLD + C.bcyan + installTxt + RESET +
+      C.bmagenta + ' ║' + RESET + '\r\n';
+  }
+
+  const descLines = wrapText(p.desc, inner, '').split('\r\n').slice(0, 3);
+
+  const skills = p.skills || [];
 
   // Each skill = "▸ name" header + word-wrapped full desc lines (indented)
   const skillLines = skills.flatMap(sk => {
@@ -796,7 +818,7 @@ async function renderPluginCard(p) {
 
   const lines = [
     pad + C.bmagenta + '╔' + hLine + '╗' + RESET + '\r\n',
-    pad + C.bmagenta + '║ ' + RESET + BOLD + C.bmagenta + name + RESET + ' '.repeat(titleGap) + C.byellow + ver + RESET + C.bmagenta + ' ║' + RESET + '\r\n',
+    headerLine,
     pad + C.bmagenta + '╟' + sLine + '╢' + RESET + '\r\n',
     ...descLines.map(line => pad + C.bmagenta + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + C.bmagenta + ' ║' + RESET + '\r\n'),
   ];
@@ -806,7 +828,7 @@ async function renderPluginCard(p) {
     lines.push(...skillLines);
   }
 
-  lines.push(pad + C.bmagenta + '║ ' + RESET + ' '.repeat(footerGap) + BOLD + C.bcyan + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
+  if (installFooterLine) lines.push(installFooterLine);
   lines.push(pad + C.bmagenta + '╚' + hLine + '╝' + RESET + '\r\n');
 
   await writeLines(lines);
