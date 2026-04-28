@@ -138,6 +138,13 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
     else
       fail "Folder name '$PLUGIN_NAME' does not match plugin.json name '$pj_name'"
     fi
+    # Charset enforcement — names flow into terminal output and clipboard
+    # commands on docs/index.html. Restricting to lower-kebab blocks ANSI
+    # escape sequences and shell metacharacters (`$()`, backticks, quotes)
+    # before they can reach end users via the install modal.
+    if [[ ! "$pj_name" =~ ^[a-z0-9][a-z0-9-]{0,63}$ ]]; then
+      fail "plugin.json name '$pj_name' must match ^[a-z0-9][a-z0-9-]{0,63}$ (lower-kebab, ≤64 chars)"
+    fi
   fi
 
   # -------------------------------------------------------

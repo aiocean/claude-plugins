@@ -72,13 +72,19 @@ body::after {
 }
 
 /* ════ GHOSTTY-WEB TERMINAL — fills the viewport ════ */
+/* right: -16px pushes the canvas 16px past the viewport so ghostty-web's
+   hardcoded 14px-wide scrollbar gutter (rendered at canvasWidth-14 in
+   renderScrollbar(), no public config to disable) is clipped off-screen.
+   body overflow:hidden prevents this from triggering horizontal scroll.
+   FitAddon refits to the wider container so cell content fills the visible
+   viewport edge-to-edge. */
 #ghostty-terminal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; left: 0; right: -16px; bottom: 0;
   z-index: 1;
   background: #000;
   overflow: hidden;
-  padding: 8px 6px 4px 8px;
+  padding: 8px 0 4px 8px;
 }
 #ghostty-terminal canvas { display: block; }
 
@@ -95,7 +101,7 @@ body::after {
 }
 /* small screens */
 @media (max-width: 640px) {
-  #ghostty-terminal { padding: 4px 2px; }
+  #ghostty-terminal { padding: 4px 0 4px 2px; } /* right=0 keeps scrollbar flush */
 }
 
 /* ════ CUSTOM DOS BLOCK CURSOR — hides native mouse, follows movement ════ */
@@ -117,6 +123,14 @@ html, body, #ghostty-terminal, #ghostty-terminal * {
 }
 #dos-cursor.active {
   animation: dos-cursor-blink 1.06s steps(2, start) infinite;
+}
+/* over-link: DOS cursor turns magenta + halo when hovering a clickable
+   region. Visual signal click affordance, since `cursor: none !important`
+   above blocks the native pointer change ghostty-web emits. */
+#dos-cursor.over-link {
+  background: var(--magenta, #ff79c6);
+  box-shadow: 0 0 10px var(--magenta, #ff79c6), 0 0 18px var(--magenta, #ff79c6);
+  animation-duration: 0.5s; /* faster blink = active hint */
 }
 @keyframes dos-cursor-blink {
   0%, 49%   { opacity: 1; }
@@ -199,6 +213,181 @@ const LINE_DELAY = 18;
 const PROMPT = C.bgreen + 'C:' + C.bmagenta + '\\CLAUDE' + RESET + '> ';
 
 function pause(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ══════════════════════════════════════════════════════════════
+   INSTALL MODAL — alt-screen overlay, click or command driven
+   trigger sources:
+     - click on "[ install <name> ]" link inside a plugin card
+     - typed command `install <name>` from prompt
+   keys while open: c=copy, esc/enter/q/^C=close
+   ══════════════════════════════════════════════════════════════ */
+// Plugin name charset — defense-in-depth filter at JS boundary. Mirrors the
+// regex enforced by scripts/validate-marketplace.sh. A name slipping past CI
+// (or a corrupt data.json) gets dropped here before reaching term.write or
+// clipboard, blocking ANSI-injection / shell-injection vectors.
+const SAFE_PLUGIN_NAME = /^[a-z0-9][a-z0-9-]{0,63}$/;
+
+// Single source of truth for the clickable button text. Both renderPluginCard
+// and the LinkProvider consume this — keeps the regex and the rendered string
+// in lockstep, so a future rename can't desync the two halves.
+function installLabel(name) { return '[ install ' + name + ' ]'; }
+function installLabelPattern() { return /\[ install ([a-z0-9][a-z0-9-]{0,63}) \]/g; }
+
+let modalPhase = false;
+let modalPlugin = null;
+let modalNeedsPrompt = false;        // true when opened via typed command — close emits a fresh prompt
+let modalCopyState = 'idle';         // 'idle' | 'copied' | 'failed' — preserved across resize redraws
+let modalSavedViewportY = 0;         // restore scrollback position after close
+let installLinkHovers = 0;           // counter — DOS cursor highlights when > 0
+let installLinkDisposable = null;    // captured from registerLinkProvider for future teardown
+const dosCursorEl = () => document.getElementById('dos-cursor');
+
+function openInstallModal(pluginName, viaCommand) {
+  // Guards: no re-entry, no double-open during BIOS/autoPlay (alt-screen would
+  // collide with running writes and the input handler can't reach the modal
+  // close path while autoPlayPhase is true).
+  if (modalPhase) return false;
+  if (biosPhase) return false;
+  if (autoPlayPhase) { skipAutoPlay = true; return false; }
+  const p = pluginsData.find(x => x.name === pluginName);
+  if (!p) return false;
+  modalPlugin = p;
+  modalCopyState = 'idle';
+  modalNeedsPrompt = !!viaCommand;
+  // Snapshot scrollback position so close can restore the user's view if they
+  // had scrolled up to read an earlier card before clicking.
+  modalSavedViewportY = (term && term.buffer && term.buffer.active) ? term.buffer.active.viewportY : 0;
+  modalPhase = true;
+  // 1049: save cursor + enter alt screen + clear. 25l: hide cursor while modal up.
+  term.write(CSI + '?1049h' + CSI + '?25l');
+  try {
+    drawInstallModal();
+  } catch (e) {
+    // Bail out cleanly if drawing throws — never strand the user in alt screen.
+    closeInstallModal();
+    throw e;
+  }
+  return true;
+}
+
+function closeInstallModal() {
+  if (!modalPhase) return;
+  modalPhase = false;
+  modalPlugin = null;
+  modalCopyState = 'idle';
+  // 1049 reset: leave alt screen + restore cursor. 25h: show cursor again.
+  term.write(CSI + '?1049l' + CSI + '?25h');
+  // Restore scrollback view (1049 restores cursor but not viewport).
+  if (term && typeof term.scrollToLine === 'function') {
+    try { term.scrollToLine(modalSavedViewportY); } catch (e) {}
+  }
+  if (modalNeedsPrompt) printPrompt();
+  modalNeedsPrompt = false;
+}
+
+// Soft-wrap a long string into multiple lines no wider than `width`.
+// Breaks on spaces when possible, falls back to hard slice when a single
+// token exceeds `width` (install commands are tokenless paths so always slice).
+function wrapForModal(text, width) {
+  if (!text) return [''];
+  if (text.length <= width) return [text];
+  const out = [];
+  let s = text;
+  while (s.length > width) {
+    let cut = s.lastIndexOf(' ', width);
+    if (cut <= 0) cut = width;       // no space → hard cut
+    out.push(s.slice(0, cut));
+    s = s.slice(cut === width ? cut : cut + 1);
+  }
+  if (s) out.push(s);
+  return out;
+}
+
+function drawInstallModal() {
+  const p = modalPlugin;
+  if (!p) return;
+  const cols = (term && term.cols) || 80;
+  const rows = (term && term.rows) || 24;
+  // Clamp width: 20 is the minimum that still renders borders + 2-char inner padding.
+  // Below cols=28 the modal becomes useless but at least won't crash or truncate
+  // commands silently — we wrap them onto multiple lines instead.
+  const w = Math.max(20, Math.min(cols - 8, 72));
+  const inner = w - 4; // 4 = 2 border cols + 2 padding cols (one each side)
+
+  const title = ' INSTALL · ' + p.name + ' ';
+  const cmd1 = '/plugin marketplace add aiocean/claude-plugins';
+  const cmd2 = '/plugin install ' + p.name + '@aiocean-plugins';
+  let help;
+  if (modalCopyState === 'copied')      help = '✓ copied to clipboard · [esc/enter] close';
+  else if (modalCopyState === 'failed') help = '⚠ clipboard denied · select text manually';
+  else                                  help = '[c] copy   [esc/enter/q] close';
+
+  // Wrap commands onto multiple lines if they exceed available width — never
+  // silently truncate the one piece of text users came here to copy.
+  const cmd1Lines = wrapForModal(cmd1, inner - 1).map(l => ' ' + l);
+  const cmd2Lines = wrapForModal(cmd2, inner - 1).map(l => ' ' + l);
+  const helpLines = wrapForModal(help, inner - 1).map(l => ' ' + l);
+
+  const body = [
+    '',
+    ' STEP 1 · register marketplace',
+    ...cmd1Lines,
+    '',
+    ' STEP 2 · install plugin',
+    ...cmd2Lines,
+    '',
+    ...helpLines,
+    '',
+  ];
+
+  const h = body.length + 2; // +2 for top/bottom border
+  const top = Math.max(1, Math.floor((rows - h) / 2));
+  const left = Math.max(1, Math.floor((cols - w) / 2));
+  const move = (r, c) => CSI + r + ';' + c + 'H';
+
+  term.write(CSI + '2J');
+
+  // Top border with embedded title — clip title if narrower than its display length
+  const titleVis = Math.min(title.length, Math.max(4, w - 6));
+  const titleClipped = title.slice(0, titleVis);
+  const remaining = w - 2 - titleVis;
+  const leftBar = '═'.repeat(Math.max(2, Math.floor(remaining / 2)));
+  const rightBar = '═'.repeat(Math.max(2, w - 2 - titleVis - leftBar.length));
+  term.write(move(top, left) + C.bmagenta + '╔' + leftBar +
+    BOLD + C.bcyan + titleClipped + RESET + C.bmagenta + rightBar + '╗' + RESET);
+
+  // Body — color decided by line prefix / state
+  for (let i = 0; i < body.length; i++) {
+    const raw = (body[i] || '').slice(0, inner);
+    const padLen = Math.max(0, inner - raw.length);
+    let col = C.bwhite;
+    if (raw.startsWith(' STEP'))               col = BOLD + C.byellow;
+    else if (raw.startsWith(' /plugin'))       col = C.bgreen;
+    else if (raw.indexOf('✓ copied') >= 0)     col = BOLD + C.bgreen;
+    else if (raw.indexOf('⚠') >= 0)            col = BOLD + C.byellow;
+    else if (raw.indexOf('[') >= 0)            col = C.grey;
+    term.write(move(top + 1 + i, left) +
+      C.bmagenta + '║ ' + RESET +
+      col + raw + RESET + ' '.repeat(padLen) +
+      C.bmagenta + ' ║' + RESET);
+  }
+
+  // Bottom border
+  term.write(move(top + h - 1, left) +
+    C.bmagenta + '╚' + '═'.repeat(w - 2) + '╝' + RESET);
+}
+
+async function copyInstallCmds() {
+  const p = modalPlugin;
+  if (!p) return;
+  const cmds = '/plugin marketplace add aiocean/claude-plugins\n/plugin install ' + p.name + '@aiocean-plugins';
+  let ok = false;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try { await navigator.clipboard.writeText(cmds); ok = true; } catch (e) {}
+  }
+  modalCopyState = ok ? 'copied' : 'failed';
+  drawInstallModal();
+}
 
 /* writes each line; pauses between them only when animatedOutput is on.
    Commands run with animatedOutput=false → loop stays fully sync (no microtask yield),
@@ -325,23 +514,6 @@ const PRINCIPLES = [
     quote: "the PoC is the judge. opinions don't overrule empirical evidence." },
 ];
 
-const STACK_ITEMS = [
-  { glyph: '▸', name: 'RTK', ver: 'v0.35', color: 'lime', tag: '/opt/homebrew/bin/rtk',
-    desc: 'output >100 dòng boilerplate → RTK thắng. 60–90% token saved trên git/curl/test/build. hook tự động rewrite — tôi không gõ rtk bằng tay.' },
-  { glyph: '◆', name: 'Bun', ver: 'latest', color: 'cyan', tag: '// bun over node, every time',
-    desc: 'never npm. chạy .ts trực tiếp, install gấp 10 lần, bundler sẵn trong box. default runtime trên mọi project từ 2024.' },
-  { glyph: '⌕', name: 'ripgrep', ver: 'rg', color: 'magenta', tag: '// rg -t go "pattern"',
-    desc: 'never grep. gitignore-aware, type-filtered, 10× nhanh hơn. default cho mọi text scan dưới 50 match — trên ngưỡng đó, chuyển sg hoặc LSP.' },
-  { glyph: '⎇', name: 'ast-grep', ver: 'sg', color: 'amber', tag: '// structural, not textual',
-    desc: 'regex thua khi gặp syntax. sg match AST pattern — refactor 200 file mà không đụng string trong comment, string literal, hay tên biến trùng keyword.' },
-  { glyph: '●', name: 'LSP', ver: 'mcp', color: 'lime', tag: '// mcp__oh-my-claudecode_t__lsp_*',
-    desc: 'semantic > textual. go-to-def, references, diagnostics qua MCP — Claude thấy cái compiler thấy, không chỉ chữ trong file. rename an toàn, find-refs không miss.' },
-  { glyph: '◆', name: 'GitNexus', ver: 'mcp', color: 'cyan', tag: '// blast radius first, edit second',
-    desc: 'graph > grep. symbol references + impact radius TRƯỚC khi chạm code. powers aio-planning — biết cái gì sẽ vỡ trước khi sửa.' },
-  { glyph: '▲', name: 'markitdown', ver: 'cli', color: 'magenta', tag: '// markitdown <url>',
-    desc: 'web → clean markdown. strip JS-rendered noise, nav, cookie banner. feed Claude text có nghĩa, không phải HTML slop — tiết kiệm context cho việc chính.' },
-];
-
 const MANIFESTO_INTRO_LINES = [
   '',
   'REM first-person · why i wrote this file',
@@ -374,26 +546,6 @@ const MANIFESTO_STRUCTURE_LINES = [
   '',
   'C:\\> TYPE CLAUDE.MD    → VIEW RAW · 233 LINES · 17.2KB',
   'https://github.com/aiocean/claude-plugins/blob/main/docs/CLAUDE.md',
-];
-
-const FLOWS = [
-  { eyebrow: '▸ pipeline /01 · feature dev', title: 'build a feature',
-    sub: 'clarify → understand → implement → review',
-    steps: [
-      { phase: 'clarify',    node: 'gherkin-refine',               color: 'lime',    desc: 'turn vague ask into testable spec' },
-      { phase: 'understand', node: 'aio-planning · discover',      color: 'magenta', desc: 'map unknowns in the codebase' },
-      { phase: 'plan',       node: 'aio-planning · plan',          color: 'magenta', desc: 'pick approach, break into tasks' },
-      { phase: 'implement',  node: 'xstate / design-system',       color: 'cyan',    desc: 'state machine + ui kit, typed' },
-      { phase: 'review',     node: 'aio-planning · code-review',   color: 'amber',   desc: 'catch defects before commit' },
-    ]},
-  { eyebrow: '▸ pipeline /02 · debug', title: 'find the bug',
-    sub: 'investigate → reproduce → observe → visualize',
-    steps: [
-      { phase: 'investigate', node: 'aio-planning · debug',        color: 'magenta', desc: 'trace symptom to root cause' },
-      { phase: 'reproduce',   node: 'ios-device-debug',            color: 'cyan',    desc: 'pull logs from the real device' },
-      { phase: 'observe',     node: 'monitoring-observability',    color: 'lime',    desc: 'instrument + watch the fix at runtime' },
-      { phase: 'visualize',   node: 'aio-diagramming',             color: 'amber',   desc: 'generate diagrams from code state' },
-    ]},
 ];
 
 /* ══════════════════════════════════════════════════════════════
@@ -432,41 +584,6 @@ async function renderPrincipleCard(rule) {
     ...bodyLines.map(line => pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
     ...quoteLines.map(line => pad + col + '║ ' + RESET + BOLD + col + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
     pad + col + '╚' + hLine + '╝' + RESET + '\r\n',
-  ]);
-}
-
-async function renderStackItem(item) {
-  const cols = (term && term.cols) || 80;
-  const w = Math.min(cols - 4, 84);
-  const inner = w - 4;
-  const pad = '  ';
-  const hLine = '═'.repeat(w - 2);
-  const col = colorFor(item.color);
-  const head = item.glyph + ' ' + item.name + '   ' + item.ver;
-  const headGap = Math.max(1, inner - head.length - item.tag.length);
-  const descLines = wrapText(item.desc, inner, '').split('\r\n').slice(0, 3);
-
-  await writeLines([
-    pad + col + '╔' + hLine + '╗' + RESET + '\r\n',
-    pad + col + '║ ' + RESET + BOLD + col + head + RESET + ' '.repeat(headGap) + C.grey + item.tag + RESET + col + ' ║' + RESET + '\r\n',
-    ...descLines.map(line => pad + col + '║ ' + RESET + C.grey + line.padEnd(inner) + RESET + col + ' ║' + RESET + '\r\n'),
-    pad + col + '╚' + hLine + '╝' + RESET + '\r\n',
-  ]);
-}
-
-async function renderFlowCard(flow) {
-  await writeLines([
-    '  ' + C.bcyan + flow.eyebrow + RESET + '\r\n',
-    '  ' + BOLD + C.bmagenta + flow.title.toUpperCase() + RESET + '\r\n',
-    '  ' + C.grey + flow.sub + RESET + '\r\n',
-    ...flow.steps.map((s, i) => {
-      const col = colorFor(s.color);
-      const idx = String(i + 1).padStart(2, '0');
-      const phase = s.phase.padEnd(12);
-      const node = s.node.padEnd(28);
-      return '    ' + C.byellow + idx + RESET + '  ' + BOLD + phase + RESET + '· ' + col + node + RESET + C.grey + '// ' + s.desc + RESET + '\r\n';
-    }),
-    '\r\n',
   ]);
 }
 
@@ -573,34 +690,16 @@ async function autoPlay() {
     await pause(line.trim() ? 60 : 110);
   }
 
-  // 4. /03 Stack
+  // 4. /03 Plugins
   if (skipAutoPlay) return finishAutoPlay();
-  await renderSectionHeader('/03', 'stack', '7 tools · 1 tradeoff each');
-  for (const it of STACK_ITEMS) {
-    if (skipAutoPlay) return finishAutoPlay();
-    await renderStackItem(it);
-    await pause(180);
-  }
-
-  // 5. /04 Workflows
-  if (skipAutoPlay) return finishAutoPlay();
-  await renderSectionHeader('/04', 'workflows', 'pipelines across plugins');
-  for (const f of FLOWS) {
-    if (skipAutoPlay) return finishAutoPlay();
-    await renderFlowCard(f);
-    await pause(220);
-  }
-
-  // 6. /05 Plugins
-  if (skipAutoPlay) return finishAutoPlay();
-  await renderSectionHeader('/05', 'plugins', pluginsData.length + ' installable skill packs');
+  await renderSectionHeader('/03', 'plugins', pluginsData.length + ' installable skill packs');
   for (const p of pluginsData) {
     if (skipAutoPlay) return finishAutoPlay();
     await renderPluginCard(p);
     await pause(80);
   }
 
-  // 7. Footer
+  // 5. Footer
   if (skipAutoPlay) return finishAutoPlay();
   await pause(400);
   term.write('\r\n' + C.bmagenta + BOLD + '  ## aiocean//claude-plugins' + RESET + '\r\n');
@@ -630,8 +729,6 @@ function cmdHelp() {
     ['install <name>',       'copy install command to clipboard'],
     ['search <query>',       'filter plugins by name/desc/skill'],
     ['principles',           'operating principles (6 rules)'],
-    ['stack',                'tooling stack (7 items)'],
-    ['flows',                'workflow pipelines'],
     ['manifest, claude.md',  'print CLAUDE.md manifesto'],
     ['play, replay',         're-run full auto-play'],
     ['theme [signal|void]',  'toggle or set theme'],
@@ -652,16 +749,6 @@ function cmdPrinciples() {
   PRINCIPLES.forEach(rule => renderPrincipleCard(rule));
 }
 
-function cmdStack() {
-  renderSectionHeader('/03', 'stack', '7 tools · 1 tradeoff each');
-  STACK_ITEMS.forEach(it => renderStackItem(it));
-}
-
-function cmdFlows() {
-  renderSectionHeader('/04', 'workflows', 'pipelines across plugins');
-  FLOWS.forEach(f => renderFlowCard(f));
-}
-
 async function renderPluginCard(p) {
   const cols = (term && term.cols) || 80;
   const w = Math.min(cols - 4, 84);
@@ -677,7 +764,10 @@ async function renderPluginCard(p) {
   const descLines = wrapText(p.desc, inner, '').split('\r\n').slice(0, 3);
 
   const skills = p.skills || [];
-  const installTxt = 'install ' + p.name;
+  // installLabel() is the single source of truth — the LinkProvider regex
+  // (installLabelPattern) parses output produced here, so renaming the format
+  // means changing both via that helper, not editing two places.
+  const installTxt = installLabel(p.name);
   const footerGap = Math.max(0, inner - installTxt.length);
 
   // Each skill = "▸ name" header + word-wrapped full desc lines (indented)
@@ -716,7 +806,7 @@ async function renderPluginCard(p) {
     lines.push(...skillLines);
   }
 
-  lines.push(pad + C.bmagenta + '║ ' + RESET + ' '.repeat(footerGap) + C.grey + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
+  lines.push(pad + C.bmagenta + '║ ' + RESET + ' '.repeat(footerGap) + BOLD + C.bcyan + installTxt + RESET + C.bmagenta + ' ║' + RESET + '\r\n');
   lines.push(pad + C.bmagenta + '╚' + hLine + '╝' + RESET + '\r\n');
 
   await writeLines(lines);
@@ -767,26 +857,16 @@ function cmdCat(arg) {
   term.write('\r\n' + C.grey + 'run: ' + C.bcyan + 'install ' + p.name + RESET + '\r\n');
 }
 
+// Returns true when modal opens (caller skips printPrompt — modal owns prompt restoration).
 function cmdInstall(arg) {
-  if (!arg) { term.write('\r\nusage: ' + C.bcyan + 'install <plugin-name>' + RESET + '\r\n'); return; }
+  if (!arg) { term.write('\r\nusage: ' + C.bcyan + 'install <plugin-name>' + RESET + '\r\n'); return false; }
   const p = pluginsData.find(x => x.name === arg);
   if (!p) {
     term.write('\r\n' + C.bred + 'No such plugin: ' + arg + RESET + '\r\n');
     term.write('try: ' + C.bcyan + 'plugins' + RESET + '\r\n');
-    return;
+    return false;
   }
-  const cmds = '/plugin marketplace add aiocean/claude-plugins\n/plugin install ' + p.name + '@aiocean-plugins';
-  term.write('\r\n  ' + C.bcyan + '/plugin marketplace add aiocean/claude-plugins' + RESET + '\r\n');
-  term.write('  ' + C.bcyan + '/plugin install ' + p.name + '@aiocean-plugins' + RESET + '\r\n');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(cmds).then(() => {
-      term.write('\r\n' + C.bgreen + '✓' + RESET + ' copied to clipboard\r\n');
-    }, () => {
-      term.write('\r\n' + C.byellow + '⚠' + RESET + ' clipboard denied — select + copy manually\r\n');
-    });
-  } else {
-    term.write('\r\n' + C.byellow + '⚠' + RESET + ' clipboard API unavailable — select + copy manually\r\n');
-  }
+  return openInstallModal(arg, true);
 }
 
 function cmdSearch(arg) {
@@ -855,11 +935,9 @@ function dispatch(line) {
     case 'help': case '?': cmdHelp(); break;
     case 'plugins': case 'ls': case 'dir': cmdPlugins(); break;
     case 'cat': cmdCat(arg); break;
-    case 'install': cmdInstall(arg); break;
+    case 'install': if (cmdInstall(arg)) return true; break;
     case 'search': case 'find': cmdSearch(arg); break;
     case 'principles': case 'rules': cmdPrinciples(); break;
-    case 'stack': case 'tools': cmdStack(); break;
-    case 'flows': case 'workflows': case 'pipelines': cmdFlows(); break;
     case 'manifest': case 'claude.md': case 'claudemd': cmdManifest(); break;
     case 'play': case 'replay': term.write('\r\n'); autoPlay(); return true;
     case 'theme': cmdTheme(arg.toLowerCase()); break;
@@ -879,6 +957,20 @@ function dispatch(line) {
    Ctrl+C, Ctrl+L, Up/Down history
    ══════════════════════════════════════════════════════════════ */
 function handleInput(data) {
+  // Modal check goes FIRST — if the modal somehow opens during BIOS or autoPlay
+  // (race window: link provider fires synchronously, no phase guard before
+  // openInstallModal returns false now, but defense-in-depth), we still need to
+  // be able to close it. Putting modalPhase ahead of biosPhase/autoPlayPhase
+  // ensures Esc/Enter/q always reach closeInstallModal.
+  if (modalPhase) {
+    if (data === '\x1b' || data === '\r' || data === '\n' ||
+        data === 'q' || data === 'Q' || data === '\x03') {
+      closeInstallModal();
+    } else if (data === 'c' || data === 'C') {
+      copyInstallCmds();
+    }
+    return; // swallow everything else while modal is up
+  }
   if (biosPhase) {
     if (data === '\r' || data === '\n') biosEnterPressed();
     return;
@@ -950,7 +1042,14 @@ async function boot() {
       init(),
       fetch('./data.json').then(r => r.ok ? r.json() : []).catch(() => []),
     ]);
-    pluginsData = Array.isArray(dataResp) ? dataResp : [];
+    // Defense-in-depth: filter on plugin name charset BEFORE any term.write or
+    // clipboard interpolation. Blocks ANSI/shell injection if a malicious entry
+    // ever lands in data.json (CI also enforces this in validate-marketplace.sh).
+    const rawList = Array.isArray(dataResp) ? dataResp : [];
+    pluginsData = rawList.filter(p => p && typeof p.name === 'string' && SAFE_PLUGIN_NAME.test(p.name));
+    if (pluginsData.length !== rawList.length) {
+      console.warn('[tui] dropped', rawList.length - pluginsData.length, 'plugin(s) with invalid names');
+    }
 
     term = new Terminal({
       cursorBlink: true,
@@ -970,10 +1069,52 @@ async function boot() {
     term.open(document.getElementById('ghostty-terminal'));
     fitAddon.fit();
     fitAddon.observeResize();
-    window.addEventListener('resize', () => fitAddon.fit());
+    window.addEventListener('resize', () => {
+      fitAddon.fit();
+      // Alt-screen modal must redraw after fit() recomputes cols/rows.
+      // drawInstallModal() reads modalCopyState directly, so the "✓ copied"
+      // feedback survives a resize.
+      if (modalPhase) drawInstallModal();
+    });
 
     term.onData(handleInput);
     term.focus();
+
+    // Click-to-install: detect "[ install <name> ]" buttons inside plugin cards.
+    // Custom provider — bare click activates (built-ins gate on Ctrl/Cmd, but
+    // landing-page UX wants single-click). Pattern lives in installLabelPattern()
+    // so render and detection can never desync.
+    //
+    // hover() drives the magenta DOS cursor — `cursor: none !important` on the
+    // page blocks ghostty's native pointer-cursor swap, so we visualize hover
+    // ourselves via a CSS class on #dos-cursor.
+    installLinkDisposable = term.registerLinkProvider({
+      provideLinks(y, callback) {
+        const line = term.buffer.active.getLine(y);
+        if (!line) { callback(undefined); return; }
+        const text = line.translateToString(false);
+        const re = installLabelPattern();
+        const links = [];
+        let m;
+        while ((m = re.exec(text)) !== null) {
+          const name = m[1];
+          const startX = m.index;
+          const endX = m.index + m[0].length - 1;
+          links.push({
+            text: m[0],
+            range: { start: { x: startX, y: y }, end: { x: endX, y: y } },
+            activate: () => openInstallModal(name, false),
+            hover: (isHovered) => {
+              installLinkHovers += isHovered ? 1 : -1;
+              if (installLinkHovers < 0) installLinkHovers = 0;
+              const el = dosCursorEl();
+              if (el) el.classList.toggle('over-link', installLinkHovers > 0);
+            },
+          });
+        }
+        callback(links.length ? links : undefined);
+      },
+    });
 
     // BIOS POST phase — once per session unless ?reboot
     const forceReboot = /[?&]reboot(=|&|$)/.test(location.search);
@@ -1004,6 +1145,9 @@ themeObserver.observe(document.documentElement, { attributes: true, attributeFil
 /* F-key shortcuts + Shift+D theme toggle */
 document.addEventListener('keydown', (e) => {
   if (!term || !isRunning) return;
+  // Modal owns all input — F-keys would otherwise re-trigger autoPlay/quit on
+  // top of the alt screen, leaving the user in a corrupted state.
+  if (modalPhase) return;
   // Shift+D toggles theme — only when input buffer empty (avoid wiping mid-command)
   if ((e.key === 'D' || e.key === 'd') && e.shiftKey && !e.ctrlKey && !e.metaKey && inputBuffer.length === 0) {
     e.preventDefault();
