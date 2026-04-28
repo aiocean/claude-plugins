@@ -44,7 +44,7 @@
     {
       "name": "aio-bun-fullstack-setup",
       "source": "./plugins/aio-bun-fullstack-setup",
-      "description": "Bootstrap a Bun fullstack project in one shot — single-port API + frontend, Vite dev proxy, monorepo layout, and Docker config. Skips files you already have.",
+      "description": "Bootstrap a Bun fullstack project in one shot \u2014 single-port API + frontend, Vite dev proxy, monorepo layout, and Docker config. Skips files you already have.",
       "version": "1.1.3",
       "author": {
         "name": "aiocean"
@@ -53,7 +53,7 @@
     {
       "name": "aio-mental-models",
       "source": "./plugins/aio-mental-models",
-      "description": "Reach better decisions faster — picks the right mental model (first principles, inversion, second-order, opportunity cost, …) and walks you through applying it to your problem.",
+      "description": "Reach better decisions faster \u2014 picks the right mental model (first principles, inversion, second-order, opportunity cost, \u2026) and walks you through applying it to your problem.",
       "version": "2.1.5",
       "author": {
         "name": "aiocean"
@@ -89,7 +89,7 @@
     {
       "name": "aio-xstate",
       "source": "./plugins/aio-xstate",
-      "description": "Build XState v5 state machines the right way — design-first planning, params-first typing, and canonical actor patterns for TypeScript and React, with anti-god-machine enforcement.",
+      "description": "Build XState v5 state machines the right way \u2014 design-first planning, params-first typing, and canonical actor patterns for TypeScript and React, with anti-god-machine enforcement.",
       "version": "1.0.8",
       "author": {
         "name": "aiocean"
@@ -98,7 +98,7 @@
     {
       "name": "aio-golang-mastery",
       "source": "./plugins/aio-golang-mastery",
-      "description": "Write and lint idiomatic Go end-to-end — a 7-tool lint chain (build, vet, golangci-lint, govulncheck, nilaway, deadcode, race) plus reference-grade patterns for concurrency, errors, generics, gRPC, and production hardening.",
+      "description": "Write and lint idiomatic Go end-to-end \u2014 a 7-tool lint chain (build, vet, golangci-lint, govulncheck, nilaway, deadcode, race) plus reference-grade patterns for concurrency, errors, generics, gRPC, and production hardening.",
       "version": "1.1.3",
       "author": {
         "name": "aiocean"
@@ -107,7 +107,7 @@
     {
       "name": "aio-tui",
       "source": "./plugins/aio-tui",
-      "description": "Build production-grade Go TUIs with Bubbletea + lipgloss — TEA architecture, styling, and battle-tested patterns for tables, parallel fetch, search, and live refresh.",
+      "description": "Build production-grade Go TUIs with Bubbletea + lipgloss \u2014 TEA architecture, styling, and battle-tested patterns for tables, parallel fetch, search, and live refresh.",
       "version": "1.0.7",
       "author": {
         "name": "aiocean"
@@ -197,7 +197,7 @@
     {
       "name": "aio-watermill-kit",
       "source": "./plugins/aio-watermill-kit",
-      "description": "Build event-driven Go apps with Watermill — Router, middleware, Pub/Sub, CQRS, and integrations for Kafka, AMQP, NATS, Redis Streams, and SQL.",
+      "description": "Build event-driven Go apps with Watermill \u2014 Router, middleware, Pub/Sub, CQRS, and integrations for Kafka, AMQP, NATS, Redis Streams, and SQL.",
       "version": "0.1.2",
       "author": {
         "name": "aiocean"
@@ -206,7 +206,7 @@
     {
       "name": "aio-kanban",
       "source": "./plugins/aio-kanban",
-      "description": "Track AI-agent work in a markdown kanban board committed to the repo — Backlog, Todo, Doing, Done columns with WIP limits and auto-status on session start.",
+      "description": "Track AI-agent work in a markdown kanban board committed to the repo \u2014 Backlog, Todo, Doing, Done columns with WIP limits and auto-status on session start.",
       "version": "2.0.2",
       "author": {
         "name": "aiocean"
@@ -215,7 +215,7 @@
     {
       "name": "aio-software-architect",
       "source": "./plugins/aio-software-architect",
-      "description": "Make architecture decisions with confidence — a deep pattern reference and a 5-step decision workflow covering cloud patterns, resilience, data, DDD, and distributed systems.",
+      "description": "Make architecture decisions with confidence \u2014 a deep pattern reference and a 5-step decision workflow covering cloud patterns, resilience, data, DDD, and distributed systems.",
       "version": "1.0.3",
       "author": {
         "name": "aiocean"
@@ -235,6 +235,15 @@
       "source": "./plugins/aio-dashboard-design",
       "description": "Design and review SaaS analytics dashboards with research-backed standards \u2014 chart selection, anti-pattern checks, accessibility, and storytelling. Pre-ship review without leaving the terminal.",
       "version": "1.0.2",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
+      "name": "aio-visual-diff",
+      "source": "./plugins/aio-visual-diff",
+      "description": "Verify AI-built UI against design via measurement-driven diff \u2014 extracts computed CSS and bounding boxes through Chrome DevTools MCP, diffs against Figma reference or a frozen baseline, and feeds numerical deltas back to the agent. No screenshot eyeballing.",
+      "version": "0.1.0",
       "author": {
         "name": "aiocean"
       }

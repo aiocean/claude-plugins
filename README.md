@@ -58,6 +58,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | **aio-ios-device-debug** | 1.1.4 | Debug iOS apps on physical devices from terminal.<br>`npx skills add aiocean/claude-plugins -s aio-ios-device-debug` |
 | **aio-cdp-relay** | 1.2.2 | Persistent CDP relay for browser automation — no MCP, no approval prompts.<br>`npx skills add aiocean/claude-plugins -s aio-cdp-relay` |
 | **aio-browser-cookie** | 2.0.3 | Extract browser cookies with rookiepy for authenticated requests.<br>`npx skills add aiocean/claude-plugins -s aio-browser-cookie` |
+| **aio-visual-diff** | 0.1.0 | Verify AI-built UI against design via measurement-driven diff — `getComputedStyle` + `getBoundingClientRect` via Chrome DevTools MCP, diff against Figma reference or frozen baseline, numerical delta feedback. No screenshot eyeballing.<br>`npx skills add aiocean/claude-plugins -s aio-visual-diff` |
 
 ### Database
 
