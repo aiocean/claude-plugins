@@ -196,7 +196,7 @@
       },
       {
         "name": "aio-patch-claude",
-        "desc": "Patch Claude Code system prompts to maximize quality over token efficiency \u2014 rebalances brevity-biased instructions in cli.js for thorough, senior-developer-level output."
+        "desc": "Patch Claude Code system prompts to maximize quality over token efficiency. Automated pipeline via patch_local.py + patches.json from godClaude, with manual fallback. Covers local cli.js patching and full binary recompilation."
       },
       {
         "name": "aio-feedback",
@@ -406,6 +406,17 @@
       {
         "name": "aio-dashboard-design",
         "desc": "Design and review SaaS analytics dashboards \u2014 chart selection, anti-pattern detection, WCAG 2.2 accessibility, data-ink discipline, color palettes, and storytelling. Use as both design reference and review standard."
+      }
+    ]
+  },
+  {
+    "name": "aio-visual-diff",
+    "version": "0.1.0",
+    "desc": "Verify AI-built UI against design via measurement-driven diff \u2014 extracts computed CSS and bounding boxes through Chrome DevTools MCP, diffs against Figma reference or a frozen baseline, and feeds numerical deltas back to the agent. No screenshot eyeballing.",
+    "skills": [
+      {
+        "name": "aio-visual-diff",
+        "desc": "Verify AI-generated frontend UI against design via measurement-driven diff \u2014 use when checking pixel-perfect implementation, validating design fidelity, catching layout regressions, comparing spacing/typography/color against a Figma reference, or when the agent claims \"it looks right\" but you want numerical proof. Extracts `getComputedStyle` + `getBoundingClientRect` through the `chrome-devtools` MCP, diffs against Figma layout data or a frozen baseline JSON, and reports numerical deltas that the agent can act on. Never asks an LLM to eyeball screenshots."
       }
     ]
   }
