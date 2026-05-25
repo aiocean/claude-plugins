@@ -1,6 +1,6 @@
 ---
-title: "Skills, agents, and hooks: when to use which"
-description: "Claude Code exposes three extension primitives — skills, agents, and hooks — and they solve three different problems. A decision tree, real examples from the aiocean marketplace, and the mistakes to avoid."
+title: "Three Claude Code primitives, three different jobs"
+description: "Skill, agent, hook — the three plugin primitives Claude Code exposes. Most plugins reach for the wrong one. Agents get built where a skill would do, skills bloat into wiki articles, hooks become control flow. The decision tree, with real examples."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
@@ -8,16 +8,22 @@ weight: 20
 tags: ["skills", "agents", "hooks", "claude-code", "architecture", "plugin-development"]
 ---
 
-# Skills, agents, and hooks: when to use which
+# Three Claude Code primitives, three different jobs
 
-When you build a Claude Code plugin, you reach for one of three primitives:
+Three primitives, three different jobs — and from what you see in the wild,
+most plugins reach for the wrong one. Agents get built where a skill would
+do. Skills bloat into wiki articles. Hooks turn into control flow. Each of
+those is a different way to waste effort, and each produces plugins that
+feel sloppy to use.
 
-- **Skill** — auto-loaded knowledge and instructions, triggered by a fuzzy-match against the user's message.
+The three primitives Claude Code exposes:
+
+- **Skill** — auto-loaded knowledge and instructions, triggered by a fuzzy match against the user's message.
 - **Agent** — a sub-thread with its own context window, spawned to do a focused task.
-- **Hook** — a command that fires on a tool-call event (`PreToolUse`, `PostToolUse`, `Stop`, etc.).
+- **Hook** — a command that fires on a tool-call lifecycle event (`PreToolUse`, `PostToolUse`, `Stop`, etc.).
 
-Picking the wrong one wastes effort and creates plugins that feel sloppy. The
-cost of picking right is reading this short page.
+Pick the right one the first time and the plugin almost writes itself. Pick
+wrong and you're rewriting it in three months.
 
 ## One-line summaries
 

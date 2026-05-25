@@ -1,6 +1,6 @@
 ---
-title: "Writing a CLAUDE.md file Claude actually uses"
-description: "CLAUDE.md is project memory loaded on every session. What belongs in it, what doesn't, and the patterns that survive months of iteration without bloating."
+title: "CLAUDE.md is project memory, not documentation"
+description: "Most CLAUDE.md files read like README files — and Claude skims them the same way humans skim READMEs. Project memory has a different audience, a different brevity budget, and a different content shape."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
@@ -8,15 +8,23 @@ weight: 10
 tags: ["claude-md", "project-memory", "claude-code", "best-practices", "configuration"]
 ---
 
-# Writing a CLAUDE.md file Claude actually uses
+# CLAUDE.md is project memory, not documentation
 
-`CLAUDE.md` is the file Claude Code reads at the top of every session — once
-for the user's home directory, once for your project root, and once for the
-working subdirectory. It's project memory: rules and conventions that don't
-belong in code comments but that Claude needs to follow consistently.
+Most CLAUDE.md files I see read like README files. That's the mistake.
 
-A good `CLAUDE.md` makes Claude predictable across sessions. A bad one bloats
-context, confuses the model, and gets ignored.
+A README tells *humans* what the project is, how to set it up, why it exists.
+It's marketing-adjacent. It tolerates length because humans scroll and search.
+
+CLAUDE.md has none of that affordance. It's *project memory* — rules,
+conventions, and hidden invariants that Claude Code reads at the top of every
+session and that change *how* Claude behaves on your code. Different audience,
+different brevity budget, different content shape. The model has finite
+attention; every line in CLAUDE.md spends some of it whether the rule fires
+or not. A 2000-line CLAUDE.md gets skimmed and ignored the same way a 2000-word
+Slack message does.
+
+The good news: the right CLAUDE.md is small, opinionated, and shrinks over
+time as the team learns what's actually load-bearing.
 
 ## What belongs in CLAUDE.md
 

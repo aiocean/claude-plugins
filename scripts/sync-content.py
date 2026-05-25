@@ -86,28 +86,73 @@ def yaml_escape(value: str) -> str:
 
 
 def write_root_index(plugins: list[dict]) -> None:
-    """Site landing at /. Layer's ContentView auto-lists the /plugins folder
-    as a child section, so this body is intentionally short — it sets the
-    tone, the section listing does the discovery work."""
+    """Site landing at /. The /plugins folder auto-lists below as a section,
+    so the body's job is to take a position — what this marketplace IS, what
+    sets it apart from "AI tool stores", and the mental model someone needs
+    to choose the right plugin. Plugin/skill counts are interpolated so the
+    line stays accurate across releases."""
     out = CONTENT_ROOT / "index.md"
+    n = len(plugins)
     total_skills = sum(len(p["skills"]) for p in plugins)
     body = f"""---
 title: "Claude Plugins"
-description: "{len(plugins)} plugins · {total_skills} skills for Claude Code — install with one command"
+description: "Procedural memory for Claude Code: {n} plugins, {total_skills} skills covering translation, debugging, design systems, infra ops, and plugin authorship. Two-command install."
 document_type: "listing"
 weight: 0
 ---
 
 # Claude Plugins
 
-Reusable **skills, agents, and workflows** for Claude Code. {len(plugins)} plugins, {total_skills} skills total.
+Most "AI plugin marketplaces" ship browser extensions and prompt collections.
+Claude Code plugins are a different shape: each one ships **procedural
+memory** — the workflow, the API surface, the gotchas a senior engineer
+would teach you on day three — packaged so Claude loads it on demand and
+forgets it when irrelevant. {n} plugins · {total_skills} skills · install
+in two commands.
 
 ```
 /plugin marketplace add aiocean/claude-plugins
 /plugin install <plugin-name>@aiocean-plugins
 ```
 
-Open [Plugins](/plugins) to browse the full catalog.
+Skills don't activate until Claude sees a fuzzy match against your message,
+so installing things you might need later costs nothing at runtime.
+
+## Five jobs these plugins solve
+
+Plugins cluster around real engineering work, not feature checklists:
+
+- **Translate & write** — literary EPUB pipelines with cross-chapter glossary
+  management, Vietnamese style enforcement (Tín-Đạt-Nhã), bilingual export.
+  See `aio-epub-translate`, `aio-epub-vn-style`.
+- **Debug & investigate** — race-condition surfacing, hypothesis-PoC loops,
+  CDP-relay browser automation that doesn't fight your login state. See
+  `aio-cdp-relay`, `aio-ai-slop-cleaner`.
+- **Design & ship UI** — brutalist + neobrutalism systems with stamp shadows,
+  WCAG audits, React-19 effect refactoring against the new useActionState /
+  useOptimistic model. See `aio-design-system`, `aio-dashboard-design`.
+- **Operate at scale** — StarRocks query tuning + EXPLAIN reading, Go
+  production hardening (concurrency, generics, race detection), threat
+  modeling for AI/ML workloads, multi-agent orchestration patterns. See
+  `aio-starrocks`, `aio-golang-mastery`, `aio-threat-models`, `aio-software-architect`.
+- **Build for yourself** — skill creation flow, CLAUDE.md tuning, marketplace
+  publishing, prompt patching for Claude Code itself. See `aio-claude-toolkit`.
+
+[Browse the {n}-plugin catalog →](/plugins) · [Read the guides →](/guides)
+
+## Why these primitives compose
+
+A **skill** is procedural knowledge that loads when Claude sees a description
+match. An **agent** is an isolated sub-thread with its own context window. A
+**hook** fires on tool-call events (PreToolUse, PostToolUse, Stop). When you
+chain all three — skill informs Claude what to do, agent runs the work in
+isolation, hook validates the output — you stop writing "please follow this
+checklist" prompts and start shipping reproducible workflows.
+
+The [primitives guide](/guides/skills-agents-hooks) shows the decision tree.
+The [CLAUDE.md guide](/guides/writing-claude-md-files) explains why project
+memory is not documentation. The [install guide](/guides/install-claude-plugins)
+covers the rest.
 """
     out.write_text(body, encoding="utf-8")
 
