@@ -30,18 +30,19 @@ freely (`bun run sync`).
 
 ```sh
 bun install         # first time / after package.json changes
+bun dev             # local dev server with HMR (sync + nuxt dev)
 bun run sync        # regenerate content/ from ../plugins/
 bun run generate    # sync + nuxt generate → .output/public
 bun run preview     # serve .output/public locally
 ```
 
+Use `bun dev` for iterating on content or theme — Nuxt HMR rebuilds on
+markdown edits. Use `bun run generate` when verifying the production
+static output (baseURL rewriting, prerender warnings, route manifest).
+
 Production build sets `app.baseURL='/claude-plugins/'` by default (matches GH
 Pages subpath). Override with `NUXT_APP_BASE_URL=/ bun run generate` for
 custom domains or local-root preview.
-
-`bun dev` is intentionally not used in this repo per the project's "never run
-dev server" rule. Use `bun run generate` + a local static server to verify
-changes (`python3 -m http.server` over `.output/public`).
 
 ## What's hand-written vs auto-generated
 
