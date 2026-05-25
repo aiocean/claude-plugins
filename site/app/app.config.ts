@@ -11,6 +11,7 @@ export default defineAppConfig({
   },
   menu: [
     { name: 'Plugins', url: '/plugins', weight: 0 },
+    { name: 'Guides', url: '/guides', weight: 10 },
     { name: 'GitHub', url: 'https://github.com/aiocean/claude-plugins', weight: 99, external: true },
   ],
 })
