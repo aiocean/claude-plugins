@@ -163,6 +163,142 @@ deadcode doesn't see:
 - Plugin/RPC registration patterns where functions are passed as values
 - Functions only called from `_test.go` files
 
+## revive — Style and Convention Enforcement
+
+`revive` is the modern replacement for the deprecated `golint`. It runs inside `golangci-lint` and is **the single most important linter for naming and style enforcement**. Without `revive` (or equivalent custom config), `golangci-lint` does not catch initialism violations (`HttpClient`, `userId`), inconsistent receiver names, error-string formatting, or `Get*` getter prefixes.
+
+`revive` is config-driven: each rule must be explicitly listed. The 21-rule production set below is the recommended starting point.
+
+```yaml
+# In .golangci.yml
+linters:
+  enable:
+    - revive
+linters-settings:
+  revive:
+    rules:
+      # Naming
+      - {name: var-naming}            # MixedCaps, initialisms (HTTP, URL, ID, JSON, API)
+      - {name: receiver-naming}       # 1-2 letter, consistent per type, no `self`/`this`
+      - {name: error-naming}          # ErrXxx sentinel, XxxError type
+      - {name: time-naming}           # timeoutSec, pollIntervalMillis
+      - {name: package-comments}      # // Package X ... on doc line
+      - {name: exported}              # exported symbols have doc comments
+
+      # Errors
+      - {name: error-return}          # error is last return value
+      - {name: error-strings}         # lowercase, no trailing punctuation
+      - {name: errorf}                # use fmt.Errorf instead of errors.New(fmt.Sprintf(...))
+
+      # Context
+      - {name: context-as-argument}   # ctx is first param
+      - {name: context-keys-type}     # custom type for ctx.Value keys
+
+      # Imports
+      - {name: blank-imports}         # blank imports only in main/test
+
+      # Control flow
+      - {name: if-return}             # avoid `if x { return y } return z`
+      - {name: indent-error-flow}     # error path returns, success continues unindented
+      - {name: superfluous-else}      # remove `else` after `return`
+      - {name: unreachable-code}
+      - {name: empty-block}
+
+      # Idioms
+      - {name: increment-decrement}   # x++ not x += 1
+      - {name: range}                 # idiomatic range usage
+      - {name: unexported-return}     # exported func should not return unexported type
+      - {name: defer}                 # idiomatic defer (loop, return-value, recover, ...)
+```
+
+### Common revive findings and fixes
+
+```go
+// var-naming: initialism violation
+type HttpClient struct{}      // → revive flags Http
+type HTTPClient struct{}      // ✓
+
+// receiver-naming: inconsistent receivers on same type
+func (s *Server) Start()
+func (srv *Server) Stop()     // → revive flags inconsistency
+// FIX: pick one, use everywhere
+
+// error-naming: wrong sentinel pattern
+var NotFoundErr = errors.New("not found")    // → flag: must be ErrNotFound
+var ErrNotFound = errors.New("not found")    // ✓
+
+// error-strings: capital + punctuation
+return errors.New("Failed to connect.")      // → flag
+return errors.New("connect to database")     // ✓
+
+// context-as-argument: ctx not first param
+func Process(data []byte, ctx context.Context) // → flag
+func Process(ctx context.Context, data []byte) // ✓
+
+// package-comments: missing or wrong format
+// foo handles foo stuff.       // → flag (must start with "Package foo")
+package foo
+// Package foo handles foo stuff.   // ✓
+package foo
+
+// exported: missing doc comment
+type Server struct{}             // → flag: exported, needs doc
+// Server handles HTTP requests.
+type Server struct{}             // ✓
+```
+
+### Suppressing a single rule
+
+```go
+// Disable for one line:
+type httpURL string  //revive:disable-line:var-naming
+
+// Disable for a block:
+//revive:disable:exported
+type internalThing struct {
+    PublicField string
+}
+//revive:enable:exported
+```
+
+### Why revive over the deprecated golint
+
+| Aspect | golint (deprecated) | revive |
+|---|---|---|
+| Configurability | Fixed rules | Per-rule enable/disable + per-rule args |
+| Performance | Single-threaded | Parallel |
+| Custom rules | Not possible | Plugin system |
+| Maintained | No (frozen 2020) | Yes (active) |
+| In `golangci-lint` | Removed | First-class |
+
+Always use `revive`. There is no reason to disable it.
+
+## Naming-Adjacent Linters — Tier Guide
+
+Beyond `revive`, four linters catch additional naming/structure issues but need careful configuration. See the [Naming & Style reference](naming-and-style.md#2-linter-tiers--what-to-enable) for the full tier guide.
+
+### Tier 2: Enable with exclusions
+
+| Linter | Catches | Required exclusions |
+|---|---|---|
+| `gochecknoglobals` | Mutable package-level vars (vs CLAUDE.md / Uber style cap on globals) | ldflag `Version`/`Commit`/`BuildDate`, sentinel `Err...`, immutable script objects (`rueidis.NewLuaScript`), lipgloss styles, `_test.go` fixtures |
+| `gochecknoinits` | `init()` functions with side effects | OTel / Prometheus registration, database driver registration |
+| `interfacebloat` | Interfaces with >10 methods | usually none |
+| `predeclared` | Shadowing `len`, `error`, `new`, ... | usually none |
+
+### Tier 3: AVOID enabling blindly (high false-positive rate)
+
+| Linter | Why it floods | When to consider |
+|---|---|---|
+| `tagliatelle` | Defaults to camelCase JSON tags — but Shopify, Stripe, AWS, jsonpb use snake_case. Will flag your entire `internal/canonical/` as wrong. | Only if your wire format actually is camelCase AND your team enforces it. Set `case.rules.json: snake` to invert. |
+| `varnamelen` | Flags `for i, v`, `tx := db.Begin()`, `c := make(chan ...)` — Go idiom of "short scope short name" is not understood. | Almost never. Manual review catches real cases. |
+| `wsl` | Enforces blank-line policy that fights `gofmt`. | If team agrees on strict whitespace house style. |
+| `lll` | Punishes long URLs, long table-test rows, struct literals with comments. | If style guide caps line length and team agrees. |
+| `funlen` | Caps function length — forces premature extraction. | Guideline only, never CI block. |
+| `gocyclo` | Older complexity metric, less Go-aware than `gocognit`. | Use `gocognit` instead. |
+
+**Heuristic**: Tier 1/2 linters flag what is *almost always* a bug or convention break. Tier 3 linters flag what is *often* a deliberate idiomatic choice. If you find yourself adding `//nolint` to suppress >5 occurrences of the same Tier-3 finding in idiomatic code, the linter is wrong for your codebase — disable it.
+
 ## Complexity & Maintainability Tools
 
 ### gocyclo — Cyclomatic Complexity

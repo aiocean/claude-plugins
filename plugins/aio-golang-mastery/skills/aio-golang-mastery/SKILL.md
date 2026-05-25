@@ -68,8 +68,8 @@ Production-grade Go patterns from Google, Uber, and the Go team. Updated for Go 
 | Project layout | cmd/, internal/, pkg/, Dockerfile, Makefile | [Project Structure](references/project-structure.md) |
 | Production hardening | Graceful shutdown, rate limiting, health checks, slog | [Production](references/production.md) |
 | gRPC services | Protobuf, interceptors, streaming, bufconn testing | [gRPC](references/grpc.md) |
-| Static analysis | govulncheck, nilaway, deadcode, golangci-lint | [Static Analysis](references/static-analysis.md) |
-| Naming & style | MixedCaps, short names, package naming, imports | This file |
+| Static analysis | govulncheck, nilaway, deadcode, golangci-lint, revive | [Static Analysis](references/static-analysis.md) |
+| Naming, style & linter enforcement | Naming decision table, linter tiers (MUST/SHOULD/AVOID), production `.golangci.yml` v2, grep-based review | [Naming & Style](references/naming-and-style.md) |
 
 ## Core Principles (in order)
 
@@ -256,37 +256,158 @@ go mod verify                   # Verify checksums
 |------|------|-----------------|
 | 1 | `go build ./...` | Compilation errors |
 | 2 | `go vet ./...` | Suspicious constructs, printf mismatches |
-| 3 | `golangci-lint run ./...` | Style, bugs, performance, security |
+| 3 | `golangci-lint run ./...` | Style, bugs, performance, security, naming (via `revive`) |
 | 4 | `govulncheck ./...` | Known CVEs in dependencies and stdlib |
 | 5 | `nilaway ./...` | Nil pointer panics before runtime |
 | 6 | `deadcode ./...` | Unreachable/unused functions |
 | 7 | `go test -race ./...` | Data races |
 
 See [Static Analysis reference](references/static-analysis.md) for install, config, and suppression patterns.
+See [Naming & Style](references/naming-and-style.md) for the linter-tier decision (MUST / SHOULD / AVOID), `revive` rule catalog, and a copy-pasteable production-grade config.
 
-### golangci-lint Configuration (.golangci.yml)
+### golangci-lint Configuration (.golangci.yml — v2 syntax, production-grade)
+
+A minimal-but-real config. The full annotated version (with exclusion blocks for `gochecknoglobals` legitimate-globals, generated proto code, ldflag build vars, Lua scripts, and tier-3 linter warnings) lives in [Naming & Style §3](references/naming-and-style.md#3-production-grade-golangciyml-v2-syntax).
 
 ```yaml
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
 linters:
   enable:
+    # correctness
     - errcheck
-    - gosimple
     - govet
-    - ineffassign
-    - staticcheck
+    - staticcheck         # absorbs gosimple in v2
     - unused
+    - ineffassign
+    - unconvert
+
+    # concurrency & race conditions
+    - copyloopvar         # loop variable capture safety net
+
+    # resource leaks
+    - bodyclose           # unclosed HTTP response bodies
+    - noctx               # HTTP requests without context
+
+    # security
+    - gosec
+
+    # bugs & correctness
+    - durationcheck       # time.Duration * time.Duration = wrong
+    - reassign            # mutating package-level vars
+    - wastedassign
+    - musttag             # missing struct tags
+    - protogetter         # proto getter for nil safety
+
+    # style & convention
+    - misspell
+    - gocritic
+    - revive              # ← the naming/style enforcer (see §revive below)
+
+    # globals & init hygiene (Tier 2 — needs exclusions below)
+    - gochecknoglobals
+    - gochecknoinits
+    - interfacebloat
+    - predeclared
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+
+    govet:
+      enable-all: true       # all analyzers (shadow, copylocks, loopclosure, ...)
+      disable:
+        - fieldalignment     # too noisy, micro-optimization
+
+    gosec:
+      excludes:
+        - G104               # errcheck covers
+        - G304               # file path from variable — expected in CLI
+      severity: medium
+      confidence: medium
+
+    gocritic:
+      enabled-tags: [diagnostic, performance]
+      disabled-checks: [hugeParam]
+
+    revive:
+      # 21-rule production set — names + errors + context + idioms.
+      # Each rule documented at references/naming-and-style.md §1.
+      rules:
+        # Naming
+        - {name: var-naming}
+        - {name: receiver-naming}
+        - {name: error-naming}
+        - {name: time-naming}
+        - {name: package-comments}
+        - {name: exported}
+        # Errors
+        - {name: error-return}
+        - {name: error-strings}
+        - {name: errorf}
+        # Context
+        - {name: context-as-argument}
+        - {name: context-keys-type}
+        # Imports
+        - {name: blank-imports}
+        # Control flow
+        - {name: if-return}
+        - {name: indent-error-flow}
+        - {name: superfluous-else}
+        - {name: unreachable-code}
+        - {name: empty-block}
+        # Idioms
+        - {name: increment-decrement}
+        - {name: range}
+        - {name: unexported-return}
+        - {name: defer}
+
+    musttag:
+      functions:
+        - {name: encoding/json.Marshal, tag: json}
+        - {name: encoding/json.Unmarshal, tag: json}
+
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters: [errcheck, gocritic, gosec, musttag, gochecknoglobals]
+      - path: pkg/         # generated proto code
+        linters: [musttag, protogetter, revive, gochecknoglobals]
+      # gochecknoglobals — legitimate Go patterns
+      - linters: [gochecknoglobals]
+        text: "^(Version|Commit|BuildDate|BuildTime|GitSHA) is a global variable$"
+      - linters: [gochecknoglobals]
+        text: "^Err[A-Z]"   # sentinel errors
+
+# Formatters live in their own block in v2 (not inside `linters`)
+formatters:
+  enable:
     - gofmt
     - goimports
-    - misspell
-    - unconvert
-    - unparam
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-  govet:
-    check-shadowing: true
 
 issues:
-  exclude-use-default: false
+  max-issues-per-linter: 50
+  max-same-issues: 5
 ```
+
+> **v2 canonical structure**: `linters.settings`, `linters.exclusions.rules`, and a separate top-level `formatters` block. Legacy top-level `linters-settings:` and `issues.exclude-rules:` still work at runtime but fail `golangci-lint config verify`. Use canonical form for clean CI.
+
+**Linter tier discipline** — full rationale at [Naming & Style §2](references/naming-and-style.md#2-linter-tiers--what-to-enable):
+
+- **Tier 1 MUST** (very low FP rate): `errcheck`, `govet`, `staticcheck`, `unused`, `ineffassign`, `unconvert`, `bodyclose`, `noctx`, `copyloopvar`, `durationcheck`, `reassign`, `wastedassign`, `musttag`, `protogetter`, `gosec`, `gocritic`, `misspell`, `revive`.
+- **Tier 2 SHOULD with exclusions**: `gochecknoglobals`, `gochecknoinits`, `interfacebloat`, `predeclared`.
+- **Tier 3 AVOID without strong reason**: `tagliatelle` (defaults to camelCase — fights snake_case wire formats), `varnamelen` (fights Go's "short scope short name" idiom), `wsl`, `lll`, `funlen`, `gocyclo` (use `gocognit` instead), `nlreturn`.
+
+### Migrating from v1 config
+
+If your repo still uses v1 syntax, three fixes:
+1. Remove `gosimple` (merged into `staticcheck` in v2)
+2. Move `gofmt` and `goimports` from `linters:` into a top-level `formatters:` block
+3. Replace `govet.check-shadowing: true` with `govet.enable-all: true` and disable `fieldalignment`
+
+Or run `golangci-lint migrate` for automatic translation.
