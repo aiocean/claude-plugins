@@ -1,6 +1,6 @@
 ---
 title: "My CLAUDE.md"
-description: "The author's working ~/.claude/CLAUDE.md, copied 1:1. Voice and rule choices are personal; treat it as an artifact, not a template."
+description: "The author's working ~/.claude/CLAUDE.md, reproduced as-is. One team's working configuration; voice and rule choices are personal."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
@@ -8,36 +8,6 @@ weight: 11
 tags: ["claude-md", "project-memory", "claude-code", "example", "configuration"]
 ---
 
-# My CLAUDE.md
-
-This is the author's own `~/.claude/CLAUDE.md`, reproduced verbatim. The
-[*writing CLAUDE.md files*](/guides/writing-claude-md-files) guide
-describes the categories and shapes of content that belong in a
-CLAUDE.md; this page is one concrete instance of those ideas applied to
-a real engineer's work.
-
-A few things to notice as you read:
-
-- **Where it differs from the model's defaults.** Sections like
-  *Proactive Conviction*, *Confidence Labels*, *Goal-Driven Execution*,
-  and *Positive Framing* are explicit corrections to behaviors the
-  author wanted different from out-of-the-box Claude.
-- **How each non-obvious rule carries its reason.** Most rules include
-  a *"Reason:"* line or a research citation. Rules that survive months
-  of use almost always have one; rules that don't, don't.
-- **What it leaves out.** No file tree, no API list, no recent commit
-  history. Anything Claude can grep is missing on purpose.
-- **Voice.** Vietnamese–English code-switching is intentional. CLAUDE.md
-  is prompt content, not documentation — it can read in whatever
-  register the author thinks in.
-
-The OMC orchestration block (auto-managed by the
-[`oh-my-claudecode`](/plugins/oh-my-claudecode) plugin, normally between
-`<!-- OMC:START -->` and `<!-- OMC:END -->` markers) has been stripped
-from this example — those lines aren't personal configuration, they
-ship with the plugin.
-
-```markdown
 # Golden Rules (ALWAYS follow)
 
 ## Iteration-First Development
@@ -244,4 +214,3 @@ Go: return error explicitly, pass context explicitly, dependency ở struct fiel
 ## 6. Consistency is Kindness (Nhất quán)
 Same problem → same solution → same pattern → same name. Everywhere. Every time. Apply cho: naming (function/variable/file/package), error handling, project structure, API design, commit message, config format. Join existing codebase → match style hiện tại, personal preference yields to team consistency. The only thing worse than a bad convention is two conventions.
 — Ref: Artem Zakirullin, "Cognitive Load is What Matters" (2023); "Effective Go"
-```
