@@ -1,0 +1,19 @@
+# Nuxt build / dev artifacts
+.nuxt/
+.output/
+.data/
+dist/
+dist          # nitro symlinks this to .output/public — gitignore both forms
+
+# Generated content — `bun run sync` regenerates the full tree from
+# ../plugins/{name}/.claude-plugin/plugin.json and SKILL.md files on every
+# build. Nothing under content/ is hand-written; if you want a hand-written
+# page (e.g. /about), un-gitignore that specific path.
+content/
+
+# Deps
+node_modules/
+
+# Editor / OS
+.DS_Store
+*.log

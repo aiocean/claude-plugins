@@ -1,0 +1,29 @@
+{
+  "name": "claude-plugins-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run sync && nuxt dev",
+    "build": "bun run sync && nuxt build",
+    "generate": "bun run sync && nuxt generate",
+    "preview": "nuxt preview",
+    "sync": "python3 ../scripts/sync-content.py",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@floating-ui/vue": "^1.1.11",
+    "@fontsource/literata": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
+    "@nuxt/content": "^3.12.0",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "nuxt": "^4.3.1",
+    "rehype-raw": "^7.0.0",
+    "vue": "^3.5.29",
+    "vue-router": "^4.6.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3",
+    "vite-plugin-ai-annotator": "^1.14.13"
+  }
+}
