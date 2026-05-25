@@ -9,12 +9,12 @@
 export default defineNuxtConfig({
   extends: ['github:nguyenvanduocit/andy-note-nuxt'],
 
-  // GitHub Pages serves this site at https://aiocean.github.io/claude-plugins/.
-  // baseURL must match the subpath so generated asset paths resolve.
-  // Override locally with `NUXT_APP_BASE_URL=/ bun dev` if the subpath in dev
-  // is annoying.
+  // Deployed to Cloudflare Pages at claude-plugins.aiocean.dev — custom
+  // domain serves from root, no subpath. NUXT_APP_BASE_URL overrides
+  // (kept env-driven so local file:// preview can use `/` and any future
+  // subpath deploy can override without code changes).
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL ?? '/claude-plugins/',
+    baseURL: process.env.NUXT_APP_BASE_URL ?? '/',
     head: {
       title: 'Claude Plugins · aiocean',
       meta: [

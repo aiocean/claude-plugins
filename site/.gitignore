@@ -1,15 +1,19 @@
-# Nuxt build / dev artifacts
+# Nuxt build / dev artifacts. Nitro symlinks `dist` → `.output/public` next
+# to the actual output dir, so both forms need to be ignored. Git's
+# .gitignore does NOT support inline `#` comments on pattern lines — keep
+# patterns and comments on separate lines.
 .nuxt/
 .output/
 .data/
 dist/
-dist          # nitro symlinks this to .output/public — gitignore both forms
+dist
 
-# Generated content — `bun run sync` regenerates the full tree from
-# ../plugins/{name}/.claude-plugin/plugin.json and SKILL.md files on every
-# build. Nothing under content/ is hand-written; if you want a hand-written
-# page (e.g. /about), un-gitignore that specific path.
-content/
+# Generated content — `bun run sync` rewrites these from
+# ../plugins/{name}/.claude-plugin/plugin.json + SKILL.md on every build.
+# Anything else under content/ is hand-written and committed (e.g.
+# content/guides/, content/about.md, etc).
+content/index.md
+content/plugins/
 
 # Deps
 node_modules/
