@@ -10,9 +10,10 @@ tags: ["installation", "onboarding", "claude-code", "plugins", "getting-started"
 
 # Install Claude Code plugins in two commands
 
-A Claude Code plugin is a folder of skills, agents, hooks, and commands that
-Claude can pull into any future session on demand. This marketplace ships 28+
-of them. You install in two steps — once for the marketplace, once per plugin.
+A Claude Code plugin is a folder of skills, agents, hooks, and slash
+commands that Claude installs per project and loads only when needed.
+This marketplace ships 28 of them. The install is two commands — one for
+the marketplace, one per plugin.
 
 ## Prerequisites
 
@@ -68,9 +69,9 @@ of this requires a restart.
 The plugin is *installed* but most of its contents don't activate until needed:
 
 - **Skills auto-trigger** when your message contains a description match.
-  Example: installing `aio-debug` doesn't slow anything down, but the next time
-  you say "this test is failing", the skill loads its debugging workflow into
-  context.
+  Example: installing `aio-debug` adds zero context cost while idle, but
+  the next time you say "this test is failing", the skill loads its
+  debugging workflow into the session.
 - **Hooks fire** on tool calls (`PreToolUse`, `PostToolUse`, etc.) the plugin
   declared. These run silently in the background.
 - **Commands** show up as `/<command-name>` autocompletes.
@@ -88,10 +89,10 @@ skills) costs nothing until a relevant message comes in.
 /plugin uninstall aio-epub-translate@aiocean-plugins
 ```
 
-`update` re-fetches against the marketplace's latest manifest. Each plugin
-follows semantic versioning — patch bumps for fixes, minor for new
-capabilities, major for breaking behavior. Watch the changelog if you depend
-on specific skill behavior.
+`update` re-fetches against the marketplace's latest manifest. Each
+plugin follows semantic versioning — patch for fixes, minor for new
+capabilities, major for breaking behavior. Major bumps are the ones that
+can change skill behavior under you.
 
 ## Common pitfalls
 

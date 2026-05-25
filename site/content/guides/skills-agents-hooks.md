@@ -1,6 +1,6 @@
 ---
 title: "Three Claude Code primitives, three different jobs"
-description: "Skill, agent, hook — the three plugin primitives Claude Code exposes. Most plugins reach for the wrong one. Agents get built where a skill would do, skills bloat into wiki articles, hooks become control flow. The decision tree, with real examples."
+description: "Skill, agent, hook — the three plugin primitives Claude Code exposes. Each maps to a different runtime mechanism. A decision tree for choosing between them, with real examples from the aiocean marketplace."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
@@ -10,20 +10,22 @@ tags: ["skills", "agents", "hooks", "claude-code", "architecture", "plugin-devel
 
 # Three Claude Code primitives, three different jobs
 
-Three primitives, three different jobs — and from what you see in the wild,
-most plugins reach for the wrong one. Agents get built where a skill would
-do. Skills bloat into wiki articles. Hooks turn into control flow. Each of
-those is a different way to waste effort, and each produces plugins that
-feel sloppy to use.
+A Claude Code plugin can ship three kinds of extension. They map to three
+different mechanisms in the Claude Code runtime:
 
-The three primitives Claude Code exposes:
+- **Skill** — a Markdown file with frontmatter (`name`, `description`,
+  optional `when_to_use`). Claude loads its body into the session context
+  when the user's message fuzzy-matches the description.
+- **Agent** — a separate Claude invocation with its own context window
+  and tool budget. Spawned when Claude calls the `Agent` tool with a
+  matching `subagent_type`. Returns a single result string to the parent.
+- **Hook** — a shell command Claude Code runs on a lifecycle event
+  (`PreToolUse`, `PostToolUse`, `Stop`, `UserPromptSubmit`, etc.). Can
+  inspect or block the event before it proceeds.
 
-- **Skill** — auto-loaded knowledge and instructions, triggered by a fuzzy match against the user's message.
-- **Agent** — a sub-thread with its own context window, spawned to do a focused task.
-- **Hook** — a command that fires on a tool-call lifecycle event (`PreToolUse`, `PostToolUse`, `Stop`, etc.).
-
-Pick the right one the first time and the plugin almost writes itself. Pick
-wrong and you're rewriting it in three months.
+The primitives are not interchangeable. Each one trades off differently on
+context cost, isolation, and where in the session lifecycle it runs. The
+rest of this page is the decision tree.
 
 ## One-line summaries
 
@@ -61,46 +63,47 @@ validation or blocking dangerous commands), PostToolUse hooks fire after (good
 for derived actions, formatters). Hooks see the tool name and args; they can
 modify or reject.
 
-If none of those questions fit cleanly, you may not need a plugin at all — a
-well-crafted prompt or a short CLAUDE.md rule might do the same job with less
-ceremony.
+If none of the three fit, the right answer may not be a plugin. A
+short CLAUDE.md rule or a focused custom command often covers the same
+ground with less plumbing.
 
 ## Real examples from this marketplace
 
 **Skill**: [`aio-claude-toolkit/aio-patch-claude`](/plugins/aio-claude-toolkit/aio-patch-claude).
 Encodes the procedure for patching Claude Code's system prompts to remove
 brevity bias. Auto-triggers on phrases like "patch claude" or "unbloat
-prompts." Knowledge, not work — perfect skill fit.
+prompts." Pure procedural knowledge, no work — skill is the right shape.
 
 **Skill**: [`aio-design-system/aio-uiux`](/plugins/aio-design-system/aio-uiux).
 A 15-section reference catalog for visual design, typography, color, and
-accessibility. Triggers on UI/UX-related messages. Pure knowledge-on-demand.
+accessibility. Triggers on UI/UX-related messages.
 
-**Agent** territory: tasks like "review this PR independently" or "run TDD
-cycle on this feature." These are handled by Claude's built-in `Agent` tool
-combined with a specialized agent definition. Several plugins ship custom
-agents (`oh-my-claudecode:executor`, `oh-my-claudecode:code-reviewer`) for
-exactly these flows.
+**Agent**: tasks like "review this PR independently" or "run a TDD cycle
+on this feature." Handled by Claude's built-in `Agent` tool plus a
+specialized agent definition. Several plugins ship custom agents
+(`oh-my-claudecode:executor`, `oh-my-claudecode:code-reviewer`) for
+exactly these isolation requirements.
 
-**Hook**: a PreToolUse hook on `Bash` that blocks `rm -rf /` or `:(){:|:&};:`
-patterns. Defensive, runs silently, doesn't add a slash-command. The
+**Hook**: a `PreToolUse` hook on `Bash` that blocks `rm -rf /` or
+`:(){:|:&};:` patterns. Runs silently, doesn't add a slash-command. The
 [aio-claude-toolkit](/plugins/aio-claude-toolkit) plugin ships several
 session-level hooks for this kind of guardrail.
 
 ## Combining them
 
-The most powerful plugins compose all three:
+The three primitives compose well when each handles its own job:
 
 1. A **skill** triggers on the user's request ("review my Go code for
-   concurrency bugs").
-2. The skill instructs Claude to spawn an **agent** with a specialized prompt
-   for race-detection analysis.
-3. A **hook** on `PostToolUse` for the `Bash` tool captures the test command's
-   stderr and feeds it back to Claude.
+   concurrency bugs") and tells Claude what procedure to follow.
+2. Claude spawns an **agent** with a specialized prompt for
+   race-detection analysis, isolating the long investigation from the
+   main thread.
+3. A **hook** on `PostToolUse` for the `Bash` tool captures the test
+   command's stderr and surfaces it back to Claude.
 
-The skill says *what*. The agent does the *work in isolation*. The hook
-*reacts to events* that came out of the work. Each does its own job; none
-should try to do another's.
+The skill carries the *what*. The agent does the work in isolation. The
+hook reacts to events the work produced. Don't try to collapse two roles
+into one primitive.
 
 ## Anti-patterns
 
@@ -112,11 +115,12 @@ Skills should be *invokable* — clear steps that produce an outcome.
 read one file and report back, you've burned token overhead for nothing. Just
 read the file in the main thread.
 
-**Hook used as control flow.** Hooks are reactive — they shouldn't try to
-restructure the user's workflow. If you find yourself writing a hook that
-blocks 30% of bash calls to "force a better pattern," fix the workflow in a
-skill or CLAUDE.md rule instead. Hooks become invisible friction; rules are
-debuggable.
+**Hook used as control flow.** Hooks are reactive — they fire on an
+event, they don't structure the workflow. If a hook blocks 30% of bash
+calls to "force a better pattern," the right fix is upstream: a skill
+that teaches the pattern or a CLAUDE.md rule that forbids the
+alternative. A rule the user can read beats a silent block they have to
+debug.
 
 **Plugin without a primitive.** Sometimes the right answer is a short
 addition to your project's `CLAUDE.md`. Plugins are heavier — they install

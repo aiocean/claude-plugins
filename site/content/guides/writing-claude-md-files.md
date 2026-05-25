@@ -1,6 +1,6 @@
 ---
 title: "CLAUDE.md is project memory, not documentation"
-description: "Most CLAUDE.md files read like README files — and Claude skims them the same way humans skim READMEs. Project memory has a different audience, a different brevity budget, and a different content shape."
+description: "Claude Code loads CLAUDE.md into the session prompt on every start. That makes it prompt content, not documentation. What to put in 50–200 lines, what to leave out, and why the file should shrink over time."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
@@ -10,80 +10,73 @@ tags: ["claude-md", "project-memory", "claude-code", "best-practices", "configur
 
 # CLAUDE.md is project memory, not documentation
 
-Most CLAUDE.md files I see read like README files. That's the mistake.
+Claude Code looks for `CLAUDE.md` in three places when a session starts:
+the user's home directory (`~/.claude/CLAUDE.md`), the project root, and
+the working subdirectory. Whatever it finds is concatenated into the
+session prompt before the user's first message.
 
-A README tells *humans* what the project is, how to set it up, why it exists.
-It's marketing-adjacent. It tolerates length because humans scroll and search.
+That's what makes it different from `README.md`. A README is documentation
+written for a human reader who can scroll, skim, and reread. `CLAUDE.md`
+is prompt content: every line stays in context for the duration of the
+session and competes with the user's actual task for the model's
+attention. A 50-line file Claude can keep loaded. A 2000-line file Claude
+reads once and effectively forgets — the rules at line 1500 don't fire
+when they should.
 
-CLAUDE.md has none of that affordance. It's *project memory* — rules,
-conventions, and hidden invariants that Claude Code reads at the top of every
-session and that change *how* Claude behaves on your code. Different audience,
-different brevity budget, different content shape. The model has finite
-attention; every line in CLAUDE.md spends some of it whether the rule fires
-or not. A 2000-line CLAUDE.md gets skimmed and ignored the same way a 2000-word
-Slack message does.
-
-The good news: the right CLAUDE.md is small, opinionated, and shrinks over
-time as the team learns what's actually load-bearing.
+So the question is what to put in 50–200 lines that change Claude's
+behavior on this codebase, and what to leave out because Claude can read
+it from the code itself.
 
 ## What belongs in CLAUDE.md
 
-Three categories are durable:
+**Rules that aren't derivable from the code.**
+"Use `bun` instead of `npm`." "Never run dev servers." "Commit messages
+are imperative with no `feat:` prefix." Claude can't infer house rules
+from grepping the codebase.
 
-**1. Rules that aren't derivable from reading the code.**
-"Use `bun` instead of `npm`," "Never run dev servers," "Commit messages are
-imperative with no `feat:` prefix." Claude can't infer these from grepping the
-codebase. They're house rules.
+**Hidden invariants and rationale.**
+"The retry loop in `worker.go:142` runs 5x, not 3x, because the upstream
+API has a 4s connect-timeout-then-retry on its side — anything less than
+5 and we miss the second-attempt window." Context that doesn't exist
+anywhere else, not even in `git log`.
 
-**2. Hidden invariants and rationale.**
-"The retry loop in `worker.go:142` runs 5x, not 3x, because the upstream API
-has a 4s connect-timeout-then-retry on its side — anything less than 5 and we
-miss the second-attempt window." This kind of context is gold; nobody can
-extract it from `git log`.
-
-**3. Tool and runtime preferences.**
-"Use `rg` for text search, `sg` for AST queries. Type-check with `bunx vue-tsc
---noEmit` before declaring done." These shape *how* Claude works, not *what*
-it builds.
+**Tool and runtime preferences.**
+"Use `rg` for text search, `sg` for AST queries. Type-check with `bunx
+vue-tsc --noEmit` before declaring done." Shapes *how* Claude works on
+the code, not what it builds.
 
 ## What does NOT belong
 
-Avoid putting things into CLAUDE.md that Claude can extract on demand:
+Anything Claude can extract on demand:
 
 - **File layout** — Claude can read the directory tree.
-- **Function signatures or API shapes** — Claude can grep / read.
+- **Function signatures or API shapes** — Claude can grep and read.
 - **Recent git history** — Claude can run `git log`.
-- **General programming practices** — Claude already knows them.
+- **General programming practices** — already in the model's weights.
 - **Ephemeral todo lists or current sprint state** — those belong in
-  TodoWrite / project memory files, not in the shared CLAUDE.md.
+  TodoWrite or per-task notes, not in the shared CLAUDE.md.
 
-Every line in CLAUDE.md consumes the model's attention budget on every
-session. Adding something duplicate trades a quiet capability for forced
-recall. The litmus test: *will Claude reliably do this without the rule?* If
-yes, drop the rule.
+The litmus test for any candidate rule: *will Claude reliably do this
+without it?* If yes, drop the rule.
 
 ## Format
 
-Three patterns that work:
-
 **Imperatives, not narration.** "Use X." beats "We try to use X when
-appropriate." The model latches onto the imperative form harder.
+appropriate." Direct directives override softer language in the prompt.
 
-**Group by concern.** Sections like `## Code Style`, `## Tools & Runtime`, `##
-Commit Conventions`. Don't interleave — group so the model can pull a coherent
-block when one concern matters.
+**Group by concern.** `## Code Style`, `## Tools & Runtime`, `## Commit
+Conventions`. One block per topic so Claude can attend to the whole
+section when one concern is active.
 
-**Why before what for non-obvious rules.** "Never use `--no-verify` on git
-commits. Reason: a previous incident bypassed a pre-commit hook that catches
-secret leakage; the hook fired but the secret already pushed to remote."
-Without the why, Claude (or a teammate skimming the file) will quietly remove
-the rule the first time it inconveniences them.
+**Why before what for non-obvious rules.** "Never use `--no-verify` on
+git commits. Reason: a previous incident bypassed a pre-commit hook that
+catches secret leakage; the hook fired but the secret already pushed to
+remote." Without the *why*, the rule looks arbitrary the next time it
+gets in the way, and the next contributor deletes it.
 
 ## Length and discipline
 
-Long `CLAUDE.md` files lose the model the same way long meetings lose a
-listener. A 200-line CLAUDE.md is read with attention. A 2000-line one is
-skimmed.
+A 200-line CLAUDE.md is read with attention. A 2000-line one is skimmed.
 
 If yours is growing past a few hundred lines, look for:
 
@@ -128,12 +121,11 @@ expected to chain).
 
 ## Iterating on it
 
-Treat CLAUDE.md like code. Review it. Delete lines that didn't earn their
-keep. When you correct Claude twice on the same thing, add the rule. When a
-rule causes friction without changing behavior, remove it.
-
-The best `CLAUDE.md` files I've seen shrank between sprint 1 and sprint 10.
-The model didn't get worse — the team learned what was actually load-bearing.
+Treat CLAUDE.md like code. Review it on PRs. When you find yourself
+correcting Claude twice on the same thing, add the rule. When a rule
+hasn't fired in three months, remove it. Mature CLAUDE.md files get
+shorter over time, not longer — the team learns which rules the model
+actually needed and which ones were noise.
 
 ## Related
 
