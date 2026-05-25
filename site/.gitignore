@@ -11,7 +11,9 @@ dist
 # Generated content — `bun run sync` rewrites these from
 # ../plugins/{name}/.claude-plugin/plugin.json + SKILL.md on every build.
 # Anything else under content/ is hand-written and committed (e.g.
-# content/guides/, content/about.md, etc).
+# content/guides/, content/vi/**, content/about.md, etc). content/vi/ in
+# particular is AI-translated content that mirrors the EN structure but
+# diverges in language — sync intentionally does NOT touch it.
 content/index.md
 content/plugins/
 

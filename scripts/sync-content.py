@@ -27,7 +27,30 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MARKETPLACE_FILE = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 PLUGINS_DIR = REPO_ROOT / "plugins"
 CONTENT_ROOT = REPO_ROOT / "site" / "content"
-OUT_DIR = CONTENT_ROOT / "plugins"
+
+# i18n: EN is the default locale (unprefixed, at content/), VI lives under
+# content/vi/. content.config.ts splits these into two collections (`content`
+# excludes vi/**, `content_vi` includes vi/** with prefix:'').
+#
+# IMPORTANT: this script only emits EN. The VI namespace (content/vi/**) is
+# AI-translated/hand-authored content that lives in git — sync MUST NOT touch
+# it. The original strategy duplicated EN into VI on every sync, but that
+# overwrote any translation work. Translation now flows from EN → VI via
+# manual edits (or AI-assisted edits) directly inside site/content/vi/, and
+# those files are committed and survive every subsequent sync. When a new
+# plugin/skill is added in EN, a human (or AI) creates the matching VI page
+# by hand — sync is intentionally not aware of the VI side at all.
+LOCALES = ["en"]
+
+
+def locale_root(locale: str) -> Path:
+    """Root content dir for a given locale. EN sits at content/ (VI, content/vi/,
+    is hand-authored — see LOCALES comment above)."""
+    return CONTENT_ROOT if locale == "en" else CONTENT_ROOT / locale
+
+
+def plugins_out_dir(locale: str) -> Path:
+    return locale_root(locale) / "plugins"
 
 
 def parse_frontmatter(text: str) -> dict | None:
@@ -85,13 +108,18 @@ def yaml_escape(value: str) -> str:
     return f'"{escaped}"'
 
 
-def write_root_index(plugins: list[dict]) -> None:
+def write_root_index(plugins: list[dict], locale: str) -> None:
     """Site landing at /. The /plugins folder auto-lists below as a section,
     so the body's job is to take a position — what this marketplace IS, what
     sets it apart from "AI tool stores", and the mental model someone needs
     to choose the right plugin. Plugin/skill counts are interpolated so the
-    line stays accurate across releases."""
-    out = CONTENT_ROOT / "index.md"
+    line stays accurate across releases.
+
+    Locale-aware: EN writes to content/index.md (collection `content`); VI
+    writes to content/vi/index.md (collection `content_vi`, stored as / after
+    the prefix:'' strip). Body is identical — translation lands in-place via
+    manual edits after sync."""
+    out = locale_root(locale) / "index.md"
     n = len(plugins)
     total_skills = sum(len(p["skills"]) for p in plugins)
     body = f"""---
@@ -119,10 +147,10 @@ nothing — browse [plugins](/plugins) or read the [guides](/guides).
     out.write_text(body, encoding="utf-8")
 
 
-def write_plugin_index(plugins: list[dict]) -> None:
+def write_plugin_index(plugins: list[dict], locale: str) -> None:
     """The /plugins listing page. Body is intentionally short — the layer's
     ContentView renders the children (each plugin) as a section automatically."""
-    out = OUT_DIR / "index.md"
+    out = plugins_out_dir(locale) / "index.md"
     total_skills = sum(len(p["skills"]) for p in plugins)
     body = f"""---
 title: "Plugins"
@@ -162,8 +190,8 @@ def render_skill_list(plugin_slug: str, skills: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def write_plugin_page(plugin: dict) -> None:
-    """One markdown file per plugin → site/content/plugins/{name}.md.
+def write_plugin_page(plugin: dict, locale: str) -> None:
+    """One markdown file per plugin → site/content/{locale-root}/plugins/{name}.md.
 
     Source-of-truth strategy: use the plugin's own README.md body if it
     exists (16 of 28 plugins do — the well-crafted ones with rationale +
@@ -212,12 +240,12 @@ def write_plugin_page(plugin: dict) -> None:
         f"---\n\n"
         f"{core}"
     )
-    out = OUT_DIR / f"{slug}.md"
+    out = plugins_out_dir(locale) / f"{slug}.md"
     out.write_text(body, encoding="utf-8")
 
 
-def write_skill_page(plugin: dict, skill: dict) -> None:
-    """One markdown file per skill → site/content/plugins/{plugin}/{skill}.md.
+def write_skill_page(plugin: dict, skill: dict, locale: str) -> None:
+    """One markdown file per skill → site/content/{locale-root}/plugins/{plugin}/{skill}.md.
 
     Source-of-truth strategy: embed the SKILL.md body verbatim — that's where
     the skill author already wrote the real documentation (median 176 lines).
@@ -259,7 +287,7 @@ def write_skill_page(plugin: dict, skill: dict) -> None:
         f"---\n\n"
         f"{core}"
     )
-    out_dir = OUT_DIR / plugin_slug
+    out_dir = plugins_out_dir(locale) / plugin_slug
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{skill_slug}.md"
     out_path.write_text(body, encoding="utf-8")
@@ -308,26 +336,35 @@ def main() -> None:
         )
         sys.exit(1)
 
-    # Nuke + rebuild — generated content is .gitignored, full regen on every
-    # run guarantees no stale files when a plugin/skill is renamed or removed.
-    if OUT_DIR.exists():
-        shutil.rmtree(OUT_DIR)
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-
     plugins = gather_plugins()
-    write_root_index(plugins)
-    write_plugin_index(plugins)
+    skill_count_per_run = 0
 
-    skill_count = 0
-    for plugin in plugins:
-        write_plugin_page(plugin)
-        for skill in plugin["skills"]:
-            write_skill_page(plugin, skill)
-            skill_count += 1
+    for locale in LOCALES:
+        out_dir = plugins_out_dir(locale)
+        # Nuke + rebuild the plugins/ subtree only — generated content is
+        # .gitignored, full regen on every run guarantees no stale files when
+        # a plugin/skill is renamed or removed. Crucially we do NOT touch the
+        # locale's other folders (e.g. content/vi/guides/) which are
+        # hand-translated by humans and must survive sync.
+        if out_dir.exists():
+            shutil.rmtree(out_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(
-        f"sync-content: wrote 1 index + {len(plugins)} plugins + {skill_count} skills to {OUT_DIR.relative_to(REPO_ROOT)}"
-    )
+        write_root_index(plugins, locale)
+        write_plugin_index(plugins, locale)
+
+        skill_count = 0
+        for plugin in plugins:
+            write_plugin_page(plugin, locale)
+            for skill in plugin["skills"]:
+                write_skill_page(plugin, skill, locale)
+                skill_count += 1
+        skill_count_per_run = skill_count  # same for every locale; remember the last
+
+        rel = out_dir.relative_to(REPO_ROOT)
+        print(
+            f"sync-content[{locale}]: wrote 1 index + {len(plugins)} plugins + {skill_count} skills to {rel}"
+        )
 
 
 if __name__ == "__main__":
