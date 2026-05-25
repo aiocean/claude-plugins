@@ -1,79 +1,177 @@
 ---
 name: aio-html-interactive
 description: |
-  Dựng nhanh một interactive web app dùng-một-lần (Vue 3 + Tailwind, no build) chạy local
-  và nói chuyện realtime 2 chiều với AI qua WebSocket + Monitor tool. AI copy scaffold
-  ra /tmp, viết app vào APP REGION, spawn bun server qua Monitor, tương tác với người
-  dùng qua browser, rồi dọn sạch khi xong. Use when the user wants an ad-hoc visual
-  interactive tool — a form, dashboard, picker, approval queue, wizard, viewer — driven
-  by the AI in real time. Triggers: "/aio-html-interactive", "/interactive", "làm cái UI
-  tương tác", "dựng app tương tác", "interactive tool", "throwaway UI", "one-off web app".
-when_to_use: interactive web app, dựng UI tương tác, throwaway app, one-off UI, ad-hoc form, real-time browser, AI talk to browser, websocket UI, monitor + browser, picker UI, approval queue, wizard, dashboard tạm, Vue tailwind no build, send to browser, push state to browser
+  Bridge Claude to a browser UI in real time. The technical problem: Claude
+  runs in a turn-by-turn CLI loop with no event loop — it cannot
+  addEventListener on a tab, cannot block on user input. This skill ships a
+  frozen Bun + Vue3 + Tailwind scaffold that solves it via two channels:
+  browser events become Monitor-tool notifications (server emits MSG:: lines
+  to stdout, Monitor pattern-matches → Claude wakes), AI pushes become
+  WebSocket broadcasts (POST /api/push → all browser tabs). Claude only
+  writes the APP REGION of app.html; the runtime, message protocol, and
+  vendor blocks are frozen. Use when an interactive browser UI must be driven
+  by Claude while a task is in progress — form capture, multi-step decision
+  flow, live preview, approval queue, side-by-side review. Triggers:
+  "/aio-html-interactive", "/interactive", "interactive UI for AI",
+  "browser ↔ AI realtime", "AI-driven UI", "Monitor + WebSocket bridge",
+  "làm cái UI tương tác với AI", "dựng UI tương tác", "realtime browser AI".
+when_to_use: bridge Claude to browser, AI event loop substitute, Monitor stdout to notification, WebSocket push from AI, AI-driven UI, interactive UI for AI, realtime browser AI, browser to AI bidirectional, dựng UI tương tác AI, làm UI tương tác AI
 argument-hint: "[slug for /tmp dir, e.g. 'picker' or 'review-queue']"
 effort: medium
 ---
 
-# aio-html-interactive — interactive web app dùng-một-lần
+# aio-html-interactive — bridge Claude to a browser via Monitor + WebSocket
 
-Skill này dựng một web app **dùng-một-lần** chạy local để AI và người dùng nói chuyện realtime 2 chiều. Kiến trúc: AI copy scaffold ra `/tmp`, viết app vào **app region**, spawn một **bun server** qua **Monitor tool** → server tự mở browser. Chiều **browser → AI**: app `send()` POST lên `/api/event`, server in một dòng `MSG::` ra stdout, Monitor biến nó thành notification. Chiều **AI → browser**: AI `POST /api/push`, server broadcast qua **WebSocket** tới browser. UI là **Vue 3** (reactivity) + **Tailwind** (styling), cả hai vendored, không build step. App chết khi Monitor task dừng.
+## The problem this solves
+
+Claude runs in a turn-by-turn CLI loop. It has no event loop, can't
+`addEventListener` on a browser, can't block on `await userClick()`. So
+how does an interactive UI — one the user is actually clicking on right
+now — drive Claude's behavior while a task is in progress?
+
+The answer two channels, both fronted by a single Bun HTTP + WebSocket
+server:
+
+- **Browser → Claude (input channel).** `RT.send(type, payload)` in the
+  browser POSTs `/api/event`; the server writes one line
+  `MSG::{instance,type,payload}` to stdout. The **Monitor tool** is
+  configured to pattern-match `MSG::` lines on that server's stdout and
+  surface each one as a notification. Notifications are how a turn-based
+  agent gets a "user-clicked-X" event without an event loop.
+- **Claude → browser (output channel).** Claude POSTs
+  `/api/push {type,payload}` from any shell tool call; the server
+  broadcasts that JSON verbatim over WebSocket to every connected tab.
+  The runtime processes a small built-in vocabulary (`state` merge,
+  `toast`, `html`, `js`, `reload`) before dispatching to
+  app-registered handlers.
+
+UI is vendored Vue 3 + Tailwind, no build step. Claude only writes the
+**APP REGION** of `app.html`; the runtime, server, and vendor blocks
+are frozen so the protocol stays intact across edits.
 
 ## Workflow
 
-1. **Copy scaffold** — `cp -r ${CLAUDE_PLUGIN_ROOT}/skills/aio-html-interactive/scaffold /tmp/aio-html-interactive-<slug>` qua **Bash** (KHÔNG dùng Read+Write — copy bằng Read+Write là cách edit nhầm vào runtime frozen lọt vào).
-2. **Build app** — `Read` file `/tmp/aio-html-interactive-<slug>/app.html` MỘT lần trước khi edit. Edit tool đòi một lần `Read` in-conversation; `cp` ở bước 1 KHÔNG tính, nên bỏ qua bước Read là Edit đầu tiên CHẮC CHẮN fail (`File has not been read yet`). Đọc vùng APP REGION là đủ — `Read` với `offset`/`limit` quanh hai marker (~25 dòng cuối file). Rồi edit DUY NHẤT phần text giữa `<!-- ===== APP REGION START ... -->` và `<!-- ===== APP REGION END ===== -->`, dùng **Edit tool** với hai dòng marker đó làm anchor. KHÔNG bao giờ rewrite cả file. KHÔNG đụng runtime block, `server.js`, hay `vendor/` — và KHÔNG cần `Read` chúng, toàn bộ API đã doc đầy đủ trong skill này.
-3. **Launch** — chạy `bun /tmp/aio-html-interactive-<slug>/server.js` qua **Monitor tool**. Dòng khởi động cho URL + `instance` id; browser tự mở.
-4. **Interact** — event từ browser tới dưới dạng notification của Monitor: `MSG::{instance,type,payload}`. AI đẩy ngược lại bằng `curl -s -X POST http://localhost:<PORT>/api/push -d '{"type":"...","payload":{...}}'`.
-5. **Cleanup (bắt buộc)** — khi xong: `TaskStop` Monitor task VÀ `rm -rf /tmp/aio-html-interactive-<slug>`. Để lại là rác.
+1. **Copy scaffold** —
+   `cp -r ${CLAUDE_PLUGIN_ROOT}/skills/aio-html-interactive/scaffold /tmp/aio-html-interactive-<slug>`
+   via Bash. Do not Read+Write to copy — that round-trips through the
+   model and risks editing the runtime by accident.
+
+2. **Build app** — `Read` `/tmp/aio-html-interactive-<slug>/app.html`
+   once before editing. The Edit tool requires a prior in-conversation
+   `Read`; the `cp` above does NOT count, so skipping `Read` makes the
+   first `Edit` fail with `File has not been read yet`. Read with
+   `offset`/`limit` around the two markers (~25 lines at end of file) is
+   enough. Edit ONLY the text between
+   `<!-- ===== APP REGION START ... -->` and
+   `<!-- ===== APP REGION END ===== -->`, using both marker lines as
+   `Edit` anchors. Never rewrite the whole file. Never touch the runtime
+   block, `server.js`, or `vendor/` — and do not Read them either; the
+   full API is documented below.
+
+3. **Launch** — run `bun /tmp/aio-html-interactive-<slug>/server.js`
+   through the Monitor tool. The startup line prints URL + `instance`
+   id; the browser opens automatically.
+
+4. **Interact** — browser events arrive as Monitor notifications:
+   `MSG::{instance,type,payload}`. Claude pushes back with
+   `curl -s -X POST http://localhost:<PORT>/api/push -d '{"type":"...","payload":{...}}'`.
+
+5. **Cleanup (required)** — when done: `TaskStop` the Monitor task AND
+   `rm -rf /tmp/aio-html-interactive-<slug>`. Leaving the task running
+   holds the port; leaving the directory is litter.
 
 ## Server API
 
-- `POST /api/push` `{type,payload}` — AI → browser. Server broadcast verbatim qua WebSocket tới mọi browser.
-- `POST /api/event` `{type,payload}` — browser → AI. App `send()` gọi cái này; server in `MSG::{instance,type,payload}` ra stdout.
-- `MSG::` stdout line — JSON sau prefix có `instance` (id phân biệt nhiều app `aio-html-interactive` chạy song song), `type`, `payload`.
+- `POST /api/push` `{type,payload}` — Claude → browser. Server
+  broadcasts the JSON verbatim over WebSocket to every connected tab.
+- `POST /api/event` `{type,payload}` — browser → Claude. `RT.send()`
+  calls this; server writes `MSG::{instance,type,payload}` to stdout.
+  Monitor surfaces each line as a notification.
+- `MSG::` stdout line — JSON after the prefix; `instance` disambiguates
+  when multiple `aio-html-interactive` apps run concurrently. The
+  prefix is the Monitor-side contract — do not change it.
 
-## Runtime API (browser)
+## Runtime API (browser-side)
 
-- `RT.start(appDef)` — entry point DUY NHẤT app region gọi (gọi cuối, một lần). `appDef` là Vue component options: `template`, `setup`, ... Runtime inject `state`/`send`/`on` vào render scope; return values từ `setup()` của app merge lên trên.
-- `RT.state` — reactive global state (`Vue.reactive`). App template đọc `state.*`.
-- `RT.send(type, payload)` — gửi event lên AI (POST `/api/event`).
-- `RT.on(type, fn)` — đăng ký handler cho một push `type` tùy biến (không phải built-in).
-- **Template** đọc `state`, `send`, `on` trực tiếp (runtime trả chúng vào render scope). Trong **thân hàm `setup()`** thì KHÔNG — ở đó phải gọi `RT.state` / `RT.send` / `RT.on` (chúng là biến closure của runtime, không phải global của app region; viết `send(...)` trần trong `setup()` sẽ `ReferenceError`).
+- `RT.start(appDef)` — the only entry point the APP REGION calls (last,
+  exactly once). `appDef` is a Vue component options object: `template`,
+  `setup`, etc. The runtime injects `state` / `send` / `on` into the
+  render scope; values returned from `setup()` merge on top.
+- `RT.state` — reactive global state (`Vue.reactive`). Template reads
+  `state.*`.
+- `RT.send(type, payload)` — emit a browser → Claude event
+  (POSTs `/api/event`).
+- `RT.on(type, fn)` — register a handler for a custom push `type`
+  (non-built-in).
+- **Template** reads `state` / `send` / `on` directly (runtime returns
+  them into the render scope). **Inside `setup()`** they are NOT visible
+  — there, address them as `RT.state` / `RT.send` / `RT.on` (they are
+  runtime closures, not globals; bare `send(...)` inside `setup()`
+  throws `ReferenceError`).
 
-## Built-in push actions
+## Built-in push types
 
-`POST /api/push` với các `type` sau được runtime xử lý trực tiếp (trước app handler — app KHÔNG shadow được):
+`POST /api/push` with these `type` values is handled by the runtime
+directly (before app-registered handlers; an app handler cannot shadow
+these):
 
-| `type` | `payload` | Tác dụng |
+| `type` | `payload` | Effect |
 |---|---|---|
-| `state` | object | **Shallow-merge** vào `RT.state` → Vue re-render. Cơ chế CHÍNH để đổi UI. |
-| `state-set` | object | Xóa sạch state cũ rồi gán payload mới (full replace). |
-| `toast` | `{kind,text}` | Toast — `kind`: `ok` (xanh, tự ẩn ~4s) / `err` (đỏ) / `held` (hổ phách) / `info` (xám). |
-| `html` | `{target,mode,html}` | `querySelector(target)`; `mode:"append"` thì append, còn lại replace `innerHTML`. Target thiếu → toast `err`. |
-| `js` | `{code}` | Eval chuỗi `code` (escape hatch). Lỗi → toast `err` (không bao giờ im lặng). |
+| `state` | object | **Shallow-merge** into `RT.state` → Vue re-renders. Primary UI-update mechanism. |
+| `state-set` | object | Full replace — clear `RT.state` then assign payload. |
+| `toast` | `{kind,text}` | Toast notification. `kind`: `ok` (green, auto-dismiss ~4s) / `err` (red) / `held` (amber) / `info` (gray). |
+| `html` | `{target,mode,html}` | `querySelector(target)`; `mode:"append"` appends, anything else replaces `innerHTML`. Missing target → `toast err`. |
+| `js` | `{code}` | Eval the `code` string (escape hatch). Errors → `toast err` (never silent). |
 | `reload` | — | `location.reload()`. |
 
-`type` khác → gọi handler đăng ký qua `RT.on()`; không có handler → bỏ qua im lặng.
+Any other `type` → invokes the handler registered via `RT.on()`; no
+handler → silently ignored.
 
-## Design principles for a good one-off app
+## Design principles
 
-- **Drive UI qua `state`** — push `state` patch, để Vue reactivity tự re-render. Đây là cơ chế chính, ưu tiên nó.
-- **Bake initial state nếu đã biết sẵn** — khi AI đã cầm data ban đầu lúc viết app (danh sách, bảng, cấu hình…), seed thẳng vào `RT.state` ngay trong `setup()` để first paint hiện đầy đủ, không blank-flash. Chỉ dùng `push state` cho *update về sau*. Đừng launch server xong mới push state khởi tạo — đó là một round-trip thừa và user nhìn màn hình trống trong lúc chờ.
-- **Mỗi `state` key chỉ MỘT writer** — hoặc app sửa local (optimistic), hoặc AI `push state`; đừng để cả hai cùng ghi một key. Cùng ghi → last-writer-wins race, giá trị nhảy loạn. Chọn một mô hình: *AI-authoritative* (click chỉ `send()`, chỉ AI push — không race, đổi lại có latency) hoặc *browser-authoritative* (app sửa local, AI chỉ đọc event, không push key đó).
-- `html` / `js` chỉ là **escape hatch** — dùng khi `state` không đủ, không phải mặc định.
-- Định nghĩa một **vocabulary message nhỏ, rõ** — vài `type` cho browser→AI, vài `type` cho AI→browser.
-- **Gửi tường minh + trạng thái chờ** — AI trong vòng lặp là async, chạy theo lượt, có thể chậm vài giây; `send()` là fire-and-forget. ĐỪNG bắn `send()` ở mỗi micro-interaction (mỗi cú bấm) rồi để user mù — họ không biết AI đã nhận chưa, đang xử lý không, có được thao tác tiếp không. Thay vào đó: gom input vào `state` local, cho user một **nút "Gửi cho AI" tường minh** để chủ động chốt; khi đã gửi thì set một cờ pending (vd `state.busy = true`) để UI hiện "đang chờ AI…" và/hoặc disable input; AI xử lý xong push `state` clear cờ. Vòng phản hồi phải khép kín — user luôn biết đang tới lượt ai.
-- Giữ app **focused vào đúng một việc** — đây là tool dùng-một-lần, không phải product.
+- **Drive UI through `state`.** Push a `state` patch; let Vue
+  reactivity re-render. Prefer this over `html` / `js`, which are
+  escape hatches.
+- **Bake initial state in `setup()` when Claude already has it.** If
+  Claude holds the initial dataset at the time of writing the app
+  (list, table, config…), seed it directly into `RT.state` inside
+  `setup()` so first paint is complete. Use `push state` for
+  *subsequent updates only*. Launching the server and then pushing
+  initial state is a wasted round-trip with a blank-flash for the user.
+- **Single writer per `state` key.** Either the app writes locally
+  (optimistic) OR Claude `push state` writes — never both for the same
+  key. Both writing → last-writer-wins race, value flickers. Pick a
+  model: *Claude-authoritative* (browser clicks only `send()`, only
+  Claude pushes — no race but adds latency) or *browser-authoritative*
+  (app writes local, Claude reads events but does not push that key).
+- **Define a small, explicit message vocabulary.** A handful of `type`
+  values for browser → Claude, a handful for Claude → browser. Spell
+  them out at the top of the APP REGION.
+- **Explicit submission + busy flag.** Claude turn-takes asynchronously
+  and can take seconds; `send()` is fire-and-forget. Do NOT fire
+  `send()` on every micro-interaction (every keystroke) and leave the
+  user blind — they cannot tell whether Claude received the event, is
+  processing, or whether further input is allowed. Collect input into
+  local `state`, give the user an explicit **"Send to AI"** button, set
+  a pending flag (e.g. `state.busy = true`) on submit so the UI shows
+  "waiting for AI…" and/or disables input, and have Claude push `state`
+  to clear the flag when done. The feedback loop must stay closed — the
+  user always knows whose turn it is.
 
-## Starter — skeleton APP REGION (tùy chọn)
+## Starter — APP REGION skeleton (optional)
 
-Khung dưới đây đã theo sẵn các design principle trên: header, container căn giữa, nút **"Gửi cho AI"** tường minh, cờ `state.busy`, và bake initial state trong `setup()`. Copy đè lên placeholder rồi thay phần nội dung. Đây chỉ là head-start — app cần layout khác thì cứ viết khác, KHÔNG bắt buộc dùng.
+The skeleton below follows the design principles above: header,
+centered container, explicit "Send to AI" button, `state.busy` flag,
+initial state baked in `setup()`. Copy over the placeholder content and
+replace the body. Head-start only — different layouts are fine, this is
+not required.
 
 ```html
 RT.start({
   template: `
     <div class="min-h-screen pb-24">
 
-      <!-- header — tên app + một dòng mô tả -->
+      <!-- header — app title + one-line description -->
       <div class="bg-slate-900 text-white">
         <div class="max-w-3xl mx-auto px-6 py-5">
           <h1 class="text-lg font-semibold">{{ state.title }}</h1>
@@ -81,23 +179,23 @@ RT.start({
         </div>
       </div>
 
-      <!-- nội dung chính — thay khối này bằng app thật -->
+      <!-- main content — replace this block with the real app -->
       <div class="max-w-3xl mx-auto px-6 py-6">
         <div class="bg-white rounded-xl border border-slate-200 p-6 text-sm text-slate-600">
-          Nội dung app ở đây.
+          App content here.
         </div>
       </div>
 
-      <!-- thanh hành động — nút Gửi tường minh, khoá khi đang chờ AI -->
+      <!-- action bar — explicit Send button, locked while waiting on AI -->
       <div class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200">
         <div class="max-w-3xl mx-auto px-6 py-3 flex items-center gap-4">
           <div class="flex-1 text-sm text-slate-500">
-            {{ state.busy ? '⏳ Đang chờ AI…' : 'Sẵn sàng.' }}
+            {{ state.busy ? '⏳ Waiting for AI…' : 'Ready.' }}
           </div>
           <button @click="submit" :disabled="state.busy"
               class="px-5 py-2 rounded-lg text-sm font-semibold text-white
                      bg-slate-900 hover:bg-slate-700 disabled:opacity-40">
-            Gửi cho AI →
+            Send to AI →
           </button>
         </div>
       </div>
@@ -105,19 +203,21 @@ RT.start({
     </div>
   `,
   setup() {
-    // Bake initial state — first paint hiện đầy đủ ngay, không blank-flash.
-    RT.state.title = "Tên app";
-    RT.state.subtitle = "Một dòng mô tả ngắn";
+    // Bake initial state — first paint is complete, no blank-flash.
+    RT.state.title = "App title";
+    RT.state.subtitle = "One-line description";
     RT.state.busy = false;
 
-    // Browser → AI: chốt input rồi bật cờ busy để UI tự khoá.
+    // Browser → AI: commit the submission and raise the busy flag so the
+    // UI locks itself.
     function submit() {
       if (RT.state.busy) return;
       RT.state.busy = true;
       RT.send("submit", {});
     }
 
-    // AI → browser: xử lý xong, AI push {"type":"done"} để nhả cờ busy.
+    // AI → browser: on completion, AI pushes {"type":"done"} to release
+    // the busy flag.
     RT.on("done", function () {
       RT.state.busy = false;
     });
@@ -127,4 +227,10 @@ RT.start({
 });
 ```
 
-Localhost-only, session-scoped — app chết khi Monitor task spawn nó dừng.
+## Lifecycle
+
+Server lifetime is tied to the Monitor task. `TaskStop` terminates the
+Bun process, which closes every WebSocket; subsequent browser actions
+silently fail (no handler reachable). The `/tmp/aio-html-interactive-<slug>/`
+directory is Claude's responsibility to remove after `TaskStop` —
+see step 5 of the workflow.
