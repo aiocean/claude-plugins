@@ -31,13 +31,18 @@ OUT_DIR = CONTENT_ROOT / "plugins"
 
 
 def parse_frontmatter(text: str) -> dict | None:
-    """Extract YAML-ish frontmatter from a SKILL.md file. Mirrors the shape
-    used in generate-docs-data.py — handles inline + multi-line description
-    blocks (with > or | indicator) and stops at the next top-level key."""
+    """Extract YAML-ish frontmatter + body from a SKILL.md file.
+
+    Returns {"name": ..., "desc": ..., "body": ...} or None when no
+    frontmatter delimiter is found. "body" is everything after the closing
+    `---` line, with leading blank lines trimmed — ready to splice straight
+    into Nuxt Content markdown.
+    """
     match = re.search(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
     if not match:
         return None
     fm_text = match.group(1)
+    body = text[match.end() :].lstrip("\n")
 
     name_match = re.search(r"^name:\s*(.+)$", fm_text, re.MULTILINE)
     name = name_match.group(1).strip() if name_match else ""
@@ -54,7 +59,20 @@ def parse_frontmatter(text: str) -> dict | None:
             raw = raw[1:].strip()
         desc = re.sub(r"\s+", " ", raw)
 
-    return {"name": name, "desc": desc}
+    return {"name": name, "desc": desc, "body": body}
+
+
+def read_plugin_readme(plugin_name: str) -> str | None:
+    """Return the plugin's README.md body (frontmatter stripped if any) or
+    None when no README exists. Path: plugins/{plugin}/README.md."""
+    readme = PLUGINS_DIR / plugin_name / "README.md"
+    if not readme.exists():
+        return None
+    text = readme.read_text(encoding="utf-8")
+    fm_match = re.search(r"^---\s*\n.*?\n---\s*\n", text, re.DOTALL)
+    if fm_match:
+        text = text[fm_match.end() :]
+    return text.lstrip("\n")
 
 
 def yaml_escape(value: str) -> str:
@@ -121,86 +139,119 @@ Browse the {len(plugins)} plugins below — click any to drill into its skills.
     out.write_text(body, encoding="utf-8")
 
 
+def render_skill_list(plugin_slug: str, skills: list[dict]) -> str:
+    """Render the per-plugin skill list as a markdown bullet list. Each link
+    points at the absolute skill URL so it works from any stacked-column
+    depth. Truncate descriptions to keep the parent page scannable."""
+    if not skills:
+        return "*This plugin ships no skills.*"
+    lines = []
+    for skill in skills:
+        link = f"/plugins/{plugin_slug}/{skill['name']}"
+        desc = skill["desc"][:160].rstrip()
+        if len(skill["desc"]) > 160:
+            desc += "…"
+        lines.append(f"- [**{skill['name']}**]({link}) — {desc}")
+    return "\n".join(lines)
+
+
 def write_plugin_page(plugin: dict) -> None:
-    """One markdown file per plugin → site/content/plugins/{name}.md. The
-    page body lists the bundled skills as a linked list so users can drill
-    into each (stacked-column push) without scrolling a giant single page."""
+    """One markdown file per plugin → site/content/plugins/{name}.md.
+
+    Source-of-truth strategy: use the plugin's own README.md body if it
+    exists (16 of 28 plugins do — the well-crafted ones with rationale +
+    installation + sections). Falls back to a slim synthetic template when
+    no README is present.
+
+    Marketplace adds: frontmatter for SEO/listing + a top-of-page install
+    callout + a "Skills" section appended at the bottom (always present so
+    users can drill into individual skills regardless of README content).
+    """
     slug = plugin["name"]
     install_cmd = f"/plugin install {slug}@aiocean-plugins"
+    readme_body = plugin.get("readme")  # set by gather_plugins
+    skill_list_md = render_skill_list(slug, plugin["skills"])
 
-    skill_lines = []
-    for skill in plugin["skills"]:
-        skill_slug = skill["name"]
-        # Use absolute path so links work from any column depth
-        link = f"/plugins/{slug}/{skill_slug}"
-        # Truncate skill desc for the listing — full text lives on the skill page
-        desc_short = skill["desc"][:160].rstrip()
-        if len(skill["desc"]) > 160:
-            desc_short += "…"
-        skill_lines.append(f"- [**{skill_slug}**]({link}) — {desc_short}")
-    skill_md = (
-        "\n".join(skill_lines) if skill_lines else "*This plugin ships no skills.*"
+    if readme_body:
+        # README is the body. Prepend a 1-line marketplace install callout
+        # (block quote so it visually separates from README's own content)
+        # and append the Skills index so drill-down is always reachable.
+        core = (
+            f"> **Install:** `{install_cmd}` · `v{plugin.get('version', '?')}`\n\n"
+            f"{readme_body.rstrip()}\n\n"
+            f"## Skills ({len(plugin['skills'])})\n\n"
+            f"{skill_list_md}\n"
+        )
+    else:
+        # Slim synthetic fallback for plugins without a README.
+        core = (
+            f"# {slug}\n\n"
+            f"`v{plugin.get('version', '?')}`\n\n"
+            f"{plugin['desc']}\n\n"
+            f"## Install\n\n"
+            f"```\n{install_cmd}\n```\n\n"
+            f"## Skills ({len(plugin['skills'])})\n\n"
+            f"{skill_list_md}\n"
+        )
+
+    body = (
+        f"---\n"
+        f"title: {yaml_escape(slug)}\n"
+        f"description: {yaml_escape(plugin['desc'])}\n"
+        f'document_type: "plugin"\n'
+        f"version: {yaml_escape(plugin.get('version', ''))}\n"
+        f"install: {yaml_escape(install_cmd)}\n"
+        f"skills_count: {len(plugin['skills'])}\n"
+        f"---\n\n"
+        f"{core}"
     )
-
-    body = f"""---
-title: {yaml_escape(slug)}
-description: {yaml_escape(plugin["desc"])}
-document_type: "plugin"
-version: {yaml_escape(plugin.get("version", ""))}
-install: {yaml_escape(install_cmd)}
-skills_count: {len(plugin["skills"])}
----
-
-# {slug}
-
-`v{plugin.get("version", "?")}`
-
-{plugin["desc"]}
-
-## Install
-
-```
-{install_cmd}
-```
-
-## Skills ({len(plugin["skills"])})
-
-{skill_md}
-"""
     out = OUT_DIR / f"{slug}.md"
     out.write_text(body, encoding="utf-8")
 
 
 def write_skill_page(plugin: dict, skill: dict) -> None:
     """One markdown file per skill → site/content/plugins/{plugin}/{skill}.md.
-    Skill detail = description + how to install the parent plugin (skills can't
-    be installed individually) + link back to plugin."""
+
+    Source-of-truth strategy: embed the SKILL.md body verbatim — that's where
+    the skill author already wrote the real documentation (median 176 lines).
+    Marketplace adds: frontmatter for SEO/listing + a top-of-page callout
+    with the parent-plugin link and install command (skills install via the
+    parent plugin, not individually).
+    """
     plugin_slug = plugin["name"]
     skill_slug = skill["name"]
     install_cmd = f"/plugin install {plugin_slug}@aiocean-plugins"
+    skill_body = skill.get("body", "").rstrip()
 
-    body = f"""---
-title: {yaml_escape(skill_slug)}
-description: {yaml_escape(skill["desc"])}
-document_type: "skill"
-plugin: {yaml_escape(plugin_slug)}
-install: {yaml_escape(install_cmd)}
----
+    if skill_body:
+        core = (
+            f"> From plugin [**{plugin_slug}**](/plugins/{plugin_slug}) · "
+            f"`v{plugin.get('version', '?')}` · "
+            f"**Install:** `{install_cmd}`\n\n"
+            f"{skill_body}\n"
+        )
+    else:
+        # Fallback when SKILL.md has no body — should never happen but
+        # render something rather than an empty page.
+        core = (
+            f"# {skill_slug}\n\n"
+            f"From plugin [**{plugin_slug}**](/plugins/{plugin_slug}) · "
+            f"`v{plugin.get('version', '?')}`\n\n"
+            f"{skill['desc']}\n\n"
+            f"## Install\n\nInstall the parent plugin — this skill is bundled inside:\n\n"
+            f"```\n{install_cmd}\n```\n"
+        )
 
-# {skill_slug}
-
-From plugin [**{plugin_slug}**](/plugins/{plugin_slug}) · `v{plugin.get("version", "?")}`
-
-{skill["desc"]}
-
-## Install
-
-Install the parent plugin — this skill is bundled inside:
-
-```
-{install_cmd}
-```
-"""
+    body = (
+        f"---\n"
+        f"title: {yaml_escape(skill_slug)}\n"
+        f"description: {yaml_escape(skill['desc'])}\n"
+        f'document_type: "skill"\n'
+        f"plugin: {yaml_escape(plugin_slug)}\n"
+        f"install: {yaml_escape(install_cmd)}\n"
+        f"---\n\n"
+        f"{core}"
+    )
     out_dir = OUT_DIR / plugin_slug
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{skill_slug}.md"
@@ -235,6 +286,9 @@ def gather_plugins() -> list[dict]:
                 "version": p.get("version", ""),
                 "desc": p.get("description", ""),
                 "skills": skills_list,
+                # plugins/{name}/README.md — present for ~57% of plugins.
+                # write_plugin_page falls back to a synthetic template when None.
+                "readme": read_plugin_readme(plugin_name),
             }
         )
     return plugins_data
