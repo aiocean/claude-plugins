@@ -59,7 +59,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | **aio-cdp-relay** | 1.2.2 | Persistent CDP relay for browser automation — no MCP, no approval prompts.<br>`npx skills add aiocean/claude-plugins -s aio-cdp-relay` |
 | **aio-browser-cookie** | 2.0.3 | Extract browser cookies with rookiepy for authenticated requests.<br>`npx skills add aiocean/claude-plugins -s aio-browser-cookie` |
 | **aio-visual-diff** | 0.1.0 | Verify AI-built UI against design via measurement-driven diff — `getComputedStyle` + `getBoundingClientRect` via Chrome DevTools MCP, diff against Figma reference or frozen baseline, numerical delta feedback. No screenshot eyeballing.<br>`npx skills add aiocean/claude-plugins -s aio-visual-diff` |
-| **aio-html-interactive** | 1.0.0 | Throwaway local web app (Vue 3 + Tailwind, no build) that talks to the AI in real time over WebSocket + Monitor. AI copies a frozen scaffold to `/tmp`, edits only the APP REGION, spawns a Bun server, interacts, then cleans up. For ad-hoc forms, pickers, approval queues, dashboards.<br>`npx skills add aiocean/claude-plugins -s aio-html-interactive` |
+| **aio-html-interactive** | 1.0.1 | Bridge Claude to a browser UI in real time — solves the AI-event-loop gap. Frozen Bun + Vue3 + Tailwind scaffold: browser events become Monitor-tool notifications (`MSG::` stdout lines), Claude pushes broadcast over WebSocket. Claude only edits the APP REGION; runtime, protocol, and vendor blocks stay frozen.<br>`npx skills add aiocean/claude-plugins -s aio-html-interactive` |
 
 ### Database
 
