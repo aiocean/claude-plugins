@@ -57,10 +57,10 @@ Thêm API key vào environment variable hoặc trực tiếp trong code:
 
 ```bash
 # Option 1: Environment variable (khuyến nghị)
-export JREAD_API_KEY="your-license-key-here"
+export AIO_EPUB_API_KEY="your-license-key-here"
 
 # Option 2: Thêm vào .env file của project
-echo 'JREAD_API_KEY=your-license-key-here' >> .env
+echo 'AIO_EPUB_API_KEY=your-license-key-here' >> .env
 ```
 
 ### Verify kết nối
@@ -69,11 +69,11 @@ echo 'JREAD_API_KEY=your-license-key-here' >> .env
 import json, urllib.request, os
 
 BASE = "https://read-api.aiocean.dev/ListBooks.v1.BookService"
-KEY = os.environ.get("JREAD_API_KEY", "")
+KEY = os.environ.get("AIO_EPUB_API_KEY", "")
 
 if not KEY:
-    print("ERROR: JREAD_API_KEY not set")
-    print("Run: export JREAD_API_KEY='your-license-key'")
+    print("ERROR: AIO_EPUB_API_KEY not set")
+    print("Run: export AIO_EPUB_API_KEY='your-license-key'")
     exit(1)
 
 def api(method, body):
@@ -147,7 +147,7 @@ print("Custom API key configured!")
 
 | Lỗi | Nguyên nhân | Giải pháp |
 |-----|-------------|-----------|
-| `401 Unauthorized` | API key sai hoặc thiếu | Kiểm tra `JREAD_API_KEY` |
+| `401 Unauthorized` | API key sai hoặc thiếu | Kiểm tra `AIO_EPUB_API_KEY` |
 | `403 Forbidden` | License hết hạn hoặc không đủ quyền | Gia hạn license |
 | `connection refused` | Server không phản hồi | Kiểm tra mạng, thử lại sau |
 | `quota exceeded` | Hết quota tháng | Nâng cấp gói hoặc chờ đầu tháng |

@@ -20,7 +20,7 @@ Dịch nội dung EPUB bằng khả năng ngôn ngữ của Claude, submit bản
 import json, urllib.request, os
 
 BASE = "https://read-api.aiocean.dev/ListBooks.v1.BookService"
-KEY = os.environ.get("JREAD_API_KEY", "duocnv")
+KEY = os.environ.get("AIO_EPUB_API_KEY", "duocnv")
 
 def api(method, body):
     data = json.dumps(body).encode('utf-8')
@@ -94,7 +94,7 @@ print(f"Need translation: {len(items_to_translate)}")
 Đọc `contentText` của từng item, dịch sang ngôn ngữ yêu cầu (mặc định: Vietnamese).
 - Giữ nguyên HTML tags, chỉ dịch text content
 - Giữ nguyên tên riêng trừ khi guideline nói khác
-- Dịch theo batch: đọc ~10-15 items, dịch hết, submit batch
+- Dịch theo **mini-batch 5 items** — dịch xong phải review trước khi submit và trước khi sang batch tiếp theo
 
 #### NGUYÊN TẮC DỊCH VĂN HỌC
 
@@ -140,33 +140,64 @@ echo "$REFS"
 - Nhịp chẵn 2/2, 2/4, giữ phong cách tác giả
 - Tránh: câu cứng theo tiếng Anh, lạm dụng bị động, sáo rỗng dịch thuật ("Nói một cách khác", "Sự thật là...")
 
-### 5. Submit bản dịch — DÙNG BATCH API
+### 5. Vòng lặp progressive — Dịch 5 items → Review → Rút kinh nghiệm → Tiếp
 
-**Luôn dùng `BatchCreateManualTranslation`** để submit tất cả translations trong 1 request.
+Mỗi chu kỳ xử lý đúng **5 items**. Không được gộp nhiều hơn.
+
+#### Chu kỳ N (lặp lại cho đến hết chapter):
+
+**Bước A — Dịch 5 items**
+
+Lấy 5 items tiếp theo từ `items_to_translate`, dịch toàn bộ, áp dụng:
+- Mọi nguyên tắc trong guideline
+- Glossary đã load
+- Bài học từ chu kỳ trước (nếu có)
+
+**Bước B — Self-review TRƯỚC KHI SUBMIT**
+
+Đọc lại từng cặp gốc/dịch, kiểm tra theo checklist:
+
+| # | Tiêu chí | Dấu hiệu lỗi |
+|---|----------|--------------|
+| 1 | Nghĩa đúng | Bỏ sót ý, thêm ý không có trong gốc |
+| 2 | Tự nhiên tiếng Việt | Câu nghe như dịch máy, cứng, gượng |
+| 3 | Không dịch word-by-word | "Đó là sự thật rằng...", cấu trúc Anh ngữ còn nguyên |
+| 4 | Bị động → chủ động | "được/bị X bởi Y" còn sót |
+| 5 | Nhất quán glossary | Tên/thuật ngữ dịch khác với glossary |
+| 6 | Giữ đúng tone | Văn xuôi thành văn nói, hoặc ngược lại |
+
+Nếu phát hiện lỗi → **sửa ngay, rồi mới submit**.
+
+**Bước C — Submit 5 items đã review**
 
 ```python
-# Chuẩn bị batch items
-batch_items = []
-for item in items_to_translate:
-    translated = translate(item["contentText"])  # Claude dịch
-    batch_items.append({
+batch_items = [
+    {
         "contentId": item["contentId"],
-        "translatedContent": translated,
+        "translatedContent": translated_text,
         "targetLanguage": "Vietnamese"
-    })
+    }
+    for item, translated_text in zip(current_5_items, current_5_translations)
+]
 
-# Submit batch (1 API call thay vì N calls)
 result = api("BatchCreateManualTranslation", {
     "bookId": BOOK_ID,
     "filePath": FILE_PATH,
     "items": batch_items
 })
-print(f"Created: {result['createdCount']}, Failed: {result['failedCount']}")
-if result.get("failedContentIds"):
-    print(f"Failed IDs: {result['failedContentIds']}")
+print(f"Cycle {cycle_num}: created={result['createdCount']}, failed={result['failedCount']}")
 ```
 
-**Dịch theo batch ~10-15 items** để giữ chất lượng. Lặp lại cho đến hết chapter.
+**Bước D — Rút kinh nghiệm (2-3 dòng)**
+
+Trước khi sang chu kỳ tiếp theo, ghi ra:
+- Lỗi nào xuất hiện nhiều nhất trong 5 items vừa rồi?
+- Cách xử lý sẽ áp dụng cho 5 items tiếp theo?
+
+Ví dụ:
+> *"Chu kỳ 3: 2/5 câu bị passive voice. Chu kỳ 4: ưu tiên chuyển hết sang chủ động trước khi review."*
+
+Lặp lại Bước A→D cho đến hết `items_to_translate`.
 
 ### 6. Kiểm tra sau khi dịch
 

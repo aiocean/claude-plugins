@@ -145,11 +145,4 @@ You: export as vietnamese-only epub
 
 - Claude Code with plugin support
 - A license key from [read.aiocean.io](https://read.aiocean.io)
-- `JREAD_API_KEY` environment variable set with your license key
-
-## Version history
-
-| Version | Changes |
-|---------|---------|
-| 3.0.0 | Complete rewrite. Replaced jread CLI with ConnectRPC API. 6 cross-referenced skills. New batch translation, quality detection, and chapter context APIs. |
-| 2.5.1 | Previous version using jread CLI (deprecated) |
+- `AIO_EPUB_API_KEY` environment variable set with your license key

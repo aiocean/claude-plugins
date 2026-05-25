@@ -18,7 +18,7 @@ argument-hint: book ID and optional chapter number
 import json, urllib.request, os
 
 BASE = "https://read-api.aiocean.dev/ListBooks.v1.BookService"
-KEY = os.environ.get("JREAD_API_KEY", "duocnv")
+KEY = os.environ.get("AIO_EPUB_API_KEY", "duocnv")
 
 def api(method, body):
     data = json.dumps(body).encode('utf-8')
