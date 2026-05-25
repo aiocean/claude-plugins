@@ -6,13 +6,14 @@ on:
       - main
     paths:
       - 'plugins/**'
-      - 'docs/**'
       - '.claude-plugin/**'
+      - 'site/**'
+      - 'scripts/sync-content.py'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -26,26 +27,31 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      # python3 is preinstalled on ubuntu-latest runners; sync-content.py only
+      # uses stdlib so no setup-python action is needed.
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          python-version: '3.x'
+          bun-version: 1.3.11
 
-      - name: Generate Plugin Data
-        run: |
-          mkdir -p docs
-          python scripts/generate-docs-data.py
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-      - name: Commit generated data
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add docs/data.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-generate docs/data.json" && git push)
+      - name: Generate static site
+        # `bun run generate` runs sync-content.py (markdown from plugins/*/SKILL.md
+        # → site/content/plugins/) then `nuxt generate`. Output lands in
+        # site/.output/public. baseURL defaults to /claude-plugins/ per
+        # nuxt.config.ts so asset paths resolve correctly under the GH Pages
+        # repo subpath. Override with NUXT_APP_BASE_URL for custom domain.
+        run: bun run generate
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -53,7 +59,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs'
+          path: site/.output/public
 
       - name: Deploy to GitHub Pages
         id: deployment

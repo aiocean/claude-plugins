@@ -62,7 +62,7 @@ plugins/{plugin-name}/
 5. Add description to `README.md`
 6. Run `bash scripts/validate-marketplace.sh` to verify everything is correct
 
-**Note:** `docs/data.json` is **auto-generated** by the `pages.yml` GitHub Action (runs `python scripts/generate-docs-data.py` on every push to `main`) and auto-committed as `chore: auto-generate docs/data.json`. **Never edit `docs/data.json` by hand** — CI will overwrite it. `docs/index.html` renders the site dynamically from `data.json`, so adding a new plugin needs no manual docs change.
+**Note:** The public marketplace site at https://aiocean.github.io/claude-plugins/ regenerates itself on every push to `main` via `pages.yml`. `scripts/sync-content.py` walks the marketplace + per-plugin SKILL.md frontmatter into `site/content/plugins/**.md`, then `bun run generate` in `site/` produces static HTML. No manual docs edits needed when adding a plugin — see `site/CLAUDE.md` for the data-flow diagram and Nuxt-layer details.
 
 ## SKILL.md Frontmatter Format
 
@@ -88,9 +88,11 @@ effort: medium
 - **`effort`** (optional): Thinking effort level — `low` for knowledge-only skills, `medium` for standard, `high`/`max` for complex reasoning skills.
 - **`model`** (optional): Force a specific model — `haiku` for lightweight lookups, `sonnet` for standard, `opus` for deep analysis.
 
-## No Build System
+## Build system
 
-No package.json, no build step, no tests. Plugins are standalone directories of markdown and scripts. Shell scripts use `#!/bin/bash`. TypeScript scripts run via `bun`.
+The **plugins themselves** have no build step — each plugin is a standalone directory of markdown and scripts (shell scripts use `#!/bin/bash`, TS scripts run via `bun`).
+
+The **marketplace site** at `site/` is a Nuxt 4 app that extends the `andy-note-nuxt` layer. `bun run generate` in `site/` produces the static site to `site/.output/public`. Full guidance: `site/CLAUDE.md`. CI runs this on every push to `main` and deploys to GitHub Pages.
 
 ## Commit Conventions
 
