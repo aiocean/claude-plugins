@@ -1,12 +1,25 @@
 ---
 title: "CLAUDE.md của tôi"
-description: "File ~/.claude/CLAUDE.md đang dùng của tác giả, tái hiện nguyên trạng. Cấu hình đang chạy của một team; lựa chọn về voice và rule mang tính cá nhân."
+description: "File ~/.claude/CLAUDE.md đang dùng của tác giả (user-level, áp dụng cho mọi project). Philosophy và behavior correction, không phải template cho project-level CLAUDE.md."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
 weight: 11
 tags: ["claude-md", "project-memory", "claude-code", "example", "configuration"]
 ---
+
+> **Bạn đang đọc cái gì.** File `~/.claude/CLAUDE.md` của tác giả —
+> một file **user-level** áp dụng cho mọi session Claude Code trên
+> máy, bất kể project nào. Nó chủ yếu là philosophy, voice, và
+> behavior correction.
+>
+> File **project-level** `CLAUDE.md` (loại commit vào repo) trông
+> không giống cái này — nó chứa Commands, Architecture, Gotchas,
+> Workflow. Xem [Viết CLAUDE.md](/vi/guides/writing-claude-md-files)
+> cho loại đó.
+>
+> Đọc cái này như một instance của slot user-level, không phải template
+> cho file `./CLAUDE.md` của project.
 
 # Golden Rules (LUÔN tuân theo)
 

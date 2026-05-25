@@ -1,6 +1,6 @@
 ---
-title: "CLAUDE.md là project memory, không phải documentation"
-description: "Claude Code load CLAUDE.md vào session prompt mỗi lần khởi động. Điều đó khiến nó là prompt content, không phải documentation. Các loại nội dung xứng đáng một dòng, heuristic format giúp rule fire đáng tin cậy, kèm trang đồng hành link đến một ví dụ thực tế."
+title: "Viết CLAUDE.md: những section thực sự hữu ích"
+description: "Claude Code load CLAUDE.md vào mọi session. Cái gì thuộc về trong đó — Commands, Architecture, Gotchas — kèm ví dụ cụ thể, quality rubric, so sánh các loại file, và phím tắt `#` để edit giữa session."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
@@ -8,287 +8,284 @@ weight: 10
 tags: ["claude-md", "project-memory", "claude-code", "best-practices", "configuration"]
 ---
 
-# CLAUDE.md là project memory, không phải documentation
+# Viết CLAUDE.md: những section thực sự hữu ích
 
-Claude Code tìm `CLAUDE.md` ở ba nơi khi một session khởi động: thư mục
-home của user (`~/.claude/CLAUDE.md`), root của project, và thư mục con
-đang làm việc. Bất kể tìm thấy gì, nó đều được nối vào session prompt
-trước tin nhắn đầu tiên của user.
+Claude Code load `CLAUDE.md` vào mọi session như prompt context. Một
+file gọn, hữu ích thay đổi cách Claude làm việc trên code của bạn.
+Một file phình to, generic thì lãng phí attention. Guide này nói về
+các section thực dụng xứng đáng có chỗ, kèm ví dụ cụ thể.
 
-Đó là điểm phân biệt nó với `README.md`. README là documentation viết
-cho con người đọc — họ có thể scroll, lướt, đọc lại. `CLAUDE.md` là
-**prompt content**: mỗi dòng nằm trong context suốt session và cạnh
-tranh với task thật của user để giành sự chú ý của model. Một file ngắn,
-dày đặc thì được đọc. File dài thì bị lướt.
+## Bốn loại file
 
-Vậy nên câu hỏi thật ra không phải *"tôi nên kể gì cho Claude về project
-này?"* — con đường đó dẫn đến một CLAUDE.md to bằng cả wiki. Câu hỏi là
-*"tập hợp dòng nhỏ nhất nào thay đổi behavior của model theo hướng mà
-project của tôi thực sự cần?"*
+Claude auto-discover `CLAUDE.md` lúc khởi động session. Mỗi vị trí
+phục vụ một mục đích khác nhau — nhầm lẫn giữa chúng là lỗi phổ biến
+nhất.
 
-Guide này nói về cách suy nghĩ về câu hỏi đó. Nó không quy định bản thân
-các rule — điều đó phụ thuộc vào team của bạn, codebase của bạn, và
-những gì bạn quan tâm. Nó mô tả *hình dạng* của nội dung fire đáng tin
-cậy, và các kiểu thất bại tạo ra những file CLAUDE.md không ai được lợi.
-Một ví dụ thực tế đầy đủ nằm ở trang đồng hành:
-[**CLAUDE.md của tôi**](/vi/guides/my-claude).
+| File | Vị trí | Mục đích | Trong git? |
+|---|---|---|---|
+| **Project root** | `./CLAUDE.md` | Build command, architecture, gotchas cho *codebase này* | Có — chia sẻ với team |
+| **Local override** | `./.claude.local.md` | Cài đặt cá nhân theo từng project | Không — `.gitignore` |
+| **Subdirectory** | `./<area>/CLAUDE.md` | Context của module / package trong monorepo | Thường có |
+| **User-level** | `~/.claude/CLAUDE.md` | Preference xuyên project (voice, behavior, principle) | Không — cá nhân |
 
-## Cái gì xứng đáng một dòng
+Phần lớn guide này nói về **project root** — file bạn commit vào repo.
+Với loại user-level, nhảy xuống [ví dụ file user-level](/vi/guides/my-claude)
+ở cuối trang.
 
-Ba loại nội dung rộng xứng đáng có chỗ trong CLAUDE.md. Tỉ lệ pha trộn
-thay đổi theo project — phần lớn file nghiêng nặng về một hoặc hai loại.
+## Cái gì thuộc về project CLAUDE.md
 
-### 1. Sự thật mà model không thể suy ra từ code
+File project trả lời câu hỏi: *"Claude (hoặc contributor mới) cần biết
+gì mà không hiển nhiên từ việc đọc code?"* Sáu section bao quát phần
+lớn. Chỉ dùng những section thực sự xứng đáng có chỗ.
 
-Trường hợp kinh điển. Convention, tool preference, và invariant không
-xuất hiện trong source code.
+### Commands
 
-- **Tool preference** — package manager nào, test runner nào, formatter
-  nào. Codebase không nói *"never use yarn"*; CLAUDE.md thì có.
-- **Process convention** — phong cách commit message, naming branch,
-  khi nào hỏi trước khi push.
-- **Invariant ẩn kèm rationale** — một con số magic kèm lý do (*"số lần
-  retry là 5 vì upstream API tự retry trên timeout 4s"*), một ràng buộc
-  thứ tự không được enforce bởi type, một workaround mà context chỉ tồn
-  tại trong một thread slack.
+Script copy-paste sẵn cho build, test, dev, lint. Section hữu ích nhất
+— Claude sẽ tìm đến chúng mỗi session.
 
-Bài test thử: *nếu tôi xóa rule này, Claude có làm đúng một cách đáng
-tin cậy không?* Nếu có, rule là nhiễu.
+```sh
+# install
+bun install
 
-### 2. Default behavior bạn muốn sửa lại
+# dev server (port 3000)
+bun run dev
 
-Claude ship với default tune cho một audience rộng. Project của bạn có
-thể muốn default khác. Các loại behavior mà team hay điều chỉnh nhất:
+# tests (CI mode, no watch)
+bun test --run
 
-- Cách model cân bằng giữa **đồng tình vs. phản biện** với ý tưởng của user.
-- Cách model xử lý **uncertainty** — đoán âm thầm vs. flag rõ hunch
-  vs. từ chối claim cho đến khi verified.
-- Mức độ aggressive khi model **root-cause** vs. patch triệu chứng.
-- Cách model đối xử với **proxy** — *tests pass* có nghĩa là *feature
-  works*, hay chỉ là *tests pass*?
-- Cách model **ước lượng effort** — theo một con người duy nhất, hay
-  theo những gì một AI session thực sự làm được.
-- Mức độ **verbose** của end-of-turn summary, và phải bao gồm những gì.
+# CI chạy gì trước khi merge
+bun run check
+```
 
-Bạn không cần có quan điểm về mọi chiều. Chỉ ghi xuống những hiệu chỉnh
-thực sự quan trọng cho project của bạn. Một team ship hạ tầng critical
-muốn default khác với một team prototype UX. Mục đích của section này là
-khai báo *nơi default của bạn khác với của model*, không phải đọc thuộc
-mọi preference bạn có.
+Command không chạy được còn tệ hơn command bị thiếu — chúng tích cực
+gây hiểu lầm. Khi script thay đổi, file phải thay đổi theo.
 
-Hình dạng fire đáng tin cậy:
+### Architecture
 
-> *"By default, do X. Reason: Y."*
+Layout thư mục cộng với constraint mà Claude không thể suy ra từ `ls`.
+Bỏ qua nếu project chỉ có 5 file. Bắt buộc nếu có 500.
 
-Một lý do làm rule bền vững qua các edge case. Một rule không có lý do
-sẽ bị xóa lần đầu tiên nó gây cản đường.
+```
+src/
+  api/        # ConnectRPC handler — mỏng, ủy quyền sang domain/
+  domain/     # business logic, không I/O, không external deps
+  storage/    # SQLite + S3 adapter
+  cli/        # Cobra command, entry point ở cmd/
+proto/        # service definition, generate bằng `bun run buf`
+```
 
-### 3. Engineering principle bạn muốn giữ trong attention giữa task
+> Constraint: `domain/` không import gì từ `api/` hoặc `storage/`.
 
-Principle bạn muốn Claude áp dụng *trong khi viết code*, không chỉ tại
-thời điểm review. Đây là những dòng có stake cao nhất trong file vì
-chúng định hình mọi commit, nhưng cũng dễ over-include nhất — team nào
-cũng có principle yêu thích, và phần lớn đã có trong training của model.
+Dòng constraint mới là cái mang trọng số — cây thư mục thì Claude có
+thể tự suy lại bất cứ lúc nào.
 
-Một principle xứng đáng dòng của nó chỉ khi nó thay đổi output. Thường
-là khi nó đi ngược với default mà model nếu không sẽ làm: ưu tiên code
-co-located hơn là package hierarchy sâu, ưu tiên trả về error explicit
-hơn là panic, ưu tiên duplication hơn là một abstraction lung lay. Nếu
-principle là *"viết code tốt,"* bỏ đi.
+### Key files
 
-## Cái gì sống ở chỗ khác
+Entry point và file config mà Claude nên biết trước khi tìm kiếm.
 
-Bất cứ thứ gì Claude có thể extract on-demand đều thuộc về bên ngoài
-CLAUDE.md:
+- `src/index.ts` — server entry, wire DI container
+- `src/config.ts` — load và validate env var (Zod schema)
+- `proto/*.proto` — service contract, regenerate sau khi edit bằng
+  `bun run buf generate`
+- `migrations/*.sql` — apply theo thứ tự filename khi startup
 
-- **File layout** — cây thư mục đã có sẵn.
-- **Signature của function và API** — grep và đọc.
-- **Lịch sử git gần đây** — `git log` là nguồn chính thức.
-- **Practice lập trình tổng quát** — đã có trong trọng số của model.
-- **State tạm thời** (sprint hiện tại, todo hôm nay, feature đang
-  in-progress) — sống trong TodoWrite hoặc note per-task, không phải
-  trong một file mà mỗi session load.
+### Environment
 
-Khi nghi ngờ: *model có làm đúng việc này một cách đáng tin cậy mà không
-cần rule không?* Nếu có, bỏ đi.
+Env var bắt buộc và bước setup không có trong README.
 
-## Heuristic về format
+- Copy `.env.example` thành `.env`
+- `DATABASE_URL` — Postgres connection string
+- `STRIPE_KEY` — để trống cho local dev; CI set từ GH secrets
+- `LOG_LEVEL` — `debug` ở local, `info` ở prod
+- Clone mới đòi `bun run migrate` trước `bun run dev`
+
+### Gotchas
+
+Những thứ không hiển nhiên đã từng "cắn" người. Section trả lại vốn
+nhanh nhất.
+
+- Tailwind config chỉ pick up từ project root — file
+  `tailwind.config.js` trong subdirectory bị bỏ qua âm thầm.
+- Auth middleware cache JWT key trong memory 10 phút. Restart server
+  sau khi rotate key; chỉ gửi SIGHUP là chưa đủ.
+- `bun test` mặc định chạy watch mode. Dùng `bun test --run` trong CI
+  nếu không sẽ treo job.
+- Migration file phải kết thúc bằng `.sql`, không phải `.psql` —
+  migrator âm thầm bỏ qua extension khác.
+
+Mỗi dòng nên trace ngược về một incident hoặc surprise thật. Nếu câu
+trả lời cho *"làm sao mình biết cái này gây đau?"* là *"chưa, giả
+thuyết thôi"*, hãy bỏ dòng đó.
+
+### Workflow
+
+Các bước Claude nên biết về dev loop của bạn.
+
+- Trước commit: `bun run check` (lint + types + tests, ~30s)
+- PR title: `feat(scope): summary` — enforce bởi commitlint
+- Không `git push --force` vào `main`. Force-push lên feature branch OK.
+- Release tag qua `bun run release` — bump version, generate changelog
+  từ conventional commits.
+
+## Quality rubric
+
+Chấm điểm file bằng các check sau trước khi merge thay đổi vào nó.
+Plugin `aio-claude-toolkit` ship một [skill audit file
+CLAUDE.md](/vi/plugins/aio-claude-toolkit) theo đúng tiêu chí này một
+cách tự động.
+
+| Tiêu chí | Trọng số | Kiểm tra cái gì |
+|---|---|---|
+| Command chạy được | Cao | Mọi command tài liệu hóa đều chạy thành công hôm nay |
+| Architecture cập nhật | Cao | Cây thư mục khớp với layout `src/` thực tế hôm nay |
+| Gotchas xứng đáng | Trung | Mỗi cái trace về một incident hoặc surprise thật |
+| Súc tích | Trung | Không nhắc lại cái code hoặc README đã nói |
+| Up to date | Cao | Không tham chiếu file / dep / script đã bị xóa |
+| Actionable | Cao | Command copy-paste sẵn, không `# điền X của bạn vào` |
+
+Thang điểm:
+
+- **A (90–100)** — toàn diện, cập nhật, actionable
+- **B (70–89)** — coverage tốt, gap nhỏ
+- **C (50–69)** — info cơ bản, thiếu section then chốt
+- **D (30–49)** — sơ sài hoặc lỗi thời
+- **F (0–29)** — thiếu hoặc lỗi thời nghiêm trọng
+
+Một file đạt hạng A thường dài 50–150 dòng. Vượt 300 dòng thường có
+nghĩa file đang bị dùng như documentation; chuyển nội dung vào
+`docs/` hoặc tách thành các file subdirectory.
+
+## Quy tắc format
+
+Áp dụng cho cả bốn loại file.
 
 ### Imperatives over narration
 
-*"Use X."* mạnh hơn *"We try to use X when appropriate."* Directive thẳng
-fire như directive. Softener — *sometimes*, *generally*, *try to* — cho
+*"Use bun, not npm."* mạnh hơn *"Chúng tôi thường ưu tiên bun khi phù
+hợp."* Cách diễn đạt mềm — *sometimes*, *generally*, *try to* — cho
 model quyền bỏ qua rule khi cảm nhận có áp lực.
 
 ### Why before what, khi rule không hiển nhiên
 
-*"Never use `--no-verify` on commits. Reason: a previous incident
-bypassed a secret-scan hook and pushed a token to remote."*
+> Không bao giờ dùng `--no-verify` trên commit.
+> Reason: một incident trước đây đã bypass secret-scan hook và push
+> token lên remote.
 
-Một rule mà rationale chỉ sống trong đầu ai đó thì chỉ cách một lần
-re-org là biến mất. Người contributor tiếp theo đọc nó, không giải thích
-được, và xóa nó.
-
-### Group by concern
-
-`## Code style`, `## Tools`, `## Workflow`, `## Behavior`. Một block cho
-mỗi chủ đề để model có thể attend đến section liên quan khi concern đó
-đang active. Danh sách phẳng dài với các rule pha trộn nhanh chóng mờ
-trong attention.
-
-### Một ví dụ cho mỗi rule kèm edge case
-
-Một rule như *"prefer colocation"* không có ví dụ thì sụp đổ dưới sự
-diễn giải. Một *"e.g. handler + query của nó trong một file, không tách
-thành thư mục Services/"* cụ thể neo lại intent.
+Rule mà rationale chỉ sống trong đầu ai đó thì chỉ cách một lần re-org
+là biến mất bởi contributor tiếp theo.
 
 ### Replace, không tích lũy
 
-Khi bạn đổi ý về một rule, xóa hoàn toàn phiên bản cũ. Đừng để lại
-residue như *"trước đây làm X, giờ làm Y"* trong các section
-forward-looking của file. Phrasing cũ giữ approach đã loại bỏ trong
-attention, và người contributor tiếp theo đọc nó như là context vẫn còn
-relevant.
+Khi bạn đổi ý về một rule, xóa hoàn toàn phiên bản cũ. *"Trước đây
+làm X, giờ làm Y"* giữ approach đã loại bỏ trong attention. Chỉ dùng
+phrasing khẳng định — `git log` và ADR là nơi lịch sử sống.
 
-Rule phủ định chỉ thuộc về nơi chưa bao giờ có một phương án dương nào
-(*"never commit secrets"*). Nếu bạn bị cám dỗ viết *"đừng dùng X cũ"*,
-bước đi sạch sẽ hơn là viết *"dùng Y"* và để X cũ biến mất hoàn toàn
-khỏi file.
+Ngoại lệ: rule mà phương án phủ định chưa bao giờ có alternative dương
+(*"never commit secrets"*) có thể giữ ở dạng cấm.
 
-Lịch sử sống trong `git log` hoặc một ADR. File rule hiện tại chỉ
-forward-looking.
+### Một ví dụ cho mỗi rule không hiển nhiên
 
-*(Ghi chú research: nhà tâm lý học gọi cái này là ironic-process effect —
-*đừng nghĩ về X* vẫn kích hoạt X trong attention của reader. Cùng pattern
-xuất hiện trong prompt.)*
+Rule như *"prefer colocation"* không có ví dụ sẽ sụp đổ dưới sự diễn
+giải. Một *"e.g. handler + query của nó trong cùng một file, không
+tách vào thư mục `Services/`"* cụ thể neo lại intent.
 
-### Khai báo cách uncertainty phải được diễn đạt
+## Mẹo hữu ích
 
-Default của model là prose tự tin đồng đều, khiến sự thật đã verify và
-hunch chưa verify trông giống hệt nhau. Nếu bạn muốn phân biệt được, hãy
-nói cách — explicit confidence label, prefix *"I'm guessing"*, một rule
-cấm claim *"done"* mà không có bước verify. Cơ chế không quan trọng bằng
-việc khai báo một cái.
+**Bấm `#` giữa session.** Trong một session Claude, bấm `#` và Claude
+ghi learning hiện tại trực tiếp vào `CLAUDE.md`. Cách nhanh nhất để
+capture gotcha khi bạn vừa phát hiện ra.
 
-## Độ dài và kỷ luật
+**Dùng `.claude.local.md` cho preference cá nhân.** Bất cứ thứ gì bạn
+không muốn push lên team — layout tmux, connection string DB local,
+*"giải thích ở mức X cho tôi"* — vào `.claude.local.md`. Thêm nó vào
+`.gitignore`.
 
-Một CLAUDE.md ngắn được đọc với attention. File dài thì bị lướt. Điểm
-giao nhau thay đổi, nhưng một file vượt vài trăm dòng gần như chắc chắn
-đã vượt qua điểm đó.
+**Subdirectory file cho monorepo.** Mỗi package có `CLAUDE.md` riêng
+với command và convention đặc thù của package. File root chứa cái
+chia sẻ.
 
-Các hình dạng bloat phổ biến, và cách xử lý:
+**Audit mỗi PR động vào file.** Đối xử với `CLAUDE.md` như code.
+Command lỗi thời và architecture cũ là bug — chúng gây hiểu lầm cho
+Claude mỗi session cho đến khi được sửa.
 
-- **Domain expansion** — file tích lũy rule cho các phần không liên quan
-  của codebase. Tách thành các file `CLAUDE.md` ở subdirectory, một cho
-  mỗi vùng. Model load chúng dựa trên thư mục đang làm việc.
-- **Documentation creep** — nội dung thực ra là documentation của sản
-  phẩm hoặc onboarding. Chuyển vào `docs/`, `CONTRIBUTING.md`, hoặc một
-  wiki.
-- **Wishful rule** — những thứ không ai enforce. Hoặc bake vào CI (lint
-  rule, pre-commit hook, GitHub Action) hoặc xóa. CLAUDE.md không phải
-  là wish list.
-- **Stale rule** — framework cũ đã biến mất nhưng rule của nó vẫn còn.
-  Cắt tỉa.
+## Lỗi phổ biến cần chú ý
 
-Quỹ đạo dài hạn lành mạnh là *ngắn hơn theo thời gian*, không phải dài
-hơn. Team học được rule nào model thực sự cần và rule nào là nhiễu;
-nhiễu bị cắt.
+Khi audit một file có sẵn, để ý:
 
-## Một bộ khung khởi đầu
+- **Command lỗi thời** — script trong `package.json` không còn tồn tại
+- **Architecture cũ** — cây thư mục không khớp với `ls src/`
+- **Thiếu dependency** — tool bắt buộc (Bun, Docker, gcloud) không
+  được nhắc trong setup
+- **Rule mơ ước** — những thứ không ai enforce (*"luôn viết test"*)
+  mà không có CI gate phía sau
+- **Documentation creep** — nội dung sản phẩm hoặc onboarding thuộc
+  về `docs/`, không phải trong mọi session prompt
+- **Giải thích dài dòng** — một section 200 từ trong khi 30 từ là đủ
 
-Nội dung cụ thể của project thay đổi, nhưng phần lớn các file hữu ích
-chia sẻ một xương sống tương tự. Dùng cái này như điểm khởi đầu — thêm
-các section bạn cần, xóa các section bạn không.
+## Một template khởi đầu
 
-```markdown
+Đổ cái này vào `./CLAUDE.md` của một project mới, sau đó cắt và mở rộng.
+
+````markdown
 # CLAUDE.md
 
-## Tools and workflow
+## Commands
 
-- [package manager / test runner / formatter của bạn]
-- [điều kiện chạy command nào]
-- [cái gì được coi là "sẵn sàng commit"]
-
-## Code style
-
-- [convention không được enforce bởi lint]
-- [naming, file layout, vị trí test]
-- [một hai ví dụ cho bất cứ thứ gì định hình genre]
-
-## Behavior
-
-- [preference giữa pushback và đồng tình]
-- [cách uncertainty phải được flag]
-- [cái gì được coi là "done" — kỳ vọng verification]
-
-## Architecture invariants
-
-- [những thứ trông như optional nhưng không phải]
-- [tại sao mỗi invariant tồn tại]
-
-## Commit and PR
-
-- [phong cách commit message]
-- [convention về size / scope của PR]
+```sh
+bun install
+bun run dev
+bun test --run
+bun run check
 ```
 
-Một project nhỏ có thể chỉ cần hai section đầu. Một project lớn hơn có
-thể tách `Architecture invariants` thành file per-subdirectory. Cấu trúc
-là một khung khởi đầu, không phải mục tiêu.
+## Architecture
 
-## Iterate trên file
+```
+src/
+  ...
+```
 
-Đối xử với CLAUDE.md như code. Review nó trên PR. Hai kiểu thất bại cần
-chú ý:
+## Key files
 
-**Under-correction.** Cùng một hiệu chỉnh xuất hiện hai lần trong một
-tuần. Thêm rule đó. Một dòng trong prompt tốn ít hơn các can thiệp lặp
-lại.
+- `src/index.ts` — entry point
+- ...
 
-**Over-accumulation.** Rule chất đống mà không fire trong nhiều tháng.
-Bỏ chúng đi. Attention của model là hữu hạn; một rule không dùng tiêu
-thụ attention mà các rule load-bearing cần.
+## Environment
 
-Một CLAUDE.md trưởng thành ngắn hơn bản nháp đầu tiên, không phải dài
-hơn. Các rule đã trở thành cơ bắp tự động được nâng cấp lên automation.
-Các rule hóa ra là nhiễu bị cắt. Cái còn lại là tập nhỏ những thứ mà
-model nếu không sẽ làm sai trên codebase này, diễn đạt ở dạng có khả
-năng fire cao nhất.
+Copy `.env.example` thành `.env`. Env var cần: ...
 
-## Một ví dụ thực tế
+## Gotchas
 
-File `~/.claude/CLAUDE.md` của tác giả được publish như một trang đồng
-hành: [**CLAUDE.md của tôi**](/vi/guides/my-claude). Nó là cấu hình đang
-chạy của một team, không phải template — voice mang tính cá nhân (kèm
-code-switching Việt–Anh), các rule cụ thể phản ánh project và tool của
-tác giả này, và các lựa chọn sẽ không phải tất cả transfer được. Đọc nó
-như một artifact: một instance cụ thể của các category mô tả ở trên,
-được size và shape cho công việc thật của một engineer.
+- ...
 
-Vài thứ đáng để ý khi bạn đọc nó:
+## Workflow
 
-- **Chỗ nó khác với default của model.** Các section như *Proactive
-  Conviction*, *Confidence Labels*, *Goal-Driven Execution*, và
-  *Positive Framing* là những hiệu chỉnh explicit cho các behavior mà
-  tác giả muốn khác với Claude out-of-the-box.
-- **Cách mỗi rule mang theo lý do của nó.** Phần lớn rule không hiển
-  nhiên đều có *"Reason:"* hoặc một citation research. Rule sống sót
-  qua nhiều tháng dùng gần như luôn có một cái; rule không sống thì
-  không.
-- **Cái nó bỏ qua.** Không có cây file, không có danh sách API, không
-  có lịch sử commit gần đây. Bất cứ thứ gì Claude có thể grep đều bị
-  bỏ qua có chủ đích.
-- **Hình dạng bloat vẫn còn ở đó.** Ngay cả file này cũng có những
-  dòng tác giả có thể sẽ cắt ở lần đi tiếp theo. CLAUDE.md không bao
-  giờ xong, chỉ là hiện tại đủ tốt.
+- Trước commit: `bun run check`
+- PR convention: ...
+````
 
-→ Mở ví dụ: [**CLAUDE.md của tôi**](/vi/guides/my-claude)
+Một library nhỏ có thể chỉ cần Commands và Gotchas. Một app phức tạp
+tách Architecture thành các file per-subdirectory. Template là điểm
+khởi đầu, không phải mục tiêu.
+
+## Một ví dụ thực tế (user-level)
+
+Trang đồng hành [**CLAUDE.md của tôi**](/vi/guides/my-claude) tái hiện
+file `~/.claude/CLAUDE.md` của tác giả — một file **user-level** áp
+dụng cho mọi project trên máy. Nó nặng về philosophy và behavior
+correction, không phải command.
+
+File project-level trông không giống cái đó. Đọc ví dụ như một instance
+của loại user-level trong bảng [bốn loại file](#bốn-loại-file), không
+phải template cho file project-root mà guide này chủ yếu nói về.
 
 ## Liên quan
 
-- [Catalog plugin](/vi/plugins) — `aio-claude-toolkit` bao gồm một skill
-  audit file CLAUDE.md so với best practice.
-- [Skill, agent, hook](/vi/guides/skills-agents-hooks) — ba primitive
-  Claude Code lộ ra ngoài plain prompt.
-- [Tài liệu chính thức của Anthropic về Claude Code](https://docs.anthropic.com/claude/docs/claude-code)
-  để tham khảo chính thức về cách load file và precedence.
+- [**CLAUDE.md của tôi**](/vi/guides/my-claude) — ví dụ user-level của
+  tác giả
+- [Catalog plugin](/vi/plugins) — `aio-claude-toolkit` bao gồm skill
+  audit CLAUDE.md
+- [Skills, agents, hooks](/vi/guides/skills-agents-hooks) — ba primitive
+  Claude Code lộ ra
+- [Tài liệu Anthropic Claude Code](https://docs.anthropic.com/claude/docs/claude-code)
+  để tham khảo chính thức về cách load file và precedence

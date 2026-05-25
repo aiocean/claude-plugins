@@ -1,6 +1,6 @@
 ---
-title: "CLAUDE.md is project memory, not documentation"
-description: "Claude Code loads CLAUDE.md into the session prompt on every start. That makes it prompt content, not documentation. Categories of content that earn a line, format heuristics that make rules fire, with a companion page linking to a real-world example."
+title: "Writing CLAUDE.md: the sections that actually help"
+description: "Claude Code loads CLAUDE.md into every session. What goes in it — Commands, Architecture, Gotchas — with concrete examples, a quality rubric, file-type comparisons, and the `#` shortcut for editing mid-session."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
@@ -8,284 +8,284 @@ weight: 10
 tags: ["claude-md", "project-memory", "claude-code", "best-practices", "configuration"]
 ---
 
-# CLAUDE.md is project memory, not documentation
+# Writing CLAUDE.md: the sections that actually help
 
-Claude Code looks for `CLAUDE.md` in three places when a session starts:
-the user's home directory (`~/.claude/CLAUDE.md`), the project root, and
-the working subdirectory. Whatever it finds is concatenated into the
-session prompt before the user's first message.
+Claude Code reads `CLAUDE.md` into every session as prompt context. A
+tight, useful one changes how Claude works on your code. A bloated,
+generic one wastes attention. This guide covers the practical
+sections that earn their space, with concrete examples.
 
-That's what makes it different from `README.md`. A README is documentation
-written for a human reader who can scroll, skim, and reread. `CLAUDE.md`
-is **prompt content**: every line stays in context for the duration of
-the session and competes with the user's actual task for the model's
-attention. A short, dense file gets read. A long one gets skimmed.
+## The four file types
 
-So the real question isn't *"what should I tell Claude about this
-project?"* — that road leads to a CLAUDE.md the size of a wiki. The
-question is *"what's the smallest set of lines that changes the model's
-behavior in the directions my project actually needs?"*
+Claude auto-discovers `CLAUDE.md` at session start. Each location serves
+a different purpose — confusing them is the most common mistake.
 
-This guide is about how to think about that question. It does not
-prescribe the rules themselves — those depend on your team, your
-codebase, and what you care about. It describes the *shape* of content
-that fires reliably, and the failure modes that produce CLAUDE.md files
-nobody benefits from. A full real-world example lives on a companion
-page: [**My CLAUDE.md**](/guides/my-claude).
+| File | Location | Purpose | In git? |
+|---|---|---|---|
+| **Project root** | `./CLAUDE.md` | Build commands, architecture, gotchas for *this codebase* | Yes — shared with team |
+| **Local override** | `./.claude.local.md` | Personal per-project settings | No — `.gitignore` |
+| **Subdirectory** | `./<area>/CLAUDE.md` | Module / package context in monorepos | Usually yes |
+| **User-level** | `~/.claude/CLAUDE.md` | Cross-project preferences (voice, behavior, principles) | No — personal |
 
-## What earns a line
+The rest of this guide is mostly about **project root** — the file you
+commit to a repo. For the user-level kind, jump to the
+[example user-level file](/guides/my-claude) at the end.
 
-Three broad categories of content earn space in CLAUDE.md. The mix
-varies by project — most files lean heavily on one or two.
+## What belongs in a project CLAUDE.md
 
-### 1. Facts the model can't derive from the code
+The project file should answer: *"What does Claude (or a new
+contributor) need that isn't obvious from reading the code?"* Six
+sections cover most of it. Use only the ones that earn their space.
 
-The classic case. Conventions, tool preferences, and invariants that
-don't show up in the source itself.
+### Commands
 
-- **Tool preferences** — which package manager, which test runner, which
-  formatter. The codebase doesn't say *"never use yarn"*; CLAUDE.md does.
-- **Process conventions** — commit message style, branch naming, when
-  to ask before pushing.
-- **Hidden invariants with rationale** — a magic number with a reason
-  (*"the retry count is 5 because the upstream API does its own retry on
-  4s timeout"*), an ordering constraint that isn't enforced by types,
-  a workaround whose context lives only in a slack thread.
+Copy-paste ready scripts for build, test, dev, lint. The single most
+useful section — Claude reaches for these every session.
 
-The litmus test: *if I delete this rule, will Claude reliably do the
-right thing anyway?* If yes, the rule is noise.
+```sh
+# install
+bun install
 
-### 2. Behavioral defaults you want corrected
+# dev server (port 3000)
+bun run dev
 
-Claude ships with defaults tuned for a broad audience. Your project may
-want different defaults. The categories of behavior teams most often
-adjust:
+# tests (CI mode, no watch)
+bun test --run
 
-- How the model balances **agreement vs. pushback** on the user's ideas.
-- How the model handles **uncertainty** — silent guess vs. flagged
-  hunch vs. refusal to claim until verified.
-- How aggressively the model **roots-causes** vs. patches symptoms.
-- How the model treats **proxies** — does *tests pass* mean *feature
-  works*, or only *tests pass*?
-- How the model **estimates effort** — by a single human, or by what an
-  AI session can actually do.
-- How **verbose** end-of-turn summaries should be, and what they must
-  include.
+# what CI runs before merge
+bun run check
+```
 
-You don't need an opinion on every dimension. Write down only the
-corrections that actually matter for your project. A team shipping
-critical infrastructure wants different defaults than a team prototyping
-UX. The point of the section is to declare *where your defaults differ
-from the model's*, not to recite every preference you have.
+Commands that don't work are worse than missing commands — they
+actively mislead. When a script changes, the file changes.
 
-The shape that fires reliably:
+### Architecture
 
-> *"By default, do X. Reason: Y."*
+Directory layout plus the constraints Claude can't infer from `ls`.
+Skip if your project has 5 files. Essential if it has 500.
 
-A reason makes the rule durable across edge cases. A rule without one
-gets deleted the first time it gets in the way.
+```
+src/
+  api/        # ConnectRPC handlers — thin, delegate to domain/
+  domain/     # business logic, no I/O, no external deps
+  storage/    # SQLite + S3 adapters
+  cli/        # Cobra commands, entry points in cmd/
+proto/        # service definitions, generate with `bun run buf`
+```
 
-### 3. Engineering principles you want held in attention mid-task
+> Constraint: `domain/` imports nothing from `api/` or `storage/`.
 
-Principles you want Claude to apply *while writing code*, not just at
-review time. These are the highest-stakes lines in the file because
-they shape every commit, but also the easiest to over-include — every
-team has favorite principles, and most of them are already in the
-model's training.
+The constraint line is what's load-bearing — the tree alone Claude can
+re-derive any time.
 
-A principle earns its line only when it changes the output. Usually
-that's when it cuts against a default the model would otherwise make:
-preferring co-located code over a deep package hierarchy, preferring
-explicit error returns over panics, preferring duplication over a
-shaky abstraction. If the principle is *"write good code,"* drop it.
+### Key files
 
-## What lives elsewhere
+Entry points and config files Claude should know about before searching.
 
-Anything Claude can extract on demand belongs outside CLAUDE.md:
+- `src/index.ts` — server entry, wires the DI container
+- `src/config.ts` — env var loading + validation (Zod schema)
+- `proto/*.proto` — service contracts, regenerate after edits with
+  `bun run buf generate`
+- `migrations/*.sql` — applied in filename order at startup
 
-- **File layout** — the directory tree exists already.
-- **Function signatures and APIs** — grep and read.
-- **Recent git history** — `git log` is authoritative.
-- **General programming practices** — already in the model's weights.
-- **Ephemeral state** (current sprint, today's todo, in-progress
-  feature) — lives in TodoWrite or per-task notes, not in a file every
-  session loads.
+### Environment
 
-When in doubt: *will the model reliably do this without the rule?* If
-yes, drop it.
+Required env vars and setup steps that aren't in the README.
 
-## Format heuristics
+- Copy `.env.example` to `.env`
+- `DATABASE_URL` — Postgres connection string
+- `STRIPE_KEY` — leave empty for local dev; CI sets it from GH secrets
+- `LOG_LEVEL` — `debug` locally, `info` in prod
+- Fresh clone requires `bun run migrate` before `bun run dev`
+
+### Gotchas
+
+Non-obvious things that have bitten people. The section that pays for
+itself fastest.
+
+- Tailwind config picked up from project root only — subdirectory
+  `tailwind.config.js` files are silently ignored.
+- The auth middleware caches JWT keys in-memory for 10 min. Restart the
+  server after rotating keys; SIGHUP alone is not enough.
+- `bun test` runs in watch mode by default. Use `bun test --run` in CI
+  or you'll hang the job.
+- Migration files must end in `.sql`, not `.psql` — the migrator
+  silently skips other extensions.
+
+Each line should trace to a real incident or surprise. If the answer
+to *"how did we learn this hurt?"* is *"we haven't, it's hypothetical"*,
+drop the line.
+
+### Workflow
+
+Steps Claude should know about your dev loop.
+
+- Before commit: `bun run check` (lint + types + tests, ~30s)
+- PR titles: `feat(scope): summary` — enforced by commitlint
+- Don't `git push --force` to `main`. Force-push to feature branches OK.
+- Releases tagged via `bun run release` — bumps version, generates
+  changelog from conventional commits.
+
+## Quality rubric
+
+Score the file with these checks before merging changes to it. The
+`aio-claude-toolkit` plugin ships a [skill that audits CLAUDE.md
+files](/plugins/aio-claude-toolkit) against these criteria
+automatically.
+
+| Criterion | Weight | What to check |
+|---|---|---|
+| Commands work | High | Every documented command runs and succeeds today |
+| Architecture current | High | Tree matches the actual `src/` layout today |
+| Gotchas earned | Medium | Each one traces to a real incident or surprise |
+| Concise | Medium | No restating what code or README already covers |
+| Up to date | High | No references to removed files, deps, or scripts |
+| Actionable | High | Commands are copy-paste ready, no `# fill in your X` |
+
+Grade ranges:
+
+- **A (90–100)** — comprehensive, current, actionable
+- **B (70–89)** — good coverage, minor gaps
+- **C (50–69)** — basic info, missing key sections
+- **D (30–49)** — sparse or outdated
+- **F (0–29)** — missing or severely outdated
+
+A common A-grade file is 50–150 lines. Past 300 lines usually means the
+file is being used as documentation; move content to `docs/` or split
+into subdirectory files.
+
+## Format rules
+
+These apply to all four file types.
 
 ### Imperatives over narration
 
-*"Use X."* beats *"We try to use X when appropriate."* Direct directives
-fire as directives. Softeners — *sometimes*, *generally*, *try to* —
+*"Use bun, not npm."* beats *"We generally prefer bun when
+appropriate."* Soft phrasings — *sometimes*, *generally*, *try to* —
 give the model permission to skip the rule under perceived pressure.
 
 ### Why before what, when the rule isn't obvious
 
-*"Never use `--no-verify` on commits. Reason: a previous incident
-bypassed a secret-scan hook and pushed a token to remote."*
+> Never use `--no-verify` on commits.
+> Reason: a previous incident bypassed a secret-scan hook and pushed a
+> token to remote.
 
-A rule whose rationale lives in someone's head is one re-org away from
-gone. The next contributor reads it, can't explain it, and deletes it.
-
-### Group by concern
-
-`## Code style`, `## Tools`, `## Workflow`, `## Behavior`. One block per
-topic so the model can attend to the relevant section when that concern
-is active. Long flat lists of mixed rules fade in attention.
-
-### One example per rule with edge cases
-
-A rule like *"prefer colocation"* without an example collapses under
-interpretation. A single concrete *"e.g. handlers + their queries in
-one file, not split into a Services/ folder"* anchors the intent.
+A rule whose rationale lives only in someone's head is one re-org away
+from being deleted by the next contributor.
 
 ### Replace, don't accumulate
 
 When you change your mind on a rule, delete the old version completely.
-Don't leave residue like *"we used to do X, now we do Y"* in the
-forward-looking sections of the file. The old phrasing keeps the
-discarded approach in attention, and the next contributor reads it as
-still-relevant context.
+*"We used to do X, now we do Y"* keeps the discarded approach in
+attention. Affirmative phrasing only — `git log` and ADRs are where
+history lives.
 
-Negative rules belong only where there was never a positive alternative
-(*"never commit secrets"*). If you're tempted to write *"don't use the
-old X"*, the cleaner move is to write *"use Y"* and let the old X
-disappear from the file entirely.
+Exception: rules where the negative never had a positive alternative
+(*"never commit secrets"*) can stay phrased as prohibitions.
 
-History lives in `git log` or an ADR. The current rules file is
-forward-looking only.
+### One example per non-obvious rule
 
-*(Research note: psychologists call this the ironic-process effect —
-*don't think about X* still activates X in the reader's attention.
-The same pattern shows up in prompts.)*
+A rule like *"prefer colocation"* without an example collapses under
+interpretation. A concrete *"e.g. handlers + their queries in one file,
+not split into a `Services/` folder"* anchors the intent.
 
-### State how uncertainty should be expressed
+## Useful tips
 
-The model's default is uniform confident prose, which makes verified
-facts and unverified hunches look identical. If you want them
-distinguishable, say how — explicit confidence labels, a *"I'm
-guessing"* prefix, a rule against claiming *"done"* without a
-verification step. The mechanism matters less than declaring one.
+**Press `#` mid-session.** During a Claude session, press `#` and
+Claude writes the current learning directly into `CLAUDE.md`. The
+fastest way to capture gotchas as you discover them.
 
-## Length and discipline
+**Use `.claude.local.md` for personal preferences.** Anything you
+don't want pushed to the team — your tmux layout, your local DB
+connection string, *"explain things to me at level X"* — goes in
+`.claude.local.md`. Add it to `.gitignore`.
 
-A short CLAUDE.md is read with attention. A long one is skimmed. The
-crossover point varies, but a file past a few hundred lines is almost
-certainly past it.
+**Subdirectory files for monorepos.** Each package gets its own
+`CLAUDE.md` with package-specific commands and conventions. The root
+file covers what's shared.
 
-Common shapes of bloat, and what to do about them:
+**Audit on every PR that touches it.** Treat `CLAUDE.md` like code.
+Stale commands and outdated architecture are bugs that mislead Claude
+on every session until fixed.
 
-- **Domain expansion** — the file accumulates rules for unrelated parts
-  of the codebase. Split into subdirectory `CLAUDE.md` files, one per
-  area. The model loads them based on the working directory.
-- **Documentation creep** — content that's really product or onboarding
-  documentation. Move to `docs/`, `CONTRIBUTING.md`, or a wiki.
-- **Wishful rules** — things nobody enforces. Either bake into CI (lint
-  rule, pre-commit hook, GitHub Action) or delete. CLAUDE.md is not a
-  wish list.
-- **Stale rules** — the old framework is gone but its rule remains.
-  Prune.
+## Common issues to flag
 
-The healthy long-term trajectory is *shorter over time*, not longer.
-The team learns which rules the model actually needed and which were
-noise; the noise gets cut.
+When auditing an existing file, watch for:
 
-## A starting skeleton
+- **Stale commands** — scripts in `package.json` that no longer exist
+- **Outdated architecture** — directory tree that doesn't match `ls src/`
+- **Missing dependencies** — required tools (Bun, Docker, gcloud) not
+  mentioned in setup
+- **Wishful rules** — things nobody enforces (*"always write tests"*)
+  with no CI gate behind them
+- **Documentation creep** — product or onboarding content that belongs
+  in `docs/`, not in every session prompt
+- **Verbose explanations** — a section with 200 words where 30 would do
 
-Project-specific content varies, but most useful files share a similar
-backbone. Use this as a starting point — add the sections you need,
-delete the ones you don't.
+## A starting template
 
-```markdown
+Drop this into `./CLAUDE.md` in a fresh project, then trim and expand.
+
+````markdown
 # CLAUDE.md
 
-## Tools and workflow
+## Commands
 
-- [your package manager / test runner / formatter]
-- [conditions for running which commands]
-- [what counts as "ready to commit"]
-
-## Code style
-
-- [conventions not enforced by lint]
-- [naming, file layout, test placement]
-- [an example or two for anything genre-defining]
-
-## Behavior
-
-- [pushback vs. agreement preference]
-- [how uncertainty should be flagged]
-- [what counts as "done" — verification expectations]
-
-## Architecture invariants
-
-- [things that look optional but aren't]
-- [why each invariant exists]
-
-## Commit and PR
-
-- [commit message style]
-- [PR size / scope conventions]
+```sh
+bun install
+bun run dev
+bun test --run
+bun run check
 ```
 
-A small project may only need the first two sections. A larger one may
-split `Architecture invariants` into a per-subdirectory file. The
-structure is a starting frame, not a target.
+## Architecture
 
-## Iterating on the file
+```
+src/
+  ...
+```
 
-Treat CLAUDE.md like code. Review it on PRs. Two failure modes to
-watch for:
+## Key files
 
-**Under-correction.** The same correction comes up twice in a week.
-Add the rule. One line in the prompt costs less than repeated
-interventions.
+- `src/index.ts` — entry point
+- ...
 
-**Over-accumulation.** Rules pile up that haven't fired in months.
-Remove them. The model's attention is finite; an unused rule consumes
-attention the load-bearing rules need.
+## Environment
 
-A mature CLAUDE.md is shorter than its first draft, not longer. The
-rules that became muscle memory got promoted into automation. The
-rules that turned out to be noise got cut. What's left is the small
-set of things the model would otherwise get wrong on this codebase,
-stated in the form most likely to fire.
+Copy `.env.example` to `.env`. Required vars: ...
 
-## A real-world example
+## Gotchas
 
-The author's own `~/.claude/CLAUDE.md` is published as a companion
-page: [**My CLAUDE.md**](/guides/my-claude). It is one team's working
-configuration, not a template — the voice is personal (Vietnamese–
-English code-switching included), the specific rules reflect this
-author's projects and tools, and the choices won't all transfer. Read
-it as an artifact: a concrete instance of the categories described
-above, sized and shaped for one engineer's actual work.
+- ...
 
-A few things worth noticing when you read it:
+## Workflow
 
-- **Where it differs from the model's defaults.** Sections like
-  *Proactive Conviction*, *Confidence Labels*, *Goal-Driven Execution*,
-  and *Positive Framing* are explicit corrections to behaviors the
-  author wanted different from out-of-the-box Claude.
-- **How each rule carries its reason.** Most non-obvious rules include
-  a *"Reason:"* or a research citation. Rules that survive months of
-  use almost always have one; rules that don't, don't.
-- **What it leaves out.** No file tree, no API list, no recent commit
-  history. Anything Claude can grep is missing on purpose.
-- **The shape of bloat that's still there.** Even this file has lines
-  the author would probably cut on the next pass. CLAUDE.md is never
-  finished, only currently good enough.
+- Before commit: `bun run check`
+- PR convention: ...
+````
 
-→ Open the example: [**My CLAUDE.md**](/guides/my-claude)
+A small library may need only Commands and Gotchas. A complex app
+splits Architecture into per-subdirectory files. The template is a
+starting point, not a target.
+
+## A real-world example (user-level)
+
+The companion page [**My CLAUDE.md**](/guides/my-claude) reproduces the
+author's own `~/.claude/CLAUDE.md` — a **user-level** file applied to
+every project on the machine. It's heavily philosophy and behavior
+corrections, not commands.
+
+A project-level file looks nothing like that. Read the example as a
+category instance for the user-level slot in the [four file
+types](#the-four-file-types) table, not as a template for the
+project-root file this guide is mostly about.
 
 ## Related
 
-- The [plugin catalog](/plugins) — `aio-claude-toolkit` includes a
-  skill for auditing CLAUDE.md files against best practices.
+- [**My CLAUDE.md**](/guides/my-claude) — the author's user-level example
+- [Plugin catalog](/plugins) — `aio-claude-toolkit` includes a CLAUDE.md
+  audit skill
 - [Skills, agents, hooks](/guides/skills-agents-hooks) — the three
-  primitives Claude Code exposes beyond plain prompts.
-- [Anthropic's Claude Code docs](https://docs.anthropic.com/claude/docs/claude-code)
-  for the authoritative reference on file loading and precedence.
+  primitives Claude Code exposes
+- [Anthropic Claude Code docs](https://docs.anthropic.com/claude/docs/claude-code)
+  for the authoritative reference on file loading and precedence

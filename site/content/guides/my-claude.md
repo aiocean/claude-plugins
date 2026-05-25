@@ -1,12 +1,25 @@
 ---
 title: "My CLAUDE.md"
-description: "The author's working ~/.claude/CLAUDE.md, reproduced as-is. One team's working configuration; voice and rule choices are personal."
+description: "The author's working ~/.claude/CLAUDE.md (user-level, applied to every project). Philosophy and behavior corrections, not a template for project-level CLAUDE.md."
 document_type: "guide"
 created: "2026-05-25"
 updated: "2026-05-25"
 weight: 11
 tags: ["claude-md", "project-memory", "claude-code", "example", "configuration"]
 ---
+
+> **What you're reading.** The author's `~/.claude/CLAUDE.md` — a
+> **user-level** file applied to every Claude Code session on the
+> machine, regardless of project. It's mostly philosophy, voice, and
+> behavior corrections.
+>
+> A **project-level** `CLAUDE.md` (the kind committed to a repo) looks
+> nothing like this — it carries Commands, Architecture, Gotchas,
+> Workflow. See [Writing CLAUDE.md](/guides/writing-claude-md-files)
+> for that.
+>
+> Read this as a category instance for the user-level slot, not as a
+> template for a project's `./CLAUDE.md`.
 
 # Golden Rules (ALWAYS follow)
 
