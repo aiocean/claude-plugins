@@ -1,0 +1,255 @@
+<!doctype html>
+<!--
+  interactive/scaffold/app.html — single-file interactive app (Vue 3 + Tailwind).
+
+  THREE parts, in this exact order:
+
+    1. <head> vendor scripts — Tailwind first, then Vue. Both vendored, no CDN.
+    2. RUNTIME block — a frozen IIFE assigned to `const RT`. It owns the
+       reactive state, the browser→AI `send()`, the AI→browser WebSocket, and
+       the 6 built-in push actions. COPY VERBATIM — never hand-edit.
+    3. APP REGION — between the two `APP REGION` marker comments. This is the
+       ONLY part the AI edits. It calls `RT.start({ template, setup, ... })`
+       exactly once, last. Control inverts to the app region on purpose: the
+       runtime does not auto-start, which removes all script-ordering fragility.
+
+  Edit ONLY the APP REGION. Never touch the runtime block, server.js, or vendor/.
+-->
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>interactive</title>
+<!-- Vendor scripts — Tailwind first (registers the in-browser engine), then
+     Vue. Both are vendored next to server.js; there is NO CDN, NO build step. -->
+<script src="/vendor/tailwind.js"></script>
+<script src="/vendor/vue.global.js"></script>
+</head>
+<body class="bg-slate-100">
+
+<!-- Empty Vue mount point — FIXED. The app region's template renders here. -->
+<div id="app"></div>
+
+<!-- Runtime toast host — FIXED. The runtime renders toast messages into this. -->
+<div id="rt-toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden
+     px-4 py-3 rounded-lg text-sm font-medium shadow-lg max-w-lg"></div>
+
+<!-- Runtime WebSocket connection dot — FIXED. Green = live, grey = reconnecting. -->
+<div id="rt-conn" title="kênh trực tiếp"
+     class="fixed top-3 right-3 z-50 w-2.5 h-2.5 rounded-full bg-slate-400"></div>
+
+<script>
+/* ============ RUNTIME — FROZEN. Copy verbatim, never hand-edit. ============ */
+/* A single IIFE assigned to `const RT`. It exposes { state, send, on, start }.
+   It does NOT auto-start — the APP REGION calls RT.start(...) last. */
+const RT = (function () {
+  "use strict";
+
+  // `ws` is declared at the TOP of the IIFE scope, before any function that
+  // references it. This MUST come first — a later `let ws` would put the
+  // `connectWS` body in a temporal-dead-zone and throw on first call.
+  let ws = null;
+
+  // The single global reactive state. App templates read `state.*`; an AI
+  // `state` / `state-set` push mutates it and Vue re-renders automatically.
+  const state = Vue.reactive({});
+
+  // App-registered message handlers: type -> fn(payload). Populated by on().
+  const handlers = new Map();
+
+  // ── Browser → AI ───────────────────────────────────────────────────────
+  // POST /api/event; the server prints a `MSG::` line that Monitor surfaces.
+  function send(type, payload) {
+    return fetch("/api/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: type, payload: payload }),
+    }).catch(function (err) {
+      showToast("err", "send() failed: " + (err && err.message ? err.message : err));
+    });
+  }
+
+  // ── App handler registration ───────────────────────────────────────────
+  // Register a handler for a custom push `type`. Built-in types (state,
+  // state-set, toast, html, js, reload) are handled by the runtime and
+  // CANNOT be shadowed by an app handler.
+  function on(type, fn) {
+    if (typeof type === "string" && typeof fn === "function") {
+      handlers.set(type, fn);
+    }
+  }
+
+  // ── Toast rendering ────────────────────────────────────────────────────
+  // kind: ok (green, auto-hide ~4s) | err (red) | held (amber) | info (slate).
+  // err/held/info linger until the next toast.
+  let toastTimer = null;
+  function showToast(kind, text) {
+    const el = document.getElementById("rt-toast");
+    if (!el) return;
+    const palette = {
+      ok: "bg-green-600 text-white",
+      err: "bg-red-600 text-white",
+      held: "bg-amber-500 text-white",
+      info: "bg-slate-700 text-white",
+    };
+    const cls = palette[kind] || palette.info;
+    el.className =
+      "fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg " +
+      "text-sm font-medium shadow-lg max-w-lg " + cls;
+    el.textContent = String(text == null ? "" : text);
+    if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+    if (kind === "ok") {
+      toastTimer = setTimeout(function () { el.classList.add("hidden"); }, 4000);
+    }
+  }
+
+  // ── WebSocket connection dot ───────────────────────────────────────────
+  function setConnDot(live) {
+    const dot = document.getElementById("rt-conn");
+    if (!dot) return;
+    dot.className =
+      "fixed top-3 right-3 z-50 w-2.5 h-2.5 rounded-full " +
+      (live ? "bg-green-500" : "bg-slate-400");
+    dot.title = live ? "kênh trực tiếp: đang kết nối" : "kênh trực tiếp: mất kết nối";
+  }
+
+  // ── Built-in push-action dispatch ──────────────────────────────────────
+  // Runs BEFORE any app handler, so an app cannot accidentally shadow a
+  // built-in. Unknown type with no registered handler is silently ignored.
+  function dispatch(frame) {
+    const type = frame && frame.type;
+    const payload = (frame && frame.payload) || {};
+
+    if (type === "state") {
+      // Shallow merge into the reactive state (v1 — documented as shallow,
+      // no deep merge). Vue re-renders any template that reads a touched key.
+      Object.assign(state, payload || {});
+      return;
+    }
+    if (type === "state-set") {
+      // Full replace: drop every existing key, then assign the new payload.
+      for (const k of Object.keys(state)) delete state[k];
+      Object.assign(state, payload || {});
+      return;
+    }
+    if (type === "toast") {
+      // payload { kind, text } — kind ok|err|info|held.
+      const kind = ["ok", "err", "info", "held"].includes(payload.kind)
+        ? payload.kind
+        : "info";
+      showToast(kind, payload.text);
+      return;
+    }
+    if (type === "html") {
+      // payload { target, mode, html } — querySelector(target); mode
+      // "append" appends, anything else replaces innerHTML.
+      const el = document.querySelector(payload.target);
+      if (!el) {
+        showToast("err", "html: target not found — " + String(payload.target));
+        return;
+      }
+      if (payload.mode === "append") {
+        el.insertAdjacentHTML("beforeend", String(payload.html == null ? "" : payload.html));
+      } else {
+        el.innerHTML = String(payload.html == null ? "" : payload.html);
+      }
+      return;
+    }
+    if (type === "js") {
+      // payload { code } — execute via indirect eval. An exception MUST NOT
+      // be silent: surface it on an error toast.
+      try {
+        (0, eval)(String(payload.code == null ? "" : payload.code));
+      } catch (err) {
+        showToast("err", "js error: " + (err && err.message ? err.message : err));
+      }
+      return;
+    }
+    if (type === "reload") {
+      location.reload();
+      return;
+    }
+
+    // Not a built-in — hand off to an app handler if one is registered.
+    const fn = handlers.get(type);
+    if (fn) {
+      try {
+        fn(payload);
+      } catch (err) {
+        showToast("err", "handler '" + type + "' error: " +
+          (err && err.message ? err.message : err));
+      }
+    }
+    // Unknown type with no handler — ignore silently.
+  }
+
+  // ── WebSocket — AI → browser push channel ─────────────────────────────
+  // Opens GET /ws; auto-reconnects on close/error. Each frame is a JSON
+  // `{ type, payload }` that dispatch() routes.
+  function connectWS() {
+    const proto = location.protocol === "https:" ? "wss://" : "ws://";
+    ws = new WebSocket(proto + location.host + "/ws");
+
+    ws.onopen = function () { setConnDot(true); };
+    ws.onclose = function () { setConnDot(false); setTimeout(connectWS, 1500); };
+    ws.onerror = function () { setConnDot(false); /* close fires next → reconnect */ };
+
+    ws.onmessage = function (ev) {
+      let frame;
+      try {
+        frame = JSON.parse(ev.data);
+      } catch (_) {
+        return; // ignore non-JSON frames
+      }
+      dispatch(frame);
+    };
+  }
+
+  // ── start(appDef) ──────────────────────────────────────────────────────
+  // The ONLY entry point the APP REGION calls. `appDef` carries the Vue
+  // component options (template, setup, ...). The runtime injects `state`,
+  // `send`, `on` into the render scope; the app's own setup() return values
+  // are merged on top (app keys win on collision). After mount, the WS
+  // connection opens.
+  function start(appDef) {
+    const def = appDef || {};
+    Vue.createApp(
+      Object.assign({}, def, {
+        setup() {
+          const extra =
+            (typeof def.setup === "function" ? def.setup() : {}) || {};
+          return Object.assign({ state: state, send: send, on: on }, extra);
+        },
+      }),
+    ).mount("#app");
+    connectWS();
+  }
+
+  return { state: state, send: send, on: on, start: start };
+})();
+/* ============ END RUNTIME ============ */
+</script>
+
+<!-- ===== APP REGION START — the AI edits ONLY between these two markers ===== -->
+<script>
+RT.start({
+  template: `
+    <div class="min-h-screen flex items-center justify-center p-6">
+      <div class="bg-white rounded-2xl shadow-lg px-10 py-8 text-center max-w-md">
+        <div class="text-3xl mb-2">👋</div>
+        <h1 class="text-xl font-semibold text-slate-800">Hello from /interactive</h1>
+        <p class="text-sm text-slate-500 mt-2">
+          The scaffold runs. Replace this APP REGION with your one-off app.
+        </p>
+      </div>
+    </div>
+  `,
+  setup() {
+    return {};
+  },
+});
+</script>
+<!-- ===== APP REGION END ===== -->
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "aio-html-interactive",
+  "description": "Spin up a throwaway local web app (Vue 3 + Tailwind, no build step) that talks to the AI in real time over WebSocket + Monitor. AI copies a frozen scaffold to /tmp, edits only the APP REGION, spawns a Bun server, interacts, then cleans up.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  },
+  "repository": "https://github.com/aiocean/claude-plugins",
+  "license": "MIT"
+}
