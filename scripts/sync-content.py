@@ -104,63 +104,17 @@ weight: 0
 # Claude Plugins
 
 A Claude Code plugin is a folder of skills, agents, hooks, and slash
-commands that Claude installs per project and loads only when a session
-needs them. {n} plugins, {total_skills} skills here. Two-command install.
+commands that Claude installs per project. {n} plugins, {total_skills}
+skills here.
 
 ```
 /plugin marketplace add aiocean/claude-plugins
 /plugin install <plugin-name>@aiocean-plugins
 ```
 
-Installing a plugin doesn't change Claude's behavior on its own. Skills
-load when the user's message matches the skill's description, hooks fire
-on the tool-call events the plugin declares, agents spawn when Claude
-calls the `Agent` tool with a matching subtype. Idle plugins sit in the
-manifest at zero token cost.
-
-## What's in the catalog
-
-The {n} plugins group by the work they help with:
-
-- **Translate & write** — literary EPUB pipelines with cross-chapter
-  glossary management, Vietnamese style enforcement (Tín-Đạt-Nhã),
-  bilingual export. See `aio-epub-translate`, `aio-epub-vn-style`.
-- **Debug & investigate** — race-condition surfacing, hypothesis-PoC
-  loops, CDP-relay browser automation that reuses the user's logged-in
-  Chrome session. See `aio-cdp-relay`, `aio-ai-slop-cleaner`.
-- **Design & ship UI** — brutalist and neobrutalism token sets with stamp
-  shadows, WCAG audit checklists, React-19 effect refactoring against the
-  `useActionState` and `useOptimistic` APIs. See `aio-design-system`,
-  `aio-dashboard-design`.
-- **Operate at scale** — StarRocks query tuning and EXPLAIN reading, Go
-  production hardening (concurrency, generics, `-race`), threat modeling
-  for AI/ML workloads, multi-agent orchestration patterns. See
-  `aio-starrocks`, `aio-golang-mastery`, `aio-threat-models`,
-  `aio-software-architect`.
-- **Build for yourself** — skill scaffolding, CLAUDE.md auditing,
-  marketplace publishing, prompt patching for Claude Code itself. See
-  `aio-claude-toolkit`.
-
-[Browse the {n}-plugin catalog →](/plugins) · [Read the guides →](/guides)
-
-## Picking a primitive
-
-When you build your own plugin, the three primitives map to three
-distinct jobs:
-
-- **Skill** — procedural knowledge Claude pulls into context on a
-  description match. Use when you want to teach Claude *what to do*.
-- **Agent** — an isolated subprocess with its own context window. Use
-  when one task needs to run separately from the main thread.
-- **Hook** — a script that runs on a Claude Code lifecycle event
-  (`PreToolUse`, `PostToolUse`, `Stop`). Use to validate, log, or modify
-  tool calls.
-
-The [primitives guide](/guides/skills-agents-hooks) covers the decision
-tree in detail. The [CLAUDE.md guide](/guides/writing-claude-md-files)
-covers project memory — the per-repo rules Claude reads on every session.
-The [install guide](/guides/install-claude-plugins) covers the install
-flow end to end.
+Skills load when their description matches your message, hooks fire on
+tool-call events, agents spawn on the `Agent` tool. Idle plugins cost
+nothing — browse [plugins](/plugins) or read the [guides](/guides).
 """
     out.write_text(body, encoding="utf-8")
 
