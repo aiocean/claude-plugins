@@ -36,14 +36,12 @@ function enumerateLocaleRoutes(locale: string): string[] {
 const viRoutes = enumerateLocaleRoutes('vi')
 
 export default defineNuxtConfig({
-  // andy-note-nuxt@0.2.0 ships no `main`/`exports` in its package.json, so
-  // bare `extends: ['andy-note-nuxt']` resolves the package but c12 can't
-  // find its nuxt.config.ts and silently emits `WARN Cannot extend config…`
-  // (verified: produces empty 1.9 KB index.html with no theme CSS). Explicit
-  // node_modules path bypasses module resolution and points c12 at the
-  // package directory directly. Switch back to the bare name once the layer
-  // publishes `"main": "./nuxt.config.ts"` upstream.
-  extends: ['./node_modules/andy-note-nuxt'],
+  // andy-note-nuxt@0.4.x ships `"main": "./nuxt.config.ts"`, so bare module
+  // resolution works — c12 finds the layer's nuxt.config.ts via node_modules
+  // lookup. (Earlier 0.2.x lacked the entry-point field and required an
+  // explicit `./node_modules/andy-note-nuxt` path; bumping to 0.4.x fixes
+  // that upstream.)
+  extends: ['andy-note-nuxt'],
 
   // Array module config merges with the layer's modules (Nuxt concatenates
   // across layers), so this adds i18n on top of @nuxt/content from the theme.

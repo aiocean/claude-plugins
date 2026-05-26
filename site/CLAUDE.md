@@ -119,13 +119,4 @@ don't have to chase the workaround:
    the layer's devDependencies, so installing `andy-note-nuxt` does NOT pull
    it in. Consumer must install it (devDep is fine) even when disabled via
    `aiAnnotator: false` — otherwise the module load fails at startup.
-4. **No package entry point — `extends` needs explicit path** — the published
-   `andy-note-nuxt` package.json declares no `main`/`exports`, so Nuxt's
-   module resolution finds the package but can't locate its `nuxt.config.ts`
-   as the layer config (silently emits `WARN Cannot extend config from
-   andy-note-nuxt` and produces empty pages). Workaround:
-   `extends: ['./node_modules/andy-note-nuxt']` in `nuxt.config.ts` — bypasses
-   module resolution and points c12 at the package dir directly. Switch back
-   to `extends: ['andy-note-nuxt']` once the layer ships an entry point.
-
 When the layer ships fixes, drop the workarounds from `content.config.ts`.
