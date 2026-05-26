@@ -3,6 +3,7 @@ name: aio-kanban
 description: |
   Markdown-based kanban board for AI agent task management — init, add, move, archive tasks across backlog/doing/done columns.
 when_to_use: kanban, board, tasks, backlog, show board, what's next, task status, add task, init kanban, sprint, todo list, track progress, move task, prioritize, plan work, archive, show tasks, current tasks, prioritize tasks, archive done
+effort: low
 argument-hint: "init | status | add <title> | archive"
 ---
 

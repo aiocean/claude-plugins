@@ -1,18 +1,7 @@
 ---
 name: aio-html-interactive
 description: |
-  Bridge Claude to a browser UI in real time. The technical problem: Claude
-  runs in a turn-by-turn CLI loop with no event loop — it cannot
-  addEventListener on a tab, cannot block on user input. This skill ships a
-  frozen Bun + Vue3 + Tailwind scaffold that solves it via two channels:
-  browser events become Monitor-tool notifications (server emits MSG:: lines
-  to stdout, Monitor pattern-matches → Claude wakes), AI pushes become
-  WebSocket broadcasts (POST /api/push → all browser tabs). Claude only
-  writes the APP REGION of app.html; the runtime, message protocol, and
-  vendor blocks are frozen. Use when an interactive browser UI must be driven
-  by Claude while a task is in progress — form capture, multi-step decision
-  flow, live preview, approval queue, side-by-side review. Triggers:
-  "/aio-html-interactive", "/interactive", "interactive UI for AI",
+  Bridge Claude to a browser UI in real time via a frozen Bun + Vue3 + Tailwind scaffold — browser events become Monitor-tool notifications, AI pushes become WebSocket broadcasts. Use when Claude needs to drive an interactive UI mid-task: form capture, multi-step decision flow, live preview, approval queue, or side-by-side review. See body for the "why" (Claude has no event loop) and architecture details.
   "browser ↔ AI realtime", "AI-driven UI", "Monitor + WebSocket bridge",
   "làm cái UI tương tác với AI", "dựng UI tương tác", "realtime browser AI".
 when_to_use: bridge Claude to browser, AI event loop substitute, Monitor stdout to notification, WebSocket push from AI, AI-driven UI, interactive UI for AI, realtime browser AI, browser to AI bidirectional, dựng UI tương tác AI, làm UI tương tác AI

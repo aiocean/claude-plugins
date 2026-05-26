@@ -2,7 +2,6 @@ plugins/aio-cocoindex/skills/aio-cocoindex-setup/boilerplate/__pycache__/
 *.egg-info/
 
 # Go build artifacts — DO NOT commit (leak local build paths via DWARF)
-plugins/aio-cdp-relay/skills/aio-cdp-relay/scripts/relay-go/cdp-relay
 plugins/aio-tui/examples/gold-monitor/gold-monitor
 
 # superpowers skill scratch — plans/specs are session-local, not for public

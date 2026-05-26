@@ -1,7 +1,7 @@
 {
   "name": "aio-tui",
   "description": "Build production-grade Go TUIs with Bubbletea + lipgloss — TEA architecture, styling, and battle-tested patterns for tables, parallel fetch, search, and live refresh.",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "author": {
     "name": "aiocean"
   }

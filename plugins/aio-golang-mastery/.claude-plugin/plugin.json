@@ -1,7 +1,7 @@
 {
   "name": "aio-golang-mastery",
   "description": "Write and lint idiomatic Go end-to-end — a 7-tool lint chain (build, vet, golangci-lint, govulncheck, nilaway, deadcode, race) plus reference-grade patterns for concurrency, errors, generics, gRPC, naming/style enforcement (revive 21-rule set, golangci-lint v2 production config), and production hardening.",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "author": {
     "name": "aiocean"
   },

@@ -2,7 +2,8 @@
 name: aio-research-kit
 description: |
   Run structured 10-phase research workflows via research-cli (auto-installs if missing).
-when_to_use: start research, research a topic, create research project, structured research, research-kit, deep research, research workflow, investigate topic, literature review, research phases
+when_to_use: start research, investigate a topic, create research project, structured research, research-kit, deep research, research workflow, literature review, 10-phase research
+effort: medium
 argument-hint: <topic>
 context: fork
 agent: Explore

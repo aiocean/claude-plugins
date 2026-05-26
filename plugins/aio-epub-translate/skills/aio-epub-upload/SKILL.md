@@ -1,8 +1,9 @@
 ---
 name: aio-epub-upload
 description: |
-  Upload and prepare EPUB books for translation.
+  Upload an EPUB file and prepare it for chapter translation — extracts TOC, counts words, queues for analysis. Use when the user wants to add a new book, start translating an EPUB, tải sách lên, import a `.epub` file, or onboard a new title into the translation workspace.
 when_to_use: upload epub, tải sách lên, prepare book, chuẩn bị sách, add book, import epub, upload file
+effort: low
 argument-hint: path to EPUB file
 ---
 

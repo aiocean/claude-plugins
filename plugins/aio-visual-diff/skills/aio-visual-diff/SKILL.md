@@ -1,7 +1,7 @@
 ---
 name: aio-visual-diff
 description: |
-  Verify AI-generated frontend UI against design via measurement-driven diff — use when checking pixel-perfect implementation, validating design fidelity, catching layout regressions, comparing spacing/typography/color against a Figma reference, or when the agent claims "it looks right" but you want numerical proof. Extracts `getComputedStyle` + `getBoundingClientRect` through the `chrome-devtools` MCP, diffs against Figma layout data or a frozen baseline JSON, and reports numerical deltas that the agent can act on. Never asks an LLM to eyeball screenshots.
+  Verify AI-generated frontend UI against design via measurement-driven diff — extracts `getComputedStyle` + `getBoundingClientRect` through chrome-devtools MCP, diffs against Figma data or baseline JSON, reports numerical deltas. Use when checking pixel-perfect implementation, validating design fidelity, catching layout regressions, or when the agent claims "it looks right" but you want numerical proof instead of eyeballed screenshots.
 when_to_use: visual diff, pixel diff, pixel perfect, design fidelity, frontend verify, UI regression, measurement loop, computed CSS, layout diff, Figma compare, design check, padding wrong, font size off, spacing off, AI built UI verify, baseline regression, visual QA, Radix token trap, Tailwind token check, MUI spacing wrong, shadcn line-height
 argument-hint: "<dev-url> <selector> [--figma <node-url>]"
 effort: medium

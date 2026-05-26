@@ -3,6 +3,8 @@ name: aio-mermaid
 description: |
   Generate shareable Mermaid diagram URLs (LZ-String compressed) for flowcharts, sequence, class, ER, state, and gantt diagrams.
 when_to_use: share diagram, generate diagram URL, mermaid, flowchart, sequence diagram, class diagram, ER diagram, entity relationship, state diagram, gantt chart, shareable diagram link
+argument-hint: "Mermaid code or diagram description"
+effort: low
 ---
 
 # MinimalMermaid URL Generator

@@ -3,7 +3,10 @@ name: aio-monitoring-observability
 description: |
   Design metrics, alerts, dashboards, and SLOs using monitoring best practices (Four Golden Signals, RED/USE method).
 when_to_use: set up monitoring, design metrics, calculate SLOs, build dashboards, Prometheus, Grafana, OpenTelemetry, distributed tracing, alerting, SLO, SLA, error budget, Four Golden Signals, RED method, USE method, observability, Datadog, log aggregation
+effort: low
 ---
+
+# Monitoring & Observability
 
 ```bash
 SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/aio-monitoring-observability/scripts"
@@ -11,8 +14,6 @@ SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/aio-monitoring-observability/scripts"
 
 ## Environment
 - python3: !`python3 --version 2>/dev/null || echo "NOT INSTALLED"`
-
-# Monitoring & Observability
 
 ## Overview
 

@@ -1,9 +1,0 @@
-{
-  "name": "aio-dashboard-design",
-  "description": "Design and review SaaS analytics dashboards with research-backed standards — chart selection, anti-pattern checks, accessibility, and storytelling. Pre-ship review without leaving the terminal.",
-  "version": "1.0.2",
-  "author": {
-    "name": "aiocean"
-  },
-  "license": "MIT"
-}

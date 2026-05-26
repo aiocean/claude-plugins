@@ -1,7 +1,7 @@
 {
   "name": "aio-software-architect",
   "description": "Make architecture decisions with confidence — a deep pattern reference and a 5-step decision workflow covering cloud patterns, resilience, data, DDD, and distributed systems.",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "author": {
     "name": "aiocean"
   },

@@ -3,12 +3,14 @@ name: aio-xstate
 description: |
   Implement XState v5 state machines with strict patterns — setup().createMachine(), actors, and TypeScript typing.
 when_to_use: create state machine, implement XState, design statechart, add actor, XState, statecharts, fromPromise, state machine, finite state, XState v5, createMachine, state transitions
+argument-hint: "State machine name or description"
+effort: medium
 ---
+
+# XState v5 Strict Skill
 
 ## Environment
 - tsc: !`tsc --version 2>/dev/null || echo "NOT INSTALLED"`
-
-# XState v5 Strict Skill
 
 > **XState v5 ONLY.** Requires TypeScript 5.0+. Never use v4 patterns.
 

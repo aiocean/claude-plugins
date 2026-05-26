@@ -1,7 +1,7 @@
 {
   "name": "aio-devops",
   "description": "GitHub, GitLab, and git worktree workflows in one toolkit — manage repos, PRs, MRs, pipelines, and parallel branches without juggling CLIs.",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "author": {
     "name": "aiocean"
   }

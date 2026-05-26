@@ -3,6 +3,8 @@ name: aio-google-workspace
 description: |
   Interact with Google Workspace services (Gmail, Drive, Calendar, Sheets, Docs, Tasks) via the gws CLI.
 when_to_use: send email, upload to drive, create event, read spreadsheet, standup report, gws, google workspace, gmail, google drive, google calendar, google sheets, google docs, google tasks
+argument-hint: "[gmail | drive | calendar | sheets | docs | tasks] [action]"
+effort: low
 ---
 
 # Google Workspace (gws CLI)

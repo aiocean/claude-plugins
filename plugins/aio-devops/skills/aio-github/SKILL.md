@@ -1,8 +1,10 @@
 ---
 name: aio-github
 description: |
-  Manage GitHub repos, PRs, and issues via github-mcp (auto-installs if missing).
+  Read and manage GitHub repos, pull requests, issues, releases, and branches via github-mcp (auto-installs if missing). Use when the user mentions a GitHub URL, asks to open/review/merge a PR, comment on an issue, list repos, trigger a release, or run any GitHub action programmatically.
 when_to_use: list repos, create PR, review PR, get issue, comment on issue, github, repository, pull request, merge, branch, commit, star, fork, release, github-mcp
+argument-hint: "Repo, PR number, issue, or action"
+effort: low
 ---
 
 # GitHub Skill

@@ -1,8 +1,9 @@
 ---
 name: aio-youtube
 description: |
-  Search YouTube and extract video transcripts via yt-dlp.
+  Search YouTube and extract video transcripts/subtitles/metadata via yt-dlp. Use whenever the user mentions a youtube.com URL, asks to summarize a video, pull a transcript, fetch video metadata, list a channel/playlist, or download subtitles in any language.
 when_to_use: search YouTube, get transcript, summarize video, extract subtitles, youtube.com, yt-dlp, video transcript, YouTube search, video metadata, playlist, channel videos, video chapters, youtube.com URLs
+effort: low
 argument-hint: <search-query or YouTube-URL>
 ---
 

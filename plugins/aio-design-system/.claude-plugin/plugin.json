@@ -1,7 +1,7 @@
 {
   "name": "aio-design-system",
-  "description": "Design and ship UI with confidence — UI/UX guidance, neobrutalism design system bootstrapping, and a React 19 audit that strips unnecessary useEffect calls.",
-  "version": "1.0.2",
+  "description": "Design and ship UI with confidence — UI/UX guidance, neobrutalism design system bootstrapping, and SaaS analytics dashboard design (chart selection, anti-pattern checks, a11y, storytelling).",
+  "version": "1.2.2",
   "author": {
     "name": "aiocean"
   }

@@ -1,7 +1,5 @@
 # Bubbletea Patterns Reference
 
-Detailed code patterns extracted from production TUI tools (`tools/sqs-tui/`, `.claude/skills/dagster/tui/`).
-
 ## Column Alignment with Unicode/Emoji
 
 **NEVER** use `fmt.Sprintf("%-*s")` for columns containing emoji or Unicode.

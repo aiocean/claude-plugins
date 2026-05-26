@@ -1,7 +1,7 @@
 {
   "name": "aio-claude-toolkit",
   "description": "Sharpen Claude Code itself — patch system prompts for senior-grade output, capture this session's workflow as a reusable skill, consolidate memory, and ship feedback to the marketplace.",
-  "version": "2.6.2",
+  "version": "2.6.4",
   "author": {
     "name": "aiocean"
   }

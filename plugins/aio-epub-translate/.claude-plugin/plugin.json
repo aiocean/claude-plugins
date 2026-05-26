@@ -1,7 +1,7 @@
 {
   "name": "aio-epub-translate",
   "description": "Translate EPUB books into literary Vietnamese end-to-end — upload, pre-translation analysis, chapter translation with consistency checks, quality review, and bilingual export.",
-  "version": "4.0.0",
+  "version": "4.0.2",
   "author": {
     "name": "aiocean"
   },

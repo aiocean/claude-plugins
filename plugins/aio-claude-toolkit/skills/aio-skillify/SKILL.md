@@ -3,6 +3,7 @@ name: aio-skillify
 description: |
   Capture this session's repeatable process into a reusable SKILL.md file via guided interview.
 when_to_use: skillify, capture this workflow, save this as a skill, turn this into a skill, make a skill from this session
+effort: medium
 allowed-tools:
   - Read
   - Write

@@ -3,12 +3,14 @@ name: aio-bun-fullstack-setup
 description: |
   Scaffold a Bun fullstack project — single-port server, Vite dev proxy, monorepo layout, and Docker config.
 when_to_use: scaffold bun, bun fullstack, bun server, vite proxy, single port, monorepo bun, docker bun, bootstrap bun project, new fullstack project
+argument-hint: "Project name or path (e.g. my-app)"
+effort: medium
 ---
+
+# Bun Fullstack Setup
 
 ## Environment
 - bun: !`bun --version 2>/dev/null || echo "NOT INSTALLED"`
-
-# Bun Fullstack Setup
 
 ## Scaffold Mode (when setting up a new project)
 

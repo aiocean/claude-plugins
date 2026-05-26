@@ -3,6 +3,8 @@ name: aio-grafana-diagram
 description: |
   Create Grafana diagrams for system visualization — analyzes codebase to auto-generate Mermaid diagrams with metric binding. For standalone Mermaid diagrams use aio-mermaid instead.
 when_to_use: create grafana diagram, mermaid in grafana, diagram panel, data-driven diagram, dynamic diagram, flowchart, sequence diagram, state diagram, ER diagram, grafana dashboard, metric binding, system visualization
+argument-hint: "Codebase path or diagram intent"
+effort: high
 ---
 
 # Grafana Dashboard Diagram Generator

@@ -1,8 +1,9 @@
 ---
 name: aio-atlassian
 description: |
-  Manage Jira issues, sprints, workflows, and Confluence pages via CLI.
+  Read, create, and update Jira issues, sprints, and workflows plus Confluence pages via the Atlassian CLI. Use when the user mentions a Jira ticket key (e.g. PROJ-123), asks for a JQL/CQL search, wants to transition an issue, manage a sprint/backlog, or read/write a Confluence page.
 when_to_use: jira, confluence, create issue, search issues, update issue status, manage sprint, JQL, CQL, epic, wiki, board, backlog, atlassian, ticket, story, subtask, page, space, create page, update page
+effort: low
 argument-hint: "Jira issue key, JQL query, or Confluence page title"
 ---
 

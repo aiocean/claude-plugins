@@ -62,7 +62,7 @@ plugins/{plugin-name}/
 5. Add description to `README.md`
 6. Run `bash scripts/validate-marketplace.sh` to verify everything is correct
 
-**Note:** The public marketplace site at https://aiocean.github.io/claude-plugins/ regenerates itself on every push to `main` via `pages.yml`. `scripts/sync-content.py` walks the marketplace + per-plugin SKILL.md frontmatter into `site/content/plugins/**.md`, then `bun run generate` in `site/` produces static HTML. No manual docs edits needed when adding a plugin — see `site/CLAUDE.md` for the data-flow diagram and Nuxt-layer details.
+**Note:** The public marketplace site at https://claude-plugins.aiocean.dev/ regenerates itself on every push to `main` via the `Deploy to Cloudflare Pages` workflow (`.github/workflows/pages.yml`). `scripts/sync-content.py` walks the marketplace + per-plugin SKILL.md frontmatter into `site/content/plugins/**.md`, then `bun run generate` in `site/` produces static HTML. No manual docs edits needed when adding a plugin — see `site/CLAUDE.md` for the data-flow diagram and Nuxt-layer details.
 
 ## SKILL.md Frontmatter Format
 

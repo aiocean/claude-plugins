@@ -3,6 +3,7 @@ name: aio-epub-setup
 description: |
   Setup guide for EPUB translation service — register account, purchase license, and configure API key.
 when_to_use: setup epub, cài đặt epub, epub setup, register account, đăng ký tài khoản, buy license, mua license, configure api key, cấu hình api key, install epub service, get started epub
+effort: low
 ---
 
 # EPUB Setup — Account & License Configuration

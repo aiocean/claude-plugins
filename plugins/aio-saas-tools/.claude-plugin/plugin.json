@@ -1,7 +1,7 @@
 {
   "name": "aio-saas-tools",
   "description": "Drive Jira, Confluence, Google Workspace (Drive/Gmail/Calendar/Sheets/Docs), Tanca HR, and X/Twitter from your terminal — one CLI per service, no context switching.",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "author": {
     "name": "aiocean"
   }

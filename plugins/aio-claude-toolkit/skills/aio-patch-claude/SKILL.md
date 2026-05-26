@@ -3,6 +3,7 @@ name: aio-patch-claude
 description: |
   Patch Claude Code system prompts to maximize quality over token efficiency. Automated pipeline via patch_local.py + patches.json from godClaude, with manual fallback. Covers local cli.js patching and full binary recompilation.
 when_to_use: patch claude, patch prompts, fix claude prompts, unbloat claude, improve claude quality, rebalance prompts, remove brevity limits, patch cli.js, upgrade claude output
+effort: high
 ---
 
 # Patch Claude Code for Maximum Quality

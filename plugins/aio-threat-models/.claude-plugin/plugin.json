@@ -1,7 +1,7 @@
 {
   "name": "aio-threat-models",
   "description": "Pick and apply the right threat-modeling framework — STRIDE, LINDDUN, PASTA, MITRE ATT&CK/ATLAS, Attack Trees, and 22 more — for security, privacy, and AI/ML risk analysis.",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "author": {
     "name": "aiocean"
   },

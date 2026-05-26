@@ -1,8 +1,9 @@
 ---
 name: aio-epub-quality
 description: |
-  Check translation quality and find chapters that need re-translation.
+  Generate a translation quality report and surface chapters that need re-translation. Use when the user wants to check quality, kiểm tra chất lượng bản dịch, run QA, tìm bản dịch kém, find bad translations, or decide which chapters to retranslate before exporting.
 when_to_use: check quality, kiểm tra chất lượng, quality report, báo cáo chất lượng, find bad translations, tìm bản dịch kém, translation quality, QA check, retranslate
+effort: low
 argument-hint: book ID
 ---
 

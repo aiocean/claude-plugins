@@ -1,7 +1,7 @@
 {
   "name": "aio-kanban",
   "description": "Track AI-agent work in a markdown kanban board committed to the repo — Backlog, Todo, Doing, Done columns with WIP limits and auto-status on session start.",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "author": {
     "name": "aiocean"
   }

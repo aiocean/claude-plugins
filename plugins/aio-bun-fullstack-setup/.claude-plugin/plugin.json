@@ -1,7 +1,7 @@
 {
   "name": "aio-bun-fullstack-setup",
   "description": "Bootstrap a Bun fullstack project in one shot — single-port API + frontend, Vite dev proxy, monorepo layout, and Docker config. Skips files you already have.",
-  "version": "1.1.3",
+  "version": "1.1.5",
   "author": {
     "name": "aiocean"
   },

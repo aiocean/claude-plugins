@@ -3,6 +3,8 @@ name: aio-architect-advisor
 description: |
   Architecture decision advisor — guides pattern selection, application, synthesis, and stress-testing for system design, scaling, resilience, and migration decisions.
 when_to_use: architecture decision, system design, which pattern, design review, microservices vs monolith, scale this, decompose, migration strategy, database choice, event-driven, CQRS, resilience, availability, consistency, distributed system, API design, domain modeling, trade-off analysis
+argument-hint: "Architecture decision or system to design"
+effort: low
 ---
 
 # Software Architecture Advisor

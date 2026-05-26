@@ -1,0 +1,9 @@
+{
+  "name": "aio-code-review",
+  "description": "Google's engineering code-review playbook — turns Claude into a thoughtful reviewer or a disciplined CL author. The 8 things every reviewer looks for (design/functionality/complexity/tests/naming/comments/style/docs), the LGTM threshold (\"improves code health, not perfection\"), how to write courteous comments, how to handle pushback, how to write good CL descriptions, and how to keep CLs small. Source: github.com/google/eng-practices (CC-BY 3.0).",
+  "version": "1.0.2",
+  "author": {
+    "name": "aiocean"
+  },
+  "license": "MIT"
+}

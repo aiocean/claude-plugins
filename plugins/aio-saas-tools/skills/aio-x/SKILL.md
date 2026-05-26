@@ -1,8 +1,9 @@
 ---
 name: aio-x
 description: |
-  Post, search, and manage Twitter/X content via x-mcp (auto-installs if missing).
+  Post tweets and threads, search timelines, read mentions, and manage Twitter/X content via x-mcp (auto-installs if missing). Use when the user mentions a tweet/x.com URL, asks to post on X, draft a thread, search Twitter, pull engagement data, or schedule social posts.
 when_to_use: post tweet, search twitter, post thread, get mentions, twitter, x.com, tweet, timeline, social media, X post, retweet, Twitter API
+effort: low
 argument-hint: <tweet-text or search-query>
 ---
 

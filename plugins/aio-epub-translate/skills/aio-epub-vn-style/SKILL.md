@@ -3,6 +3,7 @@ name: aio-epub-vn-style
 description: |
   Vietnamese literary translation style guide — word choice, sentence rhythm, genre conventions, and common error patterns for natural Anh-Viet translation.
 when_to_use: dịch sao cho hay, dịch thế nào, phong cách dịch, nguyên tắc dịch, translation style, how to translate, dịch văn học, style guide, word choice, sentence rhythm, genre style, Vietnamese literary style, Tín Đạt Nhã, translate naturally, review translated passage
+effort: low
 ---
 
 # Vietnamese Literary Translation — Style Guide

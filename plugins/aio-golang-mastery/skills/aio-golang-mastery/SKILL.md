@@ -3,14 +3,16 @@ name: aio-golang-mastery
 description: |
   Write, review, and lint Go code. Lint mode runs go build, go vet, golangci-lint, govulncheck, nilaway, deadcode, and race detection, then applies idiomatic fixes. Reference mode covers concurrency, error handling, generics, testing, gRPC, and production hardening.
 when_to_use: go code, golang, lint go, review go, go best practices, concurrency, goroutines, channels, error handling, gRPC, race condition, generics, idiomatic go, go testing, govulncheck, nilaway, deadcode, golangci-lint
+argument-hint: "[lint | review | reference] [optional path]"
+effort: medium
 ---
+
+# Go Mastery
 
 ## Environment
 - go: !`go version 2>/dev/null || echo "NOT INSTALLED"`
 - golangci-lint: !`golangci-lint version --short 2>/dev/null || echo "NOT INSTALLED"`
 - govulncheck: !`which govulncheck 2>/dev/null || echo "NOT INSTALLED"`
-
-# Go Mastery
 
 ## Lint Mode (when user has Go code to review)
 
