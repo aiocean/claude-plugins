@@ -1,5 +1,5 @@
 #!/bin/bash
-# Inject kanban protocol block into project CLAUDE.md
+# Inject kanban protocol block into project CLAUDE.md (v3: index + per-task files)
 # Also copies status script to .kanban/ for CLAUDE.md dynamic execution
 # Usage: kanban-inject.sh [path-to-claude-md]
 
@@ -17,22 +17,28 @@ INJECT_BLOCK='<!-- kanban:start -->
 
 !`bash .kanban/status.sh 2>/dev/null`
 
-Board: `.kanban/board.md` | Archive: `.kanban/archive/`
+Board: `.kanban/board.md` (index) | Tasks: `.kanban/tasks/T-NNN-slug.md` | Archive: `.kanban/archive/`
 
-**Session start:** Read `.kanban/board.md`. Resume Doing tasks.
-**Session end:** Update `.kanban/board.md` — move completed tasks to Done, note blockers, update timestamp.
+**Session start:** Read `.kanban/board.md`. For Doing tasks, open their task files.
+**Session end:** Update `.kanban/board.md` — move completed task lines to Done, note blockers, update timestamp.
 
-**Task format** (MUST follow exactly):
+**Board line format** (one per task):
 ```
-### T-NNN: Title
+- [T-NNN](tasks/T-NNN-slug.md) Title — priority/effort
+```
+
+**Task file format** (`.kanban/tasks/T-NNN-slug.md`):
+```
+# T-NNN: Title
 > One-line description
 - **priority**: critical|high|medium|low
 - **effort**: XS|S|M|L
-#### Criteria
+
+## Criteria
 - [ ] Acceptance criterion
 ```
 
-**Rules:** WIP limit = 2 in Doing. Pick highest-priority from Todo. Never skip criteria checkboxes.
+**Rules:** WIP limit = 2 in Doing. Pick highest-priority from Todo. Never skip criteria checkboxes. Slug is kebab-case from title, ≤40 chars.
 <!-- kanban:end -->'
 
 if [ ! -f "$CLAUDE_MD" ]; then

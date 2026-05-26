@@ -1,7 +1,10 @@
 ---
 name: aio-kanban
 description: |
-  Markdown-based kanban board for AI agent task management — init, add, move, archive tasks across backlog/doing/done columns.
+  Markdown-based kanban board for AI agent task management. Board is a pure index
+  (`.kanban/board.md`), every task lives in its own file (`.kanban/tasks/T-NNN-slug.md`).
+  Use to init the board, add tasks, move them across Backlog/Todo/Doing/Done/Blocked,
+  or archive completed work.
 when_to_use: kanban, board, tasks, backlog, show board, what's next, task status, add task, init kanban, sprint, todo list, track progress, move task, prioritize, plan work, archive, show tasks, current tasks, prioritize tasks, archive done
 effort: low
 argument-hint: "init | status | add <title> | archive"
@@ -9,9 +12,12 @@ argument-hint: "init | status | add <title> | archive"
 
 !`bash "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/scripts/kanban-status.sh" 2>/dev/null`
 
-# Kanban Protocol
+# Kanban Protocol (v3 — index + per-task files)
 
-Board location: `.kanban/board.md`. Follow this protocol exactly. Do NOT adapt or invent your own format.
+**Board** is a flat index at `.kanban/board.md`. Each line points to a task file.
+**Tasks** live at `.kanban/tasks/T-NNN-slug.md` with full body (description, criteria, notes).
+
+Follow this protocol exactly. Do NOT adapt or invent your own format.
 
 ---
 
@@ -37,7 +43,7 @@ cat > .kanban/board.md << 'BOARD'
 BOARD
 ```
 
-Then inject kanban guide into CLAUDE.md:
+Then inject the kanban guide into CLAUDE.md:
 
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/scripts/kanban-inject.sh"
@@ -45,44 +51,76 @@ bash "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/scripts/kanban-inject.sh"
 
 ---
 
-## Task Format — MUST use verbatim
+## Formats — MUST use verbatim
+
+### Board line (one per task)
+
+```
+- [T-NNN](tasks/T-NNN-slug.md) Title — priority/effort
+```
+
+Example:
+```
+- [T-052](tasks/T-052-rate-limit.md) Rate limit per endpoint — high/S
+```
+
+### Task file (`.kanban/tasks/T-NNN-slug.md`)
 
 ```markdown
-### T-NNN: Title
+# T-NNN: Title
 > One-line description
 
 - **priority**: critical | high | medium | low
 - **effort**: XS | S | M | L
 
-#### Criteria
+## Criteria
 - [ ] Acceptance criterion 1
 - [ ] Acceptance criterion 2
+
+## Notes
+(free-form section — design sketches, links, discussion)
 ```
 
-Optional fields (add below effort):
+Optional fields (add below `- **effort**`):
 - `- **depends**: T-NNN`
 - `- **branch**: feat/branch-name`
-- `- **completed**: YYYY-MM-DD` (when moved to Done)
-- `- **blocked-by**: reason` (when moved to Blocked)
+- `- **completed**: YYYY-MM-DD` (added when moved to Done)
+- `- **blocked-by**: reason` (added when moved to Blocked)
 
 **ID rule**: `T-NNN`, zero-padded, monotonic. NEVER reuse.
+**Slug rule**: kebab-case from title, lowercase, alphanumeric+hyphen only, max 40 chars.
 
 ---
 
 ## Workflow Rules
 
-1. **Add**: new `### T-NNN` under **Backlog**. MUST include priority + effort.
-2. **Refine**: move to **Todo** when criteria are defined.
-3. **Start**: move to **Doing**, set branch. NEVER exceed 2 in Doing.
-4. **Complete**: ALL criteria checkboxes checked → move to **Done**, add `completed` date.
-5. **Block**: move to **Blocked**, add `blocked-by`. Review daily.
-6. **Archive**: monthly, cut Done tasks to `.kanban/archive/YYYY-MM.md`.
-7. **Next ID**: find highest T-NNN in board, increment by 1.
-8. **XL tasks**: create detail file at `.kanban/tasks/T-NNN-slug.md`, link from board title.
+1. **Add a task**:
+   - Pick next ID: highest existing T-NNN + 1.
+   - Generate slug from title (kebab-case, ≤40 chars).
+   - Create file `.kanban/tasks/T-NNN-slug.md` with format above.
+   - Insert board line under **## Backlog** in `.kanban/board.md`.
+2. **Refine**: move the board line to **## Todo** when criteria are defined.
+3. **Start**: move the board line to **## Doing**, add `- **branch**: ...` to the task file. NEVER exceed 2 in Doing.
+4. **Complete**: ALL criteria checkboxes checked → move board line to **## Done**, add `- **completed**: YYYY-MM-DD` to task file.
+5. **Block**: move to **## Blocked**, add `- **blocked-by**: ...` to task file. Review daily.
+6. **Archive**: monthly, cut Done lines AND their task files to `.kanban/archive/YYYY-MM/` (board lines into `archive/YYYY-MM/board.md`, task files into `archive/YYYY-MM/tasks/`).
+7. **Update timestamp**: every board write updates `<!-- Updated: YYYY-MM-DD -->`.
+
+---
+
+## Why index + per-task files
+
+A flat board grows unbounded — task notes, design sketches, discussion all pile into one file. The index split keeps the board scannable (one line per task) while letting each task grow freely in its own file. Sub-agents and the `aio-kanban-monitor` skill rely on this split.
 
 ---
 
 ## Session Protocol
 
-- **Start**: Read `.kanban/board.md`. Resume Doing tasks. Check Blocked.
-- **End**: Update `.kanban/board.md` — move completed, note blockers, update `<!-- Updated: -->` timestamp.
+- **Start**: Read `.kanban/board.md`. For tasks in Doing, open their task files. Check Blocked.
+- **End**: Update `.kanban/board.md` — move completed task lines, note blockers, update `<!-- Updated: -->` timestamp.
+
+---
+
+## Companion: auto-dispatch
+
+The `aio-kanban-monitor` skill watches `.kanban/board.md` and auto-spawns a sub-agent for any task in a chosen column whose content matches a free-text goal. See its SKILL.md for details.

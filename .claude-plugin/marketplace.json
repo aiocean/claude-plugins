@@ -187,8 +187,8 @@
     {
       "name": "aio-kanban",
       "source": "./plugins/aio-kanban",
-      "description": "Track AI-agent work in a markdown kanban board committed to the repo — Backlog, Todo, Doing, Done columns with WIP limits and auto-status on session start.",
-      "version": "2.0.4",
+      "description": "Track AI-agent work in a markdown kanban board committed to the repo — index board with per-task files, plus an auto-dispatch monitor that watches the board and spawns sub-agents for matching tasks.",
+      "version": "3.0.0",
       "author": {
         "name": "aiocean"
       }
