@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-starrocks@aiocean-plugins
+::
+
 # aio-starrocks
 
 StarRocks performance is not primarily a query problem — it is a design problem. A table with the wrong partition key, a misaligned sort key, or undersized buckets will be slow regardless of how well the query is written. Conversely, a table designed correctly makes most queries fast without any tuning at all.

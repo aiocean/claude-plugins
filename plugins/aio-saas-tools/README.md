@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-saas-tools@aiocean-plugins
+::
+
 # aio-saas-tools
 
 Most developer time spent on SaaS tools is wasted on context-switching: browser tabs open for Jira, another for Gmail, a terminal for everything else. This plugin collapses Jira, Confluence, Google Workspace, Tanca HR, and Twitter/X into a single Claude conversation. You describe what you want in natural language; Claude calls the right CLI or MCP tool and reports back.

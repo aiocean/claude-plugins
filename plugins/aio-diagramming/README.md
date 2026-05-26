@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-diagramming@aiocean-plugins
+::
+
 # aio-diagramming
 
 **Mermaid diagrams for sharing, and for live system monitoring.**

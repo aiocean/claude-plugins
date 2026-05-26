@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-monitoring-observability@aiocean-plugins
+::
+
 # aio-monitoring-observability
 
 **Monitoring that starts from principles, not from copying dashboards.**

@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-kanban@aiocean-plugins
+::
+
 # aio-kanban
 
 **A Markdown kanban board that lives in your repository and survives every session.**

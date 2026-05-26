@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-youtube@aiocean-plugins
+::
+
 # aio-youtube
 
 **YouTube as a research and knowledge source, not just a video platform.**

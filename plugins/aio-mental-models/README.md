@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-mental-models@aiocean-plugins
+::
+
 # aio-mental-models
 
 **A decision advisor that picks the right mental models for your specific problem, then walks through each one.**

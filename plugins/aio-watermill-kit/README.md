@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-watermill-kit@aiocean-plugins
+::
+
 # aio-watermill-kit
 
 **Production-grade reference for building event-driven Go applications with Watermill.**

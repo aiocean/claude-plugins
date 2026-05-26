@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-code-review@aiocean-plugins
+::
+
 # aio-code-review
 
 **Google's engineering code-review discipline, applied to your PRs.**

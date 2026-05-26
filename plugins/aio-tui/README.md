@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-tui@aiocean-plugins
+::
+
 # aio-tui
 
 **The Bubbletea reference you need before the compiler tells you what you did wrong.**

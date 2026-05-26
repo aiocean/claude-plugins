@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-golang-mastery@aiocean-plugins
+::
+
 # aio-golang-mastery
 
 Go rewards developers who internalize its idioms deeply. The language is deliberately small, but the gap between code that compiles and code that a Go team would actually merge is wider than most newcomers expect. Initialisms spelled correctly, error strings without capital letters, context always as the first parameter, receivers consistent across a type, imports in three clean groups — none of these are enforced by the compiler, but all of them matter for maintainability.

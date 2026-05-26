@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-xstate@aiocean-plugins
+::
+
 # aio-xstate
 
 **XState v5 state machines done correctly — design-first, types-first, no god-machines.**

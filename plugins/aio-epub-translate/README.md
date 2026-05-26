@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-epub-translate@aiocean-plugins
+::
+
 # aio-epub-translate
 
 **AI-powered EPUB book translation for Claude Code.**

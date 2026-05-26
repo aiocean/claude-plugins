@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-threat-models@aiocean-plugins
+::
+
 # aio-threat-models
 
 **A structured advisor for selecting, applying, and composing threat modeling frameworks.**

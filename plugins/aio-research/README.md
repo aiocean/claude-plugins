@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-research@aiocean-plugins
+::
+
 # aio-research
 
 **Two tools for knowledge work: structured investigation and semantic retrieval.**

@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-visual-diff@aiocean-plugins
+::
+
 # aio-visual-diff
 
 **Frontend verification that measures instead of eyeballs.**

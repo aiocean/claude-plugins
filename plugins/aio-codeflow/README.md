@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-codeflow@aiocean-plugins
+::
+
 # aio-codeflow
 
 **A complete code-development workflow for Claude Code — from first exploration to merged PR.**

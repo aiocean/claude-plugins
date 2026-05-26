@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-software-architect@aiocean-plugins
+::
+
 # aio-software-architect
 
 Architecture decisions made badly tend to compound. A choice that felt expedient at 10 engineers becomes a migration project at 100. A pattern that works at current load fails visibly at 10x. This plugin exists to slow that process down: before committing to a direction, understand the full trade-off space.

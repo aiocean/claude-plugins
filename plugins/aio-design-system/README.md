@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-design-system@aiocean-plugins
+::
+
 # aio-design-system
 
 **Design guidance that meets you where the work is.**

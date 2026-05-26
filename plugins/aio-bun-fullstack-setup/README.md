@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-bun-fullstack-setup@aiocean-plugins
+::
+
 # aio-bun-fullstack-setup
 
 Starting a fullstack project with Bun involves more repetitive setup than it should: a server that proxies to Vite in development but serves static files directly in production, config validation that fails fast on missing env vars, PM2 to run both processes side by side, a multi-stage Dockerfile that builds the frontend then discards those dev dependencies. None of this is hard, but assembling it correctly every time is friction.

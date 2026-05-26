@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-claude-toolkit@aiocean-plugins
+::
+
 # aio-claude-toolkit
 
 **Meta-tools for shaping Claude Code itself.**

@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-ios-device-debug@aiocean-plugins
+::
+
 # aio-ios-device-debug
 
 **Physical device debugging for iOS, entirely from the terminal.**

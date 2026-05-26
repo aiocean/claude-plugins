@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-devops@aiocean-plugins
+::
+
 # aio-devops
 
 **GitHub, GitLab, and git worktree workflows — unified in one plugin.**

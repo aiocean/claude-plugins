@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-browser-cookie@aiocean-plugins
+::
+
 # aio-browser-cookie
 
 Your browser already holds the session you need. This plugin extracts it.

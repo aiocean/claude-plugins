@@ -207,24 +207,24 @@ def write_plugin_page(plugin: dict, locale: str) -> None:
     readme_body = plugin.get("readme")  # set by gather_plugins
     skill_list_md = render_skill_list(slug, plugin["skills"])
 
+    # Each plugin README owns its own `::install-command` block at the top
+    # — see plugins/{name}/README.md. Sync no longer prepends an install
+    # callout, so the README is the single source of truth for the plugin
+    # page body. Synthetic-fallback path (no README) still emits the slot
+    # syntax so the install card renders consistently.
     if readme_body:
-        # README is the body. Prepend a 1-line marketplace install callout
-        # (block quote so it visually separates from README's own content)
-        # and append the Skills index so drill-down is always reachable.
         core = (
-            f"> **Install:** `{install_cmd}` · `v{plugin.get('version', '?')}`\n\n"
             f"{readme_body.rstrip()}\n\n"
             f"## Skills ({len(plugin['skills'])})\n\n"
             f"{skill_list_md}\n"
         )
     else:
-        # Slim synthetic fallback for plugins without a README.
+        # Slim synthetic fallback for plugins without a README. Mirrors the
+        # README convention by leading with the install-command slot block.
         core = (
             f"# {slug}\n\n"
-            f"`v{plugin.get('version', '?')}`\n\n"
+            f"::install-command\n{install_cmd}\n::\n\n"
             f"{plugin['desc']}\n\n"
-            f"## Install\n\n"
-            f"```\n{install_cmd}\n```\n\n"
             f"## Skills ({len(plugin['skills'])})\n\n"
             f"{skill_list_md}\n"
         )
@@ -257,25 +257,24 @@ def write_skill_page(plugin: dict, skill: dict, locale: str) -> None:
     skill_slug = skill["name"]
     install_cmd = f"/plugin install {plugin_slug}@aiocean-plugins"
     skill_body = skill.get("body", "").rstrip()
+    # SKILL.md is authored by skill authors who shouldn't need to know their
+    # parent plugin slug, so sync still injects the install card on skill
+    # pages (the asymmetry vs. plugin pages — which now carry the block
+    # inside their own README — is intentional). Uses the slot syntax with
+    # plugin/plugin-slug as inline props so the rendered card shows
+    # "From plugin <link>" above the command row.
+    install_block = (
+        f'::install-command{{plugin="{plugin_slug}" plugin-slug="{plugin_slug}"}}\n'
+        f"{install_cmd}\n"
+        f"::\n\n"
+    )
 
     if skill_body:
-        core = (
-            f"> From plugin [**{plugin_slug}**](/plugins/{plugin_slug}) · "
-            f"`v{plugin.get('version', '?')}` · "
-            f"**Install:** `{install_cmd}`\n\n"
-            f"{skill_body}\n"
-        )
+        core = f"{install_block}{skill_body}\n"
     else:
-        # Fallback when SKILL.md has no body — should never happen but
-        # render something rather than an empty page.
-        core = (
-            f"# {skill_slug}\n\n"
-            f"From plugin [**{plugin_slug}**](/plugins/{plugin_slug}) · "
-            f"`v{plugin.get('version', '?')}`\n\n"
-            f"{skill['desc']}\n\n"
-            f"## Install\n\nInstall the parent plugin — this skill is bundled inside:\n\n"
-            f"```\n{install_cmd}\n```\n"
-        )
+        # When SKILL.md has no body — should never happen but render
+        # something rather than an empty page.
+        core = f"# {skill_slug}\n\n{install_block}{skill['desc']}\n"
 
     body = (
         f"---\n"

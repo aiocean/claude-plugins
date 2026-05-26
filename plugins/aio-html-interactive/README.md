@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-html-interactive@aiocean-plugins
+::
+
 # aio-html-interactive
 
 Claude operates in a turn-by-turn loop. It has no event loop, cannot listen for a button click, cannot block waiting for user input mid-task. When a task genuinely needs a UI — a form to collect structured input, a list for the user to approve or reject items, a side-by-side review panel, a multi-step decision flow — the usual answer is to embed everything in the chat conversation. That works for simple cases but breaks down when the interaction is spatial, iterative, or requires the user to work through multiple states before Claude proceeds.

@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-gherkin-refine@aiocean-plugins
+::
+
 # aio-gherkin-refine
 
 Requirements that look clear on the surface almost always contain hidden ambiguity: edge cases no one considered, business rules that conflict, terminology that means different things to different team members. Gherkin is the discipline of making that ambiguity visible before it reaches production. Writing it well forces a conversation that shallow acceptance criteria never do.

@@ -1,3 +1,7 @@
+::install-command
+/plugin install aio-image@aiocean-plugins
+::
+
 # aio-image
 
 Every major text-to-image model has the same problem: reliable transparent PNG output either does not exist or is gated behind API flags that do not actually work consistently. gpt-image-2 rejects `background: transparent` at the API level. Imagen 3 has no transparency flag. Midjourney and Grok output opaque RGB. FLUX and SDXL support it only with specific checkpoints.
