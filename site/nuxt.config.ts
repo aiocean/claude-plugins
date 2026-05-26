@@ -2,9 +2,9 @@
 // theme + stacked-column UX + Nuxt Content wiring). Layer ships the theme,
 // THIS project ships the marketplace domain (schema, branding, content).
 //
-// Layer ref is the GitHub HEAD — consumers always pull the latest pushed layer
-// state on fresh install. Pin to a tag (`github:nguyenvanduocit/andy-note-nuxt#v0.1.0`)
-// if/when the layer ships releases.
+// Layer is installed from npm (see package.json). Version pin lives in
+// package.json — `extends` just names the package so Nuxt resolves it from
+// node_modules. Bump the layer by bumping the dep version.
 
 import { readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -36,7 +36,14 @@ function enumerateLocaleRoutes(locale: string): string[] {
 const viRoutes = enumerateLocaleRoutes('vi')
 
 export default defineNuxtConfig({
-  extends: ['github:nguyenvanduocit/andy-note-nuxt'],
+  // andy-note-nuxt@0.2.0 ships no `main`/`exports` in its package.json, so
+  // bare `extends: ['andy-note-nuxt']` resolves the package but c12 can't
+  // find its nuxt.config.ts and silently emits `WARN Cannot extend config…`
+  // (verified: produces empty 1.9 KB index.html with no theme CSS). Explicit
+  // node_modules path bypasses module resolution and points c12 at the
+  // package directory directly. Switch back to the bare name once the layer
+  // publishes `"main": "./nuxt.config.ts"` upstream.
+  extends: ['./node_modules/andy-note-nuxt'],
 
   // Array module config merges with the layer's modules (Nuxt concatenates
   // across layers), so this adds i18n on top of @nuxt/content from the theme.
