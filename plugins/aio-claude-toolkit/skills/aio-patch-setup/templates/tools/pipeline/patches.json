@@ -1,0 +1,13 @@
+{
+  "_description": "EMPTY TEMPLATE — add your patches here. See patches.json.example for a real reference.",
+  "_anchor_strategy": "Anchor on invariant content (API field names, string literals, structural patterns). Never anchor on minified names — they change every Claude release.",
+  "_versioning": "Bump this whenever you re-port across a Claude version. AIO_TAG env var when shipping fleet bundles.",
+  "_schema": {
+    "patches": [
+      {"_comment": "human description", "id": "ID1", "old": "exact text to replace", "new": "replacement"},
+      {"_comment": "INJECT@<name> = inject 'new' BEFORE 'old' (anchor preserved)", "id": "INJECT@my_inject", "old": "anchor literal", "new": "content to inject before anchor"},
+      {"_comment": "resolver-driven; resolves {{placeholders}} via resolve_symbols.py from stable anchors", "id": "resolver_example", "resolve": true, "anchor_template": "{{var}}={{fn}}({{arg}});", "replacement_template": "{{var}}={{fn}}({{arg}});try{...}catch(_){}"}
+    ]
+  },
+  "patches": []
+}

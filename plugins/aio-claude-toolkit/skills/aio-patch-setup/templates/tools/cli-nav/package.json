@@ -1,0 +1,11 @@
+{
+  "name": "cli-nav",
+  "private": true,
+  "description": "Navigate Claude Code's minified cli.js by semantic role (string content-anchors + acorn AST call-graph) to locate hook points for control patching. Author-time tooling.",
+  "type": "commonjs",
+  "dependencies": {
+    "acorn": "^8.16.0",
+    "acorn-walk": "^8.3.5",
+    "eslint-scope": "^9.1.2"
+  }
+}

@@ -1,0 +1,423 @@
+// dirty-claude control channel — INJECT@dirty_control_channel
+//
+// Source-of-truth (readable). Inlined into patches.json's "new" field by
+// tools/pipeline/inline_sources.py before patch_cli.py runs.
+//
+// What changed vs prior version: real-time SSE streaming. Anthropic SSE
+// chunks are forwarded per-chunk to subscribers (zero extra latency vs the
+// upstream stream), turn boundaries detected from "stop_reason" field
+// (no more DC_STABLE_MS heuristic for the streaming path), dialog
+// transitions broadcast as events. Blocking JSON path on POST /v1/prompt
+// preserved bit-for-bit for backward compat.
+//
+// Endpoints:
+//   POST /v1/prompt
+//     Accept: application/json (default) -> blocking, returns full JSON
+//     Accept: text/event-stream          -> SSE, per-chunk events, closes on turn.end
+//   GET  /v1/stream                      -> ambient SSE subscriber, never closes
+//   GET  /v1/state                       -> unchanged
+//   POST /v1/answer                      -> unchanged
+//
+// Event schema (sent to all SSE subscribers):
+//   event: turn.start        data: {turn_uuid, prompt}        (POST SSE only, one-shot)
+//   event: anthropic.chunk   data: {url, chunk}               (every Anthropic SSE chunk)
+//   event: dialog.opened     data: {dialog_id, component, propKeys}
+//   event: dialog.closed     data: {dialog_id}
+//   event: turn.end          data: {stop_reason, source, url?} (terminal stop_reason or idle fallback)
+//   :ping                                                     (keep-alive every 15s)
+//
+// Design notes — see docs/control-channel.md for full doc.
+//   1. lastStopReason is PER-FETCH-CALL (declared inside IIFE), not global,
+//      so concurrent Anthropic calls don't clobber each other.
+//   2. stop_reason regex runs on accumulated TX (with -30 byte overlap on
+//      the new region), so chunk-boundary splits don't miss the field.
+//   3. No subscriber filtering in phase 1. SSE subscribers receive ALL
+//      broadcast events including ambient terminal-user activity. Caveat
+//      documented; promote to filter-by-turn_uuid if real pain emerges.
+//   4. broadcast() and subscriber Set live on globalThis; fetch wrap and
+//      dialog detection read them via globalThis lazily so React re-renders
+//      don't capture stale references.
+
+f6.useEffect(() => {
+  // ========== One-time install (fetch wrap + broadcast + subscriber Set) ==========
+  if (!globalThis.__dc_fetch_wrapped) {
+    globalThis.__dc_fetch_wrapped = true;
+    globalThis.__dc_http_log = [];
+    globalThis.__dc_subscribers = globalThis.__dc_subscribers || new Set();
+    globalThis.__dc_TURN_END_REASONS = new Set(["end_turn", "max_tokens", "stop_sequence", "refusal"]);
+    globalThis.__dc_diag = { broadcasts: 0, writes: 0, writeErrs: 0, lastErr: null, history: [] };
+
+    // Broadcast helper. Re-assignment OK across re-renders; consumers read via globalThis lazily.
+    // Subscribers carry `closeOnTurnEnd` flag: POST /v1/prompt SSE wants close, /v1/stream doesn't.
+    globalThis.__dc_broadcast = function (name, data) {
+      let D = globalThis.__dc_diag;
+      D.broadcasts++;
+      let perSubResults = [];
+      let msg = "event: " + name + "\ndata: " + JSON.stringify(data) + "\n\n";
+      let i = 0;
+      for (let s of globalThis.__dc_subscribers) {
+        let tag = s.tag || "?";
+        try {
+          let r = s.write(msg);
+          D.writes++;
+          perSubResults.push({ i, tag, ok: true, ret: r });
+        } catch (E) {
+          D.writeErrs++;
+          D.lastErr = String(E);
+          perSubResults.push({ i, tag, ok: false, err: String(E) });
+        }
+        if (s.closeOnTurnEnd && name === "turn.end") {
+          setTimeout(() => {
+            globalThis.__dc_subscribers.delete(s);
+            try { s.end(); } catch (_) {}
+          }, 10);
+        }
+        i++;
+      }
+      D.history.push({ ts: Date.now(), event: name, subs: perSubResults });
+      if (D.history.length > 50) D.history.shift();
+    };
+
+    let __dc_of = globalThis.fetch;
+    globalThis.fetch = async function (I, N) {
+      let U = typeof I === "string" ? I : (I && I.url) || "";
+      // Fire request_start BEFORE awaiting upstream — gives subscribers a
+      // signal that an Anthropic call is in flight before any byte returns.
+      // Critical for the SSE POST handler's slash-command-vs-API discriminator.
+      if (U.includes("api.anthropic.com")) {
+        try { globalThis.__dc_broadcast && globalThis.__dc_broadcast("anthropic.request_start", { url: U }); } catch (_) {}
+      }
+      let R = await __dc_of.call(this, I, N);
+      try {
+        if (!U.includes("api.anthropic.com")) return R;
+        if (!R.body) return R;
+        let [A, B] = R.body.tee();
+        let M = new Response(A, { status: R.status, statusText: R.statusText, headers: R.headers });
+        (async () => {
+          let RD = B.getReader();
+          let DC = new TextDecoder();
+          let TX = "";
+          let lastStopReason = null;     // PER-CALL scope (advisor risk #1)
+          let lastScannedLen = 0;
+          try {
+            while (true) {
+              let { done: D, value: V } = await RD.read();
+              if (D) break;
+              let chunkText = DC.decode(V, { stream: true });
+              TX += chunkText;
+              // Per-chunk broadcast (raw passthrough — client parses SSE).
+              try {
+                globalThis.__dc_broadcast && globalThis.__dc_broadcast("anthropic.chunk", { url: U, chunk: chunkText });
+              } catch (_) {}
+              // Scan accumulated TX with overlap so chunk-boundary splits don't miss (advisor risk #2).
+              let scanFrom = Math.max(0, lastScannedLen - 30);
+              let region = TX.slice(scanFrom);
+              let mm = region.match(/"stop_reason":"([a-z_]+)"/g);
+              if (mm) {
+                let last = mm[mm.length - 1];
+                lastStopReason = last.slice(15, -1);  // strip `"stop_reason":"` (15 chars) and trailing `"`
+              }
+              lastScannedLen = TX.length;
+            }
+            TX += DC.decode();
+          } catch (E) {
+            TX += "\n[dc-stream-error: " + String(E) + "]";
+          }
+          let H = {};
+          for (let [K, V] of R.headers.entries()) H[K] = V;
+          globalThis.__dc_http_log.push({ ts: Date.now(), url: U, status: R.status, headers: H, body: TX });
+          if (globalThis.__dc_http_log.length > 200) globalThis.__dc_http_log.shift();
+          // Decide turn.end. Terminal stop_reason -> broadcast. tool_use/pause_turn -> stay open (next call coming).
+          if (lastStopReason && globalThis.__dc_TURN_END_REASONS.has(lastStopReason)) {
+            try {
+              globalThis.__dc_broadcast && globalThis.__dc_broadcast("turn.end", { stop_reason: lastStopReason, source: "stop_reason", url: U });
+            } catch (_) {}
+          }
+        })();
+        return M;
+      } catch (E) { return R; }
+    };
+  }
+
+  // ========== Per-render: capture latest globals + dialog transition detection ==========
+  globalThis.__dc_submit = kCH;
+  globalThis.__dc_msgs = () => new Promise(r => R4(p => { r(p); return p; }));
+  globalThis.__dc_toolJSX = l6;
+  globalThis.__dc_setToolJSX = j6;
+  globalThis.__dc_appstate = () => { try { return AH.getState(); } catch (_) { return null; } };
+  globalThis.__dc_dialog_cache = globalThis.__dc_dialog_cache || new Map();
+
+  if (globalThis.__dc_last_l6 !== l6) {
+    let prevDid = globalThis.__dc_current_dialog_id;
+    globalThis.__dc_last_l6 = l6;
+    if (l6 != null && l6.jsx && l6.jsx.props) {
+      let did = "dlg_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+      let t = l6.jsx.type;
+      let cn = t == null ? "null" : typeof t === "string" ? t : (t.displayName || t.name || "anon-fn");
+      let cbs = {};
+      for (let k of Object.keys(l6.jsx.props)) {
+        if (typeof l6.jsx.props[k] === "function") cbs[k] = l6.jsx.props[k];
+      }
+      globalThis.__dc_dialog_cache.set(did, { id: did, component: cn, callbacks: cbs, createdAt: Date.now() });
+      globalThis.__dc_current_dialog_id = did;
+      if (globalThis.__dc_dialog_cache.size > 10) {
+        let first = globalThis.__dc_dialog_cache.keys().next().value;
+        globalThis.__dc_dialog_cache.delete(first);
+      }
+      try {
+        globalThis.__dc_broadcast && globalThis.__dc_broadcast("dialog.opened", { dialog_id: did, component: cn, propKeys: Object.keys(l6.jsx.props) });
+      } catch (_) {}
+    } else {
+      globalThis.__dc_current_dialog_id = null;
+      if (prevDid) {
+        try {
+          globalThis.__dc_broadcast && globalThis.__dc_broadcast("dialog.closed", { dialog_id: prevDid });
+        } catch (_) {}
+      }
+    }
+  }
+
+  // ========== One-time install (HTTP server) ==========
+  if (globalThis.__dc_server) return;
+
+  let __dc_safe = (o, d, seen) => {
+    if (d > 6 || o == null) return o;
+    if (typeof o === "function") return "[fn:" + (o.name || "anon") + "]";
+    if (typeof o !== "object") return o;
+    if (seen.has(o)) return "[circular]";
+    seen.add(o);
+    if (Array.isArray(o)) return o.slice(0, 30).map(x => __dc_safe(x, d + 1, seen));
+    let r = {};
+    for (let k of Object.keys(o).slice(0, 60)) {
+      try { r[k] = __dc_safe(o[k], d + 1, seen); } catch (_) { r[k] = "[err]"; }
+    }
+    return r;
+  };
+  let __dc_jsx_meta = (j) => {
+    if (j == null || typeof j !== "object") return null;
+    let t = j.type;
+    let n = t == null ? "null" : typeof t === "string" ? t : (t.displayName || t.name || "anon-fn");
+    return { component: n, propKeys: j.props ? Object.keys(j.props) : [], propsSummary: __dc_safe(j.props, 0, new Set) };
+  };
+  let __dc_dump = (el) => {
+    if (el == null) return null;
+    return { wrapperKeys: Object.keys(el), isLocalJSXCommand: el.isLocalJSXCommand, showSpinner: el.showSpinner, shouldHidePromptInput: el.shouldHidePromptInput, dialog_id: globalThis.__dc_current_dialog_id, jsx: __dc_jsx_meta(el.jsx) };
+  };
+
+  try {
+    globalThis.__dc_server = require("node:http").createServer(async (rq, rs) => {
+      // ----- GET /v1/diag — broadcast diagnostics -----
+      if (rq.method === "GET" && rq.url === "/v1/diag") {
+        rs.writeHead(200, { "content-type": "application/json" });
+        let subs = [];
+        for (let s of globalThis.__dc_subscribers) subs.push({ tag: s.tag, closeOnTurnEnd: !!s.closeOnTurnEnd });
+        rs.end(JSON.stringify({ diag: globalThis.__dc_diag, subscribers: subs, subCount: globalThis.__dc_subscribers.size }, null, 2));
+        return;
+      }
+
+      // ----- GET /v1/state -----
+      if (rq.method === "GET" && rq.url === "/v1/state") {
+        let st = globalThis.__dc_appstate && globalThis.__dc_appstate();
+        let interesting = {};
+        if (st) {
+          for (let k of ["elicitation", "toolPermissionContext", "activeOverlays", "pendingWorkerRequest", "pendingSandboxRequest", "pendingMemoryUpdates", "classifierApprovals", "channelPermissionCallbacks", "notifications"]) {
+            try { interesting[k] = __dc_safe(st[k], 0, new Set); } catch (_) { interesting[k] = "[err]"; }
+          }
+        }
+        rs.writeHead(200, { "content-type": "application/json" });
+        rs.end(JSON.stringify({ dialog: __dc_dump(globalThis.__dc_toolJSX), hasDialog: globalThis.__dc_toolJSX != null, appState: interesting }));
+        return;
+      }
+
+      // ----- POST /v1/answer -----
+      if (rq.method === "POST" && rq.url === "/v1/answer") {
+        let bd2 = "";
+        rq.on("data", c => bd2 += c);
+        rq.on("end", () => {
+          try {
+            let { callback: cb, args: ag = [], dialog_id: did = null } = JSON.parse(bd2 || "{}");
+            let snap = null;
+            if (did) {
+              snap = globalThis.__dc_dialog_cache && globalThis.__dc_dialog_cache.get(did);
+              if (!snap) {
+                rs.writeHead(410, { "content-type": "application/json" });
+                rs.end(JSON.stringify({ error: "dialog_id not in cache", dialog_id: did, available_ids: globalThis.__dc_dialog_cache ? [...globalThis.__dc_dialog_cache.keys()] : [] }));
+                return;
+              }
+            } else {
+              let cur = globalThis.__dc_toolJSX;
+              if (cur == null || !cur.jsx || !cur.jsx.props) {
+                rs.writeHead(409, { "content-type": "application/json" });
+                rs.end(JSON.stringify({ error: "no dialog open" }));
+                return;
+              }
+              let cbs = {};
+              for (let k of Object.keys(cur.jsx.props)) {
+                if (typeof cur.jsx.props[k] === "function") cbs[k] = cur.jsx.props[k];
+              }
+              snap = { id: globalThis.__dc_current_dialog_id, callbacks: cbs };
+            }
+            let fn = snap.callbacks[cb];
+            if (typeof fn !== "function") {
+              rs.writeHead(400, { "content-type": "application/json" });
+              rs.end(JSON.stringify({ error: "callback not found", available: Object.keys(snap.callbacks), dialog_id: snap.id }));
+              return;
+            }
+            let result;
+            try { result = fn.apply(null, ag); }
+            catch (e) {
+              rs.writeHead(500, { "content-type": "application/json" });
+              rs.end(JSON.stringify({ error: "callback threw", detail: String(e && e.stack || e), dialog_id: snap.id }));
+              return;
+            }
+            rs.writeHead(200, { "content-type": "application/json" });
+            rs.end(JSON.stringify({ ok: true, returned: result == null ? null : String(result).slice(0, 200), dialog_id: snap.id }));
+          } catch (e) {
+            rs.writeHead(500, { "content-type": "application/json" });
+            rs.end(JSON.stringify({ error: String(e) }));
+          }
+        });
+        return;
+      }
+
+      // ----- GET /v1/stream — ambient SSE subscriber -----
+      if (rq.method === "GET" && rq.url === "/v1/stream") {
+        rs.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", "connection": "keep-alive", "x-accel-buffering": "no" });
+        rs.write(":connected\n\n");
+        let sub = { write: (m) => { try { rs.write(m); } catch (_) {} }, end: () => { try { rs.end(); } catch (_) {} }, closeOnTurnEnd: false, tag: "ambient" };
+        globalThis.__dc_subscribers.add(sub);
+        let ping = setInterval(() => { try { rs.write(":ping\n\n"); } catch (_) {} }, 15000);
+        let cleanup = () => { globalThis.__dc_subscribers.delete(sub); clearInterval(ping); };
+        rq.on("close", cleanup);
+        rs.on("close", cleanup);
+        return;
+      }
+
+      // ----- POST /v1/prompt -----
+      if (rq.method !== "POST" || rq.url !== "/v1/prompt") {
+        rs.writeHead(404);
+        rs.end();
+        return;
+      }
+      let bd = "";
+      rq.on("data", c => bd += c);
+      rq.on("end", async () => {
+        try {
+          let { prompt: pm, mode: md = "prompt", skipSlashCommands: ss = false } = JSON.parse(bd || "{}");
+          if (typeof pm !== "string" || !pm) {
+            rs.writeHead(400, { "content-type": "application/json" });
+            rs.end(JSON.stringify({ error: "missing prompt" }));
+            return;
+          }
+          if (!globalThis.__dc_submit) {
+            rs.writeHead(503, { "content-type": "application/json" });
+            rs.end(JSON.stringify({ error: "submit not ready" }));
+            return;
+          }
+          let uu = require("crypto").randomUUID();
+          let acceptSSE = ((rq.headers["accept"] || "") + "").indexOf("text/event-stream") !== -1;
+
+          if (acceptSSE) {
+            // ---- SSE streaming path ----
+            // Two terminating signals:
+            //   1. PRIMARY: broadcast emits `event: turn.end` (from fetch wrap stop_reason
+            //      scan or own max_timeout/idle). closeOnTurnEnd=true asks broadcast helper
+            //      to schedule sub.end() right after writing turn.end.
+            //   2. FALLBACK (slash command path): submit promise resolved AND no
+            //      anthropic.request_start broadcast was observed for slashGraceMs since
+            //      handler start. Without this we'd hold the connection for max_timeout
+            //      on every /command. With it, slash commands close ~slashGraceMs after submit.
+            //
+            // We do NOT use http_log growth as the activity signal — kCH's submit promise
+            // resolves at ENQUEUE time (not turn-end), so submitDone+idle would fire
+            // before the first chunk arrives for API prompts. anthropic.request_start
+            // fires synchronously at fetch interception, before any response byte.
+            rs.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", "connection": "keep-alive", "x-accel-buffering": "no" });
+            let sawApiCall = false;
+            let sub = {
+              write: (m) => {
+                try { rs.write(m); } catch (_) {}
+                if (m.startsWith("event: anthropic.")) sawApiCall = true;
+              },
+              end: () => { try { rs.end(); } catch (_) {} },
+              closeOnTurnEnd: true,
+              tag: "post-sse:" + uu.slice(0, 8),
+            };
+            globalThis.__dc_subscribers.add(sub);
+            let ping = setInterval(() => { try { rs.write(":ping\n\n"); } catch (_) {} }, 15000);
+            let teardown = () => { globalThis.__dc_subscribers.delete(sub); clearInterval(ping); try { rs.end(); } catch (_) {} };
+            // DO NOT subscribe to rq.on("close") — under bun's node:http compat layer,
+            // rq.on("close") fires shortly after rq.on("end") for POST requests with
+            // bodies, NOT only when the client disconnects. Use rs.on("close") which
+            // fires when the underlying response stream closes (true client disconnect).
+            rs.on("close", () => { globalThis.__dc_subscribers.delete(sub); clearInterval(ping); });
+
+            // Manual rs.write for turn.start — bypasses sub.write so it doesn't count as anthropic activity.
+            try { rs.write("event: turn.start\ndata: " + JSON.stringify({ turn_uuid: uu, prompt: pm }) + "\n\n"); } catch (_) {}
+
+            let submitDone = false;
+            let submitP = globalThis.__dc_submit([{ value: pm, preExpansionValue: pm, mode: md, pastedContents: void 0, skipSlashCommands: ss, uuid: uu }]);
+            submitP.catch(() => {});
+            submitP.then(() => { submitDone = true; });
+
+            let slashGraceMs = Number(process.env.DC_SLASH_GRACE_MS || 1500);
+            let maxMs = Number(process.env.DC_MAX_MS || 120000);
+            let started = Date.now();
+            let watcher = setInterval(() => {
+              if (!globalThis.__dc_subscribers.has(sub)) { clearInterval(watcher); return; }
+              if (Date.now() - started > maxMs) {
+                clearInterval(watcher);
+                try { sub.write("event: turn.end\ndata: " + JSON.stringify({ turn_uuid: uu, stop_reason: null, source: "max_timeout" }) + "\n\n"); } catch (_) {}
+                teardown();
+                return;
+              }
+              if (submitDone && !sawApiCall && Date.now() - started > slashGraceMs) {
+                // Slash-command path: submit settled, no Anthropic call ever fired.
+                clearInterval(watcher);
+                try { sub.write("event: turn.end\ndata: " + JSON.stringify({ turn_uuid: uu, stop_reason: null, source: "idle_fallback" }) + "\n\n"); } catch (_) {}
+                teardown();
+              }
+              // If sawApiCall, primary signal (turn.end via broadcast) closes us — or max_timeout.
+            }, 100);
+            return;
+          }
+
+          // ---- Blocking JSON path (unchanged) ----
+          let bf = (await globalThis.__dc_msgs()).length;
+          let httpBf = globalThis.__dc_http_log.length;
+          let submitP = globalThis.__dc_submit([{ value: pm, preExpansionValue: pm, mode: md, pastedContents: void 0, skipSlashCommands: ss, uuid: uu }]);
+          submitP.catch(() => {});
+          let submitDone = false;
+          submitP.then(() => { submitDone = true; });
+          let stableMs = Number(process.env.DC_STABLE_MS || 800);
+          let maxMs = Number(process.env.DC_MAX_MS || 120000);
+          let pollMs = 100;
+          let lastLen = (await globalThis.__dc_msgs()).length;
+          let stableSince = Date.now();
+          let started = Date.now();
+          while (Date.now() - started < maxMs) {
+            await new Promise(r => setTimeout(r, pollMs));
+            if (globalThis.__dc_toolJSX != null) break;
+            let cur = (await globalThis.__dc_msgs()).length;
+            if (cur !== lastLen) { lastLen = cur; stableSince = Date.now(); continue; }
+            if (submitDone && Date.now() - stableSince >= stableMs) break;
+          }
+          let af = await globalThis.__dc_msgs();
+          let ad = af.slice(bf);
+          let raw = ad.map(m => {
+            try { return { type: m.type, role: m.message && m.message.role, content: m.message && m.message.content, uuid: m.uuid, toolUseID: m.toolUseID, toolUseResult: m.toolUseResult, isMeta: m.isMeta, timestamp: m.timestamp }; }
+            catch (_) { return null; }
+          }).filter(Boolean);
+          rs.writeHead(200, { "content-type": "application/json" });
+          let httpResp = globalThis.__dc_http_log.slice(httpBf);
+          rs.end(JSON.stringify({ httpResponses: httpResp, uuid: uu, added: ad.length, messages: raw, waitedMs: Date.now() - started, pending: globalThis.__dc_toolJSX != null ? __dc_dump(globalThis.__dc_toolJSX) : null }));
+        } catch (e) {
+          rs.writeHead(500, { "content-type": "application/json" });
+          rs.end(JSON.stringify({ error: String(e && e.stack || e) }));
+        }
+      });
+    }).listen(Number(process.env.DC_PORT || 47291), "127.0.0.1");
+  } catch (e) {
+    globalThis.__dc_server = null;
+  }
+}, [kCH, R4, l6]);

@@ -1,0 +1,5 @@
+dirty_claude_commit: de5377bd974a3165261384a6472f778bbcb0b6c3
+dirty_claude_origin: git@github.com:nguyenvanduocit/dirty-claude.git
+tested_against_claude_version: 2.1.150
+templates_synced_at: 2026-05-27
+plugin_version: 2.6.4
