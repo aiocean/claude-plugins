@@ -38,7 +38,7 @@ If `tools/cli-nav/node_modules` is empty, anchor.sh runs `bun install` (preferre
 4. Update `tools/pipeline/patches.json` `old` field with the surrounding invariant content.
 5. Re-run `/aio-claude-toolkit:aio-patch-compile` (transitive — extract first if cli.js stale).
 
-See `docs/drift-recovery.md`.
+See `docs/repatching-playbook.md` (step-by-step re-anchoring recipe).
 
 ## Implementation
 

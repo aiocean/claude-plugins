@@ -17,13 +17,13 @@ What this is: patches and recompiles Claude Code's `cli.js` for <describe your u
 
 Patches live in `tools/pipeline/patches.json`. Big patch bodies live as readable files in `tools/pipeline/sources/<name>.js`.
 
-See `docs/anchor-strategy.md` for how to write durable patches that survive Claude version bumps.
+See `docs/patches.md` for anchor selection strategy (how to write durable patches that survive Claude version bumps).
 
 ## Drift recovery
 
 When Claude releases a new version, anchors may shift. Use:
-- `/aio-claude-toolkit:aio-patch-anchor find <fragment>` — find new anchor location
-- `docs/drift-recovery.md` — full re-anchoring playbook
+- `/aio-claude-toolkit:aio-patch-anchor find <cli.js>` — produce anchor index (`anchors.json`) for re-discovery
+- `docs/repatching-playbook.md` — full re-anchoring playbook
 
 ## Status
 

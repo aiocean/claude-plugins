@@ -43,7 +43,7 @@ If compile reports MISSING patches (anchors not found in cli.js), Claude version
 - Update `tools/pipeline/patches.json` `old` field with new anchor text
 - Re-run compile
 
-See `docs/drift-recovery.md`.
+See `docs/repatching-playbook.md` (step-by-step re-anchoring recipe) and `docs/patches.md` (anchor selection strategy).
 
 ## Implementation
 
