@@ -1,4 +1,4 @@
-# site/ — Nuxt static-site source
+# docs/ — Nuxt static-site source
 
 This directory is a **Nuxt 4 + Nuxt Content v3 application** that renders the
 marketplace at https://claude-plugins.aiocean.dev/. It extends
@@ -13,10 +13,10 @@ plugins/{name}/.claude-plugin/plugin.json   ┐
 plugins/{name}/skills/{skill}/SKILL.md       ├──► scripts/sync-content.py
 .claude-plugin/marketplace.json              ┘            │
                                                           ▼
-                                          site/content/{index.md, plugins/**}
+                                          docs/content/{index.md, plugins/**}
                                                           │
                                                           ▼ nuxt generate
-                                                  site/.output/public/
+                                                  docs/.output/public/
                                                           │
                                                           ▼ cloudflare/wrangler-action
                                               https://claude-plugins.aiocean.dev/
@@ -28,7 +28,7 @@ freely (`bun run sync`).
 
 Deploy workflow: `.github/workflows/pages.yml` (workflow name "Deploy to
 Cloudflare Pages") runs on every push to `main` touching `plugins/`,
-`.claude-plugin/`, `site/`, or `scripts/sync-content.py`. It builds with
+`.claude-plugin/`, `docs/`, or `scripts/sync-content.py`. It builds with
 `bun run generate` and ships to Cloudflare Pages via
 `cloudflare/wrangler-action`.
 

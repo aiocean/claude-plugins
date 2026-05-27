@@ -85,7 +85,7 @@ export default defineNuxtConfig({
   // a development affordance, not a marketplace-site feature — disable on the
   // module level so it doesn't ship in the production bundle.
   // The npm package still needs to be installed so Nuxt can load the module
-  // entry and read this flag; see site/package.json devDependencies.
+  // entry and read this flag; see docs/package.json devDependencies.
   aiAnnotator: false,
 
   // Seed the crawler with /plugins so it follows links into every plugin and

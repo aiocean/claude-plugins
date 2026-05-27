@@ -62,7 +62,7 @@ plugins/{plugin-name}/
 5. Add description to `README.md`
 6. Run `bash scripts/validate-marketplace.sh` to verify everything is correct
 
-**Note:** The public marketplace site at https://claude-plugins.aiocean.dev/ regenerates itself on every push to `main` via the `Deploy to Cloudflare Pages` workflow (`.github/workflows/pages.yml`). `scripts/sync-content.py` walks the marketplace + per-plugin SKILL.md frontmatter into `site/content/plugins/**.md`, then `bun run generate` in `site/` produces static HTML. No manual docs edits needed when adding a plugin — see `site/CLAUDE.md` for the data-flow diagram and Nuxt-layer details.
+**Note:** The public marketplace site at https://claude-plugins.aiocean.dev/ regenerates itself on every push to `main` via the `Deploy to Cloudflare Pages` workflow (`.github/workflows/pages.yml`). `scripts/sync-content.py` walks the marketplace + per-plugin SKILL.md frontmatter into `docs/content/plugins/**.md`, then `bun run generate` in `docs/` produces static HTML. No manual docs edits needed when adding a plugin — see `docs/CLAUDE.md` for the data-flow diagram and Nuxt-layer details.
 
 ## SKILL.md Frontmatter Format
 
@@ -92,7 +92,7 @@ effort: medium
 
 The **plugins themselves** have no build step — each plugin is a standalone directory of markdown and scripts (shell scripts use `#!/bin/bash`, TS scripts run via `bun`).
 
-The **marketplace site** at `site/` is a Nuxt 4 app that extends the `andy-note-nuxt` layer. `bun run generate` in `site/` produces the static site to `site/.output/public`. Full guidance: `site/CLAUDE.md`. CI runs this on every push to `main` and deploys to GitHub Pages.
+The **marketplace site** at `docs/` is a Nuxt 4 app that extends the `andy-note-nuxt` layer. `bun run generate` in `docs/` produces the static site to `docs/.output/public`. Full guidance: `docs/CLAUDE.md`. CI runs this on every push to `main` and deploys to Cloudflare Pages.
 
 ## Commit Conventions
 

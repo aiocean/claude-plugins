@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-sync-content.py — generate site/content/plugins/*.md from the canonical plugin
+sync-content.py — generate docs/content/plugins/*.md from the canonical plugin
 source: .claude-plugin/marketplace.json + plugins/{name}/.claude-plugin/plugin.json
 + plugins/{name}/skills/{skill}/SKILL.md.
 
 Output layout (matches Nuxt Content URL routing):
-    site/content/plugins/index.md                          # landing
-    site/content/plugins/{plugin}.md                       # plugin overview
-    site/content/plugins/{plugin}/{skill}.md               # one per skill
+    docs/content/plugins/index.md                          # landing
+    docs/content/plugins/{plugin}.md                       # plugin overview
+    docs/content/plugins/{plugin}/{skill}.md               # one per skill
 
 Run from the repo root (or anywhere — paths are resolved relative to this file).
-The site's package.json wires `bun run sync` → `python3 ../scripts/sync-content.py`,
+The docs site's package.json wires `bun run sync` → `python3 ../scripts/sync-content.py`,
 so it fires automatically before `bun dev` / `bun build` / `bun generate`.
 
 The generated tree is .gitignored — regenerate freely.
@@ -26,7 +26,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MARKETPLACE_FILE = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 PLUGINS_DIR = REPO_ROOT / "plugins"
-CONTENT_ROOT = REPO_ROOT / "site" / "content"
+CONTENT_ROOT = REPO_ROOT / "docs" / "content"
 
 # i18n: EN is the default locale (unprefixed, at content/), VI lives under
 # content/vi/. content.config.ts splits these into two collections (`content`
@@ -36,7 +36,7 @@ CONTENT_ROOT = REPO_ROOT / "site" / "content"
 # AI-translated/hand-authored content that lives in git — sync MUST NOT touch
 # it. The original strategy duplicated EN into VI on every sync, but that
 # overwrote any translation work. Translation now flows from EN → VI via
-# manual edits (or AI-assisted edits) directly inside site/content/vi/, and
+# manual edits (or AI-assisted edits) directly inside docs/content/vi/, and
 # those files are committed and survive every subsequent sync. When a new
 # plugin/skill is added in EN, a human (or AI) creates the matching VI page
 # by hand — sync is intentionally not aware of the VI side at all.
@@ -191,7 +191,7 @@ def render_skill_list(plugin_slug: str, skills: list[dict]) -> str:
 
 
 def write_plugin_page(plugin: dict, locale: str) -> None:
-    """One markdown file per plugin → site/content/{locale-root}/plugins/{name}.md.
+    """One markdown file per plugin → docs/content/{locale-root}/plugins/{name}.md.
 
     Source-of-truth strategy: use the plugin's own README.md body if it
     exists (16 of 28 plugins do — the well-crafted ones with rationale +
@@ -245,7 +245,7 @@ def write_plugin_page(plugin: dict, locale: str) -> None:
 
 
 def write_skill_page(plugin: dict, skill: dict, locale: str) -> None:
-    """One markdown file per skill → site/content/{locale-root}/plugins/{plugin}/{skill}.md.
+    """One markdown file per skill → docs/content/{locale-root}/plugins/{plugin}/{skill}.md.
 
     Source-of-truth strategy: embed the SKILL.md body verbatim — that's where
     the skill author already wrote the real documentation (median 176 lines).
