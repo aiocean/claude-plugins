@@ -1,0 +1,22 @@
+# Built artifacts
+dist/
+*.backup
+
+# Python cache
+__pycache__/
+*.pyc
+.ruff_cache/
+
+# Node modules (cli-nav uses acorn)
+node_modules/
+
+# Working dirs
+.tmp/
+tmp/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store

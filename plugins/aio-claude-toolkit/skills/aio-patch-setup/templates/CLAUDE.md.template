@@ -1,0 +1,31 @@
+# <project-name>
+
+What this is: patches and recompiles Claude Code's `cli.js` for <describe your use case>.
+
+## Goal (one sentence)
+
+<describe the goal — what does your patched claude do that stock claude doesn't?>
+
+## Workflow
+
+1. `./tools/extract.sh` — extract cli.js + native modules from upstream claude binary into `dist/<arch>/`
+2. Edit `tools/pipeline/patches.json` — define your patches (anchor on invariant content, never on minified names)
+3. `./tools/build.sh` — apply patches + bun build → patched binary at `dist/<arch>/claude`
+4. `./tools/run.sh [args]` — exec the patched binary
+
+## Patches
+
+Patches live in `tools/pipeline/patches.json`. Big patch bodies live as readable files in `tools/pipeline/sources/<name>.js`.
+
+See `docs/anchor-strategy.md` for how to write durable patches that survive Claude version bumps.
+
+## Drift recovery
+
+When Claude releases a new version, anchors may shift. Use:
+- `/aio-claude-toolkit:aio-patch-anchor find <fragment>` — find new anchor location
+- `docs/drift-recovery.md` — full re-anchoring playbook
+
+## Status
+
+- Pinned Claude version: <look at .aio-patch-setup for the version your templates were tested against>
+- Pinned plugin version: <look at .aio-patch-setup>

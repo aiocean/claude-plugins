@@ -1,0 +1,23 @@
+# <project-name>
+
+Patched Claude Code binary for <your use case>.
+
+Scaffolded with [aio-claude-toolkit](https://github.com/aiocean/claude-plugins) `aio-patch-setup` skill.
+
+## Quickstart
+
+```bash
+# 1. Extract upstream cli.js
+./tools/extract.sh
+
+# 2. Edit your patches
+$EDITOR tools/pipeline/patches.json
+
+# 3. Build the patched binary
+./tools/build.sh
+
+# 4. Run it
+./tools/run.sh --version
+```
+
+See `CLAUDE.md` and `docs/` for details.
