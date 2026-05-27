@@ -313,7 +313,7 @@ All 5 PASS → patch successfully re-ported. Bump `## Current pin` in
 | `tools/cli-nav/navigate.cjs --fn <name>` | Caller/callee map for a function name |
 | `tools/cli-nav/navigate.cjs --at <offset>` | Enclosing fn + outgoing refs at a byte offset |
 | `tools/cli-nav/build-explorer.cjs` | Generate single-file HTML browser for cli.js (large, but searchable) |
-| `tools/pipeline/resolve_symbols.py` | Already-resolved symbols (8 for godClaude prompt patches) — model for adding new resolvers |
+| `tools/pipeline/resolve_symbols.py` | Resolver implementation — `RESOLVERS` dict lists symbols already wired (use as a template for adding new ones) |
 | `python3 tools/pipeline/inline_sources.py --check` | CI guard: patches.json out of sync with sources/ |
 
 ## Promoting hard-coded names to the resolver

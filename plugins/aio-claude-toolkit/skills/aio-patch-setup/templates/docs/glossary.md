@@ -153,12 +153,6 @@ Env vars consumed by control channel:
 
 See [[control-channel]] for tuning guidance.
 
-## godClaude
-
-Sister project — prompt-patch lane. Same `extract → patch → bun build --compile` pipeline structure. Difference: godClaude's `patches.json` carries 66 prompt/anti-slop patches. dirty-claude's ships empty (only `INJECT@dirty_control_channel`).
-
-godClaude lives at `aio-claude-toolkit:aio-patch-claude` skill (external plugin). dirty-claude duplicates the pipeline locally so control patches can iterate independently.
-
 ## Related
 
 - [[architecture]] — design context for terms

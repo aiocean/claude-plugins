@@ -95,7 +95,7 @@ Older Claude Code (2.1.131 hoặc earlier) shipped with older Bun → won't extr
 
 **Mitigation:**
 - Keep current pin updated to latest Claude
-- If need older: check out matching `extract_cli.py` từ godClaude git history
+- If you need to extract from an older Claude (e.g., for regression bisection), check out a matching `extract_cli.py` from your project's git history (older parser may be needed if Bun SFA layout shifted)
 
 ### `bun build --compile` only — `bun run` doesn't work
 

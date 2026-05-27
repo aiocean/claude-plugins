@@ -1,6 +1,6 @@
 # Versioning
 
-How dirty-claude stays in sync với Claude releases. What breaks when Anthropic ships N+1.
+How your patch project stays in sync with Claude releases. What breaks when Anthropic ships N+1.
 
 ## Current pin
 
@@ -40,7 +40,7 @@ TL;DR:
 
 → Resolver-driven patches (`"resolve": true`) self-heal. Xem [[symbol-resolver]].
 
-Currently không có entries dùng resolver trong `patches.json` — chỉ structure mirror godClaude's pipeline. Future control-channel patches có thể switch to resolver for `kCH` / `R4` discovery.
+If your `patches.json` ships with no resolver-driven entries, that's fine — resolver support is opt-in via `"resolve": true` per patch. Patches that inject glue code referencing minified names (like the HTTP control-channel example's `kCH` / `R4` discovery) benefit most from migrating to resolvers; patches that only anchor on invariant prose can stay hard-coded indefinitely.
 
 ### Low sensitivity (rare breaks)
 
@@ -72,7 +72,7 @@ Plus a failure-mode table mapping which test breaks → which minified name to r
 
 Tradeoff: each resolver anchor takes work to find + verify across 2-3 versions. Hard-coding is faster initially. As control channel matures, migrate critical anchors to resolver.
 
-Pattern from godClaude: resolver covers 8 symbols. Hard-coded patches reference dozens more. Most don't break per release because patches anchor on invariant content (prompt prose), and only reference minified names when injecting glue code.
+Observed pattern in practice: resolver typically covers a handful of critical symbols (~5-10 in mature patch tables). Hard-coded patches reference dozens more. Most don't break per release because patches anchor on invariant content (prompt prose, API field names, OTel event names), and only reference minified names when injecting glue code — and even then, surrounding scope clues usually let you re-locate them quickly.
 
 ## Bun version dependencies
 
