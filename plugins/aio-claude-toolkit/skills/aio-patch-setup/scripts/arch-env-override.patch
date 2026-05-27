@@ -1,0 +1,73 @@
+--- a/tools/extract.sh
++++ b/tools/extract.sh
+@@ -25,14 +25,27 @@
+ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ PIPE="$SCRIPT_DIR/pipeline"
+ 
+-# Host platform → arch key (dist layout) + npm package (for the download fallback).
+-case "$(uname -s)-$(uname -m)" in
+-  Darwin-arm64)              PLAT=darwin-arm64; NPM_PKG=@anthropic-ai/claude-code-darwin-arm64 ;;
+-  Darwin-x86_64)             PLAT=darwin-amd64; NPM_PKG=@anthropic-ai/claude-code-darwin-x64 ;;
+-  Linux-aarch64|Linux-arm64) PLAT=linux-arm64;  NPM_PKG=@anthropic-ai/claude-code-linux-arm64 ;;
+-  Linux-x86_64)              PLAT=linux-amd64;  NPM_PKG=@anthropic-ai/claude-code-linux-x64 ;;
+-  *) echo "[extract] ERROR: unsupported platform $(uname -s)-$(uname -m)" >&2; exit 1 ;;
++# Arch key (dist layout) + npm package. Honor explicit ARCH env override
++# for cross-arch extraction (see aio-patch-* plugin multi-arch flow).
++# Default: detect from host.
++ARCH="${ARCH:-}"
++if [[ -z "$ARCH" ]]; then
++  case "$(uname -s)-$(uname -m)" in
++    Darwin-arm64)              ARCH=darwin-arm64 ;;
++    Darwin-x86_64)             ARCH=darwin-amd64 ;;
++    Linux-aarch64|Linux-arm64) ARCH=linux-arm64 ;;
++    Linux-x86_64)              ARCH=linux-amd64 ;;
++    *) echo "[extract] ERROR: unsupported host $(uname -s)-$(uname -m); set ARCH=darwin-arm64|darwin-amd64|linux-arm64|linux-amd64" >&2; exit 1 ;;
++  esac
++fi
++case "$ARCH" in
++  darwin-arm64) NPM_PKG=@anthropic-ai/claude-code-darwin-arm64 ;;
++  darwin-amd64) NPM_PKG=@anthropic-ai/claude-code-darwin-x64 ;;
++  linux-arm64)  NPM_PKG=@anthropic-ai/claude-code-linux-arm64 ;;
++  linux-amd64)  NPM_PKG=@anthropic-ai/claude-code-linux-x64 ;;
++  *) echo "[extract] ERROR: unknown ARCH=$ARCH (expected darwin-arm64|darwin-amd64|linux-arm64|linux-amd64)" >&2; exit 1 ;;
+ esac
++PLAT="$ARCH"
+ 
+ OUT="$PROJECT_ROOT/dist/$PLAT"
+ mkdir -p "$OUT/upstream" "$OUT/native"
+--- a/tools/build.sh
++++ b/tools/build.sh
+@@ -19,14 +19,26 @@
+ PIPE="$SCRIPT_DIR/pipeline"
+ WORK_ROOT="$PROJECT_ROOT/dist"
+ 
+-# Host platform → arch key (matches dist layout) + bun --target triple.
+-case "$(uname -s)-$(uname -m)" in
+-  Darwin-arm64)              PLAT=darwin-arm64; BUN_TARGET=bun-darwin-arm64 ;;
+-  Darwin-x86_64)             PLAT=darwin-amd64; BUN_TARGET=bun-darwin-x64 ;;
+-  Linux-aarch64|Linux-arm64) PLAT=linux-arm64;  BUN_TARGET=bun-linux-arm64 ;;
+-  Linux-x86_64)              PLAT=linux-amd64;  BUN_TARGET=bun-linux-x64 ;;
+-  *) echo "[build] ERROR: unsupported platform $(uname -s)-$(uname -m)" >&2; exit 1 ;;
++# Arch key (matches dist layout) + bun --target triple. Honor explicit
++# ARCH env override (for cross-arch builds via aio-patch-compile --target=...).
++ARCH="${ARCH:-}"
++if [[ -z "$ARCH" ]]; then
++  case "$(uname -s)-$(uname -m)" in
++    Darwin-arm64)              ARCH=darwin-arm64 ;;
++    Darwin-x86_64)             ARCH=darwin-amd64 ;;
++    Linux-aarch64|Linux-arm64) ARCH=linux-arm64 ;;
++    Linux-x86_64)              ARCH=linux-amd64 ;;
++    *) echo "[build] ERROR: unsupported host $(uname -s)-$(uname -m); set ARCH=darwin-arm64|darwin-amd64|linux-arm64|linux-amd64" >&2; exit 1 ;;
++  esac
++fi
++case "$ARCH" in
++  darwin-arm64) BUN_TARGET=bun-darwin-arm64 ;;
++  darwin-amd64) BUN_TARGET=bun-darwin-x64 ;;
++  linux-arm64)  BUN_TARGET=bun-linux-arm64 ;;
++  linux-amd64)  BUN_TARGET=bun-linux-x64 ;;
++  *) echo "[build] ERROR: unknown ARCH=$ARCH (expected darwin-arm64|darwin-amd64|linux-arm64|linux-amd64)" >&2; exit 1 ;;
+ esac
++PLAT="$ARCH"
+ 
+ WORK="$WORK_ROOT/$PLAT"
+ RAW_CLI="$WORK/cli.js"
