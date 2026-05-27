@@ -7,7 +7,7 @@
     {
       "name": "aio-epub-translate",
       "source": "./plugins/aio-epub-translate",
-      "description": "Translate EPUB books into literary Vietnamese end-to-end — upload, pre-translation analysis, chapter translation with consistency checks, quality review, and bilingual export.",
+      "description": "Translate EPUB books into literary Vietnamese end-to-end \u2014 upload, pre-translation analysis, chapter translation with consistency checks, quality review, and bilingual export.",
       "version": "4.0.2",
       "author": {
         "name": "aiocean"
@@ -25,7 +25,7 @@
     {
       "name": "aio-gherkin-refine",
       "source": "./plugins/aio-gherkin-refine",
-      "description": "Comprehensive BDD field guide — writes and reviews Gherkin with expert quality. Includes Example Mapping, 3 Amigos, anti-patterns catalog, and declarative style guide.",
+      "description": "Comprehensive BDD field guide \u2014 writes and reviews Gherkin with expert quality. Includes Example Mapping, 3 Amigos, anti-patterns catalog, and declarative style guide.",
       "version": "2.0.5",
       "author": {
         "name": "aiocean"
@@ -34,7 +34,7 @@
     {
       "name": "aio-bun-fullstack-setup",
       "source": "./plugins/aio-bun-fullstack-setup",
-      "description": "Bootstrap a Bun fullstack project in one shot — single-port API + frontend, Vite dev proxy, monorepo layout, and Docker config. Skips files you already have.",
+      "description": "Bootstrap a Bun fullstack project in one shot \u2014 single-port API + frontend, Vite dev proxy, monorepo layout, and Docker config. Skips files you already have.",
       "version": "1.1.5",
       "author": {
         "name": "aiocean"
@@ -43,7 +43,7 @@
     {
       "name": "aio-mental-models",
       "source": "./plugins/aio-mental-models",
-      "description": "Reach better decisions faster — picks the right mental model (first principles, inversion, second-order, opportunity cost, …) and walks you through applying it to your problem.",
+      "description": "Reach better decisions faster \u2014 picks the right mental model (first principles, inversion, second-order, opportunity cost, \u2026) and walks you through applying it to your problem.",
       "version": "2.1.7",
       "author": {
         "name": "aiocean"
@@ -52,7 +52,7 @@
     {
       "name": "aio-threat-models",
       "source": "./plugins/aio-threat-models",
-      "description": "Pick and apply the right threat-modeling framework — STRIDE, LINDDUN, PASTA, MITRE ATT&CK/ATLAS, Attack Trees, and 22 more — for security, privacy, and AI/ML risk analysis.",
+      "description": "Pick and apply the right threat-modeling framework \u2014 STRIDE, LINDDUN, PASTA, MITRE ATT&CK/ATLAS, Attack Trees, and 22 more \u2014 for security, privacy, and AI/ML risk analysis.",
       "version": "1.0.4",
       "author": {
         "name": "aiocean"
@@ -79,7 +79,7 @@
     {
       "name": "aio-xstate",
       "source": "./plugins/aio-xstate",
-      "description": "Build XState v5 state machines the right way — design-first planning, params-first typing, and canonical actor patterns for TypeScript and React, with anti-god-machine enforcement.",
+      "description": "Build XState v5 state machines the right way \u2014 design-first planning, params-first typing, and canonical actor patterns for TypeScript and React, with anti-god-machine enforcement.",
       "version": "1.0.10",
       "author": {
         "name": "aiocean"
@@ -88,7 +88,7 @@
     {
       "name": "aio-golang-mastery",
       "source": "./plugins/aio-golang-mastery",
-      "description": "Write and lint idiomatic Go end-to-end — a 7-tool lint chain (build, vet, golangci-lint, govulncheck, nilaway, deadcode, race) plus reference-grade patterns for concurrency, errors, generics, gRPC, and production hardening.",
+      "description": "Write and lint idiomatic Go end-to-end \u2014 a 7-tool lint chain (build, vet, golangci-lint, govulncheck, nilaway, deadcode, race) plus reference-grade patterns for concurrency, errors, generics, gRPC, and production hardening.",
       "version": "1.2.2",
       "author": {
         "name": "aiocean"
@@ -97,7 +97,7 @@
     {
       "name": "aio-tui",
       "source": "./plugins/aio-tui",
-      "description": "Build production-grade Go TUIs with Bubbletea + lipgloss — TEA architecture, styling, and battle-tested patterns for tables, parallel fetch, search, and live refresh.",
+      "description": "Build production-grade Go TUIs with Bubbletea + lipgloss \u2014 TEA architecture, styling, and battle-tested patterns for tables, parallel fetch, search, and live refresh.",
       "version": "1.0.9",
       "author": {
         "name": "aiocean"
@@ -115,8 +115,8 @@
     {
       "name": "aio-claude-toolkit",
       "source": "./plugins/aio-claude-toolkit",
-      "description": "Sharpen Claude Code itself — patch system prompts for senior-grade output, capture this session's workflow as a reusable skill, consolidate memory, and ship feedback to the marketplace.",
-      "version": "2.6.4",
+      "description": "Sharpen Claude Code \u2014 patch and recompile Claude's binary for custom use cases (control channels, agent-as-a-service, custom tooling), capture this session's workflow as a reusable skill, consolidate memory, and ship feedback to the marketplace.",
+      "version": "3.0.0",
       "author": {
         "name": "aiocean"
       }
@@ -124,7 +124,7 @@
     {
       "name": "aio-devops",
       "source": "./plugins/aio-devops",
-      "description": "GitHub, GitLab, and git worktree workflows in one toolkit — manage repos, PRs, MRs, pipelines, and parallel branches without juggling CLIs.",
+      "description": "GitHub, GitLab, and git worktree workflows in one toolkit \u2014 manage repos, PRs, MRs, pipelines, and parallel branches without juggling CLIs.",
       "version": "1.0.4",
       "author": {
         "name": "aiocean"
@@ -133,7 +133,7 @@
     {
       "name": "aio-design-system",
       "source": "./plugins/aio-design-system",
-      "description": "Design and ship UI with confidence — UI/UX guidance, neobrutalism design system bootstrapping, and SaaS analytics dashboard design (chart selection, anti-pattern checks, a11y, storytelling).",
+      "description": "Design and ship UI with confidence \u2014 UI/UX guidance, neobrutalism design system bootstrapping, and SaaS analytics dashboard design (chart selection, anti-pattern checks, a11y, storytelling).",
       "version": "1.2.2",
       "author": {
         "name": "aiocean"
@@ -142,7 +142,7 @@
     {
       "name": "aio-diagramming",
       "source": "./plugins/aio-diagramming",
-      "description": "Generate shareable Mermaid URLs and auto-build Grafana dashboard diagrams from your codebase — diagrams that travel well, without leaving the terminal.",
+      "description": "Generate shareable Mermaid URLs and auto-build Grafana dashboard diagrams from your codebase \u2014 diagrams that travel well, without leaving the terminal.",
       "version": "1.0.4",
       "author": {
         "name": "aiocean"
@@ -151,7 +151,7 @@
     {
       "name": "aio-research",
       "source": "./plugins/aio-research",
-      "description": "Run structured 10-phase research workflows and stand up RAG pipelines on Qdrant — go from a topic to a queryable knowledge base.",
+      "description": "Run structured 10-phase research workflows and stand up RAG pipelines on Qdrant \u2014 go from a topic to a queryable knowledge base.",
       "version": "1.0.4",
       "author": {
         "name": "aiocean"
@@ -160,7 +160,7 @@
     {
       "name": "aio-codeflow",
       "source": "./plugins/aio-codeflow",
-      "description": "Understand, plan, debug, and review code as one coordinated workflow — codebase discovery, dependency mapping, implementation planning, root-cause debugging, and pre-merge review.",
+      "description": "Understand, plan, debug, and review code as one coordinated workflow \u2014 codebase discovery, dependency mapping, implementation planning, root-cause debugging, and pre-merge review.",
       "version": "2.0.1",
       "author": {
         "name": "aiocean"
@@ -169,7 +169,7 @@
     {
       "name": "aio-saas-tools",
       "source": "./plugins/aio-saas-tools",
-      "description": "Drive Jira, Confluence, Google Workspace (Drive/Gmail/Calendar/Sheets/Docs), Tanca HR, and X/Twitter from your terminal — one CLI per service, no context switching.",
+      "description": "Drive Jira, Confluence, Google Workspace (Drive/Gmail/Calendar/Sheets/Docs), Tanca HR, and X/Twitter from your terminal \u2014 one CLI per service, no context switching.",
       "version": "1.0.4",
       "author": {
         "name": "aiocean"
@@ -178,7 +178,7 @@
     {
       "name": "aio-watermill-kit",
       "source": "./plugins/aio-watermill-kit",
-      "description": "Build event-driven Go apps with Watermill — Router, middleware, Pub/Sub, CQRS, and integrations for Kafka, AMQP, NATS, Redis Streams, and SQL.",
+      "description": "Build event-driven Go apps with Watermill \u2014 Router, middleware, Pub/Sub, CQRS, and integrations for Kafka, AMQP, NATS, Redis Streams, and SQL.",
       "version": "0.1.4",
       "author": {
         "name": "aiocean"
@@ -187,7 +187,7 @@
     {
       "name": "aio-kanban",
       "source": "./plugins/aio-kanban",
-      "description": "Track AI-agent work in a markdown kanban board committed to the repo — index board with per-task files, plus an auto-dispatch monitor that watches the board and spawns sub-agents for matching tasks.",
+      "description": "Track AI-agent work in a markdown kanban board committed to the repo \u2014 index board with per-task files, plus an auto-dispatch monitor that watches the board and spawns sub-agents for matching tasks.",
       "version": "3.0.0",
       "author": {
         "name": "aiocean"
@@ -196,7 +196,7 @@
     {
       "name": "aio-software-architect",
       "source": "./plugins/aio-software-architect",
-      "description": "Make architecture decisions with confidence — a deep pattern reference and a 5-step decision workflow covering cloud patterns, resilience, data, DDD, and distributed systems.",
+      "description": "Make architecture decisions with confidence \u2014 a deep pattern reference and a 5-step decision workflow covering cloud patterns, resilience, data, DDD, and distributed systems.",
       "version": "1.0.5",
       "author": {
         "name": "aiocean"
@@ -205,7 +205,7 @@
     {
       "name": "aio-starrocks",
       "source": "./plugins/aio-starrocks",
-      "description": "Design StarRocks tables and tune slow queries — partitioning, bucketing, sort keys, and PK tuning, plus EXPLAIN/Query Profile reading and concrete tuning recipes.",
+      "description": "Design StarRocks tables and tune slow queries \u2014 partitioning, bucketing, sort keys, and PK tuning, plus EXPLAIN/Query Profile reading and concrete tuning recipes.",
       "version": "1.0.4",
       "author": {
         "name": "aiocean"
@@ -214,7 +214,7 @@
     {
       "name": "aio-visual-diff",
       "source": "./plugins/aio-visual-diff",
-      "description": "Verify AI-built UI against design via measurement-driven diff — extracts computed CSS and bounding boxes through Chrome DevTools MCP, diffs against Figma reference or a frozen baseline, and feeds numerical deltas back to the agent. No screenshot eyeballing.",
+      "description": "Verify AI-built UI against design via measurement-driven diff \u2014 extracts computed CSS and bounding boxes through Chrome DevTools MCP, diffs against Figma reference or a frozen baseline, and feeds numerical deltas back to the agent. No screenshot eyeballing.",
       "version": "0.1.2",
       "author": {
         "name": "aiocean"
@@ -232,7 +232,7 @@
     {
       "name": "aio-image",
       "source": "./plugins/aio-image",
-      "description": "Remove image backgrounds using RMBG-2.0 alpha matting with despill — works on any image (renders, photos, screenshots). Pairs with the flat-magenta chroma-key technique: render subject on #FF00FF with any image gen engine, then matte for a clean PNG RGBA cutout.",
+      "description": "Remove image backgrounds using RMBG-2.0 alpha matting with despill \u2014 works on any image (renders, photos, screenshots). Pairs with the flat-magenta chroma-key technique: render subject on #FF00FF with any image gen engine, then matte for a clean PNG RGBA cutout.",
       "version": "1.0.2",
       "author": {
         "name": "aiocean"
@@ -241,7 +241,7 @@
     {
       "name": "aio-code-review",
       "source": "./plugins/aio-code-review",
-      "description": "Google's engineering code-review playbook — turns Claude into a thoughtful reviewer or a disciplined CL author. The 8 things every reviewer looks for (design/functionality/complexity/tests/naming/comments/style/docs), the LGTM threshold (\"improves code health, not perfection\"), how to write courteous comments, how to handle pushback, how to write good CL descriptions, and how to keep CLs small. Source: github.com/google/eng-practices (CC-BY 3.0).",
+      "description": "Google's engineering code-review playbook \u2014 turns Claude into a thoughtful reviewer or a disciplined CL author. The 8 things every reviewer looks for (design/functionality/complexity/tests/naming/comments/style/docs), the LGTM threshold (\"improves code health, not perfection\"), how to write courteous comments, how to handle pushback, how to write good CL descriptions, and how to keep CLs small. Source: github.com/google/eng-practices (CC-BY 3.0).",
       "version": "1.0.2",
       "author": {
         "name": "aiocean"
