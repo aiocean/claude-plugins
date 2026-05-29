@@ -103,3 +103,32 @@ Use conventional commits: `feat:`, `fix:`, `chore:`, `docs:` prefixes (e.g., `fe
 Run `bash scripts/validate-marketplace.sh` before considering any plugin work done. It checks plugin.json fields, folder naming, SKILL.md frontmatter, script existence, marketplace registration, and version sync.
 
 The **`validate.yml` GitHub Action** runs this same script on every push to `main` and every pull request that touches `plugins/` or `.claude-plugin/` — version drift between `plugin.json` and `marketplace.json` will fail CI.
+
+<!-- kanban:start -->
+## Task Board
+
+!`bash .kanban/status.sh 2>/dev/null`
+
+Board: `.kanban/board.md` (index) | Tasks: `.kanban/tasks/T-NNN-slug.md` | Archive: `.kanban/archive/`
+
+**Session start:** Read `.kanban/board.md`. For Doing tasks, open their task files.
+**Session end:** Update `.kanban/board.md` — move completed task lines to Done, note blockers, update timestamp.
+
+**Board line format** (one per task):
+```
+- [T-NNN](tasks/T-NNN-slug.md) Title — priority/effort
+```
+
+**Task file format** (`.kanban/tasks/T-NNN-slug.md`):
+```
+# T-NNN: Title
+> One-line description
+- **priority**: critical|high|medium|low
+- **effort**: XS|S|M|L
+
+## Criteria
+- [ ] Acceptance criterion
+```
+
+**Rules:** WIP limit = 2 in Doing. Pick highest-priority from Todo. Never skip criteria checkboxes. Slug is kebab-case from title, ≤40 chars.
+<!-- kanban:end -->
