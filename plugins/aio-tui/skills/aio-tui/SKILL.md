@@ -1,8 +1,17 @@
 ---
 name: aio-tui
 description: |
-  Build interactive terminal UIs with Go Bubbletea and lipgloss — architecture, styling, and patterns.
-when_to_use: build a TUI, create terminal UI, Bubbletea app, interactive dashboard, TUI, lipgloss, build TUI, Bubbletea, terminal app, CLI UI, Go terminal, Elm architecture, charmbracelet
+  Build interactive terminal UIs with Go + the charmbracelet v2 stack
+  (charm.land/bubbletea/v2, charm.land/lipgloss/v2) — Elm architecture,
+  restrained styling, and production-grade patterns for async rendering,
+  layout geometry, mouse hit-testing, and live refresh. Use when building
+  a TUI, terminal UI, Bubbletea app, interactive dashboard, file explorer,
+  monitor, or CLI UI in Go.
+when_to_use: |
+  build a TUI, create terminal UI, Bubbletea app, bubbletea v2, lipgloss v2,
+  interactive dashboard, terminal app, CLI UI, Go terminal, Elm architecture,
+  charmbracelet, charm.land, two-pane layout, terminal mouse, async render,
+  TUI performance, TUI styling
 effort: low
 ---
 
@@ -13,480 +22,436 @@ effort: low
 REFS="${CLAUDE_PLUGIN_ROOT}/skills/aio-tui/references"
 ```
 
-# Bubbletea TUI Development Guide
+# Bubbletea v2 TUI Development Guide
 
-Build interactive terminal UIs with [Bubbletea](https://github.com/charmbracelet/bubbletea) and [lipgloss](https://github.com/charmbracelet/lipgloss).
+Build interactive terminal UIs on the charmbracelet **v2** ecosystem:
+[`charm.land/bubbletea/v2`](https://github.com/charmbracelet/bubbletea) +
+[`charm.land/lipgloss/v2`](https://github.com/charmbracelet/lipgloss). The v2 API
+differs from v1 in load-bearing ways — every snippet here is v2-correct.
 
 ## Architecture: The Elm Architecture (TEA)
 
-Every Bubbletea app has three parts:
-
 ```
-Model (state) → View (render) → Update (handle messages) → Model ...
+Model (state) → Update (handle messages) → Model → View (render) ...
 ```
 
 ```go
-type model struct {
-    data      []Item
-    loading   bool
-    err       error
-    width     int
-    height    int
-}
-
-func (m model) Init() tea.Cmd    { return m.fetchData }       // initial command
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) { … } // state transitions
-func (m model) View() string     { … }                        // render to string
+func (m model) Init() tea.Cmd                            // initial command(s)
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd)  // state transitions
+func (m model) View() tea.View                           // render → tea.View struct
 ```
 
 **Key rules:**
-- `Init()` returns a `tea.Cmd`, NOT a modified model — don't init clients here
-- `Update()` returns a NEW model (value receiver), never mutates in place
-- `View()` is a pure function of model state — no side effects
-- Messages are the ONLY way to communicate async results back to the model
+- The model is a **value** receiver. `Update` returns a **NEW** model — never mutates in place.
+- `View()` is a pure function of model state — no side effects, reads `m` only.
+- `Init()` returns a `tea.Cmd`, NOT a modified model — create heavy clients in `main()` and pass them in.
+- Messages are the ONLY way to communicate async results back to the model.
+- A `tea.Cmd` is `func() tea.Msg`. Don't double-wrap (a Cmd that returns a Cmd); use `tea.Batch(c1, c2)` to run several.
 
-## Quick Start Template
+## v2 API — the differences that bite
+
+| Concern | v2 (correct) |
+|---|---|
+| `View()` return | `tea.View` **struct** — frame string is in `.Content` |
+| Alt-screen / mouse | **Fields on the `tea.View`**: `v.AltScreen = true`, `v.MouseMode = tea.MouseModeCellMotion` — NOT `tea.NewProgram` options |
+| Keys | `tea.KeyPressMsg{Code rune, Text string}` — printable input in `.Text`, named keys via `.String()`. No `.Runes`. |
+| Mouse | An **interface**: the message TYPE is the action — `tea.MouseClickMsg` / `MouseReleaseMsg` / `MouseWheelMsg` / `MouseMotionMsg`. No `.Action` field. Each has `.Mouse()` → `tea.Mouse{X, Y, Button}`. |
+| Color | `lipgloss.Color("#RRGGBB")` is a `color.Color`, full truecolor. No `SetColorProfile` — downsampling happens at the output writer. |
+| Background detect | `lipgloss.HasDarkBackground(os.Stdin, os.Stdout)` |
+| `.Width(n)` | **OUTER** width — border + padding **included** (see Layout gotchas) |
+
+## The canonical v2 program
+
+The single most-copied skeleton — get every v2 difference right.
 
 ```go
 package main
 
 import (
-    "fmt"
-    "time"
+	"fmt"
+	"os"
+	"time"
 
-    tea "github.com/charmbracelet/bubbletea"
-    "github.com/charmbracelet/lipgloss"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/colorprofile"
 )
 
-// --- Messages ---
-type dataMsg struct {
-    items []string
-    err   error
-}
-type tickMsg time.Time
-
-// --- Model ---
 type model struct {
-    items   []string
-    loading bool
-    err     error
-    width   int
-    height  int
+	width, height int
+	renderStyle   string // resolved ONCE at startup (see below)
+	// ... your state ...
 }
 
-func newModel() model {
-    return model{loading: true}
-}
+func newModel() model { return model{} }
 
 func (m model) Init() tea.Cmd {
-    return tea.Batch(fetchData, tickCmd())
+	// Kick off initial work. tea.Batch fans several Cmds out; nil = nothing to do.
+	return tickCmd()
 }
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width, m.height = msg.Width, msg.Height
+	case tea.KeyPressMsg:
+		switch msg.String() {
+		case "q", "ctrl+c":
+			return m, tea.Quit
+		}
+	case tea.MouseMsg:
+		var nm tea.Model
+		nm, cmd = m.handleMouse(msg)
+		m = nm.(model)
+	}
+	return m, cmd
+}
+
+func (m model) View() tea.View {
+	content := "loading…"
+	if m.width != 0 && m.height != 0 {
+		content = m.render() // your pure render
+	}
+	// v2: View() returns a struct; content lives in .Content, and the
+	// alt-screen / mouse decisions are FIELDS on that struct — set them on
+	// EVERY return path (including the loading frame), or the program toggles
+	// out of the alt screen and drops mouse reporting before the first size msg.
+	v := tea.NewView(content)
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
+	return v
+}
+
+func main() {
+	// Resolve the color profile / dark-bg ONCE here, then hand it to the model.
+	// Create any heavy clients (DB, HTTP, telemetry) in main() too and pass them
+	// into the model — never build them inside Update/View.
+	m := newModel()
+	m.renderStyle = detectRenderStyle()
+
+	p := tea.NewProgram(m)
+	if _, err := p.Run(); err != nil {
+		fmt.Fprintln(os.Stderr, "app:", err)
+		os.Exit(1)
+	}
+}
+```
+
+A self-sustaining poll loop reschedules itself on each tick — `Init` kicks off the
+first, every handler calls `tickCmd()` again, so the loop self-sustains:
+
+```go
+type tickMsg struct{}
 
 func tickCmd() tea.Cmd {
-    return tea.Tick(30*time.Second, func(t time.Time) tea.Msg { return tickMsg(t) })
+	return tea.Tick(pollInterval, func(time.Time) tea.Msg { return tickMsg{} })
 }
+```
 
-// --- Fetch (runs in goroutine automatically) ---
-func fetchData() tea.Msg {
-    // Replace with real data fetching
-    items := []string{"item-1", "item-2", "item-3"}
-    return dataMsg{items: items}
+### Resolve color profile / dark-bg ONCE at startup
+
+Detect the terminal's profile and background **once, in `main()`, before
+`tea.NewProgram` takes over the terminal** — while you still own it in normal mode.
+Hand the resolved hint to the model and reuse it from every render.
+
+```go
+// detectRenderStyle resolves the palette ONCE at startup while we still own the
+// terminal — before tea.NewProgram takes it over. The chosen hint ("dark"/
+// "light"/"notty") is handed to the model and reused by every async render, so a
+// renderer never re-queries the terminal background from a render goroutine
+// (which would race Bubbletea's stdin reader and frame writer, corrupting output).
+func detectRenderStyle() string {
+	switch colorprofile.Detect(os.Stdout, os.Environ()) {
+	case colorprofile.NoTTY, colorprofile.Ascii:
+		return "notty" // not a color terminal (e.g. piped) — use a plain style
+	}
+	if lipgloss.HasDarkBackground(os.Stdin, os.Stdout) {
+		return "dark"
+	}
+	return "light"
 }
+```
 
-// --- Update ---
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-    switch msg := msg.(type) {
-    case tea.KeyMsg:
-        switch msg.String() {
-        case "q", "ctrl+c":
-            return m, tea.Quit
-        case "r":
-            m.loading = true
-            return m, fetchData
-        }
-    case tea.WindowSizeMsg:
-        m.width, m.height = msg.Width, msg.Height
-    case dataMsg:
-        m.loading = false
-        m.items = msg.items
-        m.err = msg.err
-    case tickMsg:
-        m.loading = true
-        return m, tea.Batch(fetchData, tickCmd())
-    }
-    return m, nil
+The reason a render goroutine must never re-query the terminal background: doing
+so **would race Bubbletea's stdin reader and frame writer, corrupting output.**
+Same discipline applies to any expensive per-cell decision — resolve it where you
+own the terminal, then carry the answer in the model. (In tests, set the field
+directly — `m.renderStyle = "dark"` — for a deterministic palette.)
+
+### v2 key handling
+
+Printable input is in `msg.Text` (empty for named/function keys); named keys match
+via `msg.String()`. Building a text buffer means appending `msg.Text` per key:
+
+```go
+func (m model) updateInput(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "esc":
+		return m, tea.Quit
+	case "enter":
+		m.submit()
+		return m, nil
+	case "backspace":
+		if m.query != "" {
+			r := []rune(m.query)
+			m.query = string(r[:len(r)-1])
+		}
+	default:
+		// msg.Text holds the printable chars (empty for arrows / function keys).
+		if msg.Text != "" {
+			m.query += msg.Text
+		}
+	}
+	return m, nil
 }
+```
 
-// --- View ---
+### v2 mouse handling
+
+Mouse is an interface — the message TYPE is the action. Type-switch the concrete
+message; `.Mouse()` returns `tea.Mouse{X, Y, Button}`; buttons are constants
+(`tea.MouseLeft`, `tea.MouseWheelUp`, `tea.MouseWheelDown`).
+
+```go
+func (m model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	e := msg.Mouse() // tea.Mouse{X, Y, Button}
+	switch msg.(type) {
+	case tea.MouseMotionMsg:
+		if m.dragging {
+			m.setFromXY(e.X, e.Y)
+		}
+	case tea.MouseReleaseMsg:
+		m.dragging = false
+	case tea.MouseWheelMsg:
+		switch e.Button {
+		case tea.MouseWheelUp:
+			m.scroll(-1)
+		case tea.MouseWheelDown:
+			m.scroll(+1)
+		}
+	case tea.MouseClickMsg:
+		if e.Button == tea.MouseLeft {
+			m.handleClickAt(e.X, e.Y)
+		}
+	}
+	return m, nil
+}
+```
+
+**Locating a click is geometry, not line-counting.** Don't render the body and
+count `\n` to find which row a click hit — that drifts the instant chrome changes.
+Derive a `layout()` from terminal size + scroll, render *into* it, and reverse-map
+clicks *through the same geometry*. See `$REFS/patterns.md` → "Layout geometry as a
+single source of truth".
+
+## Restrained styling — one accent
+
+Run the whole UI on **one accent color**, reused everywhere the eye needs to be
+drawn (active border, cursor row, focus glow, in-flight spinner). Everything else
+is a small fixed set: `dim` for muted/inactive, semantic `danger`/`warn` for
+destructive vs. cautionary. "Should we add a color?" defaults to **no**.
+
+```go
+import (
+	"image/color"
+
+	"charm.land/lipgloss/v2"
+)
+
+// Palette — restrained, one accent for focus.
 var (
-    titleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#7D56F4"))
-    dimStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("#6C757D"))
+	colAccent = lipgloss.Color("#7D56F4") // active border, cursor, focus glow, spinner
+	colDim    = lipgloss.Color("#6C757D") // muted text, inactive borders
+	colDanger = lipgloss.Color("#DC3545") // destructive confirm; error badge
+	colWarn   = lipgloss.Color("#FFC107") // cautionary action; warn badge
+	colFg     = lipgloss.Color("#E6E6E6")
+	colSelFg  = lipgloss.Color("#FFFFFF")
 )
 
-func (m model) View() string {
-    if m.loading {
-        return titleStyle.Render("Loading...")
-    }
-    if m.err != nil {
-        return fmt.Sprintf("Error: %v\n\n[R]etry [Q]uit", m.err)
-    }
+// Cursor row in the active list — the accent as a full-width bar.
+var cursorActiveStyle = lipgloss.NewStyle().
+	Background(colAccent).Foreground(colSelFg).Bold(true)
 
-    var s string
-    s += titleStyle.Render("MY DASHBOARD") + "\n\n"
-    for _, item := range m.items {
-        s += "  • " + item + "\n"
-    }
-    s += "\n" + dimStyle.Render("[R]efresh [Q]uit")
-    return s
-}
+var dimStyle = lipgloss.NewStyle().Foreground(colDim)
+```
 
-// --- Main ---
-func main() {
-    p := tea.NewProgram(newModel(), tea.WithAltScreen())
-    if _, err := p.Run(); err != nil {
-        fmt.Println(err)
-    }
+A status-code → color mapping keeps **one-accent-per-family** even for multi-state
+badges (the generic kernel of any per-row status indicator — git/lint/test state):
+
+```go
+func statusColor(c statusCode) color.Color {
+	switch c {
+	case statusOK, statusAdded:
+		return colOK
+	case statusBad, statusConflict:
+		return colDanger
+	default: // statusChanged, statusMoved
+		return colWarn
+	}
 }
 ```
 
-## Color Scheme
+**Focus glow — the load-bearing gotcha.** When a glyph (a divider, a separator
+block) tints toward the focused pane, set **FOREGROUND only — no background — so
+the un-inked half blends into the borderless pane.** A background fill paints a
+colored cell that no longer matches the surrounding pane.
 
 ```go
-var (
-    Primary   = lipgloss.Color("#7D56F4") // Purple — titles, primary values
-    Secondary = lipgloss.Color("#6C757D") // Gray — headers, labels
-    Success   = lipgloss.Color("#28A745") // Green — healthy, decreasing
-    Warning   = lipgloss.Color("#FFC107") // Yellow — warnings
-    Danger    = lipgloss.Color("#DC3545") // Red — errors, increasing
-    Info      = lipgloss.Color("#17A2B8") // Blue — info highlights
-    Dim       = lipgloss.Color("#6C757D") // Gray — muted text
-    Muted     = lipgloss.Color("#ADB5BD") // Light gray — borders
+var dividerFocusStyle = lipgloss.NewStyle().Foreground(colAccent)
+```
+
+## lipgloss v2 layout gotchas
+
+### `.Width(n)` is the OUTER width — border + padding included
+
+`.Width(n)` sets the **total outer width** of a styled block — border + padding
+**included**, not the content width. A bordered/padded box's usable text area is
+`n - GetHorizontalFrameSize()`. When sizing a box from an inner (text) width, pass
+`inner + frame` to `.Width()`; **passing the inner width alone shrinks the text
+area by the frame and silently WRAPS the widest rows** (and the box ends up `frame`
+cols too narrow).
+
+Probe before guessing — `lipgloss.Width(style.Width(n).Render("x"))` tells you
+exactly what `n` maps to.
+
+```go
+bw, bh := m.boxSize()                         // INNER content dims
+ow := bw + boxStyle.GetHorizontalFrameSize()  // OUTER width for .Width
+box := boxStyle.Width(ow).Render(m.renderBody(bw, bh))
+```
+
+### Canvas/Compositor overlays are OPAQUE at the cell level
+
+A top layer's cells — **even space cells with no background** — overwrite the layer
+below, so the background does **not** bleed through a box's interior.
+
+Consequence: a floating box needs **NO `Background` fill** to hide what's behind it.
+An opaque fill only sets the box's *color*; a fill that differs from the
+terminal/pane background reads as a distinct panel inside the border (looks
+"double-framed"). For a box that floats cleanly on the app (crush's look), use
+**border only, no `Background`** — the interior then matches the terminal.
+
+```go
+// modalBoxStyle floats directly on the panes behind it — no background fill,
+// border only. One accent, the same colAccent as the cursor row.
+var modalBoxStyle = lipgloss.NewStyle().
+	Border(lipgloss.RoundedBorder()).
+	BorderForeground(colAccent).
+	Foreground(colFg).
+	Padding(0, 1)
+
+// overlayCentered draws box centered over a full w×h rendered screen. The bg
+// layer at z=0 paints every cell; the box layer at z=1 paints only the cells it
+// occupies — so the background shows through everywhere the box does not cover,
+// no manual dim/fill required.
+func overlayCentered(bg, box string, w, h int) string {
+	boxW, boxH := lipgloss.Width(box), lipgloss.Height(box)
+	cx := max(0, (w-boxW)/2)
+	cy := max(0, ((h-1)-boxH)/2)
+	canvas := lipgloss.NewCanvas(w, h)
+	return canvas.Compose(lipgloss.NewCompositor(
+		lipgloss.NewLayer(bg).Z(0),
+		lipgloss.NewLayer(box).X(cx).Y(cy).Z(1),
+	)).Render()
+}
+```
+
+## Testing a v2 TUI — four layers, cheapest first
+
+The model is near-pure, so most of it tests **without a real terminal**. Climb from
+the cheapest layer that proves the thing.
+
+| What you're testing | Layer | Why |
+|---|---|---|
+| Pure logic: layout math, navigation, mouse hit-test, one-row render | **1 — unit `Update`/`View`** | fastest, deterministic |
+| A whole frame at fixed sizes (layout regression) | **2 — golden snapshot of `View().Content`** | "photograph" a frame, still in `go test` |
+| Multi-step interaction (key → update → assert) | **3 — teatest** | runs the program on a simulated terminal |
+| Visual: alignment, color, spacing, truncation | **4 — render-to-image + agent verdict** | string assertions can't *see* it |
+
+**Layer 1 — unit-test `Update`/`View`.** Construct the model, send a typed message,
+type-assert the returned `tea.Model` back, assert on state:
+
+```go
+var tm tea.Model = m
+tm, _ = tm.Update(tea.KeyPressMsg{Code: '/', Text: "/"})
+m = tm.(model)
+if m.mode != modeSearch {
+	t.Fatalf("'/' did not enter search mode")
+}
+```
+
+**Layer 2 — golden snapshot.** Render `View().Content` (v2: the frame string is in
+`.Content`) and compare against a checked-in golden, refreshed with `-update`:
+
+```go
+got := m.View().Content
+golden := filepath.Join("testdata", t.Name()+".golden")
+if *update {
+	os.WriteFile(golden, []byte(got), 0o644)
+	return
+}
+want, _ := os.ReadFile(golden)
+if got != string(want) {
+	t.Errorf("View diverged from golden:\n%s", got)
+}
+```
+
+**Layer 3 — teatest, the import-path footgun.** On a **bubbletea v2** project
+teatest is `github.com/charmbracelet/x/exp/teatest/v2` — **NOT** the v1 path
+`github.com/charmbracelet/x/exp/teatest` (importing v1 against a v2 model compiles
+against the wrong `tea.Model`/`View` shapes). If `Init()` returns a recurring tick,
+you **must `tm.Quit()` early** or the test hangs to the timeout.
+
+```go
+import (
+	tea "charm.land/bubbletea/v2"
+	teatest "github.com/charmbracelet/x/exp/teatest/v2" // v2 path
 )
+
+tm := teatest.NewTestModel(t, newModel(), teatest.WithInitialTermSize(80, 24))
+tm.Send(tea.KeyPressMsg{Code: 'j', Text: "j"}) // v2 key, not tea.KeyMsg{Runes}
+tm.Quit()
+teatest.RequireEqualOutput(t, []byte(tm.FinalModel(t).View().Content))
 ```
 
-## Critical Gotchas
-
-### 1. Client Initialization — Do It in `main()`
-
-Create heavy clients (AWS, MongoDB, K8s) in `main()`, pass into model.
-`Init()` returns `tea.Cmd`, not a modified model — you can't store clients there.
-
-```go
-func main() {
-    client := createClient() // create ONCE
-    m := newModel(client)    // pass by reference
-    tea.NewProgram(m, tea.WithAltScreen()).Run()
-}
-```
-
-### 2. KeyMsg Handling — Type Assert Correctly
-
-`handleKeyPress` must take `tea.KeyMsg`, not `tea.Msg`. Only `tea.KeyMsg` has `.String()`.
-
-```go
-// ✅ CORRECT
-case tea.KeyMsg:
-    switch msg.String() { // msg is already tea.KeyMsg
-    case "q": return m, tea.Quit
-    }
-
-// ❌ WRONG — tea.Msg doesn't have .String()
-func (m model) handleKeyPress(msg tea.Msg) {
-    switch msg.String() { // COMPILE ERROR
-```
-
-### 3. fetchData Must Return `tea.Msg`, Not `tea.Cmd`
-
-A function used as `tea.Cmd` has signature `func() tea.Msg`. Don't double-wrap:
-
-```go
-// ✅ CORRECT — fetchData IS a tea.Cmd (func() tea.Msg)
-func fetchData() tea.Msg {
-    result := doWork()
-    return dataMsg{result: result}
-}
-return m, fetchData // pass the function itself
-
-// ❌ WRONG — double-wrapping
-func (m model) fetchData() tea.Cmd {
-    return func() tea.Msg { ... } // method returns tea.Cmd, but Init/Update expect tea.Cmd
-}
-return m, m.fetchData() // calling it returns tea.Cmd, correct
-return m, m.fetchData   // NOT calling it — wrong signature (func() tea.Cmd ≠ func() tea.Msg)
-```
-
-### 4. Integer Formatting — Go Has No `%,d`
-
-```go
-// ❌ WRONG — Go doesn't support comma formatting
-fmt.Sprintf("%,d", n)
-
-// ✅ CORRECT — manual formatting
-func fmtInt(n int) string {
-    s := strconv.Itoa(n)
-    if len(s) <= 3 { return s }
-    var groups []string
-    for i := len(s); i > 0; i -= 3 {
-        groups = append([]string{s[max(0, i-3):i]}, groups...)
-    }
-    return strings.Join(groups, ",")
-}
-```
-
-### 5. Mouse Click Support — Y Offset Calculation Is Non-Obvious
-
-Enable mouse with `tea.WithMouseCellMotion()` and handle `tea.MouseMsg`:
-
-```go
-// main():
-p := tea.NewProgram(newModel(), tea.WithAltScreen(), tea.WithMouseCellMotion())
-
-// Update():
-case tea.MouseMsg:
-    if msg.Action != tea.MouseActionPress || msg.Button != tea.MouseButtonLeft {
-        break
-    }
-    // dispatch on msg.Y / msg.X
-```
-
-**Critical: Y coordinates must be calculated precisely.** The mental model:
-
-| Element | Height | Rule |
-|---------|--------|------|
-| `lipgloss.RoundedBorder()` box | **3 lines** | top-border + content + bottom-border |
-| `b.WriteString("\n\n")` gap | **1 empty line** | first `\n` ends current line, second `\n` creates 1 empty line |
-| Single-line render | **1 line** | lipgloss.Render() does NOT add trailing newline |
-
-**Example layout calculation** for a standard header → filter-tabs → table layout:
-```
-View() output:
-  renderHeader()      → 3 lines  (rows 0-2)   ← lipgloss RoundedBorder
-  "\n\n"              → 1 gap    (row 3 empty) ← \n ends row2, \n = row3 empty
-  renderFilterRow()   → 1 line   (row 4)       ← filterRowY = 4
-  "\n\n"              → 1 gap    (row 5 empty)
-  table header        → 1 line   (row 6)
-  table divider       → 1 line   (row 7)
-  first skill row     → row 8                  ← firstSkillY = 8
-```
-
-**Common mistake:** assuming `\n\n` = 2 empty lines → off-by-2 errors. It's only 1 empty line.
-
-**Debug tip:** During development, show last mouse coordinates in the status bar to verify:
-```go
-m.statusMsg = fmt.Sprintf("click: (%d, %d)", msg.X, msg.Y)
-```
-
-**X coordinate for column clicks:** Count character widths manually using fixed column widths:
-```go
-// cursor(2) + name(22) + space(1) + scope(10) + space(1) + source(20) + space(1) = 57
-const statusColX = 57
-if msg.X >= statusColX { /* clicked status column */ }
-```
-
-### 6. Variable Shadowing — Don't Name Vars After Packages
-
-```go
-// ❌ WRONG — shadows the `time` package
-var time time.Time // can't use time.Format() after this
-
-// ✅ CORRECT
-var ts time.Time
-```
-
-## Layout Patterns That Always Look Good
-
-These patterns compose well regardless of content — copy them as-is.
-
-### Header Bar (full width, title left + status right)
-
-```go
-const maxWidth = 120
-
-func renderHeader(termWidth int, loading bool, updatedAt time.Time) string {
-    ew := termWidth
-    if ew > maxWidth { ew = maxWidth }
-
-    left := "● MY APP"
-    right := "Updated " + updatedAt.Format("15:04:05") + "  |  Next in 59s"
-    if loading { right = "↻ Fetching…" }
-
-    gap := ew - lipgloss.Width(left) - lipgloss.Width(right) - 4
-    if gap < 1 { gap = 1 }
-
-    return lipgloss.NewStyle().
-        Background(lipgloss.Color("#7D56F4")).
-        Foreground(lipgloss.Color("#FFFFFF")).
-        Bold(true).Padding(0, 2).
-        Width(ew).
-        Render(left + strings.Repeat(" ", gap) + right)
-}
-```
-
-### Status Bar (footer, full width)
-
-```go
-func renderStatusBar(termWidth int, keys ...string) string {
-    return lipgloss.NewStyle().
-        Background(lipgloss.Color("#1E1E2E")).
-        Foreground(lipgloss.Color("#ADB5BD")).
-        Padding(0, 2).
-        Width(termWidth).
-        Render(strings.Join(keys, "  "))
-}
-
-// Usage:
-renderStatusBar(m.width, "[R]efresh", "[/] Filter", "[↑/↓] Scroll", "[Q]uit")
-```
-
-### Navigation Tabs
-
-```go
-func renderTabs(tabs []string, active int) string {
-    var rendered []string
-    for i, name := range tabs {
-        if i == active {
-            rendered = append(rendered, lipgloss.NewStyle().
-                Bold(true).
-                Foreground(lipgloss.Color("#7D56F4")).
-                Border(lipgloss.NormalBorder(), false, false, true, false).
-                BorderForeground(lipgloss.Color("#7D56F4")).
-                Padding(0, 2).
-                Render(name))
-        } else {
-            rendered = append(rendered, lipgloss.NewStyle().
-                Foreground(lipgloss.Color("#6C757D")).
-                Padding(0, 2).
-                Render(name))
-        }
-    }
-    return lipgloss.JoinHorizontal(lipgloss.Top, rendered...)
-}
-
-// In Update:
-case "tab", "right": m.activeTab = (m.activeTab + 1) % len(m.tabs)
-case "shift+tab", "left": m.activeTab = (m.activeTab - 1 + len(m.tabs)) % len(m.tabs)
-```
-
-### Card Grid (responsive, N cards per row)
-
-```go
-// 3 cards per row, fills terminal width exactly.
-// Each card: border(2) + padding(4) = 6 overhead.
-cardInner := (ew / 3) - 6
-if cardInner < 14 { cardInner = 14 }
-
-mkCard := func(label, value string, primary bool) string {
-    var val string
-    if primary {
-        val = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#7D56F4")).Render(value)
-    } else {
-        val = lipgloss.NewStyle().Bold(true).Render(value)
-    }
-    return lipgloss.NewStyle().
-        Border(lipgloss.RoundedBorder()).
-        BorderForeground(lipgloss.Color("#4A4A6A")).
-        Padding(0, 2).Width(cardInner).
-        Render(lipgloss.NewStyle().Foreground(lipgloss.Color("#6C757D")).Render(label) + "\n" + val)
-}
-
-row := lipgloss.JoinHorizontal(lipgloss.Top,
-    mkCard("LABEL A", "Value 1", true),
-    mkCard("LABEL B", "Value 2", false),
-    mkCard("LABEL C", "Value 3", false),
-)
-```
-
-### Section Header
-
-```go
-sectionStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#7D56F4"))
-dimStyle     := lipgloss.NewStyle().Foreground(lipgloss.Color("#ADB5BD"))
-dividerStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#6C757D"))
-
-// Plain section
-"  " + sectionStyle.Render("MY SECTION")
-
-// Section with subtitle
-"  " + sectionStyle.Render("HISTORY  ") + dimStyle.Render("(newest first)")
-
-// Section with divider
-"  " + sectionStyle.Render("TABLE")
-"  " + dividerStyle.Render(strings.Repeat("─", width))
-```
-
-### Max-Width Centering
-
-```go
-const maxWidth = 120
-
-func (m model) View() string {
-    ew := m.width
-    if ew > maxWidth { ew = maxWidth }
-
-    // ... build content using ew for all width math ...
-    content := strings.Join(lines, "\n")
-
-    if m.width > maxWidth {
-        return lipgloss.PlaceHorizontal(m.width, lipgloss.Center, content)
-    }
-    return content
-}
-```
-
-### Key-Value Rows
-
-```go
-func keyValue(label, value string, labelWidth int) string {
-    return lipgloss.NewStyle().Width(labelWidth).Foreground(lipgloss.Color("#6C757D")).Render(label+":") +
-        " " + lipgloss.NewStyle().Bold(true).Render(value)
-}
-
-// Usage:
-keyValue("Status",   "healthy",     16)
-keyValue("Uptime",   "14d 3h 22m",  16)
-keyValue("Requests", "1,240,392",   16)
-```
-
-### Error Banner (non-fatal, keeps old data visible)
-
-```go
-// Show error inline without clearing the screen
-if m.err != nil {
-    banner := lipgloss.NewStyle().
-        Background(lipgloss.Color("#3D1A1A")).
-        Foreground(lipgloss.Color("#FF6B6B")).
-        Padding(0, 2).Width(ew).
-        Render("⚠  " + m.err.Error() + "  —  showing cached data")
-    lines = append(lines, banner)
-}
-```
-
-## Patterns Reference
-
-For detailed patterns with full code examples, read `$REFS/patterns.md`:
-- Column alignment with Unicode/emoji (lipgloss.Width vs fmt byte-counting)
-- ANSI-aware colored columns
-- Column layout with constant widths
-- Parallel data fetching with semaphore
-- Tab navigation
-- Auto-refresh with configurable interval
-- Filter/search mode
-- Table abstraction
-- Scroll/pagination
-- Mouse hover support
-- Delta/change tracking
-- Severity classification
-
-For a complete gold price monitor example (freegoldapi.com + exchangerate-api.com, no API key needed), read `$REFS/gold-monitor.md`.
-
-## Project Setup
+**Color-profile determinism:** there is **no color profile to pin** in lipgloss v2
+(`SetColorProfile` was removed). A style always renders full truecolor ANSI;
+downsampling happens only at the output writer. So golden/dumped frames carry the
+real colors and are stable across machines **even though `go test`'s stdout is not
+a TTY — no global override needed.** What you pin is the palette decision
+(`m.renderStyle`), set directly in the test.
+
+**Layer 4 — render-to-image + agent verdict.** String/golden assertions catch
+*byte changed*, never *looks wrong*. Dump a frame to ANSI, convert to PNG (e.g.
+`freeze /tmp/app.ansi -o /tmp/app.png`), hand the image to an agent that returns a
+structured pass/fail against the design intent; treat a failed verdict like a
+failed assertion (fix → re-dump → re-judge).
+
+## Deep patterns reference
+
+For full, generalized, v2-correct code, read `$REFS/patterns.md`:
+
+- **Async render off the `Update` goroutine** — slow work via `tea.Cmd`, the
+  **gen-counter stale guard**, and the **renderer registry** (add a content kind = one entry)
+- **Layout geometry as a single source of truth** — one `layout()` shared by render
+  and mouse hit-testing; the two-pane split kernel with a draggable divider
+- **Per-row / per-frame performance** — cache expensive per-row compute by identity;
+  poll/refresh without re-rendering the world; fixed-width reserved spinner slot
+- **Column alignment** with Unicode/emoji (`lipgloss.Width` vs byte-counting), ANSI-aware columns, the table abstraction
+- **Filter/search mode**, scroll/pagination, integer formatting, severity/status classification
+
+For a complete v2 example styled like a lazygit-flavored companion (no API key
+needed), read `$REFS/gold-monitor.md` and `examples/gold-monitor/`.
+
+## Project setup
 
 ```bash
 mkdir my-tui && cd my-tui
 go mod init my-tui
-go get github.com/charmbracelet/bubbletea@latest
-go get github.com/charmbracelet/lipgloss@latest
-# Add data source deps as needed:
-# go get github.com/aws/aws-sdk-go-v2/...
-# go get go.mongodb.org/mongo-driver/mongo@latest
+go get charm.land/bubbletea/v2@latest
+go get charm.land/lipgloss/v2@latest
+go get github.com/charmbracelet/colorprofile@latest
+# For multi-step interaction tests (match the v2 path):
+# go get github.com/charmbracelet/x/exp/teatest/v2@latest
 ```
