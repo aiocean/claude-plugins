@@ -63,6 +63,11 @@ var (
 	// modalStyle is the floating input box: a rounded accent border over the board.
 	modalStyle      = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(colAccent).Foreground(colFg).Padding(0, 1)
 	modalTitleStyle = lipgloss.NewStyle().Foreground(colAccent).Bold(true)
+
+	// confirmModalStyle is the floating delete-confirmation box: the same rounded
+	// box in the critical color, so a destructive prompt reads as danger at a glance.
+	confirmModalStyle = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(colCritical).Foreground(colFg).Padding(0, 1)
+	confirmTitleStyle = lipgloss.NewStyle().Foreground(colCritical).Bold(true)
 )
 
 // priorityColor maps a task priority to its dot color. Unknown → dim.

@@ -139,4 +139,4 @@ Install it globally once:
 cd "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/tui" && go install .
 ```
 
-Then run `aiokan` from any repo with a `.kanban/board.md`. Keys: `j/k` select · `shift+↑/↓` move status · `tab` focus preview · `a` add · `r` reload · `q` quit; mouse click selects, wheel scrolls the focused pane. Full docs in that folder's `README.md`. Requires Go 1.26+; the board protocol works fully without it.
+Then run `aiokan` from any repo with a `.kanban/board.md`. Keys: `j/k` select · `shift+↑/↓` move status · `tab` focus preview · `d` delete (confirm modal, removes card + file) · `r` reload · `q` quit; mouse click selects, wheel scrolls the focused pane. Full docs in that folder's `README.md`. Requires Go 1.26+; the board protocol works fully without it.

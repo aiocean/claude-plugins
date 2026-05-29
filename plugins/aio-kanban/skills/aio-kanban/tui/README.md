@@ -45,7 +45,7 @@ aiokan --help
 | **Change status** (move task toward Backlog / Blocked) | `shift+↑` / `shift+↓` | — |
 | Focus the preview / list | `tab` | click a pane |
 | Scroll the preview | `j` / `k`, `ctrl+d` / `ctrl+u` (when preview focused) | wheel over right pane |
-| Add a task | `a` | — |
+| **Delete a task** (confirm modal; removes the card and its task file) | `d` then `y` | — |
 | Reload from disk | `r` | — |
 | Quit | `q` / `ctrl+c` | — |
 
@@ -67,7 +67,7 @@ Every write refreshes the board's `<!-- Updated: -->` timestamp.
 ## Develop
 
 ```bash
-go test ./...   # headless: parsing, board write-back, move/add/block flows, render
+go test ./...   # headless: parsing, board write-back, move/delete/block flows, render
 go vet ./...
 ```
 

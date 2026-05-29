@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -203,63 +202,29 @@ func (b *Board) move(c Column, idx int, dest Column) {
 	b.Cols[dest] = append(b.Cols[dest], t)
 }
 
-// nextID returns the next monotonic task ID (highest existing + 1, never reused).
-func (b *Board) nextID() string {
-	max := 0
-	for c := range b.Cols {
-		for _, t := range b.Cols[c] {
-			var n int
-			if _, err := fmt.Sscanf(t.ID, "T-%d", &n); err == nil && n > max {
-				max = n
+// findByID locates the card with the given task ID, scanning lanes in protocol
+// order. ok is false when no card carries that ID — the guard a destructive op
+// uses to refuse deleting a card the board no longer holds.
+func (b *Board) findByID(id string) (Column, int, bool) {
+	for c := Column(0); c < numColumns; c++ {
+		for i := range b.Cols[c] {
+			if b.Cols[c][i].ID == id {
+				return c, i, true
 			}
 		}
 	}
-	return fmt.Sprintf("T-%03d", max+1)
+	return 0, 0, false
 }
 
-var slugRe = regexp.MustCompile(`[^a-z0-9]+`)
-
-// slugify produces the kebab-case slug for a task title (lowercase, alphanumeric
-// and hyphen only, ≤40 chars) per the protocol's slug rule.
-func slugify(title string) string {
-	s := slugRe.ReplaceAllString(strings.ToLower(title), "-")
-	s = strings.Trim(s, "-")
-	if len(s) > 40 {
-		s = strings.Trim(s[:40], "-")
+// removeCard drops the card at index idx in lane c from the in-memory board. The
+// task file on disk and the board write are the caller's responsibility. A no-op
+// (ok false) when idx is out of range.
+func (b *Board) removeCard(c Column, idx int) bool {
+	if idx < 0 || idx >= len(b.Cols[c]) {
+		return false
 	}
-	if s == "" {
-		s = "task"
-	}
-	return s
-}
-
-// addTask creates a new task file from the protocol template and appends its
-// board line to Backlog. The board itself is not written — the caller saves.
-func (b *Board) addTask(title string) (Task, error) {
-	title = strings.TrimSpace(title)
-	if title == "" {
-		return Task{}, errors.New("empty title")
-	}
-	id := b.nextID()
-	rel := "tasks/" + id + "-" + slugify(title) + ".md"
-	body := fmt.Sprintf("# %s: %s\n> %s\n\n- **priority**: medium\n- **effort**: M\n\n## Criteria\n- [ ] \n\n## Notes\n", id, title, title)
-	p := filepath.Join(b.Dir, filepath.FromSlash(rel))
-	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
-		return Task{}, err
-	}
-	if err := atomicWriteFile(p, body); err != nil {
-		return Task{}, err
-	}
-	t := Task{
-		ID:       id,
-		Title:    title,
-		Priority: "medium",
-		Effort:   "M",
-		Rel:      rel,
-		Raw:      fmt.Sprintf("- [%s](%s) %s — medium/M", id, rel, title),
-	}
-	b.Cols[Backlog] = append(b.Cols[Backlog], t)
-	return t, nil
+	b.Cols[c] = append(b.Cols[c][:idx], b.Cols[c][idx+1:]...)
+	return true
 }
 
 var metaFieldRe = regexp.MustCompile(`^- \*\*[a-zA-Z-]+\*\*:`)

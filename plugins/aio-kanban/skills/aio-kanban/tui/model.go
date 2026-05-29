@@ -24,13 +24,14 @@ func tickCmd() tea.Cmd {
 }
 
 // uiMode is the active interaction lane. List is the default two-pane board;
-// Input collects a single line of text (add-task title or blocked reason) in the
-// status bar.
+// Input collects a single line of text (a blocked reason) via a floating modal;
+// Confirm asks the user to approve an irreversible delete.
 type uiMode int
 
 const (
 	modeList uiMode = iota
 	modeInput
+	modeConfirm
 )
 
 // focusPane selects which pane j/k and the wheel drive: the task list (left) or
@@ -47,7 +48,6 @@ type inputPurpose int
 
 const (
 	inputNone inputPurpose = iota
-	inputAddTask
 	inputBlockReason
 )
 
@@ -74,6 +74,11 @@ type model struct {
 	inputPurpose inputPurpose
 	inputBuf     string
 	status       string
+
+	// confirmTarget is the card the delete-confirm modal is asking about. It is
+	// captured by value when the modal opens so the delete commits against this
+	// exact task (located by ID) even if a reload shifts the selection meanwhile.
+	confirmTarget Task
 }
 
 func newModel(b *Board) model {
@@ -97,10 +102,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.MouseMsg:
 		return m.handleMouse(msg)
 	case tea.KeyPressMsg:
-		if m.mode == modeInput {
+		switch m.mode {
+		case modeInput:
 			return m.updateInput(msg)
+		case modeConfirm:
+			return m.updateConfirm(msg)
+		default:
+			return m.updateList(msg)
 		}
-		return m.updateList(msg)
 	}
 	return m, nil
 }
@@ -151,11 +160,12 @@ func (m model) updateList(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 		return m.shiftTask(-1), nil // move toward Backlog (up the stacked lanes)
 	case "shift+down":
 		return m.shiftTask(1), nil // move toward Blocked (down the stacked lanes)
-	case "a":
-		m.mode = modeInput
-		m.inputPurpose = inputAddTask
-		m.inputBuf = ""
-		m.status = ""
+	case "d":
+		if p, ok := m.selectedPos(); ok {
+			m.confirmTarget = m.board.Cols[p.col][p.idx]
+			m.mode = modeConfirm
+			m.status = ""
+		}
 	case "r":
 		m.reload()
 		m.status = "reloaded"
@@ -275,24 +285,6 @@ func (m model) submitInput() (tea.Model, tea.Cmd) {
 	m.inputPurpose = inputNone
 
 	switch purpose {
-	case inputAddTask:
-		if text == "" {
-			m.status = "add cancelled (empty title)"
-			return m, nil
-		}
-		t, err := m.board.addTask(text)
-		if err != nil {
-			m.status = "⚠ add failed: " + err.Error()
-			return m, nil
-		}
-		if err := m.board.save(); err != nil {
-			m.status = "⚠ save failed: " + err.Error()
-			return m, nil
-		}
-		m.sel = m.flatIndexOf(Backlog, len(m.board.Cols[Backlog])-1)
-		m.previewKey = ""
-		m.refreshPreview()
-		m.status = "added " + t.ID
 	case inputBlockReason:
 		if text == "" {
 			m.status = "block cancelled (empty reason)"
@@ -310,6 +302,59 @@ func (m model) submitInput() (tea.Model, tea.Cmd) {
 		return m.commitMove(p, Blocked), nil
 	}
 	return m, nil
+}
+
+// ---- confirm (delete) mode ----
+
+// updateConfirm handles the delete-confirmation modal: y/enter commits the
+// delete, n/esc cancels back to the board, ctrl+c still quits. Every other key
+// is inert so a stray press cannot dismiss or confirm the irreversible op.
+func (m model) updateConfirm(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "ctrl+c":
+		return m, tea.Quit
+	case "y", "enter":
+		return m.commitDelete(), nil
+	case "n", "esc":
+		m.mode = modeList
+		m.status = "delete cancelled"
+	}
+	return m, nil
+}
+
+// commitDelete removes confirmTarget from the board and deletes its task file.
+// The card is located by ID — not by the live selection — so a reload between
+// opening the modal and confirming cannot redirect the delete onto a different
+// card; a vanished ID aborts. The file is unlinked only after the board write
+// succeeds, so a stale-abort never orphans a delete.
+func (m model) commitDelete() model {
+	m.mode = modeList
+	t := m.confirmTarget
+	c, idx, ok := m.board.findByID(t.ID)
+	if !ok {
+		m.reload()
+		m.status = "⚠ " + t.ID + " no longer on board — delete aborted"
+		return m
+	}
+	m.board.removeCard(c, idx)
+	if err := m.board.save(); err != nil {
+		if errors.Is(err, errStale) {
+			m.reload()
+			m.status = "⚠ board changed on disk — reloaded, delete aborted"
+			return m
+		}
+		m.status = "⚠ save failed: " + err.Error()
+		return m
+	}
+	if err := os.Remove(filepath.Join(m.board.Dir, filepath.FromSlash(t.Rel))); err != nil && !os.IsNotExist(err) {
+		m.status = "⚠ " + t.ID + " removed from board; file delete failed: " + err.Error()
+	} else {
+		m.status = "deleted " + t.ID
+	}
+	m.clampSel()
+	m.previewKey = ""
+	m.refreshPreview()
+	return m
 }
 
 // ---- mouse ----

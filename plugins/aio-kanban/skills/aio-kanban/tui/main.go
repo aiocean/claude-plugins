@@ -37,7 +37,7 @@ func printHelp() {
 	fmt.Println("  --help       print this help and exit")
 	fmt.Println()
 	fmt.Println("Two panes: left = tasks grouped by status, right = markdown preview of the selection.")
-	fmt.Println("Keys: j/k select · shift+up/down move status · tab focus preview · a add · r reload · q quit")
+	fmt.Println("Keys: j/k select · shift+up/down move status · tab focus preview · d delete · r reload · q quit")
 	fmt.Println("Mouse: click a task to select · wheel to scroll the focused pane")
 }
 

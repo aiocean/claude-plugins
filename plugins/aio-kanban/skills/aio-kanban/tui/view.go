@@ -17,8 +17,11 @@ func (m model) View() tea.View {
 	content := "loading…"
 	if m.width > 0 && m.height > 0 {
 		content = m.renderBoard()
-		if m.mode == modeInput {
+		switch m.mode {
+		case modeInput:
 			content = overlayCentered(content, m.renderInputModal(), m.width, m.height)
+		case modeConfirm:
+			content = overlayCentered(content, m.renderConfirmModal(), m.width, m.height)
 		}
 	}
 	v := tea.NewView(content)
@@ -175,10 +178,9 @@ func (m model) renderStatus() string {
 	switch m.mode {
 	case modeInput:
 		// The prompt itself lives in the floating modal; the bar just carries help.
-		left = addHelp
-		if m.inputPurpose == inputBlockReason {
-			left = reasonHelp
-		}
+		left = reasonHelp
+	case modeConfirm:
+		left = confirmHelp
 	default:
 		help := listHelp
 		if m.focus == focusPreview {
@@ -193,15 +195,9 @@ func (m model) renderStatus() string {
 	return statusBarStyle.Width(m.width).Render(fitLine(left, m.width-2))
 }
 
-// renderInputModal builds the floating input box (add-task title or blocked
-// reason): a titled, bordered box with the live input + caret over the board.
+// renderInputModal builds the floating blocked-reason input box: a titled,
+// bordered box with the live input + caret over the board.
 func (m model) renderInputModal() string {
-	title := "Add task"
-	help := addHelp
-	if m.inputPurpose == inputBlockReason {
-		title = "Block reason"
-		help = reasonHelp
-	}
 	innerW := 48
 	if innerW > m.width-8 {
 		innerW = m.width - 8
@@ -210,13 +206,36 @@ func (m model) renderInputModal() string {
 		innerW = 16
 	}
 	body := strings.Join([]string{
-		modalTitleStyle.Render(title),
+		modalTitleStyle.Render("Block reason"),
 		"",
 		fitLine(m.inputBuf+promptStyle.Render("▏"), innerW),
 		"",
-		cardDimStyle.Render(fitLine(help, innerW)),
+		cardDimStyle.Render(fitLine(reasonHelp, innerW)),
 	}, "\n")
 	return modalStyle.Width(innerW + modalStyle.GetHorizontalFrameSize()).Render(body)
+}
+
+// renderConfirmModal builds the floating delete-confirmation box: the target
+// task's ID + title over a critical-bordered box, with an explicit warning that
+// the task file is removed too.
+func (m model) renderConfirmModal() string {
+	innerW := 48
+	if innerW > m.width-8 {
+		innerW = m.width - 8
+	}
+	if innerW < 16 {
+		innerW = 16
+	}
+	t := m.confirmTarget
+	body := strings.Join([]string{
+		confirmTitleStyle.Render("Delete task"),
+		"",
+		fitLine(t.ID+"  "+t.Title, innerW),
+		cardDimStyle.Render(fitLine("Removes the board card and its task file.", innerW)),
+		"",
+		cardDimStyle.Render(fitLine(confirmHelp, innerW)),
+	}, "\n")
+	return confirmModalStyle.Width(innerW + confirmModalStyle.GetHorizontalFrameSize()).Render(body)
 }
 
 // overlayCentered composites box centered over bg on a w×h canvas (the last row

@@ -218,30 +218,112 @@ func TestMoveToDoneStampsCompleted(t *testing.T) {
 	}
 }
 
-func TestAddTaskCreatesFileAndLine(t *testing.T) {
+func TestAddKeyDisabled(t *testing.T) {
+	pinDate(t)
+	kdir := setupBoard(t)
+	m := sizedModel(t, kdir)
+	before := readBoard(t, kdir)
+
+	m = step(m, keyRune('a'))
+	if m.mode != modeList {
+		t.Fatalf("'a' must be inert now, but mode changed to %v", m.mode)
+	}
+	if readBoard(t, kdir) != before {
+		t.Fatalf("'a' must not modify the board")
+	}
+}
+
+func TestDeleteFlowRemovesCardAndFile(t *testing.T) {
 	pinDate(t)
 	kdir := setupBoard(t)
 	m := sizedModel(t, kdir)
 
-	m = step(m, keyRune('a')) // enter add-task input
-	if m.mode != modeInput || m.inputPurpose != inputAddTask {
-		t.Fatalf("'a' should open add-task input, mode=%v purpose=%v", m.mode, m.inputPurpose)
+	m = step(m, keyRune('d')) // open the delete-confirm modal for the selected T-001
+	if m.mode != modeConfirm || m.confirmTarget.ID != "T-001" {
+		t.Fatalf("'d' should open confirm for T-001, mode=%v target=%q", m.mode, m.confirmTarget.ID)
 	}
-	for _, r := range "New Feature" {
-		m = step(m, keyRune(r))
+	// The confirmation renders as a bordered modal naming the target.
+	frame := ansiStrip(overlayCentered(m.renderBoard(), m.renderConfirmModal(), m.width, m.height))
+	if !strings.Contains(frame, "Delete task") || !strings.Contains(frame, "T-001") || !strings.Contains(frame, "╭") {
+		t.Fatalf("confirm should render as a bordered modal naming T-001:\n%s", frame)
 	}
-	m = step(m, tea.KeyPressMsg{Code: tea.KeyEnter})
 
+	m = step(m, keyRune('y')) // confirm
 	if m.mode != modeList {
-		t.Fatalf("submit should return to list mode, got %v", m.mode)
+		t.Fatalf("confirm should return to list mode, got %v", m.mode)
 	}
-	want := filepath.Join(kdir, "tasks", "T-003-new-feature.md")
-	if _, err := os.Stat(want); err != nil {
-		t.Fatalf("expected new task file %s: %v", want, err)
+	if _, err := os.Stat(filepath.Join(kdir, "tasks", "T-001-alpha.md")); !os.IsNotExist(err) {
+		t.Fatalf("T-001 task file should be deleted, stat err=%v", err)
+	}
+	if strings.Contains(readBoard(t, kdir), "[T-001]") {
+		t.Fatalf("T-001 line should be gone from the board")
+	}
+}
+
+func TestDeleteCancelKeepsTask(t *testing.T) {
+	pinDate(t)
+	kdir := setupBoard(t)
+	m := sizedModel(t, kdir)
+
+	m = step(m, keyRune('d'))
+	m = step(m, tea.KeyPressMsg{Code: tea.KeyEsc})
+	if m.mode != modeList {
+		t.Fatalf("esc should cancel back to list mode, got %v", m.mode)
+	}
+	if _, err := os.Stat(filepath.Join(kdir, "tasks", "T-001-alpha.md")); err != nil {
+		t.Fatalf("cancelled delete must keep the task file: %v", err)
+	}
+	if !strings.Contains(readBoard(t, kdir), "[T-001]") {
+		t.Fatalf("cancelled delete must keep the board line")
+	}
+}
+
+// TestDeleteTargetsCapturedIDAcrossReload guards the destructive race: if the
+// board reloads (external agent edit) while the confirm modal is open and the
+// reload shifts the selection, confirming must still delete the originally
+// targeted card — never whatever the selection now points at.
+func TestDeleteTargetsCapturedIDAcrossReload(t *testing.T) {
+	pinDate(t)
+	kdir := setupBoard(t)
+	m := sizedModel(t, kdir)
+
+	m = step(m, keyRune('d')) // confirm modal captures T-001 (the default selection)
+	if m.confirmTarget.ID != "T-001" {
+		t.Fatalf("expected captured target T-001, got %q", m.confirmTarget.ID)
+	}
+
+	// External agent prepends T-099 ABOVE T-001 in Backlog and bumps the mtime.
+	external := strings.Replace(fixtureBoard,
+		"- [T-001](tasks/T-001-alpha.md) Alpha task — high/S",
+		"- [T-099](tasks/T-099-ext.md) External — low/S\n- [T-001](tasks/T-001-alpha.md) Alpha task — high/S",
+		1)
+	bp := filepath.Join(kdir, "board.md")
+	if err := os.WriteFile(bp, []byte(external), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	future := m.board.ModTime.Add(2 * time.Second)
+	if err := os.Chtimes(bp, future, future); err != nil {
+		t.Fatal(err)
+	}
+
+	// The poll tick fires while the modal is open: the board reloads and T-099
+	// now sits at flat index 0, shifting the selection off T-001.
+	m = step(m, tickMsg{})
+	if id := selID(m); id == "T-001" {
+		t.Fatalf("precondition: reload should have shifted selection off T-001, still on %q", id)
+	}
+
+	// Confirm: must delete the captured T-001, not the now-selected T-099.
+	m = step(m, keyRune('y'))
+	if _, err := os.Stat(filepath.Join(kdir, "tasks", "T-001-alpha.md")); !os.IsNotExist(err) {
+		t.Fatalf("captured T-001 file should be deleted, stat err=%v", err)
 	}
 	board := readBoard(t, kdir)
-	if s := sectionOf(board, "T-003"); s != "Backlog" {
-		t.Fatalf("new task should land in Backlog, got %q", s)
+	if strings.Contains(board, "[T-001]") {
+		t.Fatalf("T-001 line should be gone:\n%s", board)
+	}
+	if !strings.Contains(board, "[T-099]") {
+		t.Fatalf("T-099 must be untouched on the board:\n%s", board)
 	}
 }
 
@@ -291,8 +373,8 @@ func TestViewNoPanic(t *testing.T) {
 	m = step(m, tea.KeyPressMsg{Code: tea.KeyTab})
 	_ = m.View() // preview focused
 	m = step(m, tea.KeyPressMsg{Code: tea.KeyTab})
-	m = step(m, keyRune('a'))
-	_ = m.View() // input mode
+	m = step(m, keyRune('d'))
+	_ = m.View() // confirm modal
 	m = step(m, tea.KeyPressMsg{Code: tea.KeyEsc})
 
 	// Degenerate tiny terminal must not panic either.
