@@ -230,6 +230,15 @@
       }
     },
     {
+      "name": "aio-message-bridge",
+      "source": "./plugins/aio-message-bridge",
+      "description": "Give Claude Code an event loop. A local HTTP + WebSocket relay plus the Monitor tool let anything outside Claude — a CLI, a mobile app, a webhook, another program, a web page — talk to it mid-task in both directions. Inbound: client POSTs an event, relay prints a MSG:: line to stdout, Monitor surfaces it as a notification. Outbound: Claude POSTs a push, relay broadcasts it over WebSocket. Generic, language-agnostic protocol with a ready-to-run reference relay, plus optional token-gated network exposure over Cloudflare Tunnel, Tailscale, or LAN.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
+    },
+    {
       "name": "aio-image",
       "source": "./plugins/aio-image",
       "description": "Remove image backgrounds using RMBG-2.0 alpha matting with despill \u2014 works on any image (renders, photos, screenshots). Pairs with the flat-magenta chroma-key technique: render subject on #FF00FF with any image gen engine, then matte for a clean PNG RGBA cutout.",

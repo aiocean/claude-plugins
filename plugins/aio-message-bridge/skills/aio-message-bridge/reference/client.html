@@ -1,0 +1,123 @@
+<!doctype html>
+<!--
+  client.html — a minimal, framework-free reference client for the bridge.
+
+  It demonstrates BOTH directions of the protocol with vanilla JS — no Vue, no
+  React, no build step — because the bridge is generic. Any client (browser,
+  CLI, mobile, another program) only has to do these two things:
+
+    1. Receive Claude -> client pushes: open a WebSocket to /ws and read JSON
+       `{ type, payload }` frames.
+    2. Send client -> Claude events: POST /api/event with `{ type, payload }`.
+
+  Served by bridge-server.js at GET / so this fetch() is same-origin (no CORS).
+  When the relay runs with BRIDGE_TOKEN (any network exposure), open this page
+  as  …/?token=SECRET  — the token is read from the URL and attached to both
+  the WebSocket (?token=) and every POST (Authorization: Bearer).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>message bridge — reference client</title>
+<style>
+  body { font: 14px system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1e293b; }
+  h1 { font-size: 18px; }
+  #dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; vertical-align: middle; }
+  .row { display: flex; gap: 8px; margin: 12px 0; }
+  input, button { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
+  button { background: #0f172a; color: #fff; border: none; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  #log { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 8px; height: 220px; overflow: auto; white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; }
+  .status { color: #64748b; }
+</style>
+</head>
+<body>
+
+<h1><span id="dot"></span> message bridge — reference client</h1>
+<p class="status" id="status">connecting…</p>
+
+<!-- client -> Claude: type a message, click Send. A real app would collect
+     richer input; the contract is the same — POST /api/event. -->
+<div class="row">
+  <input id="text" placeholder="Send an event to Claude…" style="flex:1" />
+  <button id="send">Send to Claude →</button>
+</div>
+
+<!-- Claude -> client: every WS frame is appended here verbatim. A real app
+     would switch on frame.type and update its own UI. -->
+<div id="log"></div>
+
+<script>
+const dot = document.getElementById("dot");
+const statusEl = document.getElementById("status");
+const logEl = document.getElementById("log");
+const textEl = document.getElementById("text");
+const sendBtn = document.getElementById("send");
+
+function log(line) {
+  logEl.textContent += line + "\n";
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// Shared secret read from the page URL (…/?token=SECRET). Empty when the relay
+// runs token-less on localhost.
+const TOKEN = new URLSearchParams(location.search).get("token") || "";
+
+// ── Claude → client (inbound pushes over WebSocket) ──────────────────────
+let busy = false;
+function connect() {
+  const proto = location.protocol === "https:" ? "wss://" : "ws://";
+  const qs = TOKEN ? "?token=" + encodeURIComponent(TOKEN) : "";
+  const ws = new WebSocket(proto + location.host + "/ws" + qs);
+
+  ws.onopen = () => { dot.style.background = "#22c55e"; statusEl.textContent = "live"; };
+  ws.onclose = () => { dot.style.background = "#94a3b8"; statusEl.textContent = "reconnecting…"; setTimeout(connect, 1500); };
+
+  ws.onmessage = (ev) => {
+    let frame;
+    try { frame = JSON.parse(ev.data); } catch (_) { return; }
+    log("← push  " + JSON.stringify(frame));
+
+    // Demo handlers — a real client defines its own vocabulary. Here, a
+    // "done" push from Claude releases the turn-taking lock.
+    if (frame.type === "done") { busy = false; sendBtn.disabled = false; statusEl.textContent = "live"; }
+    if (frame.type === "status" && frame.payload && frame.payload.text) statusEl.textContent = frame.payload.text;
+  };
+}
+
+// ── client → Claude (outbound events over HTTP) ──────────────────────────
+async function send(type, payload) {
+  log("→ event " + JSON.stringify({ type, payload }));
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (TOKEN) headers["Authorization"] = "Bearer " + TOKEN;
+    await fetch("/api/event", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ type, payload }),
+    });
+  } catch (err) {
+    log("‼ send failed: " + (err && err.message ? err.message : err));
+  }
+}
+
+// Explicit submit + busy lock: Claude answers asynchronously across turns, so
+// the user must see whose turn it is. Lock on send; Claude pushes {type:"done"}
+// to unlock.
+sendBtn.onclick = () => {
+  const text = textEl.value.trim();
+  if (!text || busy) return;
+  busy = true;
+  sendBtn.disabled = true;
+  statusEl.textContent = "⏳ waiting for Claude…";
+  send("message", { text });
+  textEl.value = "";
+};
+textEl.addEventListener("keydown", (e) => { if (e.key === "Enter") sendBtn.onclick(); });
+
+connect();
+</script>
+
+</body>
+</html>
