@@ -124,3 +124,19 @@ A flat board grows unbounded — task notes, design sketches, discussion all pil
 ## Companion: auto-dispatch
 
 The `aio-kanban-monitor` skill watches `.kanban/board.md` and auto-spawns a sub-agent for any task in a chosen column whose content matches a free-text goal. See its SKILL.md for details.
+
+---
+
+## Companion: `aiokan` terminal UI (optional)
+
+This plugin ships a Go TUI at `${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/tui/` so a human can watch and steer the same board beside the agent — vim keys + mouse, in any terminal pane.
+
+**Two panes**: the left lists every task grouped by status (Backlog → Blocked); the right renders the selected task's markdown body live (glamour). It reads and writes the **exact** `.kanban/` format above (board lines relocated verbatim, Done stamps `completed`, Blocked stamps `blocked-by`, timestamp refreshed), with atomic writes and a staleness guard so it never clobbers an edit the agent makes while it is open.
+
+Install it globally once:
+
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban/tui" && go install .
+```
+
+Then run `aiokan` from any repo with a `.kanban/board.md`. Keys: `j/k` select · `shift+↑/↓` move status · `tab` focus preview · `a` add · `r` reload · `q` quit; mouse click selects, wheel scrolls the focused pane. Full docs in that folder's `README.md`. Requires Go 1.26+; the board protocol works fully without it.
