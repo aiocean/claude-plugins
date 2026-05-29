@@ -17,6 +17,9 @@ func (m model) View() tea.View {
 	content := "loading…"
 	if m.width > 0 && m.height > 0 {
 		content = m.renderBoard()
+		if m.mode == modeInput {
+			content = overlayCentered(content, m.renderInputModal(), m.width, m.height)
+		}
 	}
 	v := tea.NewView(content)
 	v.AltScreen = true
@@ -146,11 +149,11 @@ func (m model) renderStatus() string {
 	var left string
 	switch m.mode {
 	case modeInput:
-		prompt := "Title"
+		// The prompt itself lives in the floating modal; the bar just carries help.
+		left = addHelp
 		if m.inputPurpose == inputBlockReason {
-			prompt = "Blocked reason"
+			left = reasonHelp
 		}
-		left = promptStyle.Render(prompt+": ") + m.inputBuf + promptStyle.Render("▏")
 	default:
 		help := listHelp
 		if m.focus == focusPreview {
@@ -163,6 +166,45 @@ func (m model) renderStatus() string {
 		}
 	}
 	return statusBarStyle.Width(m.width).Render(fitLine(left, m.width-2))
+}
+
+// renderInputModal builds the floating input box (add-task title or blocked
+// reason): a titled, bordered box with the live input + caret over the board.
+func (m model) renderInputModal() string {
+	title := "Add task"
+	help := addHelp
+	if m.inputPurpose == inputBlockReason {
+		title = "Block reason"
+		help = reasonHelp
+	}
+	innerW := 48
+	if innerW > m.width-8 {
+		innerW = m.width - 8
+	}
+	if innerW < 16 {
+		innerW = 16
+	}
+	body := strings.Join([]string{
+		modalTitleStyle.Render(title),
+		"",
+		fitLine(m.inputBuf+promptStyle.Render("▏"), innerW),
+		"",
+		cardDimStyle.Render(fitLine(help, innerW)),
+	}, "\n")
+	return modalStyle.Width(innerW + modalStyle.GetHorizontalFrameSize()).Render(body)
+}
+
+// overlayCentered composites box centered over bg on a w×h canvas (the last row
+// is reserved for the status bar, so the box centers in the area above it).
+func overlayCentered(bg, box string, w, h int) string {
+	boxW, boxH := lipgloss.Width(box), lipgloss.Height(box)
+	cx := max(0, (w-boxW)/2)
+	cy := max(0, ((h-1)-boxH)/2)
+	canvas := lipgloss.NewCanvas(w, h)
+	return canvas.Compose(lipgloss.NewCompositor(
+		lipgloss.NewLayer(bg).Z(0),
+		lipgloss.NewLayer(box).X(cx).Y(cy).Z(1),
+	)).Render()
 }
 
 // renderMarkdown renders task-file markdown to a width with glamour, tightened to

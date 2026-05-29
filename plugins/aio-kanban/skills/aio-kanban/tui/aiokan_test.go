@@ -260,6 +260,11 @@ func TestBlockedFlowStampsReason(t *testing.T) {
 	if m.mode != modeInput || m.inputPurpose != inputBlockReason {
 		t.Fatalf("shift into Blocked should prompt for a reason, mode=%v purpose=%v", m.mode, m.inputPurpose)
 	}
+	// The reason prompt is a floating modal (bordered box), not a status-bar line.
+	frame := ansiStrip(overlayCentered(m.renderBoard(), m.renderInputModal(), m.width, m.height))
+	if !strings.Contains(frame, "Block reason") || !strings.Contains(frame, "╭") {
+		t.Fatalf("block reason should render as a bordered modal:\n%s", frame)
+	}
 	if s := sectionOf(readBoard(t, kdir), "T-001"); s != "Done" {
 		t.Fatalf("card must not move before reason is given, got %q", s)
 	}

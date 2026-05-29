@@ -51,6 +51,10 @@ var (
 
 	dividerStyle      = lipgloss.NewStyle().Foreground(colDim)
 	dividerFocusStyle = lipgloss.NewStyle().Foreground(colAccent)
+
+	// modalStyle is the floating input box: a rounded accent border over the board.
+	modalStyle      = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(colAccent).Foreground(colFg).Padding(0, 1)
+	modalTitleStyle = lipgloss.NewStyle().Foreground(colAccent).Bold(true)
 )
 
 // priorityColor maps a task priority to its dot color. Unknown → dim.
