@@ -468,6 +468,22 @@ func (m model) layout() geom {
 
 func (m model) bodyH() int { return m.layout().bodyH }
 
+// taskCounts returns the total number of tasks and how many are in Done.
+func (m model) taskCounts() (total, done int) {
+	for c := range m.board.Cols {
+		total += len(m.board.Cols[c])
+	}
+	return total, len(m.board.Cols[Done])
+}
+
+// shortenPath replaces the home-directory prefix with ~ for a compact header.
+func shortenPath(p string) string {
+	if home, err := os.UserHomeDir(); err == nil && home != "" && strings.HasPrefix(p, home) {
+		return "~" + strings.TrimPrefix(p, home)
+	}
+	return p
+}
+
 // clampSel keeps the selection inside the flattened task list after a reload or
 // a move shrinks the board.
 func (m *model) clampSel() {

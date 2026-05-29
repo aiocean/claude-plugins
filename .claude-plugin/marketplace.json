@@ -188,7 +188,7 @@
       "name": "aio-kanban",
       "source": "./plugins/aio-kanban",
       "description": "Track AI-agent work in a markdown kanban board committed to the repo \u2014 index board with per-task files, an auto-dispatch monitor that spawns sub-agents for matching tasks, and an optional Go terminal UI (aiokan) for vim/mouse board steering.",
-      "version": "3.1.1",
+      "version": "3.1.2",
       "author": {
         "name": "aiocean"
       }

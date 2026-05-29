@@ -32,9 +32,34 @@ func (m model) View() tea.View {
 // bar.
 func (m model) renderBoard() string {
 	g := m.layout()
-	title := fitLine(appTitleStyle.Render("aio-kanban")+cardDimStyle.Render("  "+m.board.Dir), m.width)
 	body := lipgloss.JoinHorizontal(lipgloss.Top, m.renderLeft(g), m.renderDivider(g), m.renderRight(g))
-	return strings.Join([]string{title, body, m.renderStatus()}, "\n")
+	return strings.Join([]string{m.renderHeader(), body, m.renderStatus()}, "\n")
+}
+
+// renderHeader draws the top bar: an accent tab + "aio-kanban", the board path
+// (home shortened to ~), and a right-aligned task summary, all on a filled strip.
+func (m model) renderHeader() string {
+	left := headerTabStyle.Render(" ▌") + headerTitleStyle.Render(" aio-kanban") +
+		headerPathStyle.Render("  "+shortenPath(m.board.Dir))
+
+	total, done := m.taskCounts()
+	right := headerCountStyle.Render(fmt.Sprintf("%d tasks · ", total)) +
+		headerDoneStyle.Render(fmt.Sprintf("%d done", done)) + headerCountStyle.Render(" ")
+
+	gap := m.width - lipgloss.Width(left) - lipgloss.Width(right)
+	if gap < 1 { // too narrow: drop the path, then the summary
+		left = headerTabStyle.Render(" ▌") + headerTitleStyle.Render(" aio-kanban")
+		gap = m.width - lipgloss.Width(left) - lipgloss.Width(right)
+		if gap < 1 {
+			right = ""
+			gap = m.width - lipgloss.Width(left)
+		}
+		if gap < 0 {
+			gap = 0
+		}
+	}
+	content := left + headerBarStyle.Render(strings.Repeat(" ", gap)) + right
+	return headerBarStyle.Render(fitLine(content, m.width))
 }
 
 // leftRow is one rendered line of the left pane: a status group header or a task.

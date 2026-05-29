@@ -31,7 +31,15 @@ var columnColor = [numColumns]color.Color{
 }
 
 var (
-	appTitleStyle = lipgloss.NewStyle().Bold(true).Foreground(colAccent)
+	// Header bar — a filled top strip. Every segment bakes in headerBg so nested
+	// ANSI resets never leave a gap in the background fill.
+	headerBg         = lipgloss.Color("#262335")
+	headerBarStyle   = lipgloss.NewStyle().Background(headerBg).Foreground(colDim)
+	headerTitleStyle = lipgloss.NewStyle().Background(headerBg).Foreground(colSelFg).Bold(true)
+	headerTabStyle   = lipgloss.NewStyle().Background(headerBg).Foreground(colAccent).Bold(true)
+	headerPathStyle  = lipgloss.NewStyle().Background(headerBg).Foreground(colDim)
+	headerCountStyle = lipgloss.NewStyle().Background(headerBg).Foreground(colDim)
+	headerDoneStyle  = lipgloss.NewStyle().Background(headerBg).Foreground(colLow).Bold(true)
 
 	statusBarStyle = lipgloss.NewStyle().
 			Background(colChrome).
