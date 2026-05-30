@@ -71,6 +71,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | Plugin | Version | Description |
 |--------|---------|-------------|
 | **aio-code-review** | 1.0.0 | Google's engineering code-review playbook — the LGTM threshold ("improves code health, not perfection"), 8-point reviewer checklist (design/functionality/complexity/tests/naming/comments/style/docs), severity-labeled comments (Nit/Optional/FYI), pushback handling, and CL-author guidance (good descriptions, small CLs, handling reviews). Distilled verbatim from [google/eng-practices](https://github.com/google/eng-practices) (CC-BY 3.0).<br>`npx skills add aiocean/claude-plugins -s aio-code-review` |
+| **aio-workflow** | 1.0.0 | Author Workflow-tool scripts that spend effort like it's free and waste none of it — a maximal-effort playbook for multi-agent orchestration. Pick an effort tier (quick check → thorough audit → maximize), then scale fan-out width, verify votes, and discovery rounds; compose named amplifiers (multi-modal sweep, adversarial + perspective-diverse verify, loop-until-dry, completeness critic, synthesis) into one canonical harness, with the correctness rules (literal meta, determinism ban, pipeline-by-default, budget guard, caps) that keep it runnable and resumable. 1 skill: aio-workflow-creator.<br>`npx skills add aiocean/claude-plugins -s aio-workflow` |
 
 ### Observability & Utilities
 

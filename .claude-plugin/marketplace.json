@@ -255,6 +255,15 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "aio-workflow",
+      "source": "./plugins/aio-workflow",
+      "description": "Author Workflow-tool scripts that spend effort like it's free and waste none of it. A maximal-effort playbook for multi-agent orchestration: pick an effort tier (quick check \u2192 thorough audit \u2192 maximize), then scale fan-out width, verification votes, and discovery rounds off it. Composes named amplifiers \u2014 multi-modal sweep, adversarial + perspective-diverse verify, judge panels, loop-until-dry discovery, completeness critic, synthesis \u2014 into one canonical harness, with the correctness rules (literal meta, determinism ban, pipeline-by-default, budget guard, concurrency caps) that keep the script runnable and resumable.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }
