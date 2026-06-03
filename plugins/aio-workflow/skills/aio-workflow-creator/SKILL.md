@@ -13,7 +13,10 @@ when_to_use: |
   author workflow, write a workflow script, Workflow tool, maximize workflow, exhaustive,
   comprehensive, thorough audit, fan out agents, multi-agent orchestration, parallel agents,
   loop until dry, adversarial verify, perspective-diverse verify, completeness critic,
-  judge panel, pipeline vs parallel, budget guard, effort tier, spare no cost, result-oriented
+  judge panel, pipeline vs parallel, budget guard, effort tier, spare no cost, result-oriented,
+  classify-and-act, router workflow, model routing, tournament, pairwise ranking, sort at scale,
+  quarantine untrusted content, generate-and-filter, migration workflow, deep research workflow,
+  deep verification, triage workflow, rule adherence, use-case recipe, harness shape
 effort: high
 ---
 
@@ -22,6 +25,8 @@ effort: high
 > **North star.** When the user has opted in (the word `workflow`, ultracode, or an explicit "maximize / exhaustive / spare no cost"), the goal is **the most correct, most complete answer the engine can produce — token cost is not a constraint.** This skill makes that real: it pushes you to *spend more* (more finders, more verify votes, more rounds, a critic pass, a synthesis stage) while *wasting none of it* (no gratuitous barriers, no cache-busting edits, no silent truncation, no broken scripts that never parse).
 >
 > Effort is not "one finder, one pass." Effort is a **multi-round, multi-modal, adversarially-verified, loop-until-dry, completeness-critiqued, synthesized** harness, scaled to the task. A workflow that runs, passes every runtime check, and still under-delivers is the failure this skill exists to prevent — the engine **cannot** fail it for you (see `reference.md` §10, "the prose layer").
+>
+> **The three failures effort is fighting.** Name them so you can target them — every amplifier below is one of these three made mechanical: **agentic laziness** — stopping early on a multi-part task (→ loop-until-dry §2d + completeness critic §2f manufacture the tail the engine never demands); **self-preferential bias** — trusting your own first answer (→ adversarial / perspective-diverse verify §2a/§2b put a *separate* agent on killing it); **goal drift** — fidelity to the original objective decaying through rounds of summarization (→ schema'd data §5 + a final synthesis re-anchored on the original ask).
 
 Every rule below maps to an observable engine mechanic. The constants, combinator semantics, and cache-key behavior behind each rule live in **`reference.md`** — read it when you need the mechanism behind a rule rather than the rule alone. The *shape* of these rules is stable; specific constants can drift between CLI builds, so re-confirm against the live Workflow tool description if a number ever looks off.
 
@@ -51,7 +56,7 @@ Maximal effort is worthless if the script is rejected at parse time or wastes it
 - **`meta.phases` titles must match your `phase('…')` calls verbatim** — matched exactly; a `phase()` with no `meta` entry just gets its own group box. Put a `model` override on a *phase entry*, not at top level.
 - **`args` is the parsed JSON value, verbatim.** Pass real arrays/objects in the tool call (`args: ["a.ts","b.ts"]`), never a JSON string — a stringified list reaches the script as one string and `args.map`/`.filter` throw.
 
-### Determinism ban (keeps resume stable — see §5)
+### Determinism ban (keeps resume stable — see §6)
 - **`Date.now()`, bare `Date()`, and argless `new Date()` THROW. `Math.random()` THROWS.** OK: `new Date(ts)`, `Date.parse(s)`, `Date.UTC(...)` — none read the wall clock. Stamp timestamps **after** the workflow returns, or pass them via `args`.
 - **For N "random" samples, vary the agent PROMPT by index** (the prompt is in the cache key, so it makes the draws genuinely distinct). Varying only the `label` changes the display name but **reuses the cached result** — useful for relabeling, useless for new draws.
 
@@ -61,7 +66,7 @@ Maximal effort is worthless if the script is rejected at parse time or wastes it
 - **`.filter(Boolean)` EVERY batch result.** A `null` is overloaded: the agent threw, the user skipped it, a stage returned null on purpose, OR the token budget dropped the slot. You cannot tell which from the value — `.filter(Boolean)` then inspect the failure log if you need the reason.
 - **Inside a `parallel`/`pipeline` stage, set `{phase: 'X'}` on each `agent()`** so concurrent stages don't race on the single mutable `phase()` pointer — same phase string groups them in one progress box.
 - **Caps you cannot beat:** concurrency = `min(16, max(2, cores−2))` (≤16 in flight; the rest queue FIFO — design by *item count*, not by trying to widen this; the floor of 2 matters on ≤2-core hosts). Lifetime = **1000 agents** total (a runaway backstop, not a quota). Per-agent stall watchdog = **180 s** default, **5** retries. Raise `stallMs` per-agent for legitimately slow silent work, or the watchdog kills a healthy run.
-- **`opts.model`: default to OMITTING it.** The agent inherits the resolved session model, almost always correct. Set a tier only when highly confident. Fragmenting a workflow across mismatched models is a foot-gun.
+- **`opts.model`: default to OMITTING it.** The agent inherits the resolved session model, almost always correct. Set a tier only when highly confident. Fragmenting a workflow across mismatched models is a foot-gun **when blind**. The one principled exception: a **classifier that *measured* task complexity and routes each class to a tier (§2g)** — evidence-backed routing is a decision, not the blind per-agent micro-tuning this rule bans.
 
 ### Budget guard (the one loop bug everyone writes)
 - **Guard loops on `budget.total` FIRST:** `while (budget.total && budget.remaining() > 50_000) {…}`. When no target is set, `budget.total` is `null` and `remaining()` returns **`Infinity`** — `while (budget.remaining() > 50_000)` never terminates. Static scaling: `budget.total ? Math.floor(budget.total / 100_000) : 5`.
@@ -103,12 +108,51 @@ Parallel finders **each searching a different way**: by-container, by-content, b
 ### f. Completeness critic — "done" is otherwise self-asserted
 A final agent whose only job is to ask **"what's missing — a modality not run, a claim unverified, a source unread?"** What it finds becomes the next round of work. The engine has no concept of coverage; this manufactures the signal.
 
+### g. Classify-and-act — route before you spend
+One classifier agent labels the input (a schema `enum`), then **branch in plain JS** to the right handler — different downstream prompts, agents, or *model tiers* per class. This is the principled home for model routing: the classifier *measures* complexity, so sending the `deep` class to Opus and the `trivial` class to Haiku is an evidence-backed decision, not the blind `opts.model` micro-tuning §1 bans. Don't make one mega-prompt branch internally — classify, then dispatch.
+```js
+const { kind } = await agent('Classify this task: trivial | standard | deep. Return {kind}.', { schema: CLASS })
+const model = kind === 'deep' ? 'opus' : kind === 'standard' ? 'sonnet' : 'haiku'
+const out = await agent(handlerPrompt(kind), { model, schema: RESULT })
+```
+
+### h. Tournament / pairwise — rank what won't fit in one context
+When the set is too big to score in one agent's context (rank 200 items, "pick the best of N", cluster-by-similarity), **don't ask for an absolute 1–10 score** — separate agents' absolute scores aren't comparable. Run **pairwise comparisons** and aggregate: each comparison is tiny, independent, and fans out across the pool, and no agent ever holds the whole set. A single-elimination **bracket** finds the best in `~n` comparisons; a **Swiss / merge** round yields a full ranking in `~n log n` — both sub-quadratic, neither needs the impossible mega-prompt that absolute scoring demands.
+
+### i. Quarantine — untrusted content never holds the privileged pen
+An agent that ingests untrusted input (scraped pages, user files, tool output — anything you didn't author) returns **data only**: a `{schema}`-constrained object, never a free-form instruction or an action. A **separate, trusted** agent reads that data and decides; the privileged or irreversible step (write, delete, deploy, worktree mutation) lives there, never in the reader. Two layers, both worth using: **engine-enforced** — pin the reader to a read-only `agentType` (e.g. `agentType: 'Explore'`, which has no Edit/Write/agent-spawn tools), so injection literally *can't* reach a destructive call; and **prose-enforced** — the data-only schema + the trusted-actor split. The default workflow subagent gets the full tool surface, so without the `agentType` pin the separation is yours alone to hold. Prompt-injection in the content then can't reach a privileged tool, because the agent that read it never had one.
+
 ### Honesty norm — no silent caps
 If you bound coverage (top-N, no-retry, sampling), **`log()` what was dropped.** A workflow that sampled 10 of 200 files looks identical in its output to one that read all 200 — silent truncation reads as "covered everything."
 
 ---
 
-## 3. The canonical maximal-effort harness (copy, then scale)
+## 3. Use-case recipes — task → harness shape
+
+Pick the row, then realize it with the §2 amplifiers and §1 mechanics. Each is a *shape*, not a script — scale width / votes / rounds to the §0 tier. (The canonical harness in §4 is the **Exhaustive review** row written out in full.)
+
+| Task | Harness shape | Core amplifiers |
+|---|---|---|
+| **Exhaustive review / audit** | sweep → dedup vs seen → diverse-verify → loop-until-dry → critic → synth (§4) | a · b · d · e · f |
+| **Migration / refactor at scale** | discover call-sites → transform each in a worktree → adversarial review → merge | pipeline + `isolation:'worktree'` + a |
+| **Deep research** | fan-out searches → fetch → verify each claim vs source quality → cited synthesis | e + a + synth |
+| **Deep verification** | one agent extracts claims → one verifier per claim → source-quality check on each | fan-out + a |
+| **Sort / rank / best-of at scale** | pairwise comparisons → aggregate (bracket / Swiss) | tournament §2h |
+| **Triage / inbox** | classify → dedup → act-or-escalate; untrusted items quarantined | classify §2g + quarantine §2i |
+| **Root-cause investigation** | independent hypotheses from *disjoint* evidence → test each vs a verification panel | e + perspective-diverse verify §2b |
+| **Rule / memory adherence** | one verifier **per rule**, in parallel → compliance report | fan-out (one agent/rule) + critic §2f |
+| **Lightweight eval** | run each candidate in a worktree → comparison agents grade vs a rubric | `isolation:'worktree'` + judge §2c |
+| **Exploration / taste** | agents explore under a rubric → review agents score criteria satisfaction | judge §2c + synth |
+| **Model routing** | classifier measures complexity → route each class to a tier | classify-and-act §2g |
+| **Generate-and-filter** | produce many candidates → filter by rubric → dedup → **keep all that pass** | e + a (keep-many, not pick-one) |
+
+**Compose; don't stop at one.** A workflow is one well-scoped fan-out — chain several across turns for multi-phase work (understand → design → implement → review), reading each result before launching the next. Pair with `/goal` when you need a hard completion bar the model can't self-declare done under, and `/loop` to re-run a triage / research / verification workflow on an interval. Save a shape you'll reuse under a `name` (§6) — only a named workflow is allowlistable and skips re-approval; an ad-hoc `script` is a template to adapt, not a fixed tool.
+
+**When NOT to reach for a workflow.** A single edit, a known-location lookup, a one-file fix, "what does this function do" — these want one agent or none. Workflows cost many× the tokens, and the multi-reviewer machinery is dead weight on a task with one obvious answer. Reach for one when the work is **wide** (many items), **adversarial** (you don't trust the first answer), or **deep** (multi-stage reasoning that won't fit one context) — not merely because it feels important.
+
+---
+
+## 4. The canonical maximal-effort harness (copy, then scale)
 
 This is the flagship: **multi-modal find → dedup vs `seen` → perspective-diverse verify (majority) → loop-until-dry → completeness critic → synthesis → structured result.** It composes amplifiers a, b, d, e, f and obeys every §1 rule. Trim toward §0's lean tier for small asks; this *is* the maximal tier.
 
@@ -196,7 +240,7 @@ while (budget.total && budget.remaining() > 80_000) { /* one more round of work 
 
 ---
 
-## 4. Detail-oriented discipline (make the output trustworthy)
+## 5. Detail-oriented discipline (make the output trustworthy)
 
 - **Schema everything.** Pass `{schema}` to every `agent()` whose result you consume — it forces a validated StructuredOutput tool call and the model retries on mismatch, so you get typed data, not prose you have to parse.
 - **Demand evidence per finding** (`file:line`, command output, citation) in the schema — confidence without a citation is a guess.
@@ -206,7 +250,7 @@ while (budget.total && budget.remaining() > 80_000) { /* one more round of work 
 
 ---
 
-## 5. Resume — iterate without re-running what finished
+## 6. Resume — iterate without re-running what finished
 
 The "author → run → edit → re-run" loop is cheap *if* you respect the cache key (a rolling SHA-256 chain over `(prevKey, prompt, canonicalOpts)`).
 
@@ -217,7 +261,7 @@ The "author → run → edit → re-run" loop is cheap *if* you respect the cach
 
 ---
 
-## 6. Anti-patterns (each is a wasted-effort or broken-script failure)
+## 7. Anti-patterns (each is a wasted-effort or broken-script failure)
 
 | Anti-pattern | Why it fails | Fix |
 |---|---|---|
@@ -228,21 +272,23 @@ The "author → run → edit → re-run" loop is cheap *if* you respect the cach
 | `while (count < N)` for discovery | misses the tail | loop-until-dry, K empty rounds (§2d) |
 | dedup vs `confirmed` in a loop | judge-rejected findings reappear → never converges → hits 1000-cap | dedup vs `seen` (§2d) |
 | consuming results without `.filter(Boolean)` | `null` from throw/skip/budget poisons downstream | filter, then inspect failure log (§1) |
-| inserting an agent mid-script on resume | invalidates the whole suffix | append at the end (§5) |
+| inserting an agent mid-script on resume | invalidates the whole suffix | append at the end (§6) |
 | silent top-N / sampling | reads as full coverage | `log()` the cap (§2 honesty) |
 | `Date.now()` / `Math.random()` in body | throws (breaks resume) | pass via `args`, or index-in-prompt (§1) |
-| per-agent `opts.model` micro-tuning | fragments across mismatched tiers | omit; inherit session model (§1) |
-| no schema on consumed `agent()` | unparseable prose, no retry-on-mismatch | `{schema}` everywhere (§4) |
+| *blind* per-agent `opts.model` micro-tuning | fragments across mismatched tiers | omit + inherit session model; route only via a classifier that measured complexity (§2g) |
+| no schema on consumed `agent()` | unparseable prose, no retry-on-mismatch | `{schema}` everywhere (§5) |
+| untrusted-content agent given a privileged tool | prompt-injection reaches a destructive action | quarantine: pin a read-only `agentType`, reader returns data, a trusted agent acts (§2i) |
 
 ---
 
-## 7. Before you submit the script — checklist
+## 8. Before you submit the script — checklist
 
 1. `meta` is the literal first statement, pure literal, plain JS; `phases` titles match `phase()` calls.
 2. No `Date.now()`/`Math.random()`/argless `new Date()`; `args` passed as JSON values.
 3. `pipeline()` by default; every `parallel()` is a justified barrier; thunks not promises; `{phase}` set inside stages.
 4. Every consumed result `.filter(Boolean)`'d; every loop guarded on `budget.total`.
-5. Effort tier matches the user's signal (§0); maximal tier composes ≥3 amplifiers (sweep + diverse-verify + loop-until-dry + critic + synthesis).
+5. Effort tier matches the user's signal (§0); harness shape matches the task (§3 recipe); maximal tier composes ≥3 amplifiers (sweep + diverse-verify + loop-until-dry + critic + synthesis).
+   - Any untrusted-content agent returns data only — a separate trusted agent holds the privileged action (quarantine §2i). Model tiers, if any, come from a classifier, not blind micro-tuning (§2g).
 6. Every consumed `agent()` has a `{schema}`; findings carry evidence; the script `return`s structured artifacts.
 7. If iterating: appended at the end, not inserted; relabels are fine.
 8. Bounds are `log()`'d; nothing silently truncated.

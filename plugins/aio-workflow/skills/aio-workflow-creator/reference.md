@@ -134,6 +134,10 @@ Caps are network-politeness, not CPU sizing — agents are I/O-bound LLM calls. 
 | Loop-until-dry | fixed `count<N` misses the tail — loop until K empty rounds; **dedup vs `seen`, NOT `confirmed`** else never converges |
 | Multi-modal sweep | one search angle misses things — parallel finders by container/content/entity/time |
 | Completeness critic | "done" is self-asserted — a final agent asks what's missing |
+| Classify-and-act | a mega-prompt does everything badly — classify (schema enum), branch in JS, route per class (incl. evidence-backed model tier) |
+| Tournament / pairwise | absolute scores from separate agents aren't comparable, and big sets don't fit one context — pairwise compare + aggregate (bracket/Swiss) |
+| Quarantine | untrusted content reaching a privileged tool — the reader returns data only; a separate trusted agent acts |
+| Generate-and-filter | one-shot output under-covers — produce many, filter by rubric, dedup, keep ALL that pass (≠ judge panel's pick-one) |
 | No silent caps | a bounded run reads as full coverage — `log()` what was dropped |
 | Scale to ask | "find any bugs" → minimal; "thorough/audit" → maximal |
 
@@ -144,3 +148,5 @@ Caps are network-politeness, not CPU sizing — agents are I/O-bound LLM calls. 
 The large Workflow tool description is a **behavior-shaping prompt**, not documentation: the runtime enforces what it mechanically can (caps, throws, determinism — stated in one flat sentence each), and the prose carries exactly what the runtime **cannot** check — *when* to fan out (the opt-in gate and its negative shadow), *whether a barrier was necessary*, *how much effort*, and *coverage honesty*. A workflow that under-delivers passes every runtime check; **no guard fails it for you** — which is why a skill at this layer is the right surface.
 
 Companion idiom in a second tool: `ScheduleWakeup`'s pacing block derives an entire schema from the **300 s prompt-cache TTL** — "don't pick 300s, it's the worst-of-both; drop to 270s or commit to 1200s+." Same shape: the runtime accepts any delay; the prose supplies the cost geometry the engine never will.
+
+**Sourcing discipline.** The blog *"A harness for every task: dynamic workflows in Claude Code"* is the menu of **use-cases** — which patterns exist (classify-and-act, tournament, quarantine, generate-and-filter, the recipe rows in SKILL.md §3) and which task each fits. The authority on **mechanics** is the live Workflow tool description and this reference — every code example and every constant must trace back to the engine's own contract. Never enshrine a behavioral claim that can't be traced there; a paraphrased blog summary is a pointer to a pattern, not a spec for how the engine runs it.

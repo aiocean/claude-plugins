@@ -1,7 +1,7 @@
 {
   "name": "aio-workflow",
-  "description": "Author Workflow-tool scripts that spend effort like it's free and waste none of it. A maximal-effort playbook for multi-agent orchestration: pick an effort tier, then scale fan-out width, verification votes, and discovery rounds off it. Composes named amplifiers — multi-modal sweep, adversarial + perspective-diverse verify, judge panels, loop-until-dry discovery, completeness critic, synthesis — into one canonical harness, alongside the correctness rules (literal meta, determinism ban, pipeline-by-default, budget guard, concurrency caps) that keep the script runnable and resumable.",
-  "version": "1.0.0",
+  "description": "Author Workflow-tool scripts that spend effort like it's free and waste none of it. A maximal-effort playbook for multi-agent orchestration: pick an effort tier, then scale fan-out width, verification votes, and discovery rounds off it. Composes named amplifiers — multi-modal sweep, adversarial + perspective-diverse verify, judge panels, loop-until-dry discovery, completeness critic, synthesis, classify-and-act routing, tournament/pairwise ranking, and untrusted-content quarantine — plus a task→harness recipe catalog, alongside the correctness rules (literal meta, determinism ban, pipeline-by-default, budget guard, concurrency caps) that keep the script runnable and resumable.",
+  "version": "1.1.0",
   "author": {
     "name": "aiocean"
   },
