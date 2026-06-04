@@ -57,11 +57,53 @@ export default defineNuxtConfig({
   i18n: {
     defaultLocale: 'en',
     strategy: 'prefix_except_default',
+    // @nuxtjs/i18n needs baseUrl or it warns `I18n baseUrl is required to
+    // generate valid SEO tag links` on every page and can't resolve absolute
+    // locale URLs (switchLocalePath, og:locale). Hardcoded to the production
+    // origin (same value as `site.url`). Note: hreflang alternates stay
+    // intentionally OFF — see app/plugins/locale-lang.ts (`seo: false`), which
+    // suppresses the per-locale alternate flood while translation is
+    // incremental. Canonical is owned by seo-utils, so each page emits one.
+    baseUrl: 'https://claude-plugins.aiocean.dev',
     locales: [
       { code: 'en', language: 'en-US', name: 'English' },
       { code: 'vi', language: 'vi-VN', name: 'Tiếng Việt' },
     ],
     detectBrowserLanguage: false,
+  },
+
+  // Site branding — moved here from app/app.config.ts (now deleted).
+  // andy-note-nuxt ≥ 0.4 reads branding from runtimeConfig.public.site; the
+  // app.config.ts / useAppConfig surface was removed upstream. Nuxt deep-merges
+  // these over the layer's defaults field-by-field.
+  runtimeConfig: {
+    public: {
+      site: {
+        title: 'Claude Plugins',
+        description: 'A marketplace of skills, agents, and workflows for Claude Code.',
+        tagline: 'Install plugins with one command.',
+        author: 'aiocean',
+        themeColor: '#d4ff00',
+      },
+      menu: [
+        { name: 'Plugins', url: '/plugins', weight: 0 },
+        { name: 'Guides', url: '/guides', weight: 10 },
+        { name: 'GitHub', url: 'https://github.com/aiocean/claude-plugins', weight: 99, external: true },
+      ],
+    },
+  },
+
+  // @nuxtjs/seo site config — andy-note-nuxt ≥ 0.6.0 ships the SEO stack
+  // (sitemap, robots, og-image, schema-org, seo-utils); this supplies the one
+  // per-site value it needs, the production origin. `name` drives the <title>
+  // template + og:site_name, `description` the meta-description fallback.
+  // Canonical + hreflang stay owned by @nuxtjs/i18n — the SEO modules defer to it,
+  // so each page emits exactly one canonical.
+  site: {
+    url: 'https://claude-plugins.aiocean.dev',
+    name: 'Claude Plugins',
+    description: 'A marketplace of skills, agents, and workflows for Claude Code.',
+    defaultLocale: 'en',
   },
 
   // Deployed to Cloudflare Pages at claude-plugins.aiocean.dev — custom
@@ -70,15 +112,10 @@ export default defineNuxtConfig({
   // subpath deploy can override without code changes).
   app: {
     baseURL: process.env.NUXT_APP_BASE_URL ?? '/',
-    head: {
-      title: 'Claude Plugins · aiocean',
-      meta: [
-        {
-          name: 'description',
-          content: 'Reusable skills, agents, and workflows for Claude Code. Install with one command.',
-        },
-      ],
-    },
+    // No static title/description — andy-note-nuxt ≥ 0.6.0 emits per-page SEO
+    // (useSeoMeta from content frontmatter) and seo-utils supplies the
+    // `%s | %siteName` title template + the site.description fallback. A static
+    // title here would flow back through that template and double the site name.
   },
 
   // Layer wires the ai-annotator dev overlay (browser feedback to claude). It's
