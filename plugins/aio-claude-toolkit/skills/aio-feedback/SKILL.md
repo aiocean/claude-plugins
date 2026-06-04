@@ -12,12 +12,12 @@ effort: low
 ## Environment
 - gh: !`which gh 2>/dev/null || echo "NOT INSTALLED — brew install gh"`
 - gh auth: !`gh auth status 2>/dev/null | grep -q "Logged in" && echo "authenticated" || echo "NOT AUTHENTICATED — run: gh auth login"`
-- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/feedback/scripts"`
+- Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-feedback/scripts"`
 
 Submit bug reports, feature requests, and plugin requests directly to the aiocean/claude-plugins repository without leaving Claude Code.
 
 ```bash
-SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/feedback/scripts"
+SCRIPTS="${CLAUDE_PLUGIN_ROOT}/skills/aio-feedback/scripts"
 ```
 
 ## Workflow

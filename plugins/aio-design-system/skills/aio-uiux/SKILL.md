@@ -3,7 +3,8 @@ name: aio-uiux
 description: |
   Web UI design and review advisor — applies UX psychology, interaction patterns, WCAG accessibility, and modern CSS to design new interfaces or critique existing ones. Use proactively when reviewing any frontend UI, scaffolding new components, or deciding layout/color/typography trade-offs.
 when_to_use: UI, UX, design, layout, color, typography, animation, accessibility, a11y, design system, responsive, dark mode, WCAG, visual hierarchy, micro-interaction, loading state, design tokens, web design, CSS, component design, interaction patterns
-effort: low
+effort: medium
+argument-hint: "Component, page, or design challenge"
 ---
 
 # UI/UX Design Advisor

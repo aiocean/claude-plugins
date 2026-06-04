@@ -99,7 +99,7 @@ impact(file)
 
 ### Step 5: Create baseline
 
-Run `/snapshot` before starting implementation.
+Run `/aio-snapshot` before starting implementation.
 
 ### Step 6: Execution handoff
 

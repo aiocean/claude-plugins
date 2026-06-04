@@ -1,7 +1,7 @@
 ---
 name: aio-visual-diff
 description: |
-  Verify AI-generated frontend UI against design via measurement-driven diff — extracts `getComputedStyle` + `getBoundingClientRect` through chrome-devtools MCP, diffs against Figma data or baseline JSON, reports numerical deltas. Use when checking pixel-perfect implementation, validating design fidelity, catching layout regressions, or when the agent claims "it looks right" but you want numerical proof instead of eyeballed screenshots.
+  Verify AI-generated frontend UI against design via measurement-driven diff — extracts `getComputedStyle` + `getBoundingClientRect` through chrome-devtools MCP, diffs against Figma data or baseline JSON, reports numerical deltas. Catches library-specific token traps where class names lie about runtime values (Radix, Material UI, Tailwind, shadcn). Use when checking pixel-perfect implementation, validating design fidelity, catching layout regressions, or when the agent claims "it looks right" but you want numerical proof instead of eyeballed screenshots.
 when_to_use: visual diff, pixel diff, pixel perfect, design fidelity, frontend verify, UI regression, measurement loop, computed CSS, layout diff, Figma compare, design check, padding wrong, font size off, spacing off, AI built UI verify, baseline regression, visual QA, Radix token trap, Tailwind token check, MUI spacing wrong, shadcn line-height
 argument-hint: "<dev-url> <selector> [--figma <node-url>]"
 effort: medium
@@ -11,6 +11,8 @@ effort: medium
 
 > *"Heading font size is 28px, spec says 24px, change Heading size from 7 to 6."*
 > Specific, numerical, unambiguous. **That** is feedback the agent can act on.
+
+This skill drives a measurement loop: navigate the dev server, extract computed CSS and bounding-box numbers via `chrome-devtools` MCP, diff against a Figma node (Figma fidelity mode) or a frozen baseline JSON (baseline regression mode), then convert every delta into a concrete "change X to Y in file Z" correction. The loop repeats until all deltas fall within threshold — no screenshot eyeballing at any step.
 
 LLM (kể cả multimodal) yếu spatial pixel reasoning — đưa nó 2 screenshot rồi hỏi *"giống không?"* sẽ trả lời chủ quan và thường sai. Skill này thay bằng vòng lặp **đo số → diff số → fix theo delta**.
 
@@ -106,6 +108,7 @@ Trả về JSON measurements. **Không** lưu screenshot — chỉ numbers.
 
 **Baseline mode** —
 - Hash `selector + dev-url` → tên file `.aio-visual-diff/<hash>.json`.
+- `.aio-visual-diff/` is created in the **project root** (the working directory where the agent runs). Commit this directory — baselines are project assets; regression-across-runs only works if they persist in source control.
 - File chưa tồn tại → ghi current measurements làm baseline → exit với message *"baseline frozen, re-run after change to diff"*.
 - File tồn tại → load → diff.
 

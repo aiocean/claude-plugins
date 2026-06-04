@@ -24,7 +24,6 @@ SKILLS = {
         "effort": "medium",
     },
     "aio-dream": {"arg": None, "effort": "medium"},
-    "aio-patch-claude": {"arg": None, "effort": "high"},
     "aio-skillify": {
         "arg": '"[optional description of the process to capture]"',
         "effort": "medium",

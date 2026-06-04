@@ -1,8 +1,8 @@
 ---
 name: aio-ios-device-debug
 description: |
-  Debug iOS apps on physical devices — build, install, capture logs, extract crash reports, and take screenshots.
-when_to_use: debug on device, deploy to iPhone, get crash logs, pull crash report, device screenshot, syslog, iOS device, physical device, libimobiledevice, idevicesyslog, idevicecrashreport, xcodebuild
+  Debug iOS apps on physical devices from the terminal — deploy to iPhone or iPad with xcodebuild, capture syslog via idevicesyslog, pull crash reports from the device, analyze .ips crash files, and take device screenshots. Covers the full loop: build, install, launch, capture syslog, pull crash report, analyze .ips crash file, and grab a device screenshot. Uses libimobiledevice (idevicesyslog, idevicecrashreport) and pymobiledevice3 for iOS 17+ compatibility. Use when debugging an iOS app on a physical device, deploying to iPhone without the Xcode GUI, troubleshooting a crash from a .ips file, or capturing a device screenshot over USB.
+when_to_use: debug on device, deploy to iPhone, get crash logs, pull crash report, device screenshot, syslog, iOS device, physical device, libimobiledevice, idevicesyslog, idevicecrashreport, xcodebuild, analyze ips crash file, capture syslog, xcodebuild device, debug iOS app on physical device
 argument-hint: "[build | logs | crash | screenshot] [optional bundle id]"
 effort: medium
 ---

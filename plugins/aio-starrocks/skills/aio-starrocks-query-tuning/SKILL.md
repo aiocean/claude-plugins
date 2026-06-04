@@ -1,8 +1,8 @@
 ---
 name: aio-starrocks-query-tuning
 description: |
-  StarRocks query performance tuning — EXPLAIN plans, Query Profile analysis, operator metrics, tuning recipes, schema optimization, query hints, and text-based profile analysis.
-when_to_use: StarRocks query tuning, EXPLAIN plan, Query Profile, slow queries, operator metrics, query hints, schema optimization, diagnosing slow queries, reading EXPLAIN output, analyzing query profiles, optimizing joins, optimizing scans, optimizing aggregations, StarRocks performance, StarRocks EXPLAIN
+  StarRocks query performance tuning — EXPLAIN plans, Query Profile analysis, operator metrics, tuning recipes, schema optimization, query hints, and text-based profile analysis. Use when diagnosing slow queries, reading EXPLAIN or ANALYZE PROFILE output, finding operator bottlenecks via pipeline metrics, enabling profiling with enable_profile or big_query_profile_threshold, understanding runtime filter effectiveness, investigating spill to disk, or forcing join strategies with SHUFFLE or BROADCAST hints.
+when_to_use: StarRocks query tuning, EXPLAIN plan, Query Profile, slow queries, operator metrics, query hints, schema optimization, diagnosing slow queries, reading EXPLAIN output, analyzing query profiles, optimizing joins, optimizing scans, optimizing aggregations, StarRocks performance, StarRocks EXPLAIN, ANALYZE PROFILE, runtime filter, spill, operator bottleneck, pipeline metrics, enable_profile, big_query_profile_threshold
 argument-hint: "Query, EXPLAIN output, or Query Profile to tune"
 effort: low
 ---
@@ -14,8 +14,8 @@ Complete reference from [docs.starrocks.io/docs/best_practices/query_tuning/](ht
 ## Related Skills
 
 - `/aio-starrocks-best-practices` — Table design: partitioning, bucketing, sort keys, PK tuning
-- `/starrocks` — Query syntax, cluster connections, Grafana integration
-- `/starrocks-expert` — General table types, data loading, materialized views
+- `/starrocks` — Query syntax, cluster connections, Grafana integration *(external skill, not part of this plugin)*
+- `/starrocks-expert` — General table types, data loading, materialized views *(external skill, not part of this plugin)*
 
 ---
 

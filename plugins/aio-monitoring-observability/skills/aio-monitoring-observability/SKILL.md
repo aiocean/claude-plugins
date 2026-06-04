@@ -1,9 +1,15 @@
 ---
 name: aio-monitoring-observability
 description: |
-  Design metrics, alerts, dashboards, and SLOs using monitoring best practices (Four Golden Signals, RED/USE method).
-when_to_use: set up monitoring, design metrics, calculate SLOs, build dashboards, Prometheus, Grafana, OpenTelemetry, distributed tracing, alerting, SLO, SLA, error budget, Four Golden Signals, RED method, USE method, observability, Datadog, log aggregation
-effort: low
+  Design metrics, alerts, dashboards, and SLOs for any service using monitoring and observability best practices.
+  Use when setting up observability from scratch, designing alert rules, building Grafana dashboards, integrating
+  OpenTelemetry instrumentation, configuring Prometheus, implementing SLI/SLO tracking and error budgets,
+  aggregating logs with ELK or Loki, debugging with distributed tracing, applying the RED method or USE method
+  or Four Golden Signals, migrating from Datadog to an open-source stack, or comparing monitoring tools like
+  Datadog, Grafana Cloud, Jaeger, and Tempo.
+when_to_use: set up monitoring, design metrics, calculate SLOs, build dashboards, Prometheus, Grafana, OpenTelemetry, distributed tracing, alerting, SLO, SLA, SLI, error budget, Four Golden Signals, RED method, USE method, observability, Datadog migration, log aggregation, alert design, health check, burn rate
+argument-hint: "service name, tool name, or metric endpoint"
+effort: medium
 ---
 
 # Monitoring & Observability

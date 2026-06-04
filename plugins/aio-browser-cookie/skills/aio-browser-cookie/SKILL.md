@@ -1,7 +1,7 @@
 ---
 name: aio-browser-cookie
 description: |
-  Extract cookies from local browsers (Chrome/Firefox/Safari) and export them as JSON or Netscape format for authenticated requests.
+  Extract cookies from local browsers and export them for use in authenticated requests. Use when extracting Chrome cookies, Firefox cookies, or Safari cookies from the local browser store; reusing a browser session to replay an authenticated request; exporting a Netscape cookie jar for curl, wget, or yt-dlp cookies; making an authenticated curl request with your live browser session; or using rookiepy to read browser cookies programmatically. Also covers session replay — sending HTTP requests with the browser's own cookies injected automatically.
 when_to_use: extract browser cookies, reuse browser session, export cookies, cookie jar, rookiepy, authenticated request, chrome cookies, firefox cookies, safari cookies, netscape cookies, session replay
 effort: low
 argument-hint: "Domain or URL to extract cookies for"

@@ -1,7 +1,7 @@
 {
   "name": "aio-browser-cookie",
   "description": "Extract browser cookies with rookiepy and reuse them for authenticated requests or Netscape cookie exports.",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "author": {
     "name": "aiocean"
   },

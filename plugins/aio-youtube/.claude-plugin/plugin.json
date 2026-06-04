@@ -1,7 +1,7 @@
 {
   "name": "aio-youtube",
   "description": "Search YouTube and extract video transcripts using yt-dlp.",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "author": {
     "name": "aiocean"
   },

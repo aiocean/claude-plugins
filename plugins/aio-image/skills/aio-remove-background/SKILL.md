@@ -4,7 +4,7 @@ description: |
   Remove image backgrounds via RMBG-2.0 alpha matting with despill + 1px erode — produces clean PNG RGBA cutout that handles hair, smoke, glow, soft edges. Use when the user wants to remove background, xoá nền, make transparent, cutout, chroma key, or post-process a text-to-image render (gpt-image, Imagen, FLUX, SDXL, Grok, Midjourney) — especially with flat magenta (#FF00FF) key.
 when_to_use: remove background, transparent PNG, alpha matte, chroma key, despill, cutout, knock out background, sprite from render, RMBG, BiRefNet, image matting, xoá nền, tách nền, làm trong suốt, hậu xử lý ảnh gen, halo fringe removal
 argument-hint: <input-image> <output.png> [--no-despill] [--model ZhengPeng7/BiRefNet]
-effort: low
+effort: medium
 ---
 
 # aio-remove-background — RMBG-2.0 alpha matting → PNG RGBA cutout
@@ -26,12 +26,12 @@ sạch nhất.
 - torch: !`python3 -c "import torch" 2>/dev/null && echo "installed" || echo "NOT INSTALLED"`
 - transformers: !`python3 -c "import transformers" 2>/dev/null && echo "installed" || echo "NOT INSTALLED"`
 - HF auth: !`hf auth whoami 2>/dev/null || huggingface-cli whoami 2>/dev/null || echo "NOT LOGGED IN (cần cho RMBG-2.0 gated repo)"`
-- Script: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-remove-background/chroma-key.py"`
+- Script: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-remove-background/scripts/chroma-key.py"`
 
 ## Quick start
 
 ```bash
-RB="${CLAUDE_PLUGIN_ROOT}/skills/aio-remove-background"
+RB="${CLAUDE_PLUGIN_ROOT}/skills/aio-remove-background/scripts"
 
 python3 $RB/chroma-key.py input.png output.png
 python3 $RB/chroma-key.py render-magenta.png sprite.png         # despill on (default)

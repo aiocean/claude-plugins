@@ -1,7 +1,7 @@
 {
   "name": "aio-visual-diff",
   "description": "Verify AI-built UI against design via measurement-driven diff — extracts computed CSS and bounding boxes through Chrome DevTools MCP, diffs against Figma reference or a frozen baseline, and feeds numerical deltas back to the agent. No screenshot eyeballing.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": {
     "name": "aiocean"
   },

@@ -6,7 +6,7 @@
 
 **Meta-tools for shaping Claude Code itself.**
 
-Most Claude Code plugins extend what Claude can do inside your project. This plugin is different: it operates on Claude Code as a system — its output quality, its memory, its reusable knowledge, and its feedback loop back to the marketplace. Install it once and every future session benefits.
+Most Claude Code plugins extend what Claude can do inside your project. This plugin is different: it operates on Claude Code as a system — its binary behavior, its memory, its reusable knowledge, and its feedback loop back to the marketplace. Install it once and every future session benefits.
 
 The unifying idea: a Claude Code instance that improves itself over time, starting with you.
 
@@ -19,22 +19,22 @@ The unifying idea: a Claude Code instance that improves itself over time, starti
 
 ## Skills
 
-### aio-patch-claude — Rebalance Claude's built-in system prompts
+### The patch pipeline — recompile Claude's binary for custom behavior
 
-Claude Code ships with aggressive brevity mandates: one-sentence caps, 25-word limits, "don't explain", suppressed agent output. These defaults trade response quality for token efficiency. `aio-patch-claude` patches `cli.js` in place to rebalance those prompts toward thoroughness, evidence, and delegation.
+Six skills form a pipeline that extracts, patches, and recompiles Claude Code's `cli.js`, so you can change how the binary itself behaves: rebalanced system prompts, an HTTP control channel, agent-as-a-service, or custom tooling. They share one `tools/pipeline/patches.json` as the source of truth.
 
-What changes after patching:
-- Responses become complete instead of truncated
-- Agents investigate fully instead of stopping early
-- Code comments explain the why, not just the what
-- Plans include tradeoffs instead of suppressing them
-- Reasoning precedes action on non-trivial tasks
+| Skill | Role |
+|-------|------|
+| `aio-patch-setup` | Scaffold a new patching project at CWD — copies the pipeline tools, docs, and an empty `patches.json` with a reference example beside it. |
+| `aio-patch-extract` | Extract `cli.js` + native `.node` modules from an installed claude binary into `dist/<arch>/`. |
+| `aio-patch-compile` | Apply `patches.json` + `bun build --compile` → a patched binary at `dist/<arch>/claude`. Host arch by default; opt into cross-compile (`--target=all` or a CSV list). |
+| `aio-patch-anchor` | acorn-based AST navigator for `cli.js` — find and navigate anchor points, used for drift recovery when a Claude version bump moves them. |
+| `aio-patch-control` | Scaffold a reference HTTP control-channel gateway (Claude-as-a-service) or print the control-channel protocol docs. |
+| `aio-patch-run` | Exec the compiled patched binary at `dist/<arch>/claude` with pass-through args + env. |
 
-> "patch claude", "unbloat claude", "fix claude prompts", "improve claude quality", "patch cli.js", "remove brevity limits"
+Typical first run: `aio-patch-setup` → fill in `patches.json` → `aio-patch-extract` → `aio-patch-compile` → `aio-patch-run`.
 
-Two flows exist. For a personal install, the skill runs `patch_local.py` directly against your `cli.js`. For fleet deployment via godClaude bundles, use `make claude-patch-build` + `make release-bundles` from the godClaude pipeline — both read the same `patches.json` source of truth.
-
-Note: patches are lost on Claude Code auto-update. Re-run this skill after every `claude` upgrade.
+> Note: patches are lost on Claude Code auto-update. Re-run `aio-patch-compile` after every `claude` upgrade.
 
 ---
 
@@ -62,9 +62,9 @@ What it writes to and what it skips:
 
 ---
 
-### feedback — File bugs and feature requests without leaving Claude Code
+### aio-feedback — File bugs and feature requests without leaving Claude Code
 
-Found a broken skill? Want a new plugin? `feedback` collects the details and submits a GitHub Issue to `aiocean/claude-plugins` directly from Claude Code using the `gh` CLI.
+Found a broken skill? Want a new plugin? `aio-feedback` collects the details and submits a GitHub Issue to `aiocean/claude-plugins` directly from Claude Code using the `gh` CLI.
 
 > "report bug", "request feature", "request plugin", "file issue"
 
@@ -75,11 +75,11 @@ It handles three issue types with structured templates: bug reports (plugin + wh
 A productive meta-loop looks like this:
 
 ```
-run aio-patch-claude once   →  Claude quality goes up permanently
+run the patch pipeline      →  recompile Claude with the behavior you want
 work on your project        →  session produces a repeatable process
 run aio-skillify            →  that process becomes a reusable skill
 end of sprint               →  run aio-dream to consolidate memory
-encounter a skill gap       →  run feedback to request a new plugin
+encounter a skill gap       →  run aio-feedback to request a new plugin
 ```
 
 Each skill feeds forward into better future sessions.

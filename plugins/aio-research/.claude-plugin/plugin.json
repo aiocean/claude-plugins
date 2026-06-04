@@ -1,7 +1,7 @@
 {
   "name": "aio-research",
   "description": "Run structured 10-phase research workflows and stand up RAG pipelines on Qdrant — go from a topic to a queryable knowledge base.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": {
     "name": "aiocean"
   }

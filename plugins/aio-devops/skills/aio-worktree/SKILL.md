@@ -16,7 +16,13 @@ Manages git worktrees for parallel development workflows.
 - git: !`which git 2>/dev/null || echo "NOT INSTALLED"`
 - Scripts: !`echo "${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"`
 
-Set `WT` to the Scripts path shown above. Then call scripts as `$WT/script-name`.
+## Scripts Path
+
+```bash
+WT="${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"
+```
+
+Set this in every shell block that calls a script. Then reference scripts as `$WT/script-name`.
 
 ## Available Scripts
 
@@ -36,12 +42,13 @@ Set `WT` to the Scripts path shown above. Then call scripts as `$WT/script-name`
 ### 1. Create Worktree
 
 ```bash
+WT="${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"
 $WT/worktree-create.sh <name> [source_ref]
 
 # Examples:
-worktree-create.sh feature-login          # from HEAD
-worktree-create.sh hotfix-bug main        # from main branch
-worktree-create.sh experiment abc123      # from specific commit
+$WT/worktree-create.sh feature-login          # from HEAD
+$WT/worktree-create.sh hotfix-bug main        # from main branch
+$WT/worktree-create.sh experiment abc123      # from specific commit
 
 # Creates:
 #   Folder: {repo}--wtr-{name}  (e.g., myrepo--wtr-feature-login)
@@ -71,7 +78,7 @@ $WT/worktree-sync.sh
 git add . && git commit -m "feat: new feature"
 
 # Sync with main
-worktree-sync.sh
+$WT/worktree-sync.sh
 
 # Output:
 # Syncing: wtr-feature ↔ main
@@ -91,7 +98,7 @@ Preview worktree changes in main repo with hot reload. One-way sync, temporary.
 $WT/worktree-spotlight.sh <worktree_path> . [excludes...]
 
 # Example:
-worktree-spotlight.sh ../myrepo--wtr-feature . node_modules dist .env
+$WT/worktree-spotlight.sh ../myrepo--wtr-feature . node_modules dist .env
 ```
 
 **How it works:**
@@ -111,11 +118,12 @@ worktree-spotlight.sh ../myrepo--wtr-feature . node_modules dist .env
 ### 4. Remove Worktree
 
 ```bash
+WT="${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"
 $WT/worktree-remove.sh <path_or_name>
 
 # Examples:
-worktree-remove.sh ../myrepo--wtr-feature  # by path
-worktree-remove.sh feature                 # by name (auto-resolves path)
+$WT/worktree-remove.sh ../myrepo--wtr-feature  # by path
+$WT/worktree-remove.sh feature                 # by name (auto-resolves path)
 ```
 
 ## Common Scenarios
@@ -123,28 +131,30 @@ worktree-remove.sh feature                 # by name (auto-resolves path)
 ### "Multiple AI agents working in parallel"
 
 ```bash
+WT="${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"
+
 # Agent A creates worktree
-worktree-create.sh agent-a-task
+$WT/worktree-create.sh agent-a-task
 
 # Agent B creates worktree
-worktree-create.sh agent-b-task
+$WT/worktree-create.sh agent-b-task
 
 # Both work and commit independently...
 
 # Agent A syncs first
 cd ../repo--wtr-agent-a-task
-worktree-sync.sh
+$WT/worktree-sync.sh
 # main now has Agent A's commits
 
 # Agent B syncs (gets A's work + pushes B's work)
 cd ../repo--wtr-agent-b-task
-worktree-sync.sh
+$WT/worktree-sync.sh
 # main now has both A and B's commits
 # Agent B's worktree also has A's commits
 
 # Agent A syncs again to get B's work
 cd ../repo--wtr-agent-a-task
-worktree-sync.sh
+$WT/worktree-sync.sh
 # All three (main, worktree-a, worktree-b) now identical
 ```
 
@@ -168,7 +178,8 @@ worktree-sync.sh
 ### "Spotlight crashed"
 
 ```bash
-worktree-cleanup.sh .
+WT="${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"
+$WT/worktree-cleanup.sh .
 ```
 
 ### "Sync has conflicts"
@@ -178,7 +189,7 @@ Script will stop at rebase conflict. Resolve conflicts, then:
 ```bash
 git rebase --continue
 # Then run sync again
-worktree-sync.sh
+$WT/worktree-sync.sh
 ```
 
 ## Worktrees + Agent Teams
@@ -188,10 +199,12 @@ When using **Agent Teams** (experimental, requires `CLAUDE_CODE_EXPERIMENTAL_AGE
 **Pattern: Each teammate gets their own worktree**
 
 ```bash
+WT="${CLAUDE_PLUGIN_ROOT}/skills/aio-worktree"
+
 # Lead creates worktrees for each teammate
-worktree-create.sh teammate-frontend
-worktree-create.sh teammate-backend
-worktree-create.sh teammate-tests
+$WT/worktree-create.sh teammate-frontend
+$WT/worktree-create.sh teammate-backend
+$WT/worktree-create.sh teammate-tests
 
 # Each teammate works in their own worktree (no file conflicts)
 # Teammate messages via SendMessage when ready to sync

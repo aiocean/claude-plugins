@@ -35,7 +35,7 @@ The script also works on photos and screenshots without a chroma key — pass `-
 ## Requirements
 
 - Python 3
-- `pip install pillow numpy torch torchvision transformers`
+- `pip install pillow numpy torch torchvision transformers kornia`
 - HuggingFace account + `hf auth login` (RMBG-2.0 is a gated repo — accept the license at huggingface.co/briaai/RMBG-2.0 first)
 - First run downloads the model (~150 MB); subsequent runs use the local cache
 

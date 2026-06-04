@@ -1,7 +1,10 @@
 ---
 name: aio-bun-fullstack-setup
 description: |
-  Scaffold a Bun fullstack project — single-port server, Vite dev proxy, monorepo layout, and Docker config.
+  Bootstrap or scaffold a Bun fullstack project in one shot — single-port server, Vite dev proxy, monorepo layout,
+  and Docker config. Use when starting a new fullstack project with Bun, setting up a bun server with vite proxy,
+  creating a monorepo bun layout, configuring docker bun deployment, or bootstrapping a bun project from scratch.
+  Skips files that already exist so it never overwrites your work.
 when_to_use: scaffold bun, bun fullstack, bun server, vite proxy, single port, monorepo bun, docker bun, bootstrap bun project, new fullstack project
 argument-hint: "Project name or path (e.g. my-app)"
 effort: medium
@@ -28,6 +31,7 @@ Compare against the full project structure and list what needs to be created:
 
 | File | Purpose | Exists? |
 |------|---------|---------|
+| `pkgs/shared/package.json` | Shared types package (required by Dockerfile COPY steps) | ? |
 | `pkgs/server/config.ts` | Env validation, fail-fast startup | ? |
 | `pkgs/server/index.ts` | Bun server entry (API + static serving) | ? |
 | `pkgs/webapp/vite.config.ts` | Vite config with API proxy | ? |
@@ -45,8 +49,13 @@ Create each missing file using the templates in the Reference section below. Ada
 ### Step 4: VERIFY
 Run a quick validation:
 ```bash
-cd pkgs/server && bun run index.ts &
-sleep 2 && curl -s http://localhost:3001/api/health && kill %1
+cd pkgs/server && DATA_DIR=./data PORT=3001 bun run index.ts &
+SERVER_PID=$!
+for i in $(seq 1 15); do
+  curl -sf http://localhost:3001/api/health && break
+  sleep 1
+done
+kill $SERVER_PID 2>/dev/null
 ```
 If webapp exists, also verify: `cd pkgs/webapp && bun run build`
 
@@ -68,7 +77,28 @@ Production:
     /*      → Static files (webapp/dist)
 ```
 
-## 1. Config with Env Validation
+## 1. Shared Package
+
+Create `pkgs/shared/package.json` — required by both Dockerfile stages that `COPY pkgs/shared/package.json` before running `bun install`:
+
+```json
+{
+  "name": "@project/shared",
+  "version": "0.0.1",
+  "private": true,
+  "types": "./index.ts"
+}
+```
+
+Create `pkgs/shared/index.ts` as the entry point for shared types:
+
+```typescript
+// pkgs/shared/index.ts
+// Shared types used by both server and webapp
+export type {}; // extend with your shared types
+```
+
+## 2. Config with Env Validation
 
 Create `config.ts` - validates required env vars at startup, fails fast if missing:
 
@@ -105,7 +135,7 @@ console.log(`🔌 PORT: ${config.port}`);
 
 **Key principle**: Import config first in index.ts to validate before anything else runs.
 
-## 2. Server (Single Port, Dual Mode)
+## 3. Server (Single Port, Dual Mode)
 
 ```typescript
 // pkgs/server/index.ts
@@ -118,6 +148,9 @@ const STATIC_DIR = join(import.meta.dir, "../webapp/dist");
 serve({
   port: config.port,
   routes: {
+    // Health check — used by smoke test, load balancers, and Docker HEALTHCHECK
+    "/api/health": () => new Response("ok"),
+
     // API routes
     "/api/items": () => listItems(),
     "/api/items/:id": (req) => getItem(req.params.id),
@@ -150,7 +183,7 @@ console.log(`🚀 Server running at http://localhost:${config.port}`);
 if (config.isProd) console.log(`📦 Serving static files from ${STATIC_DIR}`);
 ```
 
-## 3. Vite Proxy (Development)
+## 4. Vite Proxy (Development)
 
 ```typescript
 // pkgs/webapp/vite.config.ts
@@ -166,7 +199,7 @@ export default defineConfig({
 });
 ```
 
-## 4. PM2 Config (Development)
+## 5. PM2 Config (Development)
 
 ```javascript
 // ecosystem.config.cjs
@@ -195,7 +228,7 @@ module.exports = {
 };
 ```
 
-## 5. Docker Setup
+## 6. Docker Setup
 
 **Dockerfile** (multi-stage build):
 
@@ -257,7 +290,7 @@ services:
       - DATA_DIR=/app/data
 ```
 
-## 6. .env.example
+## 7. .env.example
 
 ```bash
 # Required

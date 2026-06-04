@@ -49,4 +49,4 @@ Patterns are sourced from the Google Go Style Guide, the Uber Go Style Guide, an
 /plugin install aio-golang-mastery@aiocean-plugins
 ```
 
-Trigger phrases: "go code", "golang", "lint go", "review go", "go best practices", "concurrency", "goroutines", "channels", "error handling", "gRPC", "race condition", "generics", "idiomatic go", "go testing".
+Trigger phrases: "go code", "golang", "lint go", "review go", "go best practices", "concurrency", "goroutines", "channels", "error handling", "gRPC", "race condition", "generics", "idiomatic go", "go testing", "govulncheck", "nilaway", "deadcode", "golangci-lint", "go lint pipeline", "go static analysis", "go code quality".

@@ -1,0 +1,9 @@
+{
+  "name": "aio-understand-ai",
+  "description": "Turn Claude into a wise teacher that makes sure YOU deeply understand the work an AI agent just did — the problem, the solution, the design decisions, the edge cases, and why it matters. Incremental and mastery-gated: it has you restate your understanding first, fills the gaps at the depth you ask for (eli5 / eli14 / like-an-intern), shows you the real code, quizzes you, and does not conclude until you have demonstrated that you get it.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  },
+  "license": "MIT"
+}

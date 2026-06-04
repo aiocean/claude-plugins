@@ -5,8 +5,8 @@ description: |
   (`.kanban/board.md`), every task lives in its own file (`.kanban/tasks/T-NNN-slug.md`).
   Use to init the board, add tasks, move them across Backlog/Todo/Doing/Done/Blocked,
   or archive completed work.
-when_to_use: kanban, board, tasks, backlog, show board, what's next, task status, add task, init kanban, sprint, todo list, track progress, move task, prioritize, plan work, archive, show tasks, current tasks, prioritize tasks, archive done
-effort: low
+when_to_use: kanban, board, tasks, backlog, show board, what's next, task status, add task, init kanban, sprint, todo list, track progress, move task, prioritize, plan work, archive, show tasks, current tasks, prioritize tasks, archive done, delete task, remove task, confirm delete
+effort: medium
 argument-hint: "init | status | add <title> | archive"
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: aio-doc-writer
 description: |
-  Generate comprehensive architecture documentation powered by GitNexus knowledge graph and LSP analysis.
+  Generate comprehensive architecture documentation — the Codebase Oracle that writes docs, module docs, and dependency maps — powered by the GitNexus knowledge graph and LSP analysis.
 when_to_use: analyze codebase, map architecture, document architecture, codebase oracle, generate docs, architecture documentation, what does this codebase do, codebase documentation, module docs, dependency map
 argument-hint: "Codebase path or scope to document"
 effort: high

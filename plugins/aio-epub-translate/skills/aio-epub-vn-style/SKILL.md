@@ -39,6 +39,12 @@ Ba tiêu chuẩn đánh giá bản dịch (Nghiêm Phục, 1898):
 | Dịch sách thuộc thể loại cụ thể (self-help, fiction, science...) | `references/genre-strategies.md` |
 | Kỹ thuật nâng cao (bù đắp, liên kết, ẩn dụ, hài hước) | `references/advanced-techniques.md` |
 | Khai thác đặc trưng tiếng Việt (loại từ, tiểu từ, tượng thanh/hình) | `references/vietnamese-linguistics.md` |
+| Thì/thể sai, động từ hướng (đi/đến/ra/vào) nghe gượng | `references/aspect-motion-verbs.md` |
+| Câu đúng nghĩa nhưng "vô hồn", thiếu chiều sâu văn hóa Việt | `references/cultural-concepts-glossary.md` |
+| Gặp thơ, ca dao, lục bát trong văn xuôi | `references/poetry-in-prose.md` |
+| Cần nhịp văn xuôi du dương, hiểu thanh điệu bằng/trắc | `references/prosody-and-tonal-patterns.md` |
+| Từ cảm xúc generic ("buồn", "vui") nghe nhạt | `references/untranslatable-emotions.md` |
+| Cần giọng văn theo thời kỳ, tham chiếu bậc thầy văn học Việt | `references/vietnamese-literary-history.md` |
 | Đánh giá chất lượng bản dịch | `references/quality-rubric.md` |
 
 ## Tiêu chí đánh giá chất lượng (tóm tắt)
@@ -85,6 +91,12 @@ Sau đó dùng Read tool: `Read($REFS/translation-principles.md)`, v.v.
 | `references/genre-strategies.md` | Chiến lược dịch theo thể loại: self-help, fiction, science, philosophy, children's, historical |
 | `references/advanced-techniques.md` | Bù đắp (compensation), liên kết văn bản, ẩn dụ, hài hước, thuật ngữ chuyên ngành |
 | `references/vietnamese-linguistics.md` | Loại từ, tiểu từ tình thái, từ tượng thanh/hình, tu từ, thiết bị văn học |
+| `references/aspect-motion-verbs.md` | Hệ thống thể/thì ngữ nghĩa, động từ hướng (đi/đến/ra/vào), tránh "mùi dịch" về ngữ pháp |
+| `references/cultural-concepts-glossary.md` | Khái niệm văn hóa Việt (Phật giáo, duyên/nghiệp...) — khi nào khai thác để cộng hưởng với người đọc |
+| `references/poetry-in-prose.md` | Dịch thơ, ca dao, lục bát trong văn xuôi — phân loại tình huống và ưu tiên xử lý |
+| `references/prosody-and-tonal-patterns.md` | Vần điệu, thanh điệu bằng/trắc, nhịp văn xuôi, ảnh hưởng lục bát lên giọng văn |
+| `references/untranslatable-emotions.md` | Từ vựng cảm xúc tiếng Việt không có tương đương Anh — nhận diện cơ hội dùng đúng chỗ |
+| `references/vietnamese-literary-history.md` | Các giai đoạn văn học Việt, giọng văn theo thời kỳ, tham chiếu bậc thầy văn xuôi |
 | `references/quality-rubric.md` | Khung đánh giá MQM/ATA, phân loại lỗi, rubric chấm điểm, red flags |
 
 ## Liên kết với các skill khác

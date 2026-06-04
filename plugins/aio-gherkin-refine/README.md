@@ -32,7 +32,7 @@ Independent scenarios. Each must stand alone. Shared state between scenarios cre
 /plugin install aio-gherkin-refine@aiocean-plugins
 ```
 
-Trigger phrases: "write gherkin", "refine requirements", "write acceptance criteria", "review gherkin", "improve scenarios", "BDD", "Given When Then", "feature file", "cucumber", "specification by example", "edge cases", "example mapping".
+Trigger phrases: "write gherkin", "refine requirements", "write acceptance criteria", "review gherkin", "improve scenarios", "BDD", "Given When Then", "acceptance tests", "behavior-driven development", "scenario outline", "feature file", "cucumber", "specification by example", "edge cases", "example mapping".
 
 ## Reference material bundled with the skill
 

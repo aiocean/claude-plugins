@@ -1,8 +1,8 @@
 ---
 name: aio-grafana-diagram
 description: |
-  Create Grafana diagrams for system visualization — analyzes codebase to auto-generate Mermaid diagrams with metric binding. For standalone Mermaid diagrams use aio-mermaid instead.
-when_to_use: create grafana diagram, mermaid in grafana, diagram panel, data-driven diagram, dynamic diagram, flowchart, sequence diagram, state diagram, ER diagram, grafana dashboard, metric binding, system visualization
+  Create Grafana diagrams for live system visualization — analyzes codebase to auto-generate Mermaid diagrams with Prometheus metric binding. Each node is colored by health thresholds, turning a static architecture diagram into a live system diagram or service health monitor. Use when you need a dynamic Grafana dashboard with node coloring driven by real metrics. For standalone shareable diagrams use aio-mermaid instead.
+when_to_use: create grafana diagram, mermaid in grafana, diagram panel, data-driven diagram, dynamic diagram, dynamic grafana dashboard, flowchart, sequence diagram, state diagram, ER diagram, grafana dashboard, metric binding, Prometheus metric binding, system visualization, live system diagram, service health monitor, node coloring
 argument-hint: "Codebase path or diagram intent"
 effort: high
 ---

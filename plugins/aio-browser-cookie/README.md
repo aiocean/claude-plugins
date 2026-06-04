@@ -30,6 +30,8 @@ Trigger phrases: "extract browser cookies", "reuse browser session", "export coo
 
 ```bash
 # Save cookies for curl
+BCOOKIE="${CLAUDE_PLUGIN_ROOT}/skills/aio-browser-cookie/scripts"
+
 python3 "$BCOOKIE/rookie_tool.py" extract \
   --browser chrome \
   --domain example.com \

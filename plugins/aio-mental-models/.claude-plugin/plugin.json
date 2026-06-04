@@ -1,9 +1,0 @@
-{
-  "name": "aio-mental-models",
-  "description": "Reach better decisions faster — picks the right mental model (first principles, inversion, second-order, opportunity cost, …) and walks you through applying it to your problem.",
-  "version": "2.1.7",
-  "author": {
-    "name": "aiocean"
-  },
-  "license": "MIT"
-}

@@ -1,7 +1,7 @@
 {
   "name": "aio-watermill-kit",
   "description": "Build event-driven Go apps with Watermill — Router, middleware, Pub/Sub, CQRS, and integrations for Kafka, AMQP, NATS, Redis Streams, and SQL.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": {
     "name": "aiocean"
   }

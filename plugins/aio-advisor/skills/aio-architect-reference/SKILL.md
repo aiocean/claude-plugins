@@ -2,7 +2,7 @@
 name: aio-architect-reference
 description: |
   Look up architecture patterns and concepts via semantic search — read the full article on demand, compare patterns side-by-side, or browse by volume.
-when_to_use: architecture pattern, look up pattern, what is CQRS, explain circuit breaker, compare patterns, list patterns, browse architecture, DDD, bounded context, hexagonal, event sourcing, consistent hashing, saga, 2PC, resilience pattern, caching pattern, cloud design pattern, distributed system pattern
+when_to_use: architecture pattern, look up pattern, what is CQRS, explain circuit breaker, compare patterns, list patterns, browse architecture, DDD, bounded context, hexagonal, event sourcing, consistent hashing, saga, 2PC, resilience pattern, caching pattern, cloud design pattern, distributed system pattern, ai-native, LLM system design, RAG architecture
 argument-hint: "Pattern name or search query"
 effort: low
 ---

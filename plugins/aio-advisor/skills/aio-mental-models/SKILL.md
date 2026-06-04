@@ -2,9 +2,9 @@
 name: aio-mental-models
 description: |
   Decision and reasoning advisor — picks 2-3 relevant mental models, walks through applying each, and synthesizes a recommendation. Use proactively when facing a hard trade-off, an ambiguous decision, or any "should we do X or Y" question where structured reasoning beats gut feeling.
-when_to_use: mental model, decision, trade-off, think through, evaluate options, structured reasoning, first principles, inversion, second-order thinking, opportunity cost, which model, problem-solving framework
+when_to_use: mental model, decision, trade-off, think through, evaluate options, structured reasoning, first principles, inversion, second-order thinking, opportunity cost, which model, problem-solving framework, help me decide, analyze options, problem solving, stuck on decision, which option, decision framework
 argument-hint: "Decision or problem to think through"
-effort: low
+effort: medium
 ---
 
 # Mental Models Decision Advisor

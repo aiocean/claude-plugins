@@ -2,9 +2,7 @@
 name: aio-html-interactive
 description: |
   Bridge Claude to a browser UI in real time via a frozen Bun + Vue3 + Tailwind scaffold — browser events become Monitor-tool notifications, AI pushes become WebSocket broadcasts. Use when Claude needs to drive an interactive UI mid-task: form capture, multi-step decision flow, live preview, approval queue, or side-by-side review. See body for the "why" (Claude has no event loop) and architecture details.
-  "browser ↔ AI realtime", "AI-driven UI", "Monitor + WebSocket bridge",
-  "làm cái UI tương tác với AI", "dựng UI tương tác", "realtime browser AI".
-when_to_use: bridge Claude to browser, AI event loop substitute, Monitor stdout to notification, WebSocket push from AI, AI-driven UI, interactive UI for AI, realtime browser AI, browser to AI bidirectional, dựng UI tương tác AI, làm UI tương tác AI
+when_to_use: bridge Claude to browser, AI event loop substitute, Monitor stdout to notification, WebSocket push from AI, AI-driven UI, interactive UI for AI, realtime browser AI, browser to AI bidirectional, browser ↔ AI realtime, Monitor + WebSocket bridge, dựng UI tương tác AI, làm UI tương tác AI
 argument-hint: "[slug for /tmp dir, e.g. 'picker' or 'review-queue']"
 effort: medium
 ---
@@ -43,7 +41,10 @@ are frozen so the protocol stays intact across edits.
 1. **Copy scaffold** —
    `cp -r ${CLAUDE_PLUGIN_ROOT}/skills/aio-html-interactive/scaffold /tmp/aio-html-interactive-<slug>`
    via Bash. Do not Read+Write to copy — that round-trips through the
-   model and risks editing the runtime by accident.
+   model and risks editing the runtime by accident. For a session that may
+   span a reboot, copy into a stable project dir instead of `/tmp` (which is
+   cleared on restart) — e.g. `./.aio-html-interactive-<slug>`; the slug,
+   launch, and cleanup steps are otherwise identical.
 
 2. **Build app** — `Read` `/tmp/aio-html-interactive-<slug>/app.html`
    once before editing. The Edit tool requires a prior in-conversation

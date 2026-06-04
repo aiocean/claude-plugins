@@ -1,7 +1,7 @@
 ---
 name: aio-code-review
-description: Code-review playbook for both sides — reviewer (what to look for, when to approve, severity-labeled comments, pushback) and PR/CL author (descriptions, splitting, responding to comments). Use when reviewing or authoring a PR/MR/CL, deciding LGTM, or replying to review feedback.
-when_to_use: code review, review pr, review mr, lgtm, nit, approve pr, pr description, split pr, respond to review, pushback, hotfix
+description: Code-review playbook for both sides — reviewer (what to look for, when to approve, severity-labeled comments, handling pushback) and PR/CL author (writing CL descriptions, splitting changelists, responding to comments). Use when reviewing or authoring a PR/MR/CL/diff, deciding LGTM or LGTM threshold, authoring a merge request, assessing code health, handling a hotfix review, or replying to review feedback.
+when_to_use: code review, review pr, review mr, lgtm, lgtm threshold, nit, approve pr, pr description, cl description, split pr, respond to review, pushback, hotfix, hotfix review, diff, diff review, changelist, CL, CL author, PR author, merge request, code health
 argument-hint: "PR ref or role (reviewer | author)"
 effort: medium
 ---
@@ -9,6 +9,8 @@ effort: medium
 # Code Review
 
 A **CL** (changelist) is one self-contained change under review — equivalent to a PR / MR. **LGTM** = "Looks Good to Me" (reviewer's approval). **Nit:** = optional polish, won't block.
+
+Full principles and rationale: `references/01-overview.md`.
 
 ## Pick the role first
 

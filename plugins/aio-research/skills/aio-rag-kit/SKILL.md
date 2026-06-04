@@ -1,8 +1,8 @@
 ---
 name: aio-rag-kit
 description: |
-  Set up vector search and RAG pipelines using Qdrant via rag-kit (auto-installs if missing).
-when_to_use: create vector collection, index content, semantic search, RAG setup, qdrant, embeddings, vector database, retrieval-augmented generation, vector search, rag-kit, similarity search
+  Set up vector database collections, index content, and run semantic search via RAG pipelines using Qdrant and rag-kit (auto-installs if missing). Use for retrieval-augmented generation, similarity search over a knowledge base, or embedding content for meaning-based retrieval.
+when_to_use: create vector collection, index content, semantic search, RAG setup, qdrant, embeddings, vector database, retrieval-augmented generation, vector search, rag-kit, similarity search, knowledge base, RAG pipeline
 argument-hint: "Collection name or operation"
 effort: low
 ---

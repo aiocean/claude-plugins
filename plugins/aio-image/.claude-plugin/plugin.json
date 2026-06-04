@@ -1,7 +1,7 @@
 {
   "name": "aio-image",
   "description": "Remove image backgrounds using RMBG-2.0 alpha matting with despill — works on any image (renders, photos, screenshots). Pairs well with the flat-magenta chroma-key technique: render subject on #FF00FF with any image gen engine, then matte for a clean PNG RGBA cutout.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": {
     "name": "aiocean"
   },

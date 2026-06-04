@@ -1,8 +1,8 @@
 ---
 name: aio-mermaid
 description: |
-  Generate shareable Mermaid diagram URLs (LZ-String compressed) for flowcharts, sequence, class, ER, state, and gantt diagrams.
-when_to_use: share diagram, generate diagram URL, mermaid, flowchart, sequence diagram, class diagram, ER diagram, entity relationship, state diagram, gantt chart, shareable diagram link
+  Generate shareable Mermaid diagram URLs (LZ-String compressed). Use when you want to draw a diagram, create an architecture diagram, generate a flowchart, make a sequence diagram URL, build a mindmap, timeline, or gitgraph — and share it as a link. Supports all Mermaid v11 types: flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, pie, mindmap, timeline, gitgraph.
+when_to_use: share diagram, generate diagram URL, mermaid, draw diagram, create architecture diagram, generate flowchart, flowchart, sequence diagram, sequence diagram URL, class diagram, ER diagram, entity relationship, state diagram, gantt chart, mindmap, timeline, gitgraph, shareable diagram link
 argument-hint: "Mermaid code or diagram description"
 effort: low
 ---
@@ -138,7 +138,7 @@ https://mimaid.aiocean.dev/?hideEditor#<hash>
 
 All Mermaid diagram types are supported:
 
-- `flowchart` / `graph` - Flow diagrams
+- `flowchart` - Flow diagrams
 - `sequenceDiagram` - Sequence diagrams
 - `classDiagram` - Class diagrams
 - `stateDiagram-v2` - State diagrams

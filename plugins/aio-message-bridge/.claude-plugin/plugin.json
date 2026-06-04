@@ -1,7 +1,7 @@
 {
   "name": "aio-message-bridge",
   "description": "Give Claude Code an event loop. A local HTTP + WebSocket relay plus the Monitor tool let anything outside Claude — a browser, a CLI, a mobile app, a webhook, another program — talk to it mid-task in both directions. Inbound: the external client POSTs an event, the relay prints a MSG:: line to stdout, Monitor surfaces it as a notification. Outbound: Claude POSTs a push, the relay broadcasts it over WebSocket to every connected client. Generic, language-agnostic protocol with a ready-to-run reference relay, plus optional token-gated network exposure over Cloudflare Tunnel, Tailscale, or LAN.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "aiocean"
   },

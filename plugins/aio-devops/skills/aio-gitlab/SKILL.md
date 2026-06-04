@@ -1,8 +1,8 @@
 ---
 name: aio-gitlab
 description: |
-  Manage GitLab MRs, pipelines, branches, and CI jobs via gitlab-mcp (auto-installs if missing).
-when_to_use: create MR, accept MR, trigger pipeline, retry job, gitlab, merge request, gitlab CI, branch, CI/CD, pipeline status, gitlab-mcp
+  Read and manage GitLab merge requests, CI/CD pipelines, branches, and jobs via gitlab-mcp (auto-installs if missing). Use when the user mentions a GitLab URL, asks to open or review an MR, debug a failing pipeline, retry a CI job, protect a branch, trigger a pipeline run, or run any GitLab operation programmatically via glab or the MCP server. Supports gitflow commands (create feature, finish release, hotfix) and self-hosted GitLab instances.
+when_to_use: create MR, accept MR, review MR, MR review, merge request, trigger pipeline, pipeline trigger, retry job, pipeline debugging, cancel job, gitlab, gitlab CI, gitlab-ci, CI/CD, pipeline status, branch, branch protection, branch protect, glab, gitlab-mcp, MR pipeline, gitflow, self-hosted gitlab
 argument-hint: "MR ID, pipeline ID, or action"
 effort: low
 ---

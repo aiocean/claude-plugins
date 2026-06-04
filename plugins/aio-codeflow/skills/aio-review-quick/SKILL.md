@@ -16,7 +16,7 @@ Review completed work using change detection, duplication detection, and type ch
 
 ## Prerequisites
 
-- Baseline snapshot from `/snapshot`
+- Baseline snapshot from `/aio-snapshot`
 - GitNexus indexed (`npx gitnexus analyze`) for duplication check
 - LSP for diagnostics
 
@@ -100,6 +100,6 @@ After review completes:
 | Result | Next skill |
 |--------|-----------|
 | Review clean, ready to merge | `/superpowers:verification-before-completion` → `/superpowers:finishing-a-development-branch` |
-| Issues found, needs fixes | Fix issues → re-run `/review` |
+| Issues found, needs fixes | Fix issues → re-run `/aio-review-quick` |
 | Needs full code review (security, architecture) | `/aio-review-deep` — parallel multi-agent review with OMC agents |
 | Want to extract learnings | `/aio-reflect` — capture knowledge from this session |

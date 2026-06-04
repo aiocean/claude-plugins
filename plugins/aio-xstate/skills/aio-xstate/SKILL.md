@@ -2,9 +2,12 @@
 name: aio-xstate
 description: |
   Implement XState v5 state machines with strict patterns — setup().createMachine(), actors, and TypeScript typing.
-when_to_use: create state machine, implement XState, design statechart, add actor, XState, statecharts, fromPromise, state machine, finite state, XState v5, createMachine, state transitions
+  Use when working with finite state machines (FSM), statecharts, state diagrams, or the actor model in TypeScript.
+  Covers @xstate/react integration (useMachine, useActor, useSelector), parallel states, hierarchical (nested) states,
+  XState migration from v4 to v5, and the full design-first workflow: state inventory, event catalog, transition table.
+when_to_use: create state machine, implement XState, design statechart, add actor, XState, statecharts, fromPromise, state machine, finite state, XState v5, createMachine, state transitions, FSM, finite state machine, actor model, state diagram, hierarchical states, parallel states, XState migration, v4 to v5, @xstate/react, useMachine, useActor, react state machine
 argument-hint: "State machine name or description"
-effort: medium
+effort: high
 ---
 
 # XState v5 Strict Skill

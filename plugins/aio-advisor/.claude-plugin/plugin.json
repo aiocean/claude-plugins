@@ -1,0 +1,10 @@
+{
+  "name": "aio-advisor",
+  "description": "Curated decision-support reference with semantic search across three domains — 54 general-reasoning mental models (first principles, inversion, second-order thinking, opportunity cost, …), 27 threat-modeling frameworks (STRIDE, LINDDUN, PASTA, OCTAVE, Attack Trees, MITRE ATT&CK/ATLAS, Kill Chain, NIST AI RMF, OWASP LLM Top 10, Kubernetes Threat Matrix), and 137 software-architecture patterns (cloud design, resilience, data, DDD, distributed systems). Each domain routes a problem to the relevant entries, applies each, synthesizes, and stress-tests with a counter-frame. 4 skills: aio-mental-models, aio-threat-models, aio-architect-advisor, aio-architect-reference.",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  },
+  "repository": "https://github.com/aiocean/claude-plugins",
+  "license": "MIT"
+}

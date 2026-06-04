@@ -4,11 +4,11 @@
 
 # aio-tui
 
-**The Bubbletea reference you need before the compiler tells you what you did wrong.**
+**The Bubbletea v2 reference you need before the compiler tells you what you did wrong.**
 
-Building a terminal UI with Bubbletea is not hard once you understand the Elm Architecture. The problem is that the framework's rules are strict and silent: return a new model from Update, never mutate state, never call Init on clients, never double-wrap a Cmd. Violating these rules produces compile errors that point at the wrong line, or runtime behavior that makes no sense until you understand the underlying model.
+Building a terminal UI with Bubbletea is not hard once you understand the Elm Architecture. The problem is that the framework's rules are strict and silent: return a new model from Update, never mutate state, never build heavy clients in Init, never double-wrap a Cmd. Violating these rules produces compile errors that point at the wrong line, or runtime behavior that makes no sense until you understand the underlying model.
 
-This plugin encodes those rules — and the non-obvious production patterns that follow from them — so Claude applies them correctly the first time rather than iterating through the common mistakes.
+This plugin encodes those rules — and the non-obvious production patterns that follow from them — against the **v2 API** (`charm.land/bubbletea/v2`, `charm.land/lipgloss/v2`), so Claude applies them correctly the first time rather than iterating through the common mistakes.
 
 ## Install
 
@@ -25,34 +25,38 @@ This plugin encodes those rules — and the non-obvious production patterns that
 Every Bubbletea app is three functions and a state struct:
 
 ```
-Model (state) → View (render) → Update (handle messages) → Model ...
+Model (state) → Update (handle messages) → Model → View (render) ...
 ```
 
-`Init()` returns a command to run at startup. `Update()` receives messages and returns a new model plus an optional next command. `View()` is a pure function of model state — no side effects, no I/O. The skill includes a complete, runnable template that demonstrates all three correctly, including async data fetching, auto-refresh via tick, and keyboard handling.
+`Init()` returns a command to run at startup. `Update()` receives messages and returns a new model plus an optional next command. `View()` is a pure function of model state — it returns a `tea.View` struct (v2: the frame string lives in `.Content`, and alt-screen/mouse modes are fields on that struct). The skill includes a complete, runnable v2 skeleton that demonstrates all three correctly, including async data fetching, auto-refresh via tick, and keyboard handling.
 
 ## What the skill covers
 
-**Architecture rules** — the four invariants that prevent the most common Bubbletea mistakes: where to initialize heavy clients, how KeyMsg type assertion works, the correct signature for functions used as `tea.Cmd`, and why Go has no `%,d` format verb.
+**v2 API differences** — the changes that bite: `View()` returns a `tea.View` struct (not a string); alt-screen and mouse mode are fields on that struct, not `tea.NewProgram` options; key messages are `tea.KeyPressMsg` with printable input in `.Text` and named keys via `.String()`; mouse is an interface whose concrete type is the action (`tea.MouseClickMsg`, `tea.MouseReleaseMsg`, `tea.MouseWheelMsg`, `tea.MouseMotionMsg`).
 
-**Layout patterns** — six composable patterns that produce consistent, professional-looking TUIs regardless of content: full-width header bar with left title and right status, footer status bar with keybinding hints, tab navigation, responsive card grid, section headers with dividers, and key-value rows with aligned labels.
+**Architecture rules** — the invariants that prevent the most common Bubbletea mistakes: where to initialize heavy clients (in `main()`, not `Init()`), how to build text input by appending `msg.Text`, the correct `func() tea.Msg` signature for Cmds, and why `tea.Batch` is the right way to fan out multiple commands.
 
-**Mouse click handling** — Y coordinate calculation for click events is non-obvious because `\n\n` creates exactly one empty line (not two), and `lipgloss.RoundedBorder()` boxes occupy three lines (top border, content, bottom border). The skill documents the counting method and includes a debug technique for verifying coordinates during development.
+**Restrained styling** — one accent color reused for active borders, cursor rows, focus glows, and spinners. Everything else is a small fixed set: `dim` for muted/inactive, `danger`/`warn` for destructive vs cautionary. A status-code-to-color mapping keeps this discipline even for multi-state badges.
 
-**Color system** — a consistent seven-color palette for purple titles, gray labels, green/yellow/red status indicators, and blue highlights that works across common terminal themes.
+**Layout gotchas** — `.Width(n)` is the outer width (border + padding included, not content width); floating boxes need no `Background` fill because canvas layers are opaque at the cell level; color-profile detection must happen in `main()` before `tea.NewProgram` takes over the terminal to avoid race conditions.
 
-**Production patterns** — column alignment with Unicode and emoji (using `lipgloss.Width` instead of `len`), parallel data fetching with a semaphore, filter and search mode, scroll and pagination, delta tracking for showing changes since last refresh, and error banners that preserve cached data rather than blanking the screen.
+**Mouse hit-testing** — click location is geometry, not line-counting. The skill teaches the `layout()` reverse-mapping approach: derive a layout struct from terminal size and scroll offset, render into it, then reverse-map click coordinates through the same struct. Counting `\n` characters to find a click's row drifts the moment chrome changes and is explicitly the anti-pattern the skill warns against.
+
+**Testing — four layers, cheapest first** — unit-testing `Update`/`View` without a terminal; golden snapshots of `View().Content` for layout regression; `teatest/v2` (the v2-correct import path) for multi-step interaction tests; and render-to-image + agent verdict for visual assertions that string comparisons cannot make.
+
+**Deep patterns reference** — for full generalized v2 code, the skill points to `references/patterns.md` (async render with a gen-counter stale guard, layout geometry as a single source of truth, per-row performance caching, column alignment with Unicode/emoji, filter/search mode) and `references/gold-monitor.md` with the complete `examples/gold-monitor/` working example.
 
 ## The gotchas section
 
-The skill contains a dedicated section of named, explained mistakes with working and broken code side by side. These are not hypothetical — each one corresponds to a real Bubbletea pitfall that produces misleading errors:
+The skill contains a dedicated section of named, explained mistakes with working and broken code side by side:
 
-- Client initialization in `main()`, not `Init()`
-- `tea.KeyMsg` vs `tea.Msg` type assertion
-- `func() tea.Msg` vs `func() tea.Cmd` — the double-wrapping trap
-- Integer comma formatting (Go has none built in)
-- Mouse Y offset calculation and the `\n\n` = one empty line rule
-- Variable shadowing against package names
+- Heavy client initialization in `main()`, not `Init()`
+- `tea.KeyPressMsg` with `.Text` for printable input — not the v1 `tea.KeyMsg{Runes}`
+- `func() tea.Msg` vs double-wrapping a Cmd
+- Mouse location via geometry, not `\n`-counting
+- Color-profile detection before `tea.NewProgram` to avoid races
+- `teatest/v2` import path (not the v1 path, which compiles against the wrong `tea.Model`/`View` shapes)
 
 ## Trigger phrases
 
-> "build a TUI", "Bubbletea", "terminal UI", "lipgloss", "Elm architecture", "Go terminal app", "interactive CLI", "charmbracelet", "TUI dashboard"
+> "build a TUI", "Bubbletea", "Bubbletea v2", "terminal UI", "lipgloss", "lipgloss v2", "Elm architecture", "Go terminal app", "interactive CLI", "charmbracelet", "charm.land", "TUI dashboard", "two-pane layout", "terminal mouse", "async render"

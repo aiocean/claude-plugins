@@ -16,7 +16,8 @@ when_to_use: |
   judge panel, pipeline vs parallel, budget guard, effort tier, spare no cost, result-oriented,
   classify-and-act, router workflow, model routing, tournament, pairwise ranking, sort at scale,
   quarantine untrusted content, generate-and-filter, migration workflow, deep research workflow,
-  deep verification, triage workflow, rule adherence, use-case recipe, harness shape
+  deep verification, triage workflow, rule adherence, use-case recipe, harness shape,
+  ultracode
 effort: high
 ---
 
@@ -28,7 +29,7 @@ effort: high
 >
 > **The three failures effort is fighting.** Name them so you can target them — every amplifier below is one of these three made mechanical: **agentic laziness** — stopping early on a multi-part task (→ loop-until-dry §2d + completeness critic §2f manufacture the tail the engine never demands); **self-preferential bias** — trusting your own first answer (→ adversarial / perspective-diverse verify §2a/§2b put a *separate* agent on killing it); **goal drift** — fidelity to the original objective decaying through rounds of summarization (→ schema'd data §5 + a final synthesis re-anchored on the original ask).
 
-Every rule below maps to an observable engine mechanic. The constants, combinator semantics, and cache-key behavior behind each rule live in **`reference.md`** — read it when you need the mechanism behind a rule rather than the rule alone. The *shape* of these rules is stable; specific constants can drift between CLI builds, so re-confirm against the live Workflow tool description if a number ever looks off.
+Every rule below maps to an observable engine mechanic. The constants, combinator semantics, and cache-key behavior behind each rule live in **`reference.md`** (`${CLAUDE_PLUGIN_ROOT}/skills/aio-workflow-creator/reference.md`) — read it when you need the mechanism behind a rule rather than the rule alone. The *shape* of these rules is stable; specific constants can drift between CLI builds, so re-confirm against the live Workflow tool description if a number ever looks off.
 
 ---
 

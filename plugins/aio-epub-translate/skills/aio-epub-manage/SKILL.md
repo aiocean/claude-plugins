@@ -19,7 +19,7 @@ Browse, monitor, and manage EPUB books on the translation server.
 import json, urllib.request, os
 
 BASE = "https://read-api.aiocean.dev/ListBooks.v1.BookService"
-KEY = os.environ.get("AIO_EPUB_API_KEY", "duocnv")
+KEY = os.environ.get("AIO_EPUB_API_KEY", "")
 
 def api(method, body):
     data = json.dumps(body).encode('utf-8')

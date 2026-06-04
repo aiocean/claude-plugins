@@ -1,7 +1,7 @@
 {
   "name": "aio-monitoring-observability",
   "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "author": {
     "name": "aiocean"
   }

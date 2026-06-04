@@ -16,6 +16,8 @@ argument-hint: "<status> <goal>   (e.g. Todo \"ship v2 release\")"
 
 Watches `.kanban/board.md` for changes. For each task in column `<status>` whose content (as judged by you, inline) contributes to free-text mission `<goal>`, spawns a sub-agent with a full self-contained prompt. Sub-agent owns the task lifecycle (Todo→Doing→Done) — this skill only orchestrates.
 
+> **Dependency: `fswatch` is required.** Install it before starting: `brew install fswatch`. The monitor script exits with code 3 if `fswatch` is not found — the skill will detect this and tell you.
+
 This skill REQUIRES the v3 kanban storage layout (index board + per-task files). See the `aio-kanban` skill.
 
 ---

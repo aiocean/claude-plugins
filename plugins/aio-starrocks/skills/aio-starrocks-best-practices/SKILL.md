@@ -1,8 +1,8 @@
 ---
 name: aio-starrocks-best-practices
 description: |
-  StarRocks table design best practices — partitioning strategy, sort key selection, bucketing decisions, Primary Key table tuning, authentication/authorization, and resource group configuration.
-when_to_use: StarRocks table design, partitioning strategy, sort key selection, bucketing, Primary Key table tuning, designing new tables, optimizing schemas, reviewing DDL, partition strategy, bucket strategy, sort strategy, access control, resource isolation, resource group, StarRocks DDL, StarRocks best practices
+  StarRocks table design best practices — partitioning strategy, sort key selection, bucketing decisions, Primary Key table tuning, authentication/authorization, and resource group configuration. Use when designing a StarRocks table, reviewing DDL, choosing partition granularity, sizing tablets (tablet sizing), setting up colocated joins, configuring LDAP or OIDC authentication, tuning Primary Key compaction, adjusting FE memory limits for large partition counts, or isolating workloads with resource group isolation.
+when_to_use: StarRocks table design, partitioning strategy, sort key selection, bucketing, Primary Key table tuning, designing new tables, optimizing schemas, reviewing DDL, partition strategy, bucket strategy, sort strategy, access control, resource isolation, resource group, StarRocks DDL, StarRocks best practices, colocated join, tablet sizing, LDAP, OIDC, compaction, FE memory limit, resource group isolation, DDL review
 argument-hint: "Table DDL or design question"
 effort: low
 ---
@@ -16,8 +16,8 @@ Official best practices from [docs.starrocks.io/docs/best_practices/](https://do
 ## Related Skills
 
 - `/aio-starrocks-query-tuning` — Query performance tuning, EXPLAIN plans, operator metrics, hints
-- `/starrocks` — Query syntax, cluster connections, Grafana integration
-- `/starrocks-expert` — General table types, data loading, query optimization
+- `/starrocks` — Query syntax, cluster connections, Grafana integration *(external skill, not part of this plugin)*
+- `/starrocks-expert` — General table types, data loading, query optimization *(external skill, not part of this plugin)*
 
 ---
 

@@ -21,9 +21,11 @@ The asymmetry is the whole point. Claude cannot hold a WebSocket open across tur
 - A CLI in another terminal, a mobile app, or another program needs to send Claude events and receive pushes back
 - You want to design your own message protocol over a dumb, language-agnostic relay
 
-For building a Claude-authored **browser UI** on this pattern (a Vue 3 + Tailwind scaffold with a reactive runtime and built-in push types), use **aio-html-interactive** instead — it is one application of this transport.
+For building a Claude-authored **browser UI** on this pattern (a Vue 3 + Tailwind scaffold with a reactive runtime and built-in push types), use the **aio-html-interactive** skill in this plugin instead — it is one application of this transport.
 
 Trigger phrases: "give Claude an event loop", "bridge external process to Claude", "Monitor WebSocket relay", "webhook wakes Claude", "two-way channel to Claude", "kết nối bên ngoài với Claude".
+
+For the **aio-html-interactive** skill: "bridge Claude to a browser", "AI-driven UI", "interactive UI for AI", "realtime browser AI", "dựng UI tương tác AI".
 
 ## Install
 

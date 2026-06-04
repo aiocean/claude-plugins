@@ -1,9 +1,9 @@
 ---
 name: aio-watermill-kit
 description: |
-  Build event-driven Go apps with Watermill — Router, middleware chains, Pub/Sub patterns, CQRS, and broker integrations (Kafka, AMQP, NATS, Redis Streams, SQL).
-when_to_use: watermill, event-driven Go, message router, pub/sub Go, CQRS Go, event bus Go, message handler, watermill middleware, watermill kafka, Kafka, AMQP, Redis Streams, NATS, SQL pub/sub
-effort: low
+  Build event-driven Go apps with Watermill (ThreeDotsLabs) — Router, middleware chains, pub/sub Go patterns, CQRS, and broker integrations (Kafka, AMQP, NATS, Redis Streams, SQL). Use for async messaging, message queue design, message bus architecture, event sourcing, and Go event broker setup.
+when_to_use: watermill, event-driven Go, message router, pub/sub Go, CQRS Go, event bus Go, message handler, watermill middleware, watermill kafka, Kafka, AMQP, Redis Streams, NATS, SQL pub/sub, ThreeDotsLabs, async messaging, message queue, message bus, event sourcing, Go event broker
+effort: medium
 ---
 
 # Watermill — Event-Driven Go Applications

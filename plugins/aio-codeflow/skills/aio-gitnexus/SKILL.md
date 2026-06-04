@@ -246,7 +246,7 @@ TypeScript, JavaScript, Python, Rust, Go, Java, C, C++, C#, Ruby, PHP, Swift, Ko
 After running `npx gitnexus analyze --embeddings`, use the doc-writer skill to write documentation:
 
 1. `npx gitnexus analyze --embeddings` — builds knowledge graph (always with embeddings)
-2. `/aio-codebase-oracle:doc-writer` — Oracle reads the graph and writes all docs
+2. `/aio-codeflow:aio-doc-writer` — Oracle reads the graph and writes all docs
 
 GitNexus provides the **knowledge graph** (structure, dependencies, clusters, flows, search). Oracle provides the **qualitative analysis** (design rationale, failure modes, decision guidance).
 

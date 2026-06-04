@@ -12,7 +12,8 @@ when_to_use: |
   interactive dashboard, terminal app, CLI UI, Go terminal, Elm architecture,
   charmbracelet, charm.land, two-pane layout, terminal mouse, async render,
   TUI performance, TUI styling
-effort: low
+effort: medium
+argument-hint: "component to build or pattern to apply"
 ---
 
 ## Environment

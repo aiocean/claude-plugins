@@ -19,7 +19,7 @@ Check translation quality across a book or specific chapter to find issues.
 import json, urllib.request, os
 
 BASE = "https://read-api.aiocean.dev/ListBooks.v1.BookService"
-KEY = os.environ.get("AIO_EPUB_API_KEY", "duocnv")
+KEY = os.environ.get("AIO_EPUB_API_KEY", "")
 
 def api(method, body):
     data = json.dumps(body).encode('utf-8')
