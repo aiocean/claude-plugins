@@ -1,14 +1,14 @@
 ---
-name: aio-understand-ai
+name: aio-catch-me-up
 description: |
-  Turn Claude into a wise, effective teacher whose only goal is to make sure YOU deeply understand the work an AI agent just did — the problem it solved, why that problem existed, the solution and its design decisions, the edge cases it handled, and the broader impact. Incremental and mastery-gated: it has you restate your understanding first, fills the gaps at the depth you ask for (eli5 / eli14 / like-an-intern), shows you the real code, and quizzes you with AskUserQuestion — and it does not conclude until you have demonstrably understood. Use when the AI moved faster than you could follow and you want to catch up before merging. Trigger on "teach me", "help me understand what you did", "make sure I understand this change", "walk me through this", "explain the session", "I don't get it", "why did you do it this way", "quiz me", "eli5 / eli14", "don't let me fall behind", "I want to actually understand this, not just merge it".
-when_to_use: teach me, help me understand, make sure I understand, walk me through, explain what you did, explain the session, explain this change, why did you do it this way, I don't get it, I don't understand, quiz me, test my understanding, check my understanding, eli5, eli14, explain like I'm an intern, don't let me fall behind, understand the AI's work, understand the diff, understand the code you wrote, onboard me to this change, do I really understand this, am I going to be able to maintain this
+  Turn Claude into a wise, effective teacher whose only goal is to make sure YOU deeply understand the work an AI agent just did — the problem it solved, why that problem existed, the solution and its design decisions, the edge cases it handled, and the broader impact. Incremental and mastery-gated: it has you restate your understanding first, fills the gaps at the depth you ask for (eli5 / eli14 / like-an-intern), shows you the real code, and quizzes you with AskUserQuestion — and it does not conclude until you have demonstrably understood. Use when the AI moved faster than you could follow and you want to catch up before merging. Trigger on "teach me", "help me understand what you did", "make sure I understand this change", "walk me through this", "explain the session", "I don't get it", "why did you do it this way", "quiz me", "eli5 / eli14", "don't let me fall behind", "I want to actually understand this, not just merge it", "catch me up", "bring me up to speed", "I fell behind", "the AI moved too fast".
+when_to_use: catch me up, catch up before merge, bring me up to speed, I fell behind, the AI moved too fast, teach me, help me understand, make sure I understand, walk me through, explain what you did, explain the session, explain this change, why did you do it this way, I don't get it, I don't understand, quiz me, test my understanding, check my understanding, eli5, eli14, explain like I'm an intern, don't let me fall behind, understand the AI's work, understand the diff, understand the code you wrote, onboard me to this change, do I really understand this, am I going to be able to maintain this
 argument-hint: "what to understand (defaults to the work done this session)"
 effort: high
 model: opus
 ---
 
-# Understand the AI — Master What Was Just Built
+# Catch Me Up — Master What the AI Just Built
 
 > The AI is fast. You are accountable. The gap between *"it works"* and *"I understand why it works"* is where the bugs you'll own next month live. This skill closes that gap. It is not over until you have proven — to a quiz, in your own words — that you get it.
 
@@ -20,7 +20,7 @@ The session does **not** end until the learner has demonstrated — not asserted
 
 ## What you are teaching
 
-**Default subject: the work an AI agent just did this session** — the change it made, the code it wrote, the decisions it took, the alternatives it rejected, and the edge cases it handled. This is the richest "understand the AI" surface, because it forces the *whys* the AI reasoned through silently into the open.
+**Default subject: the work an AI agent just did this session** — the change it made, the code it wrote, the decisions it took, the alternatives it rejected, and the edge cases it handled. This is the richest surface to catch up on, because it forces the *whys* the AI reasoned through silently into the open.
 
 Ground the teaching in **real artifacts**, never a hand-wave. Before you teach, read the ground truth:
 - `git diff` / `git diff --staged` / `git log --oneline -10` — what actually changed.

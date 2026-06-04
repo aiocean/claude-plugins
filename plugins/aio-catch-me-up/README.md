@@ -1,4 +1,4 @@
-# aio-understand-ai
+# aio-catch-me-up
 
 **Don't let the AI leave you behind.**
 
@@ -27,5 +27,5 @@ When triggered, Claude stops producing and starts teaching:
 
 ```bash
 claude plugin marketplace add aiocean/claude-plugins
-claude plugin install aio-understand-ai@aiocean-plugins
+claude plugin install aio-catch-me-up@aiocean-plugins
 ```
