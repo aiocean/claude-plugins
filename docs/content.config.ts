@@ -27,6 +27,15 @@ const contentSchema = z.object({
   // layer's ContentView SELECTs on this column, so it must exist.
   document_type: z.string().optional(),
 
+  // Opt into byte-faithful "Copy as Markdown". The layer's ContentView
+  // (andy-note-nuxt ≥ 0.11) reads `page.rawbody` and, when present, copies
+  // the original .md source verbatim; absent, it round-trips the minimark
+  // AST back to markdown (lossy on edge cases). Because our schema REPLACES
+  // the layer's entirely, the column only exists if we declare it — Nuxt
+  // Content then auto-populates it with the raw source.
+  // See https://content.nuxt.com/docs/integrations/llms.
+  rawbody: z.string().optional(),
+
   // Marketplace-specific. document_type ("listing" / "plugin" / "skill")
   // covers what `type` used to — single source of truth aligned with
   // the layer's query.

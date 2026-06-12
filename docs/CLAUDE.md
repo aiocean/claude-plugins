@@ -56,10 +56,11 @@ future move doesn't require a code change.
 
 | Path | Source |
 |---|---|
-| `nuxt.config.ts` | Hand. Layer extends + baseURL + nitro.prerender config. |
-| `content.config.ts` | Hand. Zod schema for marketplace + universal + layer-queried fields. |
-| `app/app.config.ts` | Hand. Site branding (title, menu, themeColor). |
+| `nuxt.config.ts` | Hand. Layer extends + i18n + SEO `site` + branding (`runtimeConfig.public.site`, menu) + baseURL + nitro.prerender config. |
+| `content.config.ts` | Hand. Zod schema for marketplace + universal + layer-queried fields (incl. `rawbody` for copy-as-markdown). |
 | `app/app.vue` | Hand. Minimal NuxtLayout wrapper. |
+| `app/components/content/InstallCommand.vue` | Hand. MDC install-command card with copy button. |
+| `app/plugins/locale-lang.ts` | Hand. Sets `<html lang>`/`dir` per locale (i18n head). |
 | `package.json` | Hand. Pins `andy-note-nuxt` (npm) — layer's transitive deps auto-install. |
 | `content/index.md` | **Auto** (sync-content.py). Marketplace landing. |
 | `content/plugins/index.md` | **Auto**. /plugins listing intro. |
@@ -79,7 +80,10 @@ Nuxt Layers deep-merge child over parent. To customize the layer's behavior:
 - **Page / layout**: same — `app/pages/[...slug].vue` or `app/layouts/default.vue`.
 - **Tailwind palette**: copy `tailwind.config.js` into this directory; Tailwind
   picks up the project-local config (Nuxt does NOT deep-merge tailwind configs).
-- **App config**: `app/app.config.ts` deep-merges. Override individual keys.
+- **Branding / site config**: set `runtimeConfig.public.site` (title, tagline,
+  themeColor, author) + `site` (SEO: name, url) in `nuxt.config.ts`; Nuxt
+  deep-merges these field-by-field over the layer's defaults. (The layer ships
+  no `app.config.ts` surface — Nuxt 5 removed `defineAppConfig`/`useAppConfig`.)
 
 Vue components do NOT support "extend + add" — overriding replaces wholesale.
 Forward-port layer changes manually each release, or skip the override to keep
@@ -94,29 +98,24 @@ new layer features (see "Known gaps" below for the trade-off currently chosen).
   the project picks up the layer's new copy-as-markdown button + AI-deep-link
   dropdown (layer v0.2.0). The layer queries the `content` collection with
   the raw path including `/vi`, which never matches, so every VI route
-  renders the layer's Not Found fallback. EN works fully. Re-add the
-  override (and forward-port the new buttons into it) when VI matters again
-  — or push i18n awareness upstream into `andy-note-nuxt` so a future
-  version supports it natively.
+  renders the layer's Not Found fallback. EN works fully. Re-confirmed still
+  404 on `andy-note-nuxt@0.11.0` — the layer remains i18n-unaware. The 93 VI
+  pages prerender as HTML with a correct `<html lang="vi-VN">` (our
+  `app/plugins/locale-lang.ts`) but the bodies are the Not Found fallback. Re-add
+  the i18n-aware override (fork 0.11.0's now-slim `ContentView`: strip `/vi`,
+  query `content_vi`, localize NuxtLink `:to` via `localePath()`) when VI matters
+  again — or push i18n awareness upstream into `andy-note-nuxt` for native support.
 
 ## Known layer issues (to fix upstream)
 
-Tracked in `content.config.ts` comments; brief summary here so future readers
-don't have to chase the workaround:
-
-1. **PoE-domain field SELECT** — `ContentView.vue:118` queries 10 game-specific
-   columns (`budget_tier`, `game`, `league`, `patch`, `build_tags`, `ratings`,
-   `strategy_tier`, `profit_per_hour`, `investment_tier`). Layer's own CLAUDE.md
-   forbids domain leak; this select is the leak. Workaround: declare these as
-   optional in our schema so the SQLite cache materializes the columns.
-2. **`document_type` filter excludes NULL** — `ContentView.vue:117` filters
-   with `.where('document_type', '<>', 'convention')`. SQL `NULL <> 'x'` is
-   NULL (falsy) → nodes without `document_type` are silently filtered out.
-   Workaround: every generated markdown carries `document_type: "listing" |
-   "plugin" | "skill"`. Proper fix is `(IS NULL OR <> 'convention')` upstream.
-3. **`vite-plugin-ai-annotator` hardcoded module** — layer's `nuxt.config.ts`
+1. **`vite-plugin-ai-annotator` hardcoded module** — the layer's `nuxt.config.ts`
    registers `vite-plugin-ai-annotator/nuxt` as a module but lists it only in
    the layer's devDependencies, so installing `andy-note-nuxt` does NOT pull
    it in. Consumer must install it (devDep is fine) even when disabled via
    `aiAnnotator: false` — otherwise the module load fails at startup.
-When the layer ships fixes, drop the workarounds from `content.config.ts`.
+
+`andy-note-nuxt@0.11.0`'s `ContentView` runs a clean 6-column generic query
+(`path, title, description, document_type, updated, created`) and filters
+`document_type` in JS (`!== 'convention'`, so rows without the field are kept),
+so the schema no longer needs domain-specific columns or a mandatory
+`document_type` on every page to survive the layer's listing query.
