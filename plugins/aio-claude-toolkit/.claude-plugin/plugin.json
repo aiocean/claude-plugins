@@ -1,7 +1,7 @@
 {
   "name": "aio-claude-toolkit",
   "description": "Sharpen Claude Code — patch and recompile Claude's binary for custom use cases (control channels, agent-as-a-service, custom tooling), capture this session's workflow as a reusable skill, consolidate memory, and ship feedback to the marketplace.",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "author": {
     "name": "aiocean"
   }

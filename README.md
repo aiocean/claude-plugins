@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-A curated collection of 27 plugins for Claude Code — from codebase analysis to iOS debugging to ebook translation.
+A curated collection of 28 plugins for Claude Code — from codebase analysis to iOS debugging to ebook translation.
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | Plugin | Version | Skills | Description |
 |--------|---------|--------|-------------|
 | **aio-codeflow** | 2.0.2 | 10 | Coordinated coding workflow — discover/map/snapshot (codebase intel), plan (implementation planning), debug (4-phase root-cause pipeline), rubber-duck (articulation companion), review-quick (pre-commit sanity check) + review-deep (parallel multi-agent gate), doc-writer (GitNexus-powered architecture docs), gitnexus (engine setup).<br>`npx skills add aiocean/claude-plugins -s aio-codeflow` |
-| **aio-claude-toolkit** | 3.0.1 | 9 | Sharpen Claude Code — **aio-patch-{setup,extract,compile,run,anchor,control}** (extract + patch + recompile Claude's binary for custom use cases, e.g. control channels, agent-as-a-service), **aio-skillify** (capture workflow as reusable skill), **aio-dream** (memory consolidation), **aio-feedback** (ship feedback to marketplace).<br>`npx skills add aiocean/claude-plugins -s aio-claude-toolkit` |
+| **aio-claude-toolkit** | 3.0.2 | 9 | Sharpen Claude Code — **aio-patch-{setup,extract,compile,run,anchor,control}** (extract + patch + recompile Claude's binary for custom use cases, e.g. control channels, agent-as-a-service), **aio-skillify** (capture workflow as reusable skill), **aio-dream** (memory consolidation), **aio-feedback** (ship feedback to marketplace).<br>`npx skills add aiocean/claude-plugins -s aio-claude-toolkit` |
 | **aio-devops** | 1.0.5 | 3 | DevOps — github (repos, PRs, issues), gitlab (MRs, pipelines), worktree (parallel development).<br>`npx skills add aiocean/claude-plugins -s aio-devops` |
 | **aio-design-system** | 1.2.3 | 3 | UI/UX design — uiux (design knowledge), neobrutalism (design system bootstrapper), dashboard-design (SaaS analytics dashboards: chart selection, anti-patterns, a11y, storytelling).<br>`npx skills add aiocean/claude-plugins -s aio-design-system` |
 | **aio-saas-tools** | 1.0.5 | 4 | SaaS integrations — atlassian (Jira + Confluence), google-workspace, tanca (HR), x (Twitter).<br>`npx skills add aiocean/claude-plugins -s aio-saas-tools` |
@@ -60,6 +60,7 @@ Grouped plugins bundling multiple related skills into a single install.
 |--------|---------|-------------|
 | **aio-ios-device-debug** | 1.1.8 | Debug iOS apps on physical devices from terminal.<br>`npx skills add aiocean/claude-plugins -s aio-ios-device-debug` |
 | **aio-browser-cookie** | 2.0.8 | Extract browser cookies with rookiepy for authenticated requests.<br>`npx skills add aiocean/claude-plugins -s aio-browser-cookie` |
+| **aio-boox** | 1.0.0 | Push books/docs to an Onyx BOOX e-reader and manage its cloud account (push list, library, notes) API-direct via a zero-dependency Node CLI.<br>`npx skills add aiocean/claude-plugins -s aio-boox` |
 | **aio-visual-diff** | 0.1.3 | Verify AI-built UI against design via measurement-driven diff — `getComputedStyle` + `getBoundingClientRect` via Chrome DevTools MCP, diff against Figma reference or frozen baseline, numerical delta feedback. No screenshot eyeballing.<br>`npx skills add aiocean/claude-plugins -s aio-visual-diff` |
 | **aio-message-bridge** | 1.1.0 | Give Claude Code an event loop — a generic, language-agnostic HTTP + WebSocket relay plus an optional frozen Bun + Vue3 + Tailwind browser-UI scaffold (the `aio-html-interactive` skill). The Monitor tool lets anything outside Claude (CLI, mobile app, webhook, another program, web page, or the bundled UI) talk to it mid-task both ways. Inbound: client POSTs an event → relay prints `MSG::` to stdout → Monitor notification. Outbound: Claude POSTs a push → relay broadcasts over WebSocket. Ready-to-run reference relay + vanilla client; localhost by default, optional token-gated exposure over Cloudflare Tunnel / Tailscale / LAN. 2 skills: aio-message-bridge, aio-html-interactive.<br>`npx skills add aiocean/claude-plugins -s aio-message-bridge` |
 

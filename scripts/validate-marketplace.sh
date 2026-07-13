@@ -236,7 +236,7 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
     # Collect script files from scripts/ subdirectory
     if [ -d "$skill_dir/scripts" ]; then
       # Find scripts by extension OR by executable bit (for extensionless scripts like yt-search)
-      subdir_scripts="$(find "$skill_dir/scripts" -type f \( -name '*.sh' -o -name '*.py' -o -name '*.ts' -o -name '*.js' -o -perm +111 \) 2>/dev/null | grep -v '__pycache__' || true)"
+      subdir_scripts="$(find "$skill_dir/scripts" -type f \( -name '*.sh' -o -name '*.py' -o -name '*.ts' -o -name '*.js' -o -name '*.mjs' -o -perm +111 \) 2>/dev/null | grep -v '__pycache__' || true)"
       if [ -n "$subdir_scripts" ]; then
         has_scripts=true
         all_script_files="$subdir_scripts"
@@ -248,7 +248,7 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
     fi
 
     # Collect script files from skill root (direct .sh/.py/.ts/.js, excluding SKILL.md)
-    root_scripts="$(find "$skill_dir" -maxdepth 1 -type f \( -name '*.sh' -o -name '*.py' -o -name '*.ts' -o -name '*.js' \) 2>/dev/null || true)"
+    root_scripts="$(find "$skill_dir" -maxdepth 1 -type f \( -name '*.sh' -o -name '*.py' -o -name '*.ts' -o -name '*.js' -o -name '*.mjs' \) 2>/dev/null || true)"
     if [ -n "$root_scripts" ]; then
       has_scripts=true
       if [ -n "$all_script_files" ]; then
