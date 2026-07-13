@@ -2,9 +2,9 @@
 // theme + stacked-column UX + Nuxt Content wiring). Layer ships the theme,
 // THIS project ships the marketplace domain (schema, branding, content).
 //
-// Layer is installed from npm (see package.json). Version pin lives in
-// package.json — `extends` just names the package so Nuxt resolves it from
-// node_modules. Bump the layer by bumping the dep version.
+// Layer is installed from npm. package.json declares the accepted version range,
+// while bun.lock pins the resolved npm release. `extends` names the package for
+// Nuxt to resolve; upgrade by changing the range and running `bun install`.
 
 import { readdirSync } from 'node:fs'
 import { resolve } from 'node:path'

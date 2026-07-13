@@ -46,7 +46,7 @@ Use `bun dev` for iterating on content or theme — Nuxt HMR rebuilds on
 markdown edits. Use `bun run generate` when verifying the production
 static output (asset paths, prerender warnings, route manifest).
 
-`app.baseURL` defaults to `/` (`nuxt.config.ts:113`) because the
+`app.baseURL` defaults to `/` (`nuxt.config.ts:114`) because the
 `claude-plugins.aiocean.dev` custom domain serves from root with no
 subpath. Override via `NUXT_APP_BASE_URL=/some-prefix/ bun run generate`
 only if deploying to a subpath later — the env override is kept so any
@@ -61,7 +61,7 @@ future move doesn't require a code change.
 | `app/app.vue` | Hand. Minimal NuxtLayout wrapper. |
 | `app/components/content/InstallCommand.vue` | Hand. MDC install-command card with copy button. |
 | `app/plugins/locale-lang.ts` | Hand. Sets `<html lang>`/`dir` per locale (i18n head). |
-| `package.json` | Hand. Pins `andy-note-nuxt` (npm) — layer's transitive deps auto-install. |
+| `package.json` | Hand. Declares the `andy-note-nuxt` caret range; `bun.lock` pins the resolved npm release — layer's transitive deps auto-install. |
 | `content/index.md` | **Auto** (sync-content.py). Marketplace landing. |
 | `content/plugins/index.md` | **Auto**. /plugins listing intro. |
 | `content/plugins/{name}.md` | **Auto**. Per-plugin overview. |
@@ -102,7 +102,7 @@ new layer features (see "Known gaps" below for the trade-off currently chosen).
   404 on `andy-note-nuxt@0.15.0` — the layer remains i18n-unaware. The 93 VI
   pages prerender as HTML with a correct `<html lang="vi-VN">` (our
   `app/plugins/locale-lang.ts`) but the bodies are the Not Found fallback. Re-add
-  the i18n-aware override (fork 0.15.0's now-slim `ContentView`: strip `/vi`,
+  the i18n-aware override (fork 0.15.0's `ContentView`: strip `/vi`,
   query `content_vi`, localize NuxtLink `:to` via `localePath()`) when VI matters
   again — or push i18n awareness upstream into `andy-note-nuxt` for native support.
 
