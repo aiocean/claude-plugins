@@ -68,7 +68,7 @@ So: `device` looks stale → `send-book` anyway → tell the user to wake the de
 ## Auth
 
 - **JWT** read from `BOOX_TOKEN` env, else the file at `BOOX_TOKEN_FILE`
-  (default `~/compass/supremor/secret/boox/token`). Long-lived (~6 months). It is the value of
+  (default `~/.config/boox/token`, honoring `XDG_CONFIG_HOME`). Long-lived (~6 months). It is the value of
   `localStorage.token` on push.boox.com — re-grab from a logged-in browser when it expires.
 - **Sync Gateway** session cookie is fetched on demand from `/api/1/users/syncToken`
   (the script handles this; no separate secret).

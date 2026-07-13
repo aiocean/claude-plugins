@@ -25,7 +25,7 @@ import os from 'node:os'
 const HOST = process.env.BOOX_HOST || 'https://push.boox.com' // US region. CN: https://send2boox.com
 const TOKEN_FILE =
   process.env.BOOX_TOKEN_FILE ||
-  path.join(os.homedir(), 'compass/supremor/secret/boox/token')
+  path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'), 'boox', 'token')
 
 function token() {
   if (process.env.BOOX_TOKEN) return process.env.BOOX_TOKEN.trim()

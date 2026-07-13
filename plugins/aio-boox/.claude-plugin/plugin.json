@@ -1,7 +1,7 @@
 {
   "name": "aio-boox",
   "description": "Push books/docs to an Onyx BOOX e-reader and manage its cloud account (push list, library, notes) API-direct via a self-contained zero-dependency Node CLI — no web UI, no email, no BooxDrop.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "aiocean"
   },

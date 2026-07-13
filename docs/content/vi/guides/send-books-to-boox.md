@@ -62,21 +62,17 @@ Web app xác thực mọi request bằng một JWT sống lâu nằm trong
    **Application** → **Local Storage** → `https://push.boox.com` → copy
    giá trị của key `token`.)
 
-4. Lưu vào chỗ CLI tìm được:
+4. Lưu vào đúng chỗ CLI tự tìm:
 
    ```sh
    mkdir -p ~/.config/boox
    pbpaste > ~/.config/boox/token        # macOS; Linux: xclip -o > ~/.config/boox/token
    ```
 
-5. Trỏ plugin vào đó — thêm vào shell profile:
-
-   ```sh
-   export BOOX_TOKEN_FILE="$HOME/.config/boox/token"
-   ```
-
-   (Hoặc bỏ qua file mà `export BOOX_TOKEN="eyJ..."` trực tiếp — tác dụng
-   y hệt, chỉ dễ lọt vào shell history hơn. Tùy bạn.)
+   Setup đến đây là xong — CLI tự đọc `~/.config/boox/token`
+   (`$XDG_CONFIG_HOME/boox/token` nếu bạn đặt biến đó). Muốn để chỗ khác?
+   Trỏ `BOOX_TOKEN_FILE` vào đó. Không muốn dùng file? `export
+   BOOX_TOKEN="eyJ..."` cũng được, chỉ dễ lọt vào shell history hơn.
 
 Hãy coi token như mật khẩu: nó là toàn quyền truy cập BOOX cloud của bạn —
 sách, note, push thiết bị. Đừng commit, đừng dán vào issue.

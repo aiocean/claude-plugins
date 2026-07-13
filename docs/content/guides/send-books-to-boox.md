@@ -61,21 +61,18 @@ The web app authenticates every request with a long-lived JWT it keeps in
    tab → **Local Storage** → `https://push.boox.com` → copy the value of
    the `token` key.)
 
-4. Save it where the CLI can find it:
+4. Save it where the CLI looks by default:
 
    ```sh
    mkdir -p ~/.config/boox
    pbpaste > ~/.config/boox/token        # macOS; Linux: xclip -o > ~/.config/boox/token
    ```
 
-5. Point the plugin at it — add to your shell profile:
-
-   ```sh
-   export BOOX_TOKEN_FILE="$HOME/.config/boox/token"
-   ```
-
-   (Or skip the file and `export BOOX_TOKEN="eyJ..."` directly — same
-   effect, slightly easier to leak into shell history. Your call.)
+   That's the whole setup — the CLI reads `~/.config/boox/token`
+   (`$XDG_CONFIG_HOME/boox/token` if you set that) on its own. Prefer a
+   different location? Point `BOOX_TOKEN_FILE` at it. Prefer no file at
+   all? `export BOOX_TOKEN="eyJ..."` works too, just slightly easier to
+   leak into shell history.
 
 Treat the token like a password: it is full access to your BOOX cloud —
 books, notes, device push. Don't commit it, don't paste it into issues.
