@@ -46,7 +46,7 @@ Use `bun dev` for iterating on content or theme — Nuxt HMR rebuilds on
 markdown edits. Use `bun run generate` when verifying the production
 static output (asset paths, prerender warnings, route manifest).
 
-`app.baseURL` defaults to `/` (`nuxt.config.ts:67`) because the
+`app.baseURL` defaults to `/` (`nuxt.config.ts:113`) because the
 `claude-plugins.aiocean.dev` custom domain serves from root with no
 subpath. Override via `NUXT_APP_BASE_URL=/some-prefix/ bun run generate`
 only if deploying to a subpath later — the env override is kept so any
@@ -99,10 +99,10 @@ new layer features (see "Known gaps" below for the trade-off currently chosen).
   dropdown (layer v0.2.0). The layer queries the `content` collection with
   the raw path including `/vi`, which never matches, so every VI route
   renders the layer's Not Found fallback. EN works fully. Re-confirmed still
-  404 on `andy-note-nuxt@0.11.0` — the layer remains i18n-unaware. The 93 VI
+  404 on `andy-note-nuxt@0.15.0` — the layer remains i18n-unaware. The 93 VI
   pages prerender as HTML with a correct `<html lang="vi-VN">` (our
   `app/plugins/locale-lang.ts`) but the bodies are the Not Found fallback. Re-add
-  the i18n-aware override (fork 0.11.0's now-slim `ContentView`: strip `/vi`,
+  the i18n-aware override (fork 0.15.0's now-slim `ContentView`: strip `/vi`,
   query `content_vi`, localize NuxtLink `:to` via `localePath()`) when VI matters
   again — or push i18n awareness upstream into `andy-note-nuxt` for native support.
 
@@ -114,7 +114,7 @@ new layer features (see "Known gaps" below for the trade-off currently chosen).
    it in. Consumer must install it (devDep is fine) even when disabled via
    `aiAnnotator: false` — otherwise the module load fails at startup.
 
-`andy-note-nuxt@0.11.0`'s `ContentView` runs a clean 6-column generic query
+`andy-note-nuxt@0.15.0`'s `ContentView` runs a clean 6-column generic query
 (`path, title, description, document_type, updated, created`) and filters
 `document_type` in JS (`!== 'convention'`, so rows without the field are kept),
 so the schema no longer needs domain-specific columns or a mandatory
