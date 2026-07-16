@@ -24,7 +24,16 @@ The plugin surfaces this framework in both directions: what the reviewer should 
 
 ### aio-code-review
 
-The skill handles both reviewer and author roles.
+The skill runs reviews and coaches both the reviewer and author roles.
+
+**Run a review (the workflow).** When there's actual code to review, the skill authors and runs an adaptive, project-aware review workflow instead of eyeballing the diff:
+
+1. **Profile** — three agents in parallel understand the project, detect the lint/type-check/test tooling it *actually configures*, and extract its house conventions and design patterns.
+2. **Mechanical** — run the detected tools and parse their output into findings scoped to the diff.
+3. **Semantic** — a multi-lens sweep applying the eight-dimension rubric *plus the discovered conventions*, so the review enforces this codebase's style rather than generic advice.
+4. **Consolidate** — dedup both tracks, adversarially verify each finding against the real code (linters and LLMs both produce false positives), severity-rank, and emit an LGTM verdict against The Standard.
+
+Tier the run `lean` / `standard` / `maximal` to scale lenses, discovery rounds, and verification votes. Trivial one-file diffs skip the workflow. The full harness lives in `skills/aio-code-review/references/review-workflow.md`.
 
 **As a reviewer**, the skill covers:
 

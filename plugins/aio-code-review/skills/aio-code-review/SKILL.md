@@ -1,8 +1,8 @@
 ---
 name: aio-code-review
-description: Code-review playbook for both sides — reviewer (what to look for, when to approve, severity-labeled comments, handling pushback) and PR/CL author (writing CL descriptions, splitting changelists, responding to comments). Use when reviewing or authoring a PR/MR/CL/diff, deciding LGTM or LGTM threshold, authoring a merge request, assessing code health, handling a hotfix review, or replying to review feedback.
-when_to_use: code review, review pr, review mr, lgtm, lgtm threshold, nit, approve pr, pr description, cl description, split pr, respond to review, pushback, hotfix, hotfix review, diff, diff review, changelist, CL, CL author, PR author, merge request, code health
-argument-hint: "PR ref or role (reviewer | author)"
+description: Runs an adaptive, project-aware code-review workflow (profile the project, detect its lint tools + conventions, run mechanical + semantic review, consolidate into an LGTM verdict) and carries the Google eng-practices playbook it applies — reviewer (what to look for, when to approve, severity-labeled comments, handling pushback) and PR/CL author (CL descriptions, splitting changelists, responding to comments). Use when reviewing or authoring a PR/MR/CL/diff, running a code review, deciding LGTM or LGTM threshold, authoring a merge request, assessing code health, handling a hotfix review, or replying to review feedback.
+when_to_use: code review, run a code review, review pr, review mr, review diff, lgtm, lgtm threshold, nit, approve pr, pr description, cl description, split pr, respond to review, pushback, hotfix, hotfix review, diff, diff review, changelist, CL, CL author, PR author, merge request, code health, lint, static analysis
+argument-hint: "PR/diff ref, or role (reviewer | author), or tier (lean | standard | maximal)"
 effort: medium
 ---
 
@@ -10,16 +10,42 @@ effort: medium
 
 A **CL** (changelist) is one self-contained change under review — equivalent to a PR / MR. **LGTM** = "Looks Good to Me" (reviewer's approval). **Nit:** = optional polish, won't block.
 
+This skill does two things:
+
+- **Runs a review** — authors and runs an adaptive review *workflow* over a diff/PR (the default when there's code in front of you). See **Run a review** below.
+- **Coaches a role** — the reviewer / author playbook. It's both the rubric the workflow's agents apply *and* your reference for reviewing by hand.
+
 Full principles and rationale: `references/01-overview.md`.
 
-## Pick the role first
+## Pick the lane first
 
-| User signal | Role | Start with |
+| User signal | Lane | Start with |
 |---|---|---|
-| "review this PR / should I approve / check my diff" | **Reviewer** | the 8-point checklist below |
-| "writing a PR description / split my change / respond to review comments" | **Author** | the author sections below |
-| "is this an emergency / can we skip review" | both | the emergency section + `references/02-emergencies.md` |
-| Unclear | ask once; default **Reviewer** | — |
+| "review this PR / check my diff / is this safe to merge" (code is present) | **Run a review** | the workflow below |
+| "how should I review / what do I look for / should I approve" (no diff, wants guidance) | **Reviewer** playbook | the 8-point checklist below |
+| "writing a PR description / split my change / respond to review comments" | **Author** playbook | the author sections below |
+| "is this an emergency / can we skip review" | either | the emergency section + `references/02-emergencies.md` |
+| Unclear | ask once; default **Run a review** if a diff exists, else **Reviewer** | — |
+
+## Run a review — the workflow
+
+When there's actual code to review, don't eyeball it — run the adaptive review workflow. It profiles the project, reviews on two independent tracks, then kills its own false positives before giving a verdict:
+
+1. **Profile** *(3 agents in parallel)* — understand the project · detect the lint/type-check/test tooling it *actually configures* · extract the house conventions and design patterns. These are independent discovery tasks, so they fan out, not run in sequence.
+2. **Mechanical** — run the tools the profile found (linters, type-checkers, tests) and parse their output into findings scoped to the diff.
+3. **Semantic** — a multi-lens sweep applying the **8-dimension rubric** below *plus the discovered house conventions*, so the review enforces *this* codebase's style, not generic advice.
+4. **Consolidate** — dedup both tracks, **adversarially verify each finding against the real code** (linters and LLMs both emit noise — a false positive erodes trust more than a missed nit), severity-rank, and synthesize an **LGTM verdict against The Standard**.
+
+**To run it:**
+
+1. **Scope the diff inline first** — `git diff --name-only <base>` for the changed files, note the base ref (working tree vs `HEAD`, `origin/main...HEAD`, or a PR ref). For a GitHub PR, `gh pr diff <n>`.
+2. **Pick a tier** from the user's signal — `lean` (quick spot-check), `standard` (default), `maximal` ("thorough / audit / spare no cost"). Tier scales lenses, semantic rounds, and verify votes.
+3. **Author + run the Workflow** using the script in `references/review-workflow.md`, passing `args = { scope, base, files, tier }`. Pass the script inline; adapt the knobs to the detected project.
+4. **Present the consolidated report** in the eng-practices vocabulary — verdict, blocking items vs `Nit:`s, what's good, each comment kind and with a concrete fix.
+
+**Skip the workflow** for a trivial one-file diff — a single reviewer agent (or reviewing it yourself against the checklist below) is enough; the multi-agent machinery is dead weight on a change with one obvious answer.
+
+The full harness, its schemas, and the tuning knobs live in `references/review-workflow.md`. Workflow mechanics (pure-literal `meta`, barrier vs pipeline, budget guard, cache-safe resume) live in the `aio-workflow-creator` skill.
 
 ## The Standard (the senior principle — memorize)
 
@@ -36,6 +62,8 @@ Underlying principles:
 Deep dive: `references/reviewer-01-standard.md`.
 
 ## Reviewer — every review touches 8 things
+
+These eight dimensions are the rubric the workflow's **Semantic** phase applies (one lens per concern), and your checklist when reviewing by hand.
 
 1. **Design** — does the change belong here? Does it fit the system?
 2. **Functionality** — does it do what was intended, and is that good for users? Think about edge cases, concurrency, UI impact.
