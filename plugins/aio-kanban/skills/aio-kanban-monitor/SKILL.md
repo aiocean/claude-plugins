@@ -48,28 +48,34 @@ state:
   dispatched: Set<TaskID>     # IDs we've already spawned this session
   judged_no:  Map<TaskID, hash-of-task-content>  # IDs we judged irrelevant; key on content hash so edits re-judge
   running:    TaskID | null   # the one currently-running sub-agent, if any
-  shell_id:   string          # the fswatch background shell id
+  watch_id:   string          # task id of the board watch
 
 setup:
   1. Validate args + preconditions.
-  2. Start the monitor as a background bash process:
-       Bash(command="bash ${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban-monitor/scripts/kanban-monitor.sh",
-            run_in_background=true)
-     Capture the returned shell_id.
+  2. Arm the board watch:
+       Monitor(command="bash ${CLAUDE_PLUGIN_ROOT}/skills/aio-kanban-monitor/scripts/kanban-monitor.sh 2>&1",
+               description="kanban board changes (<status> / <goal>)",
+               persistent=true)
+     Capture the returned task id as watch_id. `persistent` is required: this watch must
+     live as long as the session, and a timeout would end it mid-mission in silence.
+     `2>&1` routes the script's FATAL lines into the event stream where you can see them.
   3. Tell the user: "Monitoring .kanban/board.md for tasks in <status> matching goal '<goal>'.
-                    Press Ctrl+C or send /cancel to stop."
+                    Send /cancel to stop."
 
-loop:
-  4. Use Monitor tool on shell_id to receive the next stdout line (each line = one
-     "board changed" notification; the first line is the synthetic "start").
-  5. On each notification → run a PARSE PASS (see below).
-  6. If a sub-agent is `running`, do NOT spawn another. Wait for it to finish
+loop (event-driven — the watch pushes to you; never poll it):
+  4. Each stdout line arrives on its own as a notification. The synthetic `start` line
+     fires the first pass; each later line is one "board changed" event.
+     On each → run a PARSE PASS (see below).
+  5. If a sub-agent is `running`, do NOT spawn another. Wait for it to finish
      (Claude Code auto-notifies on background-agent completion). When it
      completes, clear `running` and run another PARSE PASS immediately.
+  6. If the watch exits, its exit code is reported: 2 = board missing, 3 = fswatch
+     missing, other = unexpected. Surface it and stop — once the watch is gone no
+     events arrive, and that silence is indistinguishable from "no new tasks".
   7. Continue indefinitely until the user cancels.
 
 cleanup (when user cancels):
-  - Kill the background fswatch shell (KillShell with shell_id).
+  - Stop the board watch: TaskStop(watch_id).
   - Print a summary: tasks dispatched this session, any still in Doing.
 ```
 
@@ -168,6 +174,7 @@ Throughout the loop, keep the user informed concisely:
 - ❌ Editing `.kanban/board.md` yourself from the monitor session — the sub-agent owns lifecycle moves.
 - ❌ Re-judging a task on every event when its content hasn't changed — use the `judged_no` cache.
 - ❌ Spawning the judge as its own sub-agent — judge inline; only the executor is a sub-agent.
+- ❌ Polling the watch, or re-arming it to "get the next line" — arm it once; events push to you.
 - ❌ Continuing past EXIT conditions silently — if preconditions fail, surface the error and stop.
 
 ---

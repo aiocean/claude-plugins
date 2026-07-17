@@ -3,7 +3,7 @@
 # Designed to be consumed by Claude Code's Monitor tool (each stdout line = one notification).
 #
 # Usage: bash kanban-monitor.sh
-# Run via: Bash tool with run_in_background=true, then Monitor with the returned shell_id.
+# Run via: Monitor tool with persistent=true (the watch lives as long as the session).
 
 set -u
 
