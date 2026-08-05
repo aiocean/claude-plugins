@@ -185,17 +185,41 @@ those rects; the mouse handler reverse-maps a click coordinate *through the same
 rects*. The two can never disagree because they read the identical geometry.
 
 The geometry struct holds offsets, not strings. `firstRow` is kept as a *named
-field* (even though it is always 0) so the render path and the click path read the
-same name rather than one hard-coding a literal the other forgets to update.
+field* so the render path and the click path read the same name rather than one
+hard-coding a literal the other forgets to update.
+
+**Chrome rows are a single knob, threaded everywhere.** A header strip at the top
+shifts *every* Y origin below it. Give it one constant and carry it through
+`firstRow`, `previewFirstRow`, `dividerYStart`, and the drag inverse — never a bare
+`+1` at four call sites, or one of them will drift and hit-testing goes off by a row.
 
 ```go
+// headerH is the height (rows) of the always-visible top header. It is the single
+// knob that shifts the whole body down: layout() reserves it at the top
+// (firstRow = headerH) and excludes it from bodyH (m.height-1-headerH), and every
+// Y-origin field carries it so render and mouse hit-testing agree. The drag inverse
+// (setTopFromY) reads this SAME const to invert a screen-Y back through the offset.
+// Exactly 1 because the header style paints NO border — a bordered header would
+// render an extra row and break the off-by-one invariant.
+const headerH = 1
+
 // geometry holds the screen layout derived purely from terminal size + cursor.
 // Both View (for rendering) and the mouse handler (for hit-testing) call layout()
 // so the two can never disagree about where a row or column lives.
+//
+// Two orientations share one struct, picked by `vertical`:
+//
+//   - HORIZONTAL (m.width >= widthBreakpoint) — side-by-side. Pane A covers cols
+//     [0, dividerStart), the divider [dividerStart, +dividerWidth), pane B the rest.
+//     The Y-axis fields stay zero.
+//   - VERTICAL (m.width < widthBreakpoint) — 1-col stacked. Both panes use full
+//     width (leftInner = m.width). Pane A covers rows [firstRow, +topInner), the
+//     divider [dividerYStart, +dividerHeight), pane B [previewFirstRow, +bottomInner).
+//     The X-axis fields (rightInner / dividerStart) stay zero.
 type geometry struct {
 	vertical bool // true → 1-col stacked layout; false → 2-col side-by-side
 
-	leftInner    int // content columns of the first pane
+	leftInner    int // content columns of the first pane (vertical: of BOTH panes)
 	rightInner   int // content columns of the second pane (horizontal only)
 	dividerStart int // first column of the vertical divider strip (horizontal only)
 
@@ -203,18 +227,23 @@ type geometry struct {
 	bottomInner   int // content rows of the second pane (vertical only)
 	dividerYStart int // first row of the horizontal divider strip (vertical only)
 
-	bodyH           int // body rows (excludes the 1 status row at m.height-1)
+	bodyH           int // body rows (excludes the header at top + the status row at m.height-1)
 	listTop         int // index of the first visible row entry
-	firstRow        int // screen Y of the first body row — always 0 (no top border)
+	firstRow        int // screen Y of the first body row — = headerH
 	previewFirstRow int // screen Y of the first second-pane content row
 }
 
 // layout picks 2-col or 1-col purely from m.width — `vertical` is NEVER stored on
-// the model, so View() and the mouse handler can never read a stale value.
+// the model, so View() and the mouse handler can never read a stale value. The
+// threshold is single (no hysteresis); cancelling a drag when the flip changes the
+// axis is handled separately, in Update's WindowSizeMsg case.
 func (m model) layout() geometry {
-	bodyH := max(m.height-1, 3) // status(1); body fills the rest
+	bodyH := max(m.height-1-headerH, 3) // header(top) + status(bottom); body fills the rest
 
 	if m.width < widthBreakpoint {
+		// 1-col stacked. listTop must be measured against topInner (NOT bodyH), or a
+		// long list scrolls the cursor past the bottom of its pane into the divider
+		// and the pane below — the classic stacked-layout footgun.
 		topInner := topInnerHeight(bodyH, m.topRatio)
 		return geometry{
 			vertical:        true,
@@ -222,13 +251,16 @@ func (m model) layout() geometry {
 			bodyH:           bodyH,
 			topInner:        topInner,
 			bottomInner:     bodyH - topInner - dividerHeight,
-			dividerYStart:   topInner, // glyph row Y (0-indexed)
+			dividerYStart:   headerH + topInner, // glyph row SCREEN-Y (below the header)
 			listTop:         m.listTopFor(topInner),
-			firstRow:        0,
-			previewFirstRow: topInner + dividerHeight,
+			firstRow:        headerH,
+			previewFirstRow: headerH + topInner + dividerHeight,
 		}
 	}
 
+	// 2-col side-by-side: both panes start at the first body row below the header,
+	// so firstRow == previewFirstRow == headerH. The Y-split fields stay zero —
+	// horizontal mode has no Y split inside the body.
 	leftInner := m.leftInnerWidth()
 	return geometry{
 		vertical:        false,
@@ -237,9 +269,46 @@ func (m model) layout() geometry {
 		dividerStart:    leftInner,
 		bodyH:           bodyH,
 		listTop:         m.listTopFor(bodyH),
-		firstRow:        0,
-		previewFirstRow: 0,
+		firstRow:        headerH,
+		previewFirstRow: headerH,
 	}
+}
+```
+
+Every pane-local scroll helper must read its row budget from the **same** `layout()`,
+branching on orientation in exactly one place so no caller has to know which layout
+it is in:
+
+```go
+// bodyRows for the SECOND pane: in 2-col it shares bodyH with the first pane; in
+// stacked it has its own budget. Branching here keeps every caller (render, scroll,
+// hit-test) orientation-agnostic.
+func (m model) previewScroll() (top, bodyH int) {
+	g := m.layout()
+	if g.vertical {
+		bodyH = g.bottomInner
+	} else {
+		bodyH = g.bodyH
+	}
+	top = min(m.previewTop, max(0, m.previewLen()-bodyH))
+	return top, bodyH
+}
+```
+
+The same discipline gives the *content width* one home — which is what makes a
+responsive re-render work with no extra code in the pipeline:
+
+```go
+// previewBodyWidth returns the second pane's content columns at the current layout.
+// When the orientation changes (a resize across the breakpoint), this value changes,
+// so the async reconciler re-dispatches because the cached render width no longer
+// matches. That is what makes "reflow on responsive flip" work for free.
+func (m model) previewBodyWidth() int {
+	g := m.layout()
+	if g.vertical {
+		return g.leftInner // = m.width in stacked mode
+	}
+	return g.rightInner
 }
 ```
 
@@ -269,7 +338,11 @@ func (m model) View() tea.View {
 				Render(m.renderPreview(g.rightInner))
 			body = lipgloss.JoinHorizontal(lipgloss.Top, left, divider, right)
 		}
-		content = strings.Join([]string{body, m.renderStatus()}, "\n")
+		// header(row 0) + body + status(last row). strings.Join — NOT JoinVertical:
+		// JoinVertical left-pads every line to the widest block, which appends
+		// trailing spaces to short status lines and churns snapshots. Each block is
+		// already padded to m.width by its own style, so newline joining aligns them.
+		content = strings.Join([]string{m.renderHeader(m.width), body, m.renderStatus()}, "\n")
 	}
 
 	v := tea.NewView(content)
@@ -279,62 +352,29 @@ func (m model) View() tea.View {
 }
 ```
 
-The mouse handler is the reverse map. It calls the same `layout()`, decides which
-pane the coordinate fell in by comparing against the divider offset, then converts
-screen-Y to a list index by subtracting `firstRow` and adding `listTop` — the
-inverse of what the renderer did. No `\n` counting anywhere.
+The mouse handler is the reverse map: same `layout()`, decide which pane the
+coordinate fell in by comparing against the divider offset, then convert screen-Y to
+a list index by subtracting `firstRow` and adding `listTop` — the inverse of what
+the renderer did. No `\n` counting anywhere.
 
 ```go
-func (m model) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
-	g := m.layout() // identical geometry to View()
-	e := msg.Mouse()
-
-	// overDivider: the divider's hit-zone in the current orientation.
-	var overDivider bool
-	if g.vertical {
-		overDivider = e.Y >= g.dividerYStart-dividerHitRowsAbove &&
-			e.Y <= g.dividerYStart+dividerHeight-1+dividerHitRowsBelow
-	} else {
-		overDivider = e.X >= g.dividerStart && e.X < g.dividerStart+dividerWidth
-	}
-
-	switch msg.(type) {
-	case tea.MouseClickMsg:
-		if e.Button != tea.MouseLeft {
-			return m, nil
-		}
-		if overDivider {
-			return m, nil // divider is a "no-pane" zone — never route to a pane
-		}
-		overList := false
-		listH := g.bodyH
-		if g.vertical {
-			overList = e.Y < g.dividerYStart
-			listH = g.topInner
-		} else {
-			overList = e.X < g.dividerStart
-		}
-		if !overList {
-			m.previewClick(e.Y, g) // reverse-map within the other pane
-			return m, nil
-		}
-		// Reverse-map screen Y → list index. This is the inverse of the renderer:
-		// render drew entry (listTop+row) at screen row (firstRow+row); here we
-		// recover row, then the index. Counting \n in the rendered string would
-		// drift the moment chrome changes — this can't.
-		row := e.Y - g.firstRow
-		if row < 0 || row >= listH {
-			return m, nil
-		}
-		idx := g.listTop + row
-		if idx < 0 || idx >= len(m.entries) {
-			return m, nil
-		}
-		m.cursor = idx
-	}
+// Reverse-map screen Y → list index. Render drew entry (listTop+row) at screen row
+// (firstRow+row); here we recover row, then the index. Counting \n in the rendered
+// string would drift the moment chrome changes — this can't.
+row := e.Y - g.firstRow
+if row < 0 || row >= listH {
 	return m, nil
 }
+idx := g.listTop + row
+if idx < 0 || idx >= len(m.entries) {
+	return m, nil
+}
+m.cursor = idx
 ```
+
+The full handler — zone map, no-pane guards, focus-follows-click, wheel semantics,
+the arm→commit→apply drag gesture, and divider-drag resize — lives in
+`$REFS/mouse.md`.
 
 **Rules to keep verbatim:**
 - *Both `View()` and the mouse handler call `layout()` so the two can never disagree about where a row or column lives.*
@@ -730,6 +770,438 @@ func (t *Table) row(cells []string, fg color.Color) string {
 func (t *Table) Row(cells ...string) string    { return t.row(cells, nil) }
 func (t *Table) Header(cells ...string) string  { return t.row(cells, colDim) }
 ```
+
+---
+
+## Fitting text: truncate from the right, or from the left
+
+A width-fitter is not one function. Which end you keep is a semantic decision, and
+using the wrong one loses exactly the information the element exists to show.
+
+```go
+// fitWidth truncates s to w display columns (rune-aware), keeping the HEAD.
+// Answers "what's the start of this?". Padding is left to lipgloss.
+func fitWidth(s string, w int) string {
+	if w <= 0 {
+		return ""
+	}
+	if lipgloss.Width(s) <= w {
+		return s
+	}
+	r := []rune(s)
+	for len(r) > 0 && lipgloss.Width(string(r))+1 > w {
+		r = r[:len(r)-1]
+	}
+	return string(r) + "…"
+}
+
+// fitPathRight keeps the TAIL and drops LEADING runes, replacing them with one "…".
+// Answers "where am I?" — so a deep "proj/src/auth/handlers" narrows to
+// "…/auth/handlers", never losing the current folder off the right edge. The "…" is
+// itself 1 col, so once truncation kicks in we fit the tail into w-1.
+func fitPathRight(s string, w int) string {
+	if w <= 0 {
+		return ""
+	}
+	if lipgloss.Width(s) <= w {
+		return s
+	}
+	if w == 1 {
+		return "…"
+	}
+	r := []rune(s)
+	for len(r) > 0 && lipgloss.Width(string(r)) > w-1 {
+		r = r[1:] // drop from the FRONT
+	}
+	return "…" + string(r)
+}
+```
+
+Use `fitPathRight` for paths, breadcrumbs, and any identifier whose *suffix* is the
+identifying part; `fitWidth` for prose, names, and descriptions. Both are pure and
+belong in their own unit test — they are where off-by-one and CJK bugs hide.
+
+**`fitWidth` is not ANSI-aware.** A string carrying per-rune SGR (a gradient rule, a
+syntax-highlighted line) must be measured and cut as **plain text before coloring**,
+or the escape bytes get counted as width and chopped mid-sequence.
+
+---
+
+## Graceful degradation by width
+
+A row with a name plus trailing metadata cannot always show everything. The naive
+fix — always render both and let the terminal clip — destroys the most important
+element, because clipping happens at the *right* edge where the metadata lives.
+
+Instead, declare a **priority order** and pick the widest candidate that fits:
+
+```go
+// chooseIndicator picks the widest indicator candidate that fits beside a name of
+// width nw in w columns, honoring name > badge > delta: try badge+delta, then badge
+// alone, else drop the indicator entirely. Returns the chosen (plain, styled) pair,
+// or ("","") when nothing fits — the caller then truncates the name.
+func chooseIndicator(ind *rowIndicator, nw, w int) (plain, styled string) {
+	if ind == nil {
+		return "", ""
+	}
+	type cand struct{ plain, styled string }
+	cands := []cand{{ind.fullPlain(), ind.fullStyled()}}
+	if ind.delta != "" { // the narrower badge-only candidate exists only when delta can drop
+		cands = append(cands, cand{ind.badge, ind.badgeStyled()})
+	}
+	for _, c := range cands {
+		if nw+1+lipgloss.Width(c.plain) <= w { // +1 = the minimum gap
+			return c.plain, c.styled
+		}
+	}
+	return "", ""
+}
+```
+
+Each candidate is carried as a **(plain, styled) pair**: measure the plain one, emit
+the styled one. Measuring the styled string would count escape bytes; styling before
+measuring would force you to strip them back out.
+
+The layout helper stays a pure plain-string function so the caller wraps it in a
+*single* style and escapes never nest:
+
+```go
+// fitRow lays out name (flush left) and right (flush right) in w display columns,
+// returning a PLAIN string. Priority is name > right: when both can't fit, `right`
+// is dropped before the name is truncated.
+func fitRow(name, right string, w int) string {
+	if w <= 0 {
+		return ""
+	}
+	if right == "" {
+		return fitWidth(name, w) // no padding pretense
+	}
+	nw, rw := lipgloss.Width(name), lipgloss.Width(right)
+	if nw+1+rw <= w {
+		return name + strings.Repeat(" ", w-nw-rw) + right
+	}
+	return fitWidth(name, w) // combined too wide: drop right, truncate the name
+}
+```
+
+### One row renderer, shared by every pane that draws that row
+
+When the same entity appears in two places (a list pane and a preview listing, a
+table and a detail card), route both through **one** function. Two renderers drift
+within a release; one cannot.
+
+```go
+// renderEntryRow draws ONE row at w display columns — the single place a row is
+// formatted, so the list pane and the folder preview can never disagree on row
+// format. active=true marks the cursor row (the only allowed visual difference);
+// the preview always passes active=false.
+//
+// The ACTIVE row lays its indicator out PLAIN, inside the one accent style: a
+// colored badge on the accent background could wash out, and the whole row must be
+// one style so escapes never nest.
+func renderEntryRow(e entry, ind *rowIndicator, w int, active, listFocused bool) string {
+	name := e.name
+	if e.isDir && e.name != ".." {
+		name += "/"
+	}
+	if active {
+		st := cursorActiveStyle
+		if !listFocused {
+			st = cursorActiveStyle.Background(colDim) // returns a COPY; the original is untouched
+		}
+		plain, _ := chooseIndicator(ind, lipgloss.Width(name), w)
+		return st.Width(w).Render(fitRow(name, plain, w))
+	}
+	if e.isDir {
+		return styleRow(name, dirStyle, ind, w)
+	}
+	return styleRow(name, fileStyle, ind, w)
+}
+
+// styleRow lays out an INACTIVE row: name (in nameStyle) flush left, the chosen
+// indicator (already colored) flush right, the gap between them left UNSTYLED so the
+// pane background shows through.
+func styleRow(name string, nameStyle lipgloss.Style, ind *rowIndicator, w int) string {
+	if w <= 0 {
+		return ""
+	}
+	plain, styled := chooseIndicator(ind, lipgloss.Width(name), w)
+	if plain == "" {
+		return nameStyle.Render(fitWidth(name, w))
+	}
+	gap := w - lipgloss.Width(name) - lipgloss.Width(plain)
+	return nameStyle.Render(name) + strings.Repeat(" ", gap) + styled
+}
+```
+
+**Rules to keep verbatim:**
+- *Declare a priority order and pick the widest candidate that fits; never render everything and let the terminal clip.*
+- *Carry each candidate as a (plain, styled) pair: measure the plain, emit the styled.*
+- *The gap between a left and a right element stays unstyled, so the pane background shows through.*
+- *A style method returns a COPY — `base.Background(x)` never mutates `base`.*
+- *One row renderer per row shape, shared by every pane that draws it.*
+
+---
+
+## Horizontal scrolling and soft wrap
+
+Content wider than the pane needs one of two treatments, and the user picks:
+**nowrap + horizontal pan**, or **soft wrap**. Both need a reflow cache and an
+ANSI-aware slicer, because syntax-highlighted lines carry escapes that a rune slice
+would cut in half.
+
+### The reflow cache: expand once, keyed by (width, wrap)
+
+```go
+// reflowPreview keeps the visual-line buffer current so the render path never
+// re-wraps every frame. Cache-guarded on (width, wrapMode), so it is a cheap no-op
+// when nothing relevant changed. Call it from the tail reconciler — that one hook
+// covers navigation, resize, AND divider drag.
+func (m *model) reflowPreview(w int) {
+	if w <= 0 || !m.previewScrollable {
+		return
+	}
+	if m.previewDisplayW == w && m.previewDisplayWrap == m.previewWrap && m.previewDisplay != nil {
+		return // cache hit
+	}
+	m.previewDisplayW, m.previewDisplayWrap = w, m.previewWrap
+
+	srcStart := make([]int, len(m.preview))
+	if m.previewWrap {
+		// wrap: each source line expands to ≥1 visual lines; srcStart[s] records
+		// where source line s begins in the visual buffer.
+		var out []string
+		for s, line := range m.preview {
+			srcStart[s] = len(out)
+			out = append(out, wrapLine(line, w)...)
+		}
+		m.previewDisplay, m.previewSrcStart = out, srcStart
+		m.previewMaxLineWidth = 0 // no hscroll in wrap mode
+		return
+	}
+	// nowrap: logical lines unchanged (1:1); record the widest for the pan clamp.
+	m.previewDisplay = m.preview
+	maxW := 0
+	for s, line := range m.preview {
+		srcStart[s] = s
+		if lw := lineWidth(line); lw > maxW {
+			maxW = lw
+		}
+	}
+	m.previewMaxLineWidth, m.previewSrcStart = maxW, srcStart
+}
+```
+
+### Toggling wrap must preserve the reading position
+
+`previewTop` is a *visual*-line index whose meaning flips logical↔visual on toggle.
+Without re-mapping it, the viewport jerks to an unrelated line — defeating the exact
+intent ("I'm reading this line, wrap it"). `srcStart` gives you both directions:
+
+```go
+// sourceLineAt returns the source line whose visual block contains visual line v
+// (the largest s with previewSrcStart[s] <= v). visualLineFor is its inverse.
+func (m model) sourceLineAt(v int) int {
+	ss := m.previewSrcStart
+	if len(ss) == 0 {
+		return 0
+	}
+	lo, hi := 0, len(ss)-1
+	for lo < hi {
+		mid := (lo + hi + 1) / 2
+		if ss[mid] <= v {
+			lo = mid
+		} else {
+			hi = mid - 1
+		}
+	}
+	return lo
+}
+
+func (m model) visualLineFor(s int) int {
+	ss := m.previewSrcStart
+	if s < 0 || s >= len(ss) {
+		return 0
+	}
+	return ss[s]
+}
+
+func (m *model) toggleWrap() {
+	if !m.previewScrollable {
+		return
+	}
+	srcAtTop := m.sourceLineAt(m.previewTop) // remember WHAT is at the top
+	m.previewWrap = !m.previewWrap
+	m.previewHScroll = 0
+	m.reflowPreview(m.previewBodyWidth())
+	m.previewTop = m.visualLineFor(srcAtTop) // put it back at the top
+	m.scrollPreview(0)                       // clamp into range
+}
+```
+
+`sourceLineAt` is also the mapper a **mouse drag** uses to find the line under the
+pointer — one index map serves scroll, wrap, and hit-testing.
+
+### The horizontal window: reserve edge indicators GLOBALLY
+
+The subtle bug: deciding per line whether to draw a `›` overflow marker makes the
+content width differ line-to-line, and code jitters out of column alignment. Decide
+**once for the whole visible set**, then every line gets the same content width:
+
+```go
+// renderHWindow renders nowrap lines sliced to [hScroll, hScroll+contentW) with ‹/›
+// edge indicators. The indicator columns are reserved by a GLOBAL condition (does
+// ANY visible line overflow that side?) so content width is uniform across lines and
+// code stays column-aligned instead of jittering line to line.
+func (m model) renderHWindow(visible []string, top, w int) string {
+	left := m.previewHScroll
+	showLeft := left > 0
+
+	provW := w
+	if showLeft {
+		provW--
+	}
+	anyRightCut := false
+	for _, line := range visible {
+		if lineWidth(line)-left > provW {
+			anyRightCut = true
+			break
+		}
+	}
+
+	contentW := w
+	if showLeft {
+		contentW--
+	}
+	if anyRightCut {
+		contentW--
+	}
+	if contentW < 1 {
+		contentW = 1 // degenerate narrow pane: best effort
+	}
+
+	var out []string
+	for _, line := range visible {
+		var b strings.Builder
+		if showLeft {
+			b.WriteString(dimStyle.Render("‹"))
+		}
+		b.WriteString(hSlice(line, left, contentW))
+		if anyRightCut {
+			if lineWidth(line)-left > contentW {
+				b.WriteString(dimStyle.Render("›"))
+			} else {
+				b.WriteByte(' ') // reserved column; THIS line is not cut
+			}
+		}
+		out = append(out, b.String())
+	}
+	return strings.Join(out, "\n")
+}
+```
+
+### ANSI-aware slicing, wrapping, and measuring
+
+Three helpers, each branching on "does this line carry escapes?". Use
+`github.com/charmbracelet/x/ansi` for the styled path and rune arithmetic for the
+plain one.
+
+```go
+// hSlice extracts display columns [left, left+width) from a line: ANSI-aware for
+// styled content (TruncateLeft drops the left cols PRESERVING SGR, then Truncate
+// caps the right), rune-aware for plain (CJK width via lipgloss.Width).
+func hSlice(line string, left, width int) string {
+	if width <= 0 {
+		return ""
+	}
+	if hasANSI(line) {
+		return ansi.Truncate(ansi.TruncateLeft(line, left, ""), width, "")
+	}
+	r := []rune(line)
+	r = r[runePrefixWidth(r, left):]
+	return string(r[:runePrefixWidth(r, width)])
+}
+
+// runePrefixWidth returns the count of leading runes whose cumulative DISPLAY width
+// is ≤ w (CJK/wide-glyph aware) — how you slice plain lines on column boundaries.
+func runePrefixWidth(r []rune, w int) int {
+	if w <= 0 {
+		return 0
+	}
+	acc, n := 0, 0
+	for _, c := range r {
+		cw := lipgloss.Width(string(c))
+		if acc+cw > w {
+			break
+		}
+		acc += cw
+		n++
+	}
+	return n
+}
+
+// wrapLine hard-wraps one line to w columns → ≥1 visual lines. Styled lines get an
+// ANSI-aware hard-wrap so escapes survive the split; plain lines get a rune slice.
+// An EMPTY line yields one empty visual line, so blank rows are preserved.
+func wrapLine(line string, w int) []string {
+	if w <= 0 || line == "" {
+		return []string{line}
+	}
+	if hasANSI(line) {
+		return strings.Split(ansi.Hardwrap(line, w, false), "\n")
+	}
+	var out []string
+	r := []rune(line)
+	for len(r) > 0 {
+		cut := runePrefixWidth(r, w)
+		if cut == 0 { // a single glyph WIDER than w: emit it alone to make progress
+			cut = 1
+		}
+		out = append(out, string(r[:cut]))
+		r = r[cut:]
+	}
+	if len(out) == 0 {
+		out = []string{""}
+	}
+	return out
+}
+
+func lineWidth(line string) int {
+	if hasANSI(line) {
+		return ansi.StringWidth(line)
+	}
+	return lipgloss.Width(line)
+}
+
+func hasANSI(s string) bool { return strings.Contains(s, "\x1b") }
+```
+
+The `cut == 0` guard is the one that saves you: a glyph wider than the pane would
+otherwise loop forever producing empty slices.
+
+### Clamp the pan against real content
+
+```go
+// scrollPreviewH pans by delta columns, clamped to [0, maxHScroll]. maxHScroll is
+// the widest line minus the content width — when content fits it is 0 and any pan is
+// a no-op. No-op entirely in wrap mode or on non-pannable content, so callers (keys,
+// wheel, shift-wheel) need no extra gating.
+func (m *model) scrollPreviewH(delta int) {
+	if m.previewWrap || !m.previewScrollable {
+		return
+	}
+	w := m.previewBodyWidth()
+	maxH := max(0, m.previewMaxLineWidth-max(1, w-2)) // -2 ≈ both edge indicators
+	m.previewHScroll = min(max(0, m.previewHScroll+delta), maxH)
+}
+```
+
+**Rules to keep verbatim:**
+- *Reflow once into a cache keyed by (width, wrapMode); never re-wrap in the render path.*
+- *Keep a source→visual index map so a wrap toggle preserves the reading position — and reuse it for mouse hit-testing.*
+- *Reserve edge-indicator columns by a GLOBAL condition over the visible set, so content width is uniform and columns don't jitter.*
+- *Branch every width/slice/wrap helper on `hasANSI`: escape-carrying lines go through the ANSI-aware path, plain lines through rune arithmetic.*
+- *A no-op guard inside the pan function means every call site (key, wheel, shift-wheel) needs no gating of its own.*
 
 ---
 

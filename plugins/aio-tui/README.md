@@ -42,9 +42,15 @@ Model (state) → Update (handle messages) → Model → View (render) ...
 
 **Mouse hit-testing** — click location is geometry, not line-counting. The skill teaches the `layout()` reverse-mapping approach: derive a layout struct from terminal size and scroll offset, render into it, then reverse-map click coordinates through the same struct. Counting `\n` characters to find a click's row drifts the moment chrome changes and is explicitly the anti-pattern the skill warns against.
 
-**Testing — four layers, cheapest first** — unit-testing `Update`/`View` without a terminal; golden snapshots of `View().Content` for layout regression; `teatest/v2` (the v2-correct import path) for multi-step interaction tests; and render-to-image + agent verdict for visual assertions that string comparisons cannot make.
+**Keymaps and mode machines** — every binding in one `key.Binding` struct, so help text can never drift from the key it describes; deliberate key-code collisions disambiguated by dispatch lane rather than by inventing new keys; and the distinction that keeps an update function flat — a *mode* is an exclusive input lane, a *sub-state* is an orthogonal flag inside one.
 
-**Deep patterns reference** — for full generalized v2 code, the skill points to `references/patterns.md` (async render with a gen-counter stale guard, layout geometry as a single source of truth, per-row performance caching, column alignment with Unicode/emoji, filter/search mode) and `references/gold-monitor.md` with the complete `examples/gold-monitor/` working example.
+**Mouse beyond the click** — mouse modes (and why hover needs a different one that fires per cell crossed); no-pane zones that must return before touching state; focus-follows-click; the arm → commit → apply drag gesture that keeps a plain click distinct from a drag; wheel semantics including shift-pan and the trackpad's native horizontal wheel; and divider-drag resizing stored as a ratio so a split survives terminal resizes.
+
+**Floating modals and command palettes** — chrome-aware sizing with a floor, compositing that needs no dim layer because canvas layers are already opaque, the status-bar handoff while a modal owns the prompt, multi-stage palettes that keep a failed submit open, and scroll-clamp parity between the renderer and its line counter.
+
+**Testing — four layers, cheapest first** — unit-testing `Update`/`View` without a terminal; golden snapshots of `View().Content` for layout regression; `teatest/v2` (the v2-correct import path) for multi-step interaction tests; and render-to-image + agent verdict for visual assertions that string comparisons cannot make. Plus the harness that makes layer 1 cheap, the two oracles (rendered string vs. model field), frame invariants that survive redesigns, byte-identity pins, and a dogfood harness that measures keystrokes instead of asserting.
+
+**Deep patterns reference** — for full generalized v2 code, the skill points to five reference files: `patterns.md` (async render with a gen-counter stale guard, layout geometry as a single source of truth, per-row performance caching, graceful degradation by width, horizontal scroll and soft wrap with ANSI-aware slicing), `keymap-and-modes.md`, `mouse.md`, `modals.md`, and `testing.md` — plus `gold-monitor.md` with the complete `examples/gold-monitor/` working example.
 
 ## The gotchas section
 
@@ -54,9 +60,13 @@ The skill contains a dedicated section of named, explained mistakes with working
 - `tea.KeyPressMsg` with `.Text` for printable input — not the v1 `tea.KeyMsg{Runes}`
 - `func() tea.Msg` vs double-wrapping a Cmd
 - Mouse location via geometry, not `\n`-counting
+- `MouseModeCellMotion` delivers motion only while a button is held — hover is a different mode with a real cost
+- `.Width(n)` is the outer width: pass `inner + frame`, or a bordered box silently wraps its widest row
+- A press is not the action — arm, commit on motion, apply on release
+- Chrome rows are one constant threaded through every Y origin, never a bare `+1` at four call sites
 - Color-profile detection before `tea.NewProgram` to avoid races
 - `teatest/v2` import path (not the v1 path, which compiles against the wrong `tea.Model`/`View` shapes)
 
 ## Trigger phrases
 
-> "build a TUI", "Bubbletea", "Bubbletea v2", "terminal UI", "lipgloss", "lipgloss v2", "Elm architecture", "Go terminal app", "interactive CLI", "charmbracelet", "charm.land", "TUI dashboard", "two-pane layout", "terminal mouse", "async render"
+> "build a TUI", "Bubbletea", "Bubbletea v2", "terminal UI", "lipgloss", "lipgloss v2", "Elm architecture", "Go terminal app", "interactive CLI", "charmbracelet", "charm.land", "TUI dashboard", "two-pane layout", "terminal mouse", "mouse drag", "resize sidebar", "draggable divider", "keybindings", "command palette", "modal overlay", "responsive TUI", "horizontal scroll", "async render", "TUI testing", "visual verdict"
