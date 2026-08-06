@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Example narrative HTML deck for an infrastructure migration decision.">
+  <title>One queue, two clocks — migration briefing</title>
+  <style>
+    :root { --night:#10121a; --paper:#f3f0e6; --lime:#d7ff62; --coral:#ff7557; --sky:#76c8ff; --muted:#a7a9b4; }
+    * { box-sizing:border-box; }
+    html, body { margin:0; min-height:100%; background:var(--night); color:var(--paper); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+    body { overflow:hidden; }
+    main { min-height:100vh; }
+    .slide { display:none; min-height:100vh; padding:clamp(28px,6vw,88px); position:relative; overflow:hidden; align-content:center; }
+    .slide.active { display:grid; animation:arrive .35s ease-out; }
+    .eyebrow { font-size:.76rem; letter-spacing:.18em; text-transform:uppercase; color:var(--lime); font-weight:800; }
+    h1, h2 { margin:.16em 0; letter-spacing:-.055em; line-height:.93; max-width:1100px; }
+    h1 { font-size:clamp(4rem,10vw,10rem); }
+    h2 { font-size:clamp(3rem,8vw,7rem); }
+    p { font-size:clamp(1.05rem,2vw,1.5rem); line-height:1.45; max-width:760px; color:#d3d4da; }
+    .accent { color:var(--lime); }
+    .coral { color:var(--coral); }
+    .quiet { color:var(--muted); }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,7vw,100px); align-items:center; width:min(1180px,100%); margin:auto; }
+    .big-number { font-size:clamp(7rem,20vw,18rem); line-height:.78; font-weight:900; letter-spacing:-.09em; color:var(--coral); }
+    .clock { width:min(420px,72vw); aspect-ratio:1; border:2px solid var(--paper); border-radius:50%; position:relative; margin:auto; }
+    .clock::before, .clock::after { content:""; position:absolute; left:50%; top:50%; height:33%; width:5px; background:var(--lime); transform-origin:50% 0; }
+    .clock::before { transform:rotate(145deg); } .clock::after { height:22%; background:var(--coral); transform:rotate(248deg); }
+    .clock span { position:absolute; inset:19%; border:1px dashed #5a5d68; border-radius:50%; display:grid; place-items:center; text-align:center; font-weight:800; }
+    .lanes { width:min(1160px,100%); margin:40px auto 0; display:grid; gap:22px; }
+    .lane { display:grid; grid-template-columns:180px 1fr; gap:28px; align-items:center; }
+    .lane b { font-size:1.1rem; }
+    .track { height:54px; border:1px solid #555965; position:relative; background:#171a24; }
+    .track span { position:absolute; inset:8px auto 8px 8px; display:flex; align-items:center; padding:0 16px; color:var(--night); font-weight:900; }
+    .legacy { width:82%; background:var(--coral); } .target { width:34%; background:var(--lime); }
+    .track em { position:absolute; right:12px; top:15px; font-style:normal; font-size:.78rem; color:var(--muted); }
+    .sequence { display:grid; grid-template-columns:repeat(4,1fr); width:min(1180px,100%); margin:50px auto 0; border-top:1px solid #646772; }
+    .step { position:relative; padding:34px 26px 0 0; }
+    .step::before { content:attr(data-n); position:absolute; top:-17px; left:0; width:34px; height:34px; background:var(--night); border:1px solid var(--lime); color:var(--lime); border-radius:50%; display:grid; place-items:center; font-weight:800; }
+    .step strong { display:block; font-size:1.25rem; margin-bottom:8px; }
+    .step small { color:var(--muted); line-height:1.5; }
+    .decision { background:var(--lime); color:var(--night); }
+    .decision .eyebrow, .decision p { color:#384016; }
+    .decision h2 { max-width:1000px; }
+    .ask { margin-top:42px; border-top:2px solid var(--night); padding-top:18px; display:flex; gap:40px; align-items:baseline; max-width:980px; }
+    .ask b { font-size:clamp(1.3rem,2.7vw,2.4rem); }
+    .evidence-note { position:absolute; bottom:36px; left:clamp(28px,6vw,88px); color:var(--muted); font-size:.75rem; }
+    .controls { position:fixed; z-index:10; right:22px; bottom:20px; display:flex; align-items:center; gap:8px; background:#20232e; border:1px solid #484b56; border-radius:999px; padding:7px; }
+    button { min-width:44px; min-height:44px; border:0; border-radius:50%; background:transparent; color:var(--paper); font-size:1rem; cursor:pointer; }
+    button:hover { background:#343744; }
+    button:focus-visible { outline:3px solid var(--lime); outline-offset:3px; }
+    #count { min-width:58px; text-align:center; font:700 .8rem ui-monospace,monospace; }
+    .progress { position:fixed; z-index:12; left:0; bottom:0; height:4px; width:100%; background:#2a2d36; }
+    .progress span { display:block; height:100%; width:16.67%; background:var(--lime); transition:width .25s ease; }
+    .notes { display:none; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @keyframes arrive { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+    @media (max-width:720px) {
+      body { overflow:auto; }
+      .slide, .slide.active { display:grid; min-height:auto; padding:72px 22px; border-bottom:1px solid #383b46; animation:none; }
+      .slide:first-child { min-height:92vh; }
+      .split { grid-template-columns:1fr; }
+      .clock { width:min(270px,72vw); }
+      .lane { grid-template-columns:1fr; gap:8px; }
+      .sequence { grid-template-columns:1fr; border-top:0; border-left:1px solid #646772; margin-left:16px; }
+      .step { padding:0 0 34px 34px; }
+      .step::before { top:0; left:-17px; }
+      .controls, .progress { display:none; }
+      .evidence-note { position:static; margin-top:44px; }
+      .ask { display:block; }
+    }
+    @media (prefers-reduced-motion:reduce) { .slide.active { animation:none; } .progress span { transition:none; } }
+    @media print {
+      @page { size:landscape; margin:0; }
+      body { background:#fff; color:#111; overflow:visible; }
+      .slide, .slide.active { display:grid; height:100vh; min-height:100vh; break-after:page; color:inherit; background:#fff; animation:none; }
+      .decision { background:#e8f7b6; }
+      .controls, .progress { display:none; }
+      .quiet, .evidence-note, p { color:#444; }
+      .notes { display:block; position:absolute; bottom:20px; right:24px; font-size:10px; color:#555; }
+    }
+  </style>
+</head>
+<body>
+  <header class="sr-only">Migration decision briefing</header>
+  <main aria-label="Migration briefing deck">
+    <section class="slide active" id="slide-1" aria-label="Slide 1 of 6">
+      <div>
+        <span class="eyebrow">Decision briefing · 8 minutes</span>
+        <h1>One queue.<br><span class="accent">Two clocks.</span></h1>
+        <p>Why the migration should optimize for recovery time—not raw throughput.</p>
+      </div>
+      <small class="evidence-note">Fictional example · source snapshot: load test LT-204</small>
+    </section>
+
+    <section class="slide" id="slide-2" aria-label="Slide 2 of 6">
+      <div class="split">
+        <div>
+          <span class="eyebrow">Reality</span>
+          <h2>Peak load is <span class="coral">not</span> the problem.</h2>
+          <p>At 2.4× expected traffic, both designs stay below 55% consumer utilization.</p>
+        </div>
+        <div class="big-number" aria-label="55 percent">55<span style="font-size:.35em">%</span></div>
+      </div>
+      <small class="evidence-note">Evidence: 30-minute steady-state load test; identical payload and concurrency.</small>
+    </section>
+
+    <section class="slide" id="slide-3" aria-label="Slide 3 of 6">
+      <div class="split">
+        <div class="clock" role="img" aria-label="Two recovery clocks, broker redelivery and application retry"><span>broker<br>vs<br>application</span></div>
+        <div>
+          <span class="eyebrow">Tension</span>
+          <h2>A failure starts <span class="accent">two timers.</span></h2>
+          <p>The legacy path waits for visibility timeout before it can retry. The target path records intent immediately and schedules recovery independently.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-4" aria-label="Slide 4 of 6" data-evidence>
+      <div>
+        <span class="eyebrow">Evidence · p95 recovery</span>
+        <h2>Seven minutes become <span class="accent">ninety seconds.</span></h2>
+        <div class="lanes" role="img" aria-label="Legacy recovery takes 7 minutes 4 seconds; target recovery takes 1 minute 31 seconds">
+          <div class="lane"><b>Legacy</b><div class="track"><span class="legacy">7m 04s</span><em>visibility timeout</em></div></div>
+          <div class="lane"><b>Target</b><div class="track"><span class="target">1m 31s</span><em>durable retry intent</em></div></div>
+        </div>
+      </div>
+      <small class="evidence-note">Evidence: 120 injected worker failures; p95 end-to-end recovery. Baseline starts at zero.</small>
+    </section>
+
+    <section class="slide" id="slide-5" aria-label="Slide 5 of 6">
+      <div>
+        <span class="eyebrow">Resolution · reversible sequence</span>
+        <h2>Migrate the <span class="accent">clock</span> before the traffic.</h2>
+        <div class="sequence">
+          <div class="step" data-n="1"><strong>Shadow intent</strong><small>Write retry intent while legacy remains authoritative.</small></div>
+          <div class="step" data-n="2"><strong>Compare recovery</strong><small>Measure missing, duplicate, and late outcomes for one week.</small></div>
+          <div class="step" data-n="3"><strong>Shift 10%</strong><small>Move one reversible cohort with automatic rollback.</small></div>
+          <div class="step" data-n="4"><strong>Retire timeout</strong><small>Remove the old clock only after parity evidence.</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide decision" id="slide-6" aria-label="Slide 6 of 6">
+      <div>
+        <span class="eyebrow">The ask</span>
+        <h2>Approve a one-week shadow, <em>not</em> a full migration.</h2>
+        <p>We accept temporary dual-write complexity to buy observable recovery evidence before the one-way cutover.</p>
+        <div class="ask"><span>Decision today</span><b>Authorize shadow traffic and the rollback SLO.</b></div>
+      </div>
+      <aside class="notes">Speaker note: confirm the rollback owner and 2-minute recovery SLO before closing.</aside>
+    </section>
+  </main>
+
+  <div class="controls" aria-label="Slide controls">
+    <button id="prev" type="button" aria-label="Previous slide">←</button>
+    <span id="count" aria-live="polite">1 / 6</span>
+    <button id="next" type="button" aria-label="Next slide">→</button>
+  </div>
+  <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    let current = Math.max(0, slides.findIndex(s => '#' + s.id === location.hash));
+    if (current < 0) current = 0;
+    function show(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+      document.getElementById('count').textContent = `${current + 1} / ${slides.length}`;
+      document.getElementById('bar').style.width = `${((current + 1) / slides.length) * 100}%`;
+      history.replaceState(null, '', `#${slides[current].id}`);
+    }
+    document.getElementById('prev').addEventListener('click', () => show(current - 1));
+    document.getElementById('next').addEventListener('click', () => show(current + 1));
+    document.addEventListener('keydown', event => {
+      if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(current + 1); }
+      if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); show(current - 1); }
+      if (event.key === 'Home') show(0);
+      if (event.key === 'End') show(slides.length - 1);
+    });
+    show(current);
+  </script>
+</body>
+</html>

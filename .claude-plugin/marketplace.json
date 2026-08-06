@@ -255,6 +255,15 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "aio-html-artifacts",
+      "source": "./plugins/aio-html-artifacts",
+      "description": "Create self-contained HTML artifacts that keep humans in the loop: evidence-rich reports, narrative decks, side-by-side decision surfaces, and purpose-built editors with export loops. Uses a researched information grammar, layered detail, responsive design, accessibility, print support, and deterministic validation.",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }

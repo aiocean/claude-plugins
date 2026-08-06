@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Example purpose-built feature rollout editor with dependency validation and deterministic diff export.">
+  <title>Dispute rollout editor — safe cohort changes</title>
+  <style>
+    :root { --bg:#111716; --panel:#19211f; --panel2:#202a27; --ink:#edf3ef; --muted:#92a19a; --line:#36433e; --mint:#89f0bd; --yellow:#ffd36a; --red:#ff7e73; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; line-height:1.45; }
+    button, input, select, textarea { font:inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid var(--mint); outline-offset:3px; }
+    header { padding:19px max(20px,calc((100vw - 1180px)/2)); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; align-items:center; }
+    .brand { font-weight:900; letter-spacing:-.03em; }
+    .source { color:var(--muted); font-size:.75rem; }
+    .dirty { padding:5px 9px; border:1px solid var(--line); color:var(--muted); font-size:.72rem; }
+    .dirty.on { color:var(--yellow); border-color:var(--yellow); }
+    main { max-width:1180px; margin:auto; padding:54px 20px 110px; }
+    .intro { display:grid; grid-template-columns:1fr 330px; gap:70px; align-items:end; }
+    h1 { font-family:ui-sans-serif,system-ui,sans-serif; font-size:clamp(2.7rem,6vw,5.8rem); line-height:.94; letter-spacing:-.06em; margin:0; }
+    .contract { border-left:3px solid var(--mint); padding-left:18px; color:var(--muted); }
+    .contract b { color:var(--mint); display:block; margin-bottom:6px; }
+    .workspace { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:28px; margin-top:48px; }
+    .editor, .preview { border:1px solid var(--line); background:var(--panel); }
+    .bar { padding:13px 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; color:var(--muted); }
+    .flag { display:grid; grid-template-columns:minmax(170px,1fr) 120px 180px; gap:18px; padding:22px 18px; border-bottom:1px solid var(--line); align-items:center; }
+    .flag:last-child { border:0; }
+    .name { color:var(--ink); font-weight:800; }
+    .name small { display:block; color:var(--muted); font-weight:400; margin-top:4px; }
+    .toggle { display:flex; align-items:center; gap:8px; cursor:pointer; }
+    .toggle input { width:20px; height:20px; accent-color:var(--mint); }
+    .rollout label { display:flex; justify-content:space-between; color:var(--muted); font-size:.75rem; margin-bottom:7px; }
+    input[type="range"] { width:100%; accent-color:var(--mint); }
+    select { width:100%; color:var(--ink); background:var(--bg); border:1px solid var(--line); padding:9px; }
+    .warning { display:none; margin:16px; border:1px solid var(--red); color:#ffd6d2; background:#33201f; padding:13px 15px; font-size:.82rem; }
+    .warning.show { display:block; }
+    .preview { position:sticky; top:20px; align-self:start; }
+    .shop { padding:22px; }
+    .shop-head { display:flex; align-items:center; justify-content:space-between; gap:15px; }
+    .shop h2 { font-size:1rem; margin:0; }
+    .badge { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; padding:4px 7px; color:var(--mint); border:1px solid var(--mint); }
+    .journey { margin:28px 0; }
+    .journey-step { display:grid; grid-template-columns:24px 1fr; gap:12px; padding-bottom:24px; position:relative; }
+    .journey-step:not(:last-child)::before { content:""; position:absolute; left:11px; top:24px; bottom:0; width:1px; background:var(--line); }
+    .dot { width:24px; height:24px; border-radius:50%; background:var(--panel2); border:1px solid var(--line); display:grid; place-items:center; font-size:.7rem; z-index:1; }
+    .journey-step.active .dot { color:var(--bg); background:var(--mint); border-color:var(--mint); }
+    .journey-step.blocked .dot { color:var(--bg); background:var(--red); border-color:var(--red); }
+    .journey-step strong { display:block; font-size:.82rem; }
+    .journey-step small { color:var(--muted); }
+    .summary { background:var(--panel2); padding:14px; color:var(--muted); font-size:.75rem; }
+    .actions { position:fixed; z-index:5; bottom:0; left:0; right:0; border-top:1px solid var(--line); background:rgba(17,23,22,.96); backdrop-filter:blur(10px); }
+    .actions-inner { max-width:1180px; margin:auto; padding:13px 20px; display:flex; gap:10px; justify-content:flex-end; align-items:center; }
+    .feedback { margin-right:auto; color:var(--muted); font-size:.78rem; }
+    button { min-height:44px; border:1px solid var(--line); background:var(--panel2); color:var(--ink); padding:0 17px; cursor:pointer; }
+    button:hover { border-color:var(--mint); }
+    button.primary { background:var(--mint); color:var(--bg); border-color:var(--mint); font-weight:900; }
+    dialog { width:min(720px,calc(100vw - 32px)); border:1px solid var(--line); background:var(--panel); color:var(--ink); padding:0; }
+    dialog::backdrop { background:rgba(0,0,0,.72); }
+    dialog header { padding:16px 18px; }
+    dialog textarea { display:block; width:calc(100% - 36px); min-height:270px; margin:18px; background:var(--bg); color:var(--ink); border:1px solid var(--line); padding:14px; resize:vertical; }
+    dialog footer { padding:0 18px 18px; display:flex; justify-content:flex-end; }
+    @media (max-width:880px) { .intro, .workspace { grid-template-columns:1fr; gap:28px; } .preview { position:static; } }
+    @media (max-width:620px) {
+      header { align-items:flex-start; flex-direction:column; }
+      main { padding-top:36px; }
+      .flag { grid-template-columns:1fr; gap:15px; }
+      .actions-inner { flex-wrap:wrap; } .feedback { width:100%; }
+      .actions-inner button { flex:1; padding:0 8px; }
+    }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; } }
+    @media print { .actions, dialog { display:none; } body { background:#fff; color:#111; } .editor, .preview { background:#fff; color:#111; border-color:#aaa; } .workspace { grid-template-columns:1fr; } .preview { position:static; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div><span class="brand">rollout://disputes</span> <span class="source">source evidence: flags.prod.json @ 8f2c1a7</span></div>
+    <span class="dirty" id="dirty">No unsaved export</span>
+  </header>
+  <main>
+    <section class="intro">
+      <h1>Change the cohort.<br>Keep the dependency.</h1>
+      <div class="contract"><b>Editor contract</b>Edit three rollout flags. The dispute webhook may never exceed the scope-consent cohort. Export changed keys only; this file does not save to production.</div>
+    </section>
+
+    <div class="workspace">
+      <form class="editor" id="flagsForm" aria-labelledby="editor-title">
+        <div class="bar"><span id="editor-title">Flag controls</span><span>original → current</span></div>
+        <div class="warning" id="warning" role="alert">Invalid rollout: <b>dispute_webhook</b> cannot exceed <b>dispute_scope</b>. Lower the webhook cohort or raise scope consent first.</div>
+
+        <div class="flag" data-flag="dispute_banner">
+          <div class="name">dispute_banner<small>Shows the permission recovery banner.</small></div>
+          <label class="toggle"><input type="checkbox" name="dispute_banner_enabled" checked> Enabled</label>
+          <div class="rollout"><label for="bannerPct"><span>Rollout</span><output id="bannerOut">25%</output></label><input id="bannerPct" name="dispute_banner_percent" type="range" min="0" max="100" step="5" value="25"></div>
+        </div>
+
+        <div class="flag" data-flag="dispute_scope">
+          <div class="name">dispute_scope<small>Requests and persists the required OAuth scope.</small></div>
+          <label class="toggle"><input type="checkbox" name="dispute_scope_enabled" checked> Enabled</label>
+          <div class="rollout"><label for="scopePct"><span>Rollout</span><output id="scopeOut">20%</output></label><input id="scopePct" name="dispute_scope_percent" type="range" min="0" max="100" step="5" value="20"></div>
+        </div>
+
+        <div class="flag" data-flag="dispute_webhook">
+          <div class="name">dispute_webhook<small>Reconciles the dispute subscription after consent.</small></div>
+          <label class="toggle"><input type="checkbox" name="dispute_webhook_enabled" checked> Enabled</label>
+          <div class="rollout"><label for="webhookPct"><span>Rollout</span><output id="webhookOut">10%</output></label><input id="webhookPct" name="dispute_webhook_percent" type="range" min="0" max="100" step="5" value="10"></div>
+        </div>
+
+        <div class="flag">
+          <div class="name">cohort_strategy<small>Stable shop assignment for this export.</small></div>
+          <div></div>
+          <select name="cohort_strategy" aria-label="Cohort strategy"><option value="stable_hash" selected>Stable shop hash</option><option value="staff_only">Staff shops only</option><option value="allowlist">Explicit allowlist</option></select>
+        </div>
+      </form>
+
+      <aside class="preview" aria-labelledby="preview-title">
+        <div class="bar"><span id="preview-title">Shop journey preview</span><span id="previewCohort">10% eligible</span></div>
+        <div class="shop">
+          <div class="shop-head"><h2>sample-shop.example</h2><span class="badge">in cohort</span></div>
+          <div class="journey">
+            <div class="journey-step active" id="stepBanner"><span class="dot">1</span><div><strong>Banner visible</strong><small>Shop is flagged and scope is absent.</small></div></div>
+            <div class="journey-step active" id="stepScope"><span class="dot">2</span><div><strong>Scope consent</strong><small>OAuth callback persists the new scope.</small></div></div>
+            <div class="journey-step active" id="stepWebhook"><span class="dot">3</span><div><strong>Webhook reconciliation</strong><small>Runs only inside the authorized cohort.</small></div></div>
+          </div>
+          <div class="summary" id="summary">Valid: 10% of shops can complete the full recovery journey.</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="actions">
+    <div class="actions-inner">
+      <div class="feedback" id="feedback" aria-live="polite">Ready. Changes exist only in this browser tab.</div>
+      <button type="button" id="reset">Reset</button>
+      <button type="button" id="previewExport">Preview diff</button>
+      <button type="button" class="primary" id="copyExport">Copy diff</button>
+    </div>
+  </div>
+
+  <dialog id="exportDialog" aria-labelledby="dialogTitle">
+    <header><b id="dialogTitle">Deterministic changed-keys export</b><span class="source">pasteable JSON</span></header>
+    <textarea id="exportText" readonly aria-label="Exported JSON diff"></textarea>
+    <footer><button type="button" id="closeDialog">Close</button></footer>
+  </dialog>
+
+  <script>
+    const original = Object.freeze({
+      dispute_banner: { enabled:true, percent:25 },
+      dispute_scope: { enabled:true, percent:20 },
+      dispute_webhook: { enabled:true, percent:10 },
+      cohort_strategy: 'stable_hash'
+    });
+    const form = document.getElementById('flagsForm');
+    const byName = name => form.elements.namedItem(name);
+    const readState = () => ({
+      dispute_banner: { enabled:byName('dispute_banner_enabled').checked, percent:Number(byName('dispute_banner_percent').value) },
+      dispute_scope: { enabled:byName('dispute_scope_enabled').checked, percent:Number(byName('dispute_scope_percent').value) },
+      dispute_webhook: { enabled:byName('dispute_webhook_enabled').checked, percent:Number(byName('dispute_webhook_percent').value) },
+      cohort_strategy: byName('cohort_strategy').value
+    });
+    const isEqual = (a,b) => JSON.stringify(a) === JSON.stringify(b);
+    function validate(state) {
+      const scopeCap = state.dispute_scope.enabled ? state.dispute_scope.percent : 0;
+      const webhookCap = state.dispute_webhook.enabled ? state.dispute_webhook.percent : 0;
+      return { valid:webhookCap <= scopeCap, scopeCap, webhookCap };
+    }
+    function diff(state) {
+      const changed = {};
+      for (const key of ['dispute_banner','dispute_scope','dispute_webhook']) {
+        if (!isEqual(state[key], original[key])) changed[key] = { from:original[key], to:state[key] };
+      }
+      if (state.cohort_strategy !== original.cohort_strategy) changed.cohort_strategy = { from:original.cohort_strategy, to:state.cohort_strategy };
+      return { source:'flags.prod.json@8f2c1a7', changed };
+    }
+    function exportJSON() { return JSON.stringify(diff(readState()), null, 2) + '\n'; }
+    function render() {
+      const state = readState();
+      const check = validate(state);
+      document.getElementById('bannerOut').value = `${state.dispute_banner.percent}%`;
+      document.getElementById('scopeOut').value = `${state.dispute_scope.percent}%`;
+      document.getElementById('webhookOut').value = `${state.dispute_webhook.percent}%`;
+      document.getElementById('warning').classList.toggle('show', !check.valid);
+      document.getElementById('dirty').classList.toggle('on', !isEqual(state, original));
+      document.getElementById('dirty').textContent = isEqual(state, original) ? 'No unsaved export' : 'Changed · not saved';
+      document.getElementById('previewCohort').textContent = `${Math.min(check.scopeCap, check.webhookCap)}% eligible`;
+      document.getElementById('stepBanner').className = `journey-step ${state.dispute_banner.enabled ? 'active' : ''}`;
+      document.getElementById('stepScope').className = `journey-step ${state.dispute_scope.enabled ? 'active' : ''}`;
+      document.getElementById('stepWebhook').className = `journey-step ${check.valid && state.dispute_webhook.enabled ? 'active' : 'blocked'}`;
+      document.getElementById('summary').textContent = check.valid ? `Valid: ${Math.min(check.scopeCap, check.webhookCap)}% of shops can complete the full recovery journey.` : `Blocked: webhook cohort (${check.webhookCap}%) exceeds authorized scope cohort (${check.scopeCap}%).`;
+      document.getElementById('copyExport').disabled = !check.valid;
+    }
+    function showExport() {
+      const field = document.getElementById('exportText');
+      field.value = exportJSON();
+      document.getElementById('exportDialog').showModal();
+      field.focus(); field.select();
+    }
+    form.addEventListener('input', render);
+    document.getElementById('previewExport').addEventListener('click', showExport);
+    document.getElementById('closeDialog').addEventListener('click', () => document.getElementById('exportDialog').close());
+    document.getElementById('reset').addEventListener('click', () => {
+      if (!isEqual(readState(), original) && !confirm('Discard all changes in this tab?')) return;
+      byName('dispute_banner_enabled').checked = original.dispute_banner.enabled; byName('dispute_banner_percent').value = original.dispute_banner.percent;
+      byName('dispute_scope_enabled').checked = original.dispute_scope.enabled; byName('dispute_scope_percent').value = original.dispute_scope.percent;
+      byName('dispute_webhook_enabled').checked = original.dispute_webhook.enabled; byName('dispute_webhook_percent').value = original.dispute_webhook.percent;
+      byName('cohort_strategy').value = original.cohort_strategy;
+      render(); document.getElementById('feedback').textContent = 'Reset to source revision 8f2c1a7.';
+    });
+    document.getElementById('copyExport').addEventListener('click', async () => {
+      const value = exportJSON();
+      try { await navigator.clipboard.writeText(value); document.getElementById('feedback').textContent = 'Changed keys copied as JSON. Nothing was saved to production.'; }
+      catch { showExport(); document.getElementById('feedback').textContent = 'Clipboard unavailable. Export selected for manual copy.'; }
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "aio-html-artifacts",
+  "version": "1.0.0",
+  "description": "Create self-contained HTML reports, decks, decision surfaces, and purpose-built editors with layered information, evidence proximity, accessibility, and export loops.",
+  "author": {
+    "name": "aiocean"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AIO HTML Artifacts",
+    "shortDescription": "Rich HTML communication for reports, decks, decisions, and editors.",
+    "longDescription": "Build standalone HTML artifacts that keep humans in the loop through strong narrative structure, multiple levels of detail, evidence beside claims, responsive accessibility, print support, and deterministic exports.",
+    "developerName": "aiocean",
+    "category": "Productivity",
+    "capabilities": ["skills"],
+    "defaultPrompt": "Turn this work into the HTML artifact best suited to the human decision or task."
+  }
+}
