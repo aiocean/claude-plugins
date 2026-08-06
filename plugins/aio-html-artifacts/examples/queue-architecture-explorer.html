@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Example HTML decision explorer comparing three queue architectures on aligned criteria.">
+  <title>Queue architecture explorer — three honest tradeoffs</title>
+  <style>
+    :root { --canvas:#eef2ef; --ink:#13231d; --muted:#61716a; --line:#aebbb5; --blue:#2e66d2; --violet:#7049b9; --orange:#d36932; --white:#fbfcf8; --soft:#dde5df; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--canvas); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.45; }
+    button:focus-visible, a:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
+    header { padding:24px max(22px,calc((100vw - 1240px)/2)); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; font-size:.76rem; text-transform:uppercase; letter-spacing:.12em; }
+    main { max-width:1240px; margin:auto; padding:56px 22px 100px; }
+    .intro { display:grid; grid-template-columns:minmax(0,1fr) 350px; gap:64px; align-items:end; padding-bottom:48px; }
+    h1 { font-size:clamp(3rem,7vw,6.2rem); line-height:.91; letter-spacing:-.06em; margin:0; max-width:850px; }
+    .question { border-left:5px solid var(--blue); padding-left:20px; font-size:1.05rem; }
+    .question b { display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.13em; margin-bottom:8px; color:var(--blue); }
+    .frame { display:grid; grid-template-columns:190px repeat(3,1fr); border-top:2px solid var(--ink); border-bottom:1px solid var(--ink); }
+    .cell { padding:22px 18px; border-bottom:1px solid var(--line); min-width:0; }
+    .cell:not(:nth-child(4n+1)) { border-left:1px solid var(--line); }
+    .label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.7rem; font-weight:800; }
+    .option-head { min-height:170px; position:relative; padding-top:35px; }
+    .option-head::before { content:attr(data-letter); position:absolute; top:12px; right:14px; font-size:5rem; line-height:1; font-weight:900; opacity:.1; }
+    .option-head h2 { font-size:1.55rem; line-height:1.05; margin:0 0 12px; }
+    .option-head p { color:var(--muted); font-size:.9rem; margin:0; }
+    .a { color:var(--blue); } .b { color:var(--violet); } .c { color:var(--orange); }
+    .constraint { font-weight:750; }
+    .pass::before { content:"✓ "; color:#19724e; } .risk::before { content:"△ "; color:#9d5d13; } .fail::before { content:"× "; color:#a5302f; }
+    .metric { display:flex; align-items:baseline; gap:7px; }
+    .metric strong { font-size:1.65rem; }
+    .meter { height:7px; background:#d5ddd8; margin-top:11px; position:relative; }
+    .meter span { display:block; height:100%; background:currentColor; width:var(--value); }
+    .evidence { color:var(--muted); font-size:.78rem; margin-top:10px; }
+    .scenario { margin:58px 0 26px; display:flex; justify-content:space-between; gap:24px; align-items:end; }
+    .scenario h2 { margin:0; font-size:clamp(1.8rem,4vw,3.2rem); letter-spacing:-.04em; }
+    .switch { display:flex; border:1px solid var(--ink); padding:3px; border-radius:999px; }
+    .switch button { border:0; background:transparent; color:var(--ink); min-height:42px; padding:0 18px; border-radius:999px; cursor:pointer; font-weight:800; }
+    .switch button[aria-pressed="true"] { background:var(--ink); color:var(--white); }
+    .frontier { position:relative; min-height:360px; border:1px solid var(--ink); background:linear-gradient(to right,transparent 49.8%,rgba(19,35,29,.1) 50%,transparent 50.2%),linear-gradient(to bottom,transparent 49.8%,rgba(19,35,29,.1) 50%,transparent 50.2%); }
+    .axis-x, .axis-y { position:absolute; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; }
+    .axis-x { right:18px; bottom:12px; } .axis-y { left:14px; top:12px; }
+    .dot { position:absolute; left:var(--x); bottom:var(--y); transform:translate(-50%,50%); width:86px; height:86px; border-radius:50%; color:white; display:grid; place-items:center; text-align:center; font-weight:850; box-shadow:0 7px 0 rgba(19,35,29,.18); transition:left .25s,bottom .25s; }
+    .dot small { display:block; font-weight:500; font-size:.68rem; }
+    .dot-a { background:var(--blue); } .dot-b { background:var(--violet); } .dot-c { background:var(--orange); }
+    .recommendation { margin-top:58px; background:var(--ink); color:var(--white); display:grid; grid-template-columns:210px 1fr; gap:36px; padding:38px; }
+    .recommendation .label { color:#aebbb5; }
+    .recommendation h2 { margin:0 0 13px; font-size:clamp(2rem,4vw,3.6rem); line-height:1; letter-spacing:-.04em; }
+    .recommendation p { margin:0; max-width:780px; color:#ccd5d0; font-size:1.05rem; }
+    .falsifier { margin-top:18px; color:#fff; padding-top:18px; border-top:1px solid #506159; }
+    details { margin-top:36px; padding:20px 0; border-block:1px solid var(--line); }
+    summary { cursor:pointer; font-weight:850; }
+    @media (max-width:900px) {
+      .intro { grid-template-columns:1fr; gap:28px; }
+      .frame { grid-template-columns:120px repeat(3,minmax(230px,1fr)); overflow-x:auto; }
+      .frame::after { content:"Scroll horizontally to compare all options →"; position:absolute; }
+      .scenario { align-items:flex-start; flex-direction:column; }
+    }
+    @media (max-width:620px) {
+      header { flex-direction:column; }
+      main { padding-top:38px; }
+      .frame { display:block; }
+      .frame::after { display:none; }
+      .cell { border-left:0 !important; }
+      .label { background:var(--ink); color:white; margin-top:20px; }
+      .option-head { min-height:0; padding:24px 18px; }
+      .cell[data-option]::before { content:attr(data-option); display:block; font-size:.66rem; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin-bottom:4px; }
+      .frontier { min-height:440px; }
+      .dot { width:72px; height:72px; }
+      .recommendation { grid-template-columns:1fr; padding:28px 22px; }
+      .switch { width:100%; } .switch button { flex:1; padding:0 8px; }
+    }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .dot { transition:none; } }
+    @media print {
+      :root { --canvas:#fff; }
+      header { padding:12px 0; } main { max-width:none; padding:26px 0; }
+      .switch { display:none; } .frame, .recommendation, .frontier { break-inside:avoid; }
+      details > * { display:block; } summary { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <header><span>Architecture decision explorer · ADR-042</span><span>Evidence snapshot · 06 Aug 2026</span></header>
+  <main>
+    <section class="intro">
+      <h1>Three queue architectures. No universal winner.</h1>
+      <div class="question"><b>Decision question</b>Which approach gives a six-person team reliable recovery under bursty workloads without adding an operations platform?</div>
+    </section>
+
+    <section aria-labelledby="options-title" data-evidence>
+      <h2 id="options-title" style="position:absolute;clip:rect(0 0 0 0)">Aligned option comparison</h2>
+      <div class="frame">
+        <div class="cell label">Alternative</div>
+        <div class="cell option-head a" data-letter="A"><h2>Managed queue</h2><p>Broker retries and dead-letter queue; smallest operating surface.</p></div>
+        <div class="cell option-head b" data-letter="B"><h2>Queue + retry ledger</h2><p>Managed transport with application-owned recovery intent.</p></div>
+        <div class="cell option-head c" data-letter="C"><h2>Workflow engine</h2><p>Durable execution with explicit state, timers, and replay.</p></div>
+
+        <div class="cell label">Hard constraint<br>≤ 2 FTE-months</div>
+        <div class="cell constraint pass" data-option="Managed queue">3 weeks</div>
+        <div class="cell constraint pass" data-option="Queue + ledger">7 weeks</div>
+        <div class="cell constraint fail" data-option="Workflow engine">14–18 weeks</div>
+
+        <div class="cell label">p95 recovery</div>
+        <div class="cell a" data-option="Managed queue"><div class="metric"><strong>7m</strong><span>04s</span></div><div class="meter"><span style="--value:82%"></span></div><div class="evidence">120 injected failures · LT-204</div></div>
+        <div class="cell b" data-option="Queue + ledger"><div class="metric"><strong>1m</strong><span>31s</span></div><div class="meter"><span style="--value:28%"></span></div><div class="evidence">120 injected failures · LT-204</div></div>
+        <div class="cell c" data-option="Workflow engine"><div class="metric"><strong>0m</strong><span>44s</span></div><div class="meter"><span style="--value:17%"></span></div><div class="evidence">Vendor benchmark · not reproduced</div></div>
+
+        <div class="cell label">Failure visibility</div>
+        <div class="cell risk" data-option="Managed queue">Queue depth shows pressure, not business outcome.</div>
+        <div class="cell pass" data-option="Queue + ledger">Intent and terminal outcome are queryable.</div>
+        <div class="cell pass" data-option="Workflow engine">Full execution history and replay.</div>
+
+        <div class="cell label">Operating burden</div>
+        <div class="cell pass" data-option="Managed queue">Lowest; existing alarms and runbooks.</div>
+        <div class="cell risk" data-option="Queue + ledger">One table, sweeper, and reconciliation SLO.</div>
+        <div class="cell fail" data-option="Workflow engine">New platform ownership exceeds team constraint.</div>
+
+        <div class="cell label">Reversibility</div>
+        <div class="cell pass" data-option="Managed queue">Current state; no migration.</div>
+        <div class="cell pass" data-option="Queue + ledger">Can shadow before becoming authoritative.</div>
+        <div class="cell risk" data-option="Workflow engine">Domain contracts become engine-shaped.</div>
+      </div>
+    </section>
+
+    <section aria-labelledby="scenario-title">
+      <div class="scenario">
+        <div><span class="label">Sensitivity, not a magic score</span><h2 id="scenario-title">Change the operating scenario.</h2></div>
+        <div class="switch" role="group" aria-label="Operating scenario">
+          <button type="button" data-scenario="small" aria-pressed="true">Small team</button>
+          <button type="button" data-scenario="regulated" aria-pressed="false">Audit-heavy</button>
+          <button type="button" data-scenario="scale" aria-pressed="false">10× scale</button>
+        </div>
+      </div>
+      <div class="frontier" role="img" aria-label="Options positioned by operational cost and recovery control">
+        <span class="axis-y">More recovery control ↑</span><span class="axis-x">More operating cost →</span>
+        <div class="dot dot-a" data-dot="a" style="--x:22%;--y:34%">A<small>managed</small></div>
+        <div class="dot dot-b" data-dot="b" style="--x:49%;--y:72%">B<small>ledger</small></div>
+        <div class="dot dot-c" data-dot="c" style="--x:82%;--y:88%">C<small>workflow</small></div>
+      </div>
+    </section>
+
+    <section class="recommendation" aria-labelledby="recommend-title">
+      <div class="label">Recommendation<br><span id="confidence">High confidence</span></div>
+      <div>
+        <h2 id="recommend-title">Choose B for this team and horizon.</h2>
+        <p id="recommend-copy">The retry ledger clears the recovery SLO while staying inside the delivery constraint. Accept one new reconciliation loop; shadow it before authority moves.</p>
+        <p class="falsifier" id="falsifier"><b>Reconsider if:</b> the measured maintenance load exceeds 0.2 FTE or the workflow engine becomes an already-operated shared platform.</p>
+      </div>
+    </section>
+
+    <details>
+      <summary>Assumptions, unknowns, and evidence limits</summary>
+      <ul>
+        <li><b>Observed:</b> options A and B were load-tested with identical payloads.</li>
+        <li><b>Unknown:</b> option C recovery is a vendor benchmark, not locally reproduced.</li>
+        <li><b>Assumption:</b> the team remains six engineers for the next two quarters.</li>
+        <li><b>Decision owner:</b> Platform lead. Review horizon: six months.</li>
+      </ul>
+    </details>
+  </main>
+  <script>
+    const scenarios = {
+      small: { title:'Choose B for this team and horizon.', copy:'The retry ledger clears the recovery SLO while staying inside the delivery constraint. Accept one new reconciliation loop; shadow it before authority moves.', falsifier:'Reconsider if: the measured maintenance load exceeds 0.2 FTE or the workflow engine becomes an already-operated shared platform.', confidence:'High confidence', dots:[[22,34],[49,72],[82,88]] },
+      regulated: { title:'Choose C only if the delivery constraint changes.', copy:'Execution history and replay become decisive under audit-heavy operation, but the current two FTE-month limit disqualifies the option.', falsifier:'Reconsider B if: evidence retention and replay cannot satisfy the audit control without bespoke tooling.', confidence:'Medium confidence', dots:[[20,22],[52,61],[76,94]] },
+      scale: { title:'Run a B-versus-C benchmark before committing.', copy:'At 10× scale, both can meet throughput. The unknown is operator cost per million recoveries, so a reversible benchmark is more honest than a winner.', falsifier:'Decision flips when: reproduced cost and recovery evidence separates the options by the agreed threshold.', confidence:'Low confidence', dots:[[18,18],[48,70],[72,83]] }
+    };
+    const buttons = [...document.querySelectorAll('[data-scenario]')];
+    buttons.forEach(button => button.addEventListener('click', () => {
+      const value = scenarios[button.dataset.scenario];
+      buttons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      document.getElementById('recommend-title').textContent = value.title;
+      document.getElementById('recommend-copy').textContent = value.copy;
+      document.getElementById('falsifier').innerHTML = `<b>${value.falsifier.split(':')[0]}:</b>${value.falsifier.split(':').slice(1).join(':')}`;
+      document.getElementById('confidence').textContent = value.confidence;
+      ['a','b','c'].forEach((key,index) => {
+        const dot = document.querySelector(`[data-dot="${key}"]`);
+        dot.style.setProperty('--x', `${value.dots[index][0]}%`);
+        dot.style.setProperty('--y', `${value.dots[index][1]}%`);
+      });
+    }));
+  </script>
+</body>
+</html>

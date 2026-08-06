@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Example evidence-led engineering investigation report with inline code and causal flow.">
+  <title>Webhook recovery path — engineering investigation</title>
+  <style>
+    :root { --paper:#f4f0e8; --ink:#17211d; --muted:#65706a; --rule:#c8c4ba; --red:#b6422f; --amber:#c57b1c; --green:#27755a; --code:#101713; --code-ink:#d9e7df; --mark:#ffe08a; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.55; }
+    a { color:inherit; }
+    a:focus-visible, summary:focus-visible { outline:3px solid var(--amber); outline-offset:4px; }
+    .masthead { border-bottom:1px solid var(--ink); padding:18px max(24px,calc((100vw - 1180px)/2)); display:flex; justify-content:space-between; gap:20px; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+    .status { display:inline-flex; align-items:center; gap:8px; font-weight:800; color:var(--red); }
+    .status::before { content:""; width:9px; height:9px; border-radius:50%; background:currentColor; }
+    .hero { max-width:1180px; margin:auto; display:grid; grid-template-columns:1fr 280px; gap:72px; padding:74px 24px 58px; border-bottom:1px solid var(--rule); }
+    .kicker { color:var(--red); font-size:.76rem; letter-spacing:.16em; text-transform:uppercase; font-weight:850; }
+    h1 { font-family:Georgia,serif; font-size:clamp(2.8rem,7vw,6.6rem); line-height:.91; letter-spacing:-.055em; max-width:900px; margin:15px 0 28px; }
+    .dek { font-family:Georgia,serif; font-size:clamp(1.2rem,2vw,1.55rem); max-width:760px; margin:0; }
+    .verdict { border-top:5px solid var(--red); padding-top:18px; align-self:end; }
+    .verdict strong { display:block; font-size:1.75rem; line-height:1.05; margin-bottom:12px; }
+    .verdict p { margin:0; color:var(--muted); font-size:.92rem; }
+    .body { max-width:1180px; margin:auto; padding:0 24px 100px; display:grid; grid-template-columns:210px minmax(0,1fr); gap:72px; }
+    nav { position:sticky; top:20px; align-self:start; padding-top:54px; font-size:.8rem; }
+    nav b { display:block; margin-bottom:14px; text-transform:uppercase; letter-spacing:.14em; }
+    nav a { display:block; padding:8px 0; color:var(--muted); text-decoration:none; border-bottom:1px solid var(--rule); }
+    nav a:hover { color:var(--ink); }
+    article { min-width:0; }
+    section { padding:58px 0; border-bottom:1px solid var(--rule); }
+    h2 { font-family:Georgia,serif; font-size:clamp(2rem,4vw,3.8rem); letter-spacing:-.04em; line-height:1; margin:0 0 28px; max-width:780px; }
+    h3 { font-size:1rem; margin:0 0 9px; }
+    .lead { font-size:1.12rem; max-width:740px; }
+    .fact-strip { display:grid; grid-template-columns:repeat(3,1fr); border-block:1px solid var(--ink); margin:34px 0 10px; }
+    .fact { padding:22px 22px 22px 0; }
+    .fact + .fact { padding-left:22px; border-left:1px solid var(--rule); }
+    .fact span { display:block; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; }
+    .fact strong { display:block; margin-top:6px; font:700 1.25rem Georgia,serif; }
+    .flow { display:grid; grid-template-columns:1fr 42px 1fr 42px 1fr; align-items:stretch; margin:38px 0; }
+    .node { border:1px solid var(--ink); padding:22px; background:rgba(255,255,255,.28); }
+    .node small { display:block; color:var(--muted); margin-top:8px; }
+    .arrow { display:grid; place-items:center; font-size:1.6rem; }
+    .node.break { border-color:var(--red); box-shadow:inset 0 -5px var(--red); }
+    .finding { display:grid; grid-template-columns:86px 1fr; gap:24px; margin:40px 0 24px; }
+    .finding .index { font:700 2.8rem Georgia,serif; color:var(--red); border-top:1px solid var(--red); padding-top:4px; }
+    .finding p { margin:.25rem 0 0; max-width:720px; }
+    .evidence { display:grid; grid-template-columns:minmax(0,1fr) 230px; background:var(--code); color:var(--code-ink); border-radius:3px; overflow:hidden; margin:24px 0 36px; }
+    .code { overflow:auto; padding:20px 0; font:13px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace; }
+    .source { display:block; padding:0 20px 12px; color:#90a39a; font-size:11px; letter-spacing:.04em; }
+    .line { display:block; padding:0 20px; white-space:pre; border-left:4px solid transparent; }
+    .line::before { content:attr(data-line); display:inline-block; width:32px; color:#60736a; user-select:none; }
+    .line.hot { background:#2b2116; border-left-color:var(--mark); color:#fff2c7; }
+    .annotation { border-left:1px solid #3c4b43; padding:48px 20px 20px; color:#bdc9c3; font-size:.84rem; }
+    .annotation b { color:var(--mark); display:block; margin-bottom:8px; }
+    .causal { counter-reset:step; margin:35px 0 0; }
+    .cause { display:grid; grid-template-columns:55px 1fr; gap:20px; padding:22px 0; border-top:1px solid var(--rule); }
+    .cause::before { counter-increment:step; content:counter(step); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; color:white; background:var(--ink); font-weight:800; }
+    .cause strong { display:block; margin-bottom:5px; }
+    .cause p { margin:0; color:var(--muted); }
+    .actions { width:100%; border-collapse:collapse; margin-top:28px; }
+    .actions th, .actions td { text-align:left; vertical-align:top; padding:15px 10px; border-bottom:1px solid var(--rule); }
+    .actions th { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; }
+    .priority { font-weight:800; color:var(--red); }
+    details { margin-top:28px; border-block:1px solid var(--rule); padding:18px 0; }
+    summary { cursor:pointer; font-weight:800; }
+    .legend { color:var(--muted); font-size:.85rem; }
+    .tag { display:inline-block; border:1px solid currentColor; padding:2px 7px; margin-right:5px; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; }
+    .observed { color:var(--green); } .inferred { color:var(--amber); }
+    @media (max-width:850px) {
+      .hero { grid-template-columns:1fr; gap:36px; padding-top:48px; }
+      .verdict { max-width:520px; }
+      .body { grid-template-columns:1fr; gap:0; }
+      nav { position:static; display:flex; overflow:auto; gap:18px; padding:20px 0; border-bottom:1px solid var(--rule); }
+      nav b { display:none; } nav a { white-space:nowrap; border:0; }
+      .evidence { grid-template-columns:1fr; }
+      .annotation { border-left:0; border-top:1px solid #3c4b43; padding:18px 20px; }
+    }
+    @media (max-width:580px) {
+      .masthead { align-items:flex-start; flex-direction:column; }
+      .hero, .body { padding-left:18px; padding-right:18px; }
+      .fact-strip { grid-template-columns:1fr; }
+      .fact + .fact { border-left:0; border-top:1px solid var(--rule); padding-left:0; }
+      .flow { grid-template-columns:1fr; gap:8px; }
+      .arrow { transform:rotate(90deg); }
+      .finding { grid-template-columns:56px 1fr; gap:12px; }
+      .actions, .actions tbody, .actions tr, .actions td { display:block; }
+      .actions thead { position:absolute; clip:rect(0 0 0 0); }
+      .actions tr { padding:14px 0; border-bottom:1px solid var(--rule); }
+      .actions td { border:0; padding:3px 0; }
+      .actions td::before { content:attr(data-label) ": "; font-weight:800; }
+    }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+    @media print {
+      :root { --paper:#fff; }
+      nav { display:none; } .body { display:block; } .hero { padding-top:28px; }
+      section { break-inside:auto; } .evidence, .finding, .cause, tr { break-inside:avoid; }
+      details > * { display:block; } summary { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <span>Atlas Engineering · Investigation 017</span>
+    <span class="status">Action required before rollout</span>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <div class="kicker">Webhook authorization · 06 Aug 2026</div>
+        <h1>The recovery path stops one service too early.</h1>
+        <p class="dek">The new authorization scope is persisted correctly, but shops that abandon OAuth can remain without the dispute webhook because recovery validates only the legacy installer.</p>
+      </div>
+      <aside class="verdict" aria-label="Verdict">
+        <strong>Do not approve as complete.</strong>
+        <p>High confidence · one blocking gap · evidence from two handlers and the queue topology.</p>
+      </aside>
+    </div>
+
+    <div class="body">
+      <nav aria-label="Report sections">
+        <b>Read the case</b>
+        <a href="#answer">01 · Answer</a>
+        <a href="#path">02 · System path</a>
+        <a href="#evidence">03 · Code evidence</a>
+        <a href="#cause">04 · Causal chain</a>
+        <a href="#actions">05 · Actions</a>
+      </nav>
+
+      <article>
+        <section id="answer">
+          <h2>The banner recovers scope consent, not webhook delivery.</h2>
+          <p class="lead"><span class="tag observed">Observed</span> A shop remains eligible for the banner while <code>shops.scopes</code> lacks the new scope. That part is correct. A separate recovery route is needed after the scope arrives: the current validation command reaches only the order webhook installer.</p>
+          <div class="fact-strip" aria-label="Investigation summary">
+            <div class="fact"><span>Scope fallback</span><strong>Works as intended</strong></div>
+            <div class="fact"><span>Webhook recovery</span><strong>Incomplete</strong></div>
+            <div class="fact"><span>Release impact</span><strong>Silent missed events</strong></div>
+          </div>
+          <p class="legend"><span class="tag observed">Observed</span> directly supported by source &nbsp; <span class="tag inferred">Inferred</span> consequence derived from the observed path</p>
+        </section>
+
+        <section id="path">
+          <h2>The successful path crosses three boundaries.</h2>
+          <p class="lead">The banner and OAuth callback only establish permission. Delivery becomes reliable when the callback also reaches the installer that owns dispute subscriptions.</p>
+          <div class="flow" role="img" aria-label="Shop clicks banner, OAuth callback stores scope, then webhook recovery should register dispute topics">
+            <div class="node"><b>1 · Consent</b><small>Banner opens OAuth only for flagged shops missing the scope.</small></div>
+            <div class="arrow" aria-hidden="true">→</div>
+            <div class="node"><b>2 · Persist</b><small>Callback stores the granted scope in <code>shops.scopes</code>.</small></div>
+            <div class="arrow" aria-hidden="true">→</div>
+            <div class="node break"><b>3 · Recover</b><small>Validation invokes the legacy order installer, not the dispute owner.</small></div>
+          </div>
+        </section>
+
+        <section id="evidence" data-evidence>
+          <h2>The decisive branch is visible in six lines.</h2>
+          <div class="finding">
+            <div class="index">01</div>
+            <div><h3>Banner eligibility survives an abandoned OAuth flow</h3><p>The predicate reads persisted scopes. If the callback never saves the new value, the predicate remains true and the user sees the banner again.</p></div>
+          </div>
+          <div class="evidence">
+            <div class="code" aria-label="Code excerpt from banner eligibility">
+              <span class="source">web/app/disputes/banner.ts · lines 41–46 · fictional example</span>
+              <span class="line" data-line="41">const granted = new Set(shop.scopes.split(","));</span>
+              <span class="line hot" data-line="42">const missing = !granted.has(DISPUTE_SCOPE);</span>
+              <span class="line" data-line="43"></span>
+              <span class="line" data-line="44">return shop.flags.disputes &amp;&amp; missing;</span>
+            </div>
+            <aside class="annotation"><b>Why this answers the question</b>The database remains authoritative. Abandoning OAuth produces no persisted scope, so <code>missing</code> stays true.</aside>
+          </div>
+
+          <div class="finding">
+            <div class="index">02</div>
+            <div><h3>Recovery invokes only the order installer</h3><p>The callback publishes a validation command, but the consumer hard-codes one Lambda target. No SNS fan-out or second SQS consumer appears in the inspected topology.</p></div>
+          </div>
+          <div class="evidence">
+            <div class="code" aria-label="Code excerpt from webhook validation consumer">
+              <span class="source">workers/validate-webhooks.ts · lines 72–80 · fictional example</span>
+              <span class="line" data-line="72">if (shop.active &amp;&amp; shop.scopes.includes(requiredScope)) {</span>
+              <span class="line hot" data-line="73">  await lambda.invoke({</span>
+              <span class="line hot" data-line="74">    FunctionName: "orders-install-webhooks-prod",</span>
+              <span class="line" data-line="75">    Payload: JSON.stringify({ shopId: shop.id }),</span>
+              <span class="line" data-line="76">  });</span>
+              <span class="line" data-line="77">}</span>
+            </div>
+            <aside class="annotation"><b>The gap</b>The condition is right, but the only named target owns order topics. Permission recovery does not imply dispute subscription recovery.</aside>
+          </div>
+        </section>
+
+        <section id="cause">
+          <h2>This fails silently, not immediately.</h2>
+          <div class="causal">
+            <div class="cause"><div><strong>User completes the second OAuth attempt.</strong><p>The scope is saved, so the banner correctly disappears.</p></div></div>
+            <div class="cause"><div><strong>The validation message is consumed successfully.</strong><p>Queue health remains green because the consumer and Lambda invocation both succeed.</p></div></div>
+            <div class="cause"><div><strong>The wrong installer owns the recovery action.</strong><p>The dispute topic is never registered; there is no failing call to alarm on.</p></div></div>
+            <div class="cause"><div><strong>Missing events surface later as data drift.</strong><p><span class="tag inferred">Inferred</span> The first visible symptom is stale dispute state, not an authorization error.</p></div></div>
+          </div>
+        </section>
+
+        <section id="actions">
+          <h2>Close the loop at the owner boundary.</h2>
+          <p class="lead">Make one component authoritative for dispute webhook reconciliation and invoke it idempotently after scope persistence. Then observe the subscription result, not merely the queue delivery.</p>
+          <table class="actions">
+            <thead><tr><th>Priority</th><th>Action</th><th>Proof of completion</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Priority" class="priority">Blocker</td><td data-label="Action">Route validation to the dispute webhook reconciler.</td><td data-label="Proof">A shop with scope but no topic receives an idempotent registration call.</td></tr>
+              <tr><td data-label="Priority">Before ramp</td><td data-label="Action">Emit desired vs actual topic counts.</td><td data-label="Proof">Alert fires when reconciliation leaves a required topic absent.</td></tr>
+              <tr><td data-label="Priority">Verification</td><td data-label="Action">Test abandon → retry → callback → reconcile.</td><td data-label="Proof">Banner disappears only after scope save; webhook exists after recovery.</td></tr>
+            </tbody>
+          </table>
+          <details>
+            <summary>Evidence register and limits</summary>
+            <p>This is a fictional capability example. A real report must include repository, MR/SHA, file lines, AWS resource ARNs or names, inspection time, and any unavailable evidence. The conclusion would change if an uninspected SNS subscription or independent scheduled reconciler owns dispute registration.</p>
+          </details>
+        </section>
+      </article>
+    </div>
+  </main>
+</body>
+</html>

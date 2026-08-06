@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Gallery of four distinct HTML communication genres from aio-html-artifacts.">
+  <title>aio-html-artifacts — example gallery</title>
+  <style>
+    :root { --paper:#f7f4eb; --ink:#19201d; --muted:#65706b; --rule:#bfc5bf; --blue:#275dcc; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:ui-sans-serif,system-ui,sans-serif; }
+    header, main { max-width:1120px; margin:auto; padding-inline:22px; }
+    header { padding-top:70px; padding-bottom:48px; border-bottom:2px solid var(--ink); }
+    h1 { font-size:clamp(3rem,8vw,7rem); line-height:.9; letter-spacing:-.065em; margin:0 0 28px; }
+    header p { max-width:720px; color:var(--muted); font-size:1.15rem; line-height:1.55; }
+    main { padding-top:40px; padding-bottom:80px; }
+    article { display:grid; grid-template-columns:80px 1fr 180px; gap:22px; padding:30px 0; border-bottom:1px solid var(--rule); align-items:start; }
+    .n { font-size:2.8rem; font-weight:900; color:var(--rule); }
+    h2 { margin:2px 0 8px; font-size:1.8rem; }
+    p { margin:0; color:var(--muted); line-height:1.5; }
+    a { display:inline-flex; justify-content:center; align-items:center; min-height:44px; border:1px solid var(--ink); color:var(--ink); text-decoration:none; font-weight:800; }
+    a:hover { background:var(--ink); color:var(--paper); }
+    a:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
+    footer { max-width:1120px; margin:auto; padding:0 22px 50px; color:var(--muted); font-size:.8rem; }
+    @media (max-width:680px) { article { grid-template-columns:50px 1fr; } article a { grid-column:2; width:max-content; padding:0 18px; } }
+    @media print { a::after { content:" · " attr(href); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>One medium.<br>Four human jobs.</h1>
+    <p>These examples share an information grammar, not a visual template. Open them to compare an auditable report, a paced deck, an aligned decision surface, and a stateful editor with an export loop.</p>
+  </header>
+  <main>
+    <article><span class="n">01</span><div><h2>Evidence-led report</h2><p>Verdict first, causal system path, actual code beside each claim, and concrete actions.</p></div><a href="engineering-investigation-report.html">Open report →</a></article>
+    <article><span class="n">02</span><div><h2>Narrative deck</h2><p>One claim per scene, keyboard navigation, mobile reading flow, and print-to-PDF behavior.</p></div><a href="migration-briefing-deck.html">Open deck →</a></article>
+    <article><span class="n">03</span><div><h2>Decision explorer</h2><p>Alternatives on a shared baseline, scenario sensitivity, evidence limits, and falsifiable recommendation.</p></div><a href="queue-architecture-explorer.html">Open explorer →</a></article>
+    <article><span class="n">04</span><div><h2>Purpose-built editor</h2><p>Domain constraints, live journey preview, dirty state, reset, and deterministic changed-key export.</p></div><a href="rollout-editor.html">Open editor →</a></article>
+  </main>
+  <footer>All scenarios and data are fictional. Examples are original work created for the aio-html-artifacts plugin.</footer>
+</body>
+</html>

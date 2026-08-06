@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-A curated collection of 28 plugins for Claude Code — from codebase analysis to iOS debugging to ebook translation.
+A curated collection of 29 plugins for Claude Code — from codebase analysis to iOS debugging to rich HTML communication artifacts.
 
 ## Quick Start
 
@@ -28,6 +28,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | **aio-saas-tools** | 1.0.5 | 4 | SaaS integrations — atlassian (Jira + Confluence), google-workspace, tanca (HR), x (Twitter).<br>`npx skills add aiocean/claude-plugins -s aio-saas-tools` |
 | **aio-research** | 1.0.5 | 2 | Research — research-kit (10-phase framework), rag-kit (Qdrant vector search).<br>`npx skills add aiocean/claude-plugins -s aio-research` |
 | **aio-diagramming** | 1.0.5 | 2 | Diagrams — mermaid (shareable URLs), grafana-diagram (dashboard diagrams from code).<br>`npx skills add aiocean/claude-plugins -s aio-diagramming` |
+| **aio-html-artifacts** | 1.0.0 | 4 | Rich agent-to-human communication in standalone HTML — evidence-led reports with code beside claims, narrative slide/side decks, aligned decision explorers, and purpose-built editors that export changes back to JSON/diff/prompt. Shared five-layer reading grammar, responsive/a11y/print requirements, four original examples, and deterministic validation.<br>`npx skills add aiocean/claude-plugins -s aio-html-artifacts` |
 
 ## Standalone Plugins
 

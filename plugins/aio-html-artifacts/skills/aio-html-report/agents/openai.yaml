@@ -1,0 +1,3 @@
+interface:
+  display_name: "HTML Evidence Report"
+  short_description: "Turn evidence into a layered, auditable HTML report"
