@@ -39,6 +39,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | **aio-epub-translate** | 4.0.3 | EPUB translation via ConnectRPC API — 9 skills: analyze, translate, review, quality, manage, upload, export, setup, vn-style.<br>`npx skills add aiocean/claude-plugins -s aio-epub-translate` |
 | **aio-youtube** | 1.1.7 | YouTube search and transcript extraction via yt-dlp.<br>`npx skills add aiocean/claude-plugins -s aio-youtube` |
 | **aio-gherkin-refine** | 2.0.6 | BDD field guide — Gherkin with Example Mapping, 3 Amigos, anti-patterns.<br>`npx skills add aiocean/claude-plugins -s aio-gherkin-refine` |
+| **aio-anti-slop** | 1.0.0 | Remove AI slop from prose and code — grep-able tell catalog (English + Vietnamese), false-positive triage, re-scan loop, diff-scoped code pass.<br>`npx skills add aiocean/claude-plugins -s aio-anti-slop` |
 
 ### Knowledge & Advisory
 
