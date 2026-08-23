@@ -29,7 +29,7 @@ This is a style pass, not a content edit. Meaning, claims, facts, and code behav
 ## Prose pass
 
 1. **Anchor genre and voice.** If the target genre (docs, blog, tweet, academic) or the author's voice is unclear, ask one question first. The author's existing voice overrides every rule below.
-2. **Scan mechanically** using the catalog at `${CLAUDE_PLUGIN_ROOT}/skills/aio-anti-slop/references/patterns.md` — run the `rg` commands, then do the by-hand checks. A match is a lead, not a verdict.
+2. **Scan mechanically** using the catalog at [references/patterns.md](references/patterns.md) (relative to this SKILL.md) — run the `rg` commands, then do the by-hand checks. A match is a lead, not a verdict.
 3. **Triage every hit: defect or protected use.** Protected: quotations, code blocks, proper names, domain terms used precisely, and the author's own recognizable habits. Edit only when the defect is clearer than preservation — when unsure, no-op. A no-op is a first-class outcome.
 4. **Repair finding by finding.** Decide what the sentence actually asserts, then assert that. Never fix a pattern by paraphrasing the pattern — the catalog lists banned escape hatches that count as new findings. Sentences without findings are copied byte-for-byte.
 5. **Re-scan after rewriting** (rewrites reintroduce slop). Maximum 3 passes; a pattern surviving 3 passes gets rewritten as a bare claim, not paraphrased again.
