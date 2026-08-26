@@ -1,220 +1,572 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-voice="technical-manual">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Example evidence-led engineering investigation report with inline code and causal flow.">
-  <title>Webhook recovery path — engineering investigation</title>
-  <style>
-    :root { --paper:#f4f0e8; --ink:#17211d; --muted:#65706a; --rule:#c8c4ba; --red:#b6422f; --amber:#c57b1c; --green:#27755a; --code:#101713; --code-ink:#d9e7df; --mark:#ffe08a; }
-    * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body { margin:0; background:var(--paper); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.55; }
-    a { color:inherit; }
-    a:focus-visible, summary:focus-visible { outline:3px solid var(--amber); outline-offset:4px; }
-    .masthead { border-bottom:1px solid var(--ink); padding:18px max(24px,calc((100vw - 1180px)/2)); display:flex; justify-content:space-between; gap:20px; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
-    .status { display:inline-flex; align-items:center; gap:8px; font-weight:800; color:var(--red); }
-    .status::before { content:""; width:9px; height:9px; border-radius:50%; background:currentColor; }
-    .hero { max-width:1180px; margin:auto; display:grid; grid-template-columns:1fr 280px; gap:72px; padding:74px 24px 58px; border-bottom:1px solid var(--rule); }
-    .kicker { color:var(--red); font-size:.76rem; letter-spacing:.16em; text-transform:uppercase; font-weight:850; }
-    h1 { font-family:Georgia,serif; font-size:clamp(2.8rem,7vw,6.6rem); line-height:.91; letter-spacing:-.055em; max-width:900px; margin:15px 0 28px; }
-    .dek { font-family:Georgia,serif; font-size:clamp(1.2rem,2vw,1.55rem); max-width:760px; margin:0; }
-    .verdict { border-top:5px solid var(--red); padding-top:18px; align-self:end; }
-    .verdict strong { display:block; font-size:1.75rem; line-height:1.05; margin-bottom:12px; }
-    .verdict p { margin:0; color:var(--muted); font-size:.92rem; }
-    .body { max-width:1180px; margin:auto; padding:0 24px 100px; display:grid; grid-template-columns:210px minmax(0,1fr); gap:72px; }
-    nav { position:sticky; top:20px; align-self:start; padding-top:54px; font-size:.8rem; }
-    nav b { display:block; margin-bottom:14px; text-transform:uppercase; letter-spacing:.14em; }
-    nav a { display:block; padding:8px 0; color:var(--muted); text-decoration:none; border-bottom:1px solid var(--rule); }
-    nav a:hover { color:var(--ink); }
-    article { min-width:0; }
-    section { padding:58px 0; border-bottom:1px solid var(--rule); }
-    h2 { font-family:Georgia,serif; font-size:clamp(2rem,4vw,3.8rem); letter-spacing:-.04em; line-height:1; margin:0 0 28px; max-width:780px; }
-    h3 { font-size:1rem; margin:0 0 9px; }
-    .lead { font-size:1.12rem; max-width:740px; }
-    .fact-strip { display:grid; grid-template-columns:repeat(3,1fr); border-block:1px solid var(--ink); margin:34px 0 10px; }
-    .fact { padding:22px 22px 22px 0; }
-    .fact + .fact { padding-left:22px; border-left:1px solid var(--rule); }
-    .fact span { display:block; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; }
-    .fact strong { display:block; margin-top:6px; font:700 1.25rem Georgia,serif; }
-    .flow { display:grid; grid-template-columns:1fr 42px 1fr 42px 1fr; align-items:stretch; margin:38px 0; }
-    .node { border:1px solid var(--ink); padding:22px; background:rgba(255,255,255,.28); }
-    .node small { display:block; color:var(--muted); margin-top:8px; }
-    .arrow { display:grid; place-items:center; font-size:1.6rem; }
-    .node.break { border-color:var(--red); box-shadow:inset 0 -5px var(--red); }
-    .finding { display:grid; grid-template-columns:86px 1fr; gap:24px; margin:40px 0 24px; }
-    .finding .index { font:700 2.8rem Georgia,serif; color:var(--red); border-top:1px solid var(--red); padding-top:4px; }
-    .finding p { margin:.25rem 0 0; max-width:720px; }
-    .evidence { display:grid; grid-template-columns:minmax(0,1fr) 230px; background:var(--code); color:var(--code-ink); border-radius:3px; overflow:hidden; margin:24px 0 36px; }
-    .code { overflow:auto; padding:20px 0; font:13px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace; }
-    .source { display:block; padding:0 20px 12px; color:#90a39a; font-size:11px; letter-spacing:.04em; }
-    .line { display:block; padding:0 20px; white-space:pre; border-left:4px solid transparent; }
-    .line::before { content:attr(data-line); display:inline-block; width:32px; color:#60736a; user-select:none; }
-    .line.hot { background:#2b2116; border-left-color:var(--mark); color:#fff2c7; }
-    .annotation { border-left:1px solid #3c4b43; padding:48px 20px 20px; color:#bdc9c3; font-size:.84rem; }
-    .annotation b { color:var(--mark); display:block; margin-bottom:8px; }
-    .causal { counter-reset:step; margin:35px 0 0; }
-    .cause { display:grid; grid-template-columns:55px 1fr; gap:20px; padding:22px 0; border-top:1px solid var(--rule); }
-    .cause::before { counter-increment:step; content:counter(step); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; color:white; background:var(--ink); font-weight:800; }
-    .cause strong { display:block; margin-bottom:5px; }
-    .cause p { margin:0; color:var(--muted); }
-    .actions { width:100%; border-collapse:collapse; margin-top:28px; }
-    .actions th, .actions td { text-align:left; vertical-align:top; padding:15px 10px; border-bottom:1px solid var(--rule); }
-    .actions th { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; }
-    .priority { font-weight:800; color:var(--red); }
-    details { margin-top:28px; border-block:1px solid var(--rule); padding:18px 0; }
-    summary { cursor:pointer; font-weight:800; }
-    .legend { color:var(--muted); font-size:.85rem; }
-    .tag { display:inline-block; border:1px solid currentColor; padding:2px 7px; margin-right:5px; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; }
-    .observed { color:var(--green); } .inferred { color:var(--amber); }
-    @media (max-width:850px) {
-      .hero { grid-template-columns:1fr; gap:36px; padding-top:48px; }
-      .verdict { max-width:520px; }
-      .body { grid-template-columns:1fr; gap:0; }
-      nav { position:static; display:flex; overflow:auto; gap:18px; padding:20px 0; border-bottom:1px solid var(--rule); }
-      nav b { display:none; } nav a { white-space:nowrap; border:0; }
-      .evidence { grid-template-columns:1fr; }
-      .annotation { border-left:0; border-top:1px solid #3c4b43; padding:18px 20px; }
-    }
-    @media (max-width:580px) {
-      .masthead { align-items:flex-start; flex-direction:column; }
-      .hero, .body { padding-left:18px; padding-right:18px; }
-      .fact-strip { grid-template-columns:1fr; }
-      .fact + .fact { border-left:0; border-top:1px solid var(--rule); padding-left:0; }
-      .flow { grid-template-columns:1fr; gap:8px; }
-      .arrow { transform:rotate(90deg); }
-      .finding { grid-template-columns:56px 1fr; gap:12px; }
-      .actions, .actions tbody, .actions tr, .actions td { display:block; }
-      .actions thead { position:absolute; clip:rect(0 0 0 0); }
-      .actions tr { padding:14px 0; border-bottom:1px solid var(--rule); }
-      .actions td { border:0; padding:3px 0; }
-      .actions td::before { content:attr(data-label) ": "; font-weight:800; }
-    }
-    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
-    @media print {
-      :root { --paper:#fff; }
-      nav { display:none; } .body { display:block; } .hero { padding-top:28px; }
-      section { break-inside:auto; } .evidence, .finding, .cause, tr { break-inside:avoid; }
-      details > * { display:block; } summary { display:none; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Scope recovery restores the OAuth scope and stops there; the dispute webhook topic is never registered.">
+<title>Webhook recovery stops one service short of the dispute topic</title>
+<!--
+  ARTIFACT CONTRACT  (fill every key before writing markup; the validator requires it)
+  audience=        the release manager and the two on-call engineers for Atlas checkout, who
+                   know the banner shipped and hold that recovery is complete
+  question=        does the scope-recovery path restore dispute webhook delivery?
+  verdict=         recovery restores the scope and stops there — the dispute topic is never
+                   registered, very likely (80-95%)
+  consequence=     the release stays behind the ramp gate until validation calls the dispute
+                   reconciler and a desired-vs-actual topic count alarms
+  challenge=       "an uninspected SNS subscription or a scheduled reconciler already registers
+                   the dispute topic, so nothing is missing"
+  structure=       investigation: verdict, the two handlers, the cost per day, why nothing
+                   alarms, what refutes it, the actions
+  spine=           recovery stops one service short; the dispute topic has a different owner;
+                   the shortfall compounds daily; every component reports success; here is what
+                   would show this wrong; here is what closes it
+  transition-type= consequence — each section states what the previous section's fact costs
+  evidence=        banner.ts:41-46 and validate-webhooks.ts:72-80 at pinned 40-hex SHAs; two
+                   recorded command runs; the daily shops-without-topic count
+  visuals=         daily accumulation -> aligned bar chart on a zero baseline; failing path ->
+                   numbered stack of ruled rows; cohort cost -> one aligned track in a table
+  voice=           technical-manual
+  generic-check=   a generic report on this topic opens with a KPI strip of duration, shops
+                   affected and severity; those are consequences rather than the answer, so the
+                   strip is replaced by the decisive six lines of the consumer, beside the verdict
+-->
+<style>
+/* 1. layout-primitives.css — pasted subset. Every Layout via AVivero/every-layout-skill, MIT.
+      Names the layouts. Sets no colour, no font, no radius, no shadow. */
+:root {
+  --ratio: 1.5;
+  --s-3: calc(var(--s-2)/var(--ratio)); --s-2: calc(var(--s-1)/var(--ratio));
+  --s-1: calc(var(--s0)/var(--ratio));  --s0: 1rem;
+  --s1: calc(var(--s0)*var(--ratio));   --s2: calc(var(--s1)*var(--ratio));
+  --s3: calc(var(--s2)*var(--ratio));   --s4: calc(var(--s3)*var(--ratio));
+  --measure: 34em; --measure-wide: 45em; --space: var(--s1);
+}
+*,*::before,*::after { box-sizing: border-box; }
+/* MEASURE AXIOM: on the TEXT elements, because max-inline-size does not inherit.
+   Tables, figures and layout containers stay uncapped on purpose. */
+p,h1,h2,h3,h4,h5,h6,blockquote,figcaption { max-inline-size: var(--measure); }
+h1,h2,h3 { text-wrap: balance; }   p,li { text-wrap: pretty; }
+.stack { display:flex; flex-direction:column; }
+.stack > * { margin-block: 0; }
+.stack > * + * { margin-block-start: var(--space, var(--s1)); }
+.with-sidebar { display:flex; flex-wrap:wrap; gap: var(--space, var(--s1)); }
+.with-sidebar > :first-child { flex-basis: var(--sidebar-width, 20rem); flex-grow: 1; }
+.with-sidebar > :last-child  { flex-basis: 0; flex-grow: 999; min-inline-size: var(--content-min, 50%); }
+.region { container-type: inline-size; }  /* primitives respond to their SLOT, not the viewport */
+@container (inline-size < 34rem) { .with-sidebar > :first-child { flex-basis: 100%; } }
+/* LAYOUT HYGIENE: grid and flex children default to min-width:auto, so a long token widens the
+   track and the page scrolls sideways. Measured at 485px: scrollWidth 566 vs clientWidth 485
+   without this line, 485 vs 485 with it. */
+main > *, main section > * { min-width: 0; }
+
+/* 2. voices.css — exactly one [data-voice] block, pasted. technical-manual: IBM Plex Sans +
+      Serif + Mono, dual mode via light-dark(), sections numbered by CSS counter so a reader cites
+      "3.1" and nobody maintains a number. Every colour in this file traces to a token here. */
+[data-voice="technical-manual"] {
+  color-scheme: light dark;
+  --paper:  light-dark(#f4f4f4, #161616);
+  --surface: light-dark(oklch(100% 0 89.9), oklch(24% 0 89.9));
+  --raised:  light-dark(oklch(100% 0 89.9), oklch(26% 0 89.9));
+  --ink:    light-dark(#161616, #f4f4f4);
+  --muted:  light-dark(oklch(48% 0 89.9), oklch(70% 0 89.9));
+  --rule:   light-dark(oklch(86% 0 89.9), oklch(32% 0 89.9));
+  --border: var(--rule);           --rule-weight: 1px;
+  --accent: light-dark(#0f62fe, #78a9ff);
+  --accent-soft: light-dark(oklch(93% 0.03 262), oklch(30% 0.05 262));
+  --radius: 0;
+  --shadow-1: none; --shadow-2: none; --shadow-3: none;
+
+  --sans:  "IBM Plex Sans", "Helvetica Neue", "Segoe UI", "Liberation Sans", ui-sans-serif, sans-serif;
+  --serif: "IBM Plex Serif", Charter, Georgia, "Liberation Serif", ui-serif, serif;
+  --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+  --text--1: 0.8125rem; --text-0: 1rem; --text-1: 1.25rem; --text-2: 1.75rem; --text-3: 3.25rem;
+  --lh-body: 1.55; --lh-head: 1.2; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: 0; --tracking-caps: 0.08em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+  background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: var(--text-0); line-height: var(--lh-body);
+  counter-reset: h2;
+}
+[data-voice="technical-manual"] main h2 { counter-increment: h2; counter-reset: h3; }
+[data-voice="technical-manual"] main h3 { counter-increment: h3; }
+[data-voice="technical-manual"] main h2::before { content: counter(h2) "  "; color: var(--muted); font-family: var(--mono); }
+[data-voice="technical-manual"] main h3::before { content: counter(h2) "." counter(h3) "  "; color: var(--muted); font-family: var(--mono); }
+
+/* 3. base-layer.html — pasted. Focus, reflow, motion, contrast, forced-colors, pagination. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 40rem) {   /* reflow structure; never shrink type */
+  .masthead { flex-direction: column; align-items: flex-start; }
+  .actions, .actions tbody, .actions tr, .actions td { display: block; }
+  .actions thead { position: absolute; clip-path: inset(50%); }
+  .actions tr { padding-block: var(--s0); border-block-end: var(--rule-weight) solid var(--rule); }
+  .actions td { border: 0; padding-inline: 0; }
+  .actions td::before { content: attr(data-label) ": "; font-weight: var(--weight-strong); }
+  .cmp th, .cmp td { padding-inline: 0.25rem; }
+  .path li { grid-template-columns: 2rem minmax(0,1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-delay: -1ms !important; animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important; transition-delay: -1ms !important;
+    transition-duration: 1ms !important; scroll-behavior: auto !important;
+  }
+}
+@media (prefers-contrast: more) { :root { --border: currentColor; --muted: var(--ink); } }
+@media (forced-colors: active) {
+  .card, dialog, [popover], details { border: 1px solid CanvasText; box-shadow: none; }
+  svg[role="img"], figure svg { forced-color-adjust: none; }
+}
+@page { size: A4; margin: 15mm; }
+@media print {
+  h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+  p, pre, code, figure, table, tr { break-inside: avoid; page-break-inside: avoid; }
+  nav, .toc, .no-print, button { display: none !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; word-break: break-all; }
+  body { background: #fff; color: #000; }
+  .bars rect { fill: #000; }  .cmp .bar { border-inline-start-width: 4px; background: none; }
+  /* The annotation layer is ink on paper: a label is a mark, and a dashed rule survives toner. */
+  .bars .event { stroke: #000; }  .bars .a-label, .bars .s-label { fill: #000; }
+}
+
+/* 4. This report. Every value below is a token from block 2 or a step from the --s* scale. */
+body { margin:0 }
+.wrap { margin-inline:auto; max-inline-size:68rem; padding-inline:var(--s1) }
+a { color:var(--accent) }
+.masthead,.toc,.conf,summary,.tag,.bars text,.path li::before,.provenance dt,.coverage,
+figure.src figcaption,figure.src pre,.cmp thead th,.actions thead th { font-family:var(--mono) }
+.masthead,.toc,.tag,.notice,.verdict,.note,.provenance,summary,.coverage,.cmp caption,
+.actions caption,.cmp thead th,.actions thead th,figure.src figcaption,figure.src pre { font-size:var(--text--1) }
+.masthead,.tag,.verdict dt,.provenance dt,.cmp thead th,.actions thead th { letter-spacing:var(--tracking-caps); text-transform:uppercase }
+.verdict dt,.provenance dt,.tag,.note,.cmp caption,.actions caption,.cmp thead th,
+.actions thead th,.cmp .unknown,.bars text { color:var(--muted) }
+.masthead { display:flex; flex-wrap:wrap; gap:var(--s0); justify-content:space-between;
+  padding-block:var(--s0); border-block-end:var(--rule-weight) solid var(--rule) }
+.masthead .status { color:var(--accent); font-weight:var(--weight-strong) }
+.masthead .status::before { content:"\26A0 " }        /* glyph beside the colour, not colour alone */
+.notice { margin-block:var(--s1); padding:var(--s-1) var(--s0);
+  background:var(--accent-soft); border-inline-start:3px solid var(--accent) }
+.lede { padding-block:var(--s2) var(--s1) }
+h1 { margin:0 0 var(--s1); font-size:var(--text-3); line-height:var(--lh-display);
+  letter-spacing:-0.01em; font-weight:var(--weight-display) }
+.dek { margin:0; font-family:var(--serif); font-size:var(--text-1) }
+.verdict { padding-block-start:var(--s0); border-block-start:3px solid var(--accent) }
+.verdict dd,.provenance dd { margin:0 0 var(--s-1) }
+.conf { font-weight:var(--weight-strong); white-space:nowrap }
+.toc { padding-block:var(--s0); border-block:var(--rule-weight) solid var(--rule) }
+main section { padding-block:var(--s3); border-block-start:var(--rule-weight) solid var(--rule) }
+h2 { margin:0 0 var(--s1); font-size:var(--text-2) }
+h3 { margin:0 0 var(--s-1); font-size:var(--text-1) }
+h2,h3 { line-height:var(--lh-head); font-weight:var(--weight-strong) }
+.tag::before { content:"[" }   .tag::after { content:"] " }
+.note { padding-inline-start:var(--s0); border-inline-start:3px solid var(--rule) }
+figure.src { margin:0; background:var(--surface); border:var(--rule-weight) solid var(--rule) }
+figure.src figcaption { padding:var(--s-1) var(--s0); max-inline-size:none; word-break:break-word;
+  border-block-end:var(--rule-weight) solid var(--rule) }
+figure.src pre { margin:0; padding:var(--s0); overflow-x:auto; line-height:1.7 }
+figure.src pre b { background:var(--accent-soft); font-weight:var(--weight-strong) }
+.chart { margin:0 }
+.chart figcaption { margin-block-end:var(--s0); max-inline-size:var(--measure-wide) }
+.chart svg.bars { inline-size:100%; block-size:auto }
+.bars line { stroke:var(--rule) }
+.bars .baseline { stroke:var(--ink); stroke-width:1.5 }   /* zero baseline, drawn, not implied */
+.bars rect { fill:var(--accent) }
+.bars text { font-size:12px }
+.bars .datum { fill:var(--ink); font-weight:var(--weight-strong) }
+/* Annotation layer. Dashes are furniture only — the bars stay solid, so the marks read as the
+   author's layer over the data rather than as more data. A presentation attribute loses to a
+   class rule, so `font-size:11px` is declared here to match the textLength arithmetic in the
+   markup; `.bars text` at 12px would otherwise squeeze 12px glyphs into an 11px-wide box. */
+.bars .event { stroke:var(--muted); stroke-width:1; stroke-dasharray:3 3 }
+.bars .a-label,.bars .s-label { font-size:11px }
+.bars .a-label { fill:var(--muted) }
+.bars .s-label { fill:var(--ink); font-weight:var(--weight-strong) }
+.cmp,.actions { inline-size:100%; border-collapse:collapse;
+  font-variant-numeric:tabular-nums lining-nums; font-feature-settings:"tnum" 1,"lnum" 1 }
+.cmp caption,.actions caption { text-align:left; padding-block-end:var(--s-1);
+  max-inline-size:var(--measure-wide) }
+.cmp th,.cmp td,.actions th,.actions td { border:0; padding:var(--s-2) var(--s-1);
+  border-block-end:var(--rule-weight) solid var(--rule); text-align:left; vertical-align:top }
+.cmp td.num { position:relative; inline-size:52% }
+.cmp .bar { position:absolute; inset:var(--s-2) auto var(--s-2) 0; z-index:0;   /* the aligned
+  track: two numbers on one shared scale, which is what a card grid encodes with nothing */
+  inline-size:calc(var(--v)*100%); background:var(--accent-soft); border-inline-start:3px solid var(--accent) }
+.cmp .num b { position:relative; z-index:1; font-weight:var(--weight-strong) }
+.cmp .delta::before { content:"\25B2 " }              /* shape beside the sign, not hue alone */
+.cmp .unknown::before { content:"\25CB " }
+.path { margin:0; padding:0; list-style:none; counter-reset:step }
+.path li { display:grid; grid-template-columns:3rem minmax(0,1fr); gap:var(--s0);
+  padding-block:var(--s0); border-block-start:var(--rule-weight) solid var(--rule) }
+.path li::before { counter-increment:step; content:counter(step,decimal-leading-zero) }
+.path b { display:block }
+.falsifier ul { margin:0; padding-inline-start:var(--s1) }
+.falsifier li { margin-block-end:var(--s0); max-inline-size:var(--measure) }
+details { padding-block:var(--s0); border-block:var(--rule-weight) solid var(--rule) }
+summary { cursor:pointer; font-weight:var(--weight-strong) }
+.provenance { padding-block:var(--s1) var(--s3); border-block-start:3px solid var(--accent) }
+.provenance dd,.coverage { max-inline-size:var(--measure-wide) }
+.coverage { margin-block-start:var(--s1); padding:var(--s0); border:var(--rule-weight) solid var(--rule) }
+</style>
 </head>
 <body>
-  <header class="masthead">
-    <span>Atlas Engineering · Investigation 017</span>
-    <span class="status">Action required before rollout</span>
-  </header>
 
-  <main>
-    <div class="hero">
-      <div>
-        <div class="kicker">Webhook authorization · 06 Aug 2026</div>
-        <h1>The recovery path stops one service too early.</h1>
-        <p class="dek">The new authorization scope is persisted correctly, but shops that abandon OAuth can remain without the dispute webhook because recovery validates only the legacy installer.</p>
-      </div>
-      <aside class="verdict" aria-label="Verdict">
-        <strong>Do not approve as complete.</strong>
-        <p>High confidence · one blocking gap · evidence from two handlers and the queue topology.</p>
-      </aside>
+<header class="masthead wrap">
+  <span>Atlas Engineering &middot; Investigation 017 &middot; 2026-08-13</span>
+  <span class="status">Action required before ramp</span>
+</header>
+
+<main class="wrap">
+
+<div class="lede region">
+  <p class="notice">Fictional artifact. Every repository, SHA, path, line range, command and count
+    below is invented so the file reads as a capability example. The anchor format around them is
+    the real one: 40-hex SHA, path, line range, inspection time.</p>
+
+  <div class="with-sidebar" style="--sidebar-width: 26rem;">
+    <div class="stack">
+      <h1>Webhook recovery stops one service short of the dispute topic.</h1>
+      <p class="dek">The banner and the OAuth callback restore the scope correctly. The validation
+        consumer that runs next names one Lambda target, and that target owns order topics.</p>
+      <dl class="verdict">
+        <dt>Verdict</dt>
+        <dd data-claim="inferred" data-confidence="very likely" data-basis="src-banner src-consumer" id="claim-verdict">
+          A shop that completes the second OAuth attempt keeps the new scope and stays without the
+          dispute topic <b class="conf">very likely (80-95%)</b>.</dd>
+        <dt>Consequence</dt>
+        <dd data-claim="recommended" data-basis="claim-verdict">Hold the ramp until validation calls
+          the dispute reconciler and a desired-vs-actual topic count alarms.</dd>
+      </dl>
     </div>
 
-    <div class="body">
-      <nav aria-label="Report sections">
-        <b>Read the case</b>
-        <a href="#answer">01 · Answer</a>
-        <a href="#path">02 · System path</a>
-        <a href="#evidence">03 · Code evidence</a>
-        <a href="#cause">04 · Causal chain</a>
-        <a href="#actions">05 · Actions</a>
-      </nav>
+    <figure class="src" id="src-banner" data-kind="code" data-repo="atlas/web"
+      data-sha="9f1c2b7a4d5e6f708192a3b4c5d6e7f809a1b2c3" data-path="web/app/disputes/banner.ts"
+      data-lines="41-46" data-retrieved="2026-08-13T09:12Z">
+      <figcaption id="cap-banner"><a href="https://github.com/atlas/web/blob/9f1c2b7a4d5e6f708192a3b4c5d6e7f809a1b2c3/web/app/disputes/banner.ts#L41-L46"
+        >atlas/web@9f1c2b7 &middot; web/app/disputes/banner.ts:41-46 &middot; inspected 2026-08-13T09:12Z</a></figcaption>
+      <pre tabindex="0" role="region" aria-labelledby="cap-banner"><code>41  const granted = new Set(shop.scopes.split(","));
+42  <b>const missing = !granted.has(DISPUTE_SCOPE);</b>
+43
+44  // eligibility reads the persisted row, not the OAuth session
+45  return shop.flags.disputes &amp;&amp; missing;
+46}</code></pre>
+    </figure>
+  </div>
+</div>
 
-      <article>
-        <section id="answer">
-          <h2>The banner recovers scope consent, not webhook delivery.</h2>
-          <p class="lead"><span class="tag observed">Observed</span> A shop remains eligible for the banner while <code>shops.scopes</code> lacks the new scope. That part is correct. A separate recovery route is needed after the scope arrives: the current validation command reaches only the order webhook installer.</p>
-          <div class="fact-strip" aria-label="Investigation summary">
-            <div class="fact"><span>Scope fallback</span><strong>Works as intended</strong></div>
-            <div class="fact"><span>Webhook recovery</span><strong>Incomplete</strong></div>
-            <div class="fact"><span>Release impact</span><strong>Silent missed events</strong></div>
-          </div>
-          <p class="legend"><span class="tag observed">Observed</span> directly supported by source &nbsp; <span class="tag inferred">Inferred</span> consequence derived from the observed path</p>
-        </section>
+<nav class="toc" aria-label="Report sections">
+  <a href="#s-answer">1 Answer</a> &middot;
+  <a href="#s-owner">2 Owner</a> &middot;
+  <a href="#s-drift">3 Cost per day</a> &middot;
+  <a href="#s-silent">4 Why nothing alarms</a> &middot;
+  <a href="#s-falsifier">5 What would refute this</a> &middot;
+  <a href="#s-actions">6 Actions</a>
+</nav>
 
-        <section id="path">
-          <h2>The successful path crosses three boundaries.</h2>
-          <p class="lead">The banner and OAuth callback only establish permission. Delivery becomes reliable when the callback also reaches the installer that owns dispute subscriptions.</p>
-          <div class="flow" role="img" aria-label="Shop clicks banner, OAuth callback stores scope, then webhook recovery should register dispute topics">
-            <div class="node"><b>1 · Consent</b><small>Banner opens OAuth only for flagged shops missing the scope.</small></div>
-            <div class="arrow" aria-hidden="true">→</div>
-            <div class="node"><b>2 · Persist</b><small>Callback stores the granted scope in <code>shops.scopes</code>.</small></div>
-            <div class="arrow" aria-hidden="true">→</div>
-            <div class="node break"><b>3 · Recover</b><small>Validation invokes the legacy order installer, not the dispute owner.</small></div>
-          </div>
-        </section>
+<section id="s-answer" class="stack">
+  <h2>Scope consent and webhook delivery are two different recoveries.</h2>
+  <p data-claim="observed" data-src="src-banner"><span class="tag">observed</span>
+    The banner predicate reads the persisted row: <code>missing</code> stays true for any shop whose
+    callback never wrote the scope, so the banner returns on the next visit — as designed.</p>
+  <p data-claim="observed" data-src="src-consumer"><span class="tag">observed</span>
+    The recovery step that runs after the scope is written invokes one function by name,
+    <code>orders-install-webhooks-prod</code>, with no fan-out and no second consumer in the
+    inspected topology.</p>
+  <p class="note">Those two facts are what a reader can paste. Everything below rests on them, by
+    name.</p>
+</section>
 
-        <section id="evidence" data-evidence>
-          <h2>The decisive branch is visible in six lines.</h2>
-          <div class="finding">
-            <div class="index">01</div>
-            <div><h3>Banner eligibility survives an abandoned OAuth flow</h3><p>The predicate reads persisted scopes. If the callback never saves the new value, the predicate remains true and the user sees the banner again.</p></div>
-          </div>
-          <div class="evidence">
-            <div class="code" aria-label="Code excerpt from banner eligibility">
-              <span class="source">web/app/disputes/banner.ts · lines 41–46 · fictional example</span>
-              <span class="line" data-line="41">const granted = new Set(shop.scopes.split(","));</span>
-              <span class="line hot" data-line="42">const missing = !granted.has(DISPUTE_SCOPE);</span>
-              <span class="line" data-line="43"></span>
-              <span class="line" data-line="44">return shop.flags.disputes &amp;&amp; missing;</span>
-            </div>
-            <aside class="annotation"><b>Why this answers the question</b>The database remains authoritative. Abandoning OAuth produces no persisted scope, so <code>missing</code> stays true.</aside>
-          </div>
+<section id="s-owner" class="stack">
+  <h2>The dispute topics have a different owner than the function recovery calls.</h2>
 
-          <div class="finding">
-            <div class="index">02</div>
-            <div><h3>Recovery invokes only the order installer</h3><p>The callback publishes a validation command, but the consumer hard-codes one Lambda target. No SNS fan-out or second SQS consumer appears in the inspected topology.</p></div>
-          </div>
-          <div class="evidence">
-            <div class="code" aria-label="Code excerpt from webhook validation consumer">
-              <span class="source">workers/validate-webhooks.ts · lines 72–80 · fictional example</span>
-              <span class="line" data-line="72">if (shop.active &amp;&amp; shop.scopes.includes(requiredScope)) {</span>
-              <span class="line hot" data-line="73">  await lambda.invoke({</span>
-              <span class="line hot" data-line="74">    FunctionName: "orders-install-webhooks-prod",</span>
-              <span class="line" data-line="75">    Payload: JSON.stringify({ shopId: shop.id }),</span>
-              <span class="line" data-line="76">  });</span>
-              <span class="line" data-line="77">}</span>
-            </div>
-            <aside class="annotation"><b>The gap</b>The condition is right, but the only named target owns order topics. Permission recovery does not imply dispute subscription recovery.</aside>
-          </div>
-        </section>
+  <figure class="src" id="src-consumer" data-kind="code" data-repo="atlas/workers"
+    data-sha="4b8e1d0a6c93f27e5a10b4d8c6e2f9017a3b5c6d" data-path="workers/validate-webhooks.ts"
+    data-lines="72-80" data-retrieved="2026-08-13T09:18Z">
+    <figcaption id="cap-consumer"><a href="https://github.com/atlas/workers/blob/4b8e1d0a6c93f27e5a10b4d8c6e2f9017a3b5c6d/workers/validate-webhooks.ts#L72-L80"
+      >atlas/workers@4b8e1d0 &middot; workers/validate-webhooks.ts:72-80 &middot; inspected 2026-08-13T09:18Z</a></figcaption>
+    <pre tabindex="0" role="region" aria-labelledby="cap-consumer"><code>72  if (shop.active &amp;&amp; shop.scopes.includes(requiredScope)) {
+73    await lambda.invoke({
+74      <b>FunctionName: "orders-install-webhooks-prod",</b>
+75      Payload: JSON.stringify({ shopId: shop.id }),
+76    });
+77    metrics.increment("webhooks.validated");
+78  }
+79
+80  return { statusCode: 200 };</code></pre>
+  </figure>
 
-        <section id="cause">
-          <h2>This fails silently, not immediately.</h2>
-          <div class="causal">
-            <div class="cause"><div><strong>User completes the second OAuth attempt.</strong><p>The scope is saved, so the banner correctly disappears.</p></div></div>
-            <div class="cause"><div><strong>The validation message is consumed successfully.</strong><p>Queue health remains green because the consumer and Lambda invocation both succeed.</p></div></div>
-            <div class="cause"><div><strong>The wrong installer owns the recovery action.</strong><p>The dispute topic is never registered; there is no failing call to alarm on.</p></div></div>
-            <div class="cause"><div><strong>Missing events surface later as data drift.</strong><p><span class="tag inferred">Inferred</span> The first visible symptom is stale dispute state, not an authorization error.</p></div></div>
-          </div>
-        </section>
+  <h3>The dispute subscriptions are registered elsewhere</h3>
+  <figure class="src" id="src-topics" data-kind="command" data-cwd="~/atlas/infra" data-exit="0"
+    data-host="ci-runner-04" data-retrieved="2026-08-13T09:24Z"
+    data-cmd="aws lambda list-functions --query 'Functions[?contains(FunctionName,`install-webhooks`)].FunctionName'">
+    <figcaption id="cap-topics">aws lambda list-functions &middot; cwd ~/atlas/infra &middot; exit 0
+      &middot; host ci-runner-04 &middot; run 2026-08-13T09:24Z</figcaption>
+    <pre tabindex="0" role="region" aria-labelledby="cap-topics"><code>[
+    "orders-install-webhooks-prod",
+    <b>"disputes-install-webhooks-prod"</b>
+]</code></pre>
+  </figure>
 
-        <section id="actions">
-          <h2>Close the loop at the owner boundary.</h2>
-          <p class="lead">Make one component authoritative for dispute webhook reconciliation and invoke it idempotently after scope persistence. Then observe the subscription result, not merely the queue delivery.</p>
-          <table class="actions">
-            <thead><tr><th>Priority</th><th>Action</th><th>Proof of completion</th></tr></thead>
-            <tbody>
-              <tr><td data-label="Priority" class="priority">Blocker</td><td data-label="Action">Route validation to the dispute webhook reconciler.</td><td data-label="Proof">A shop with scope but no topic receives an idempotent registration call.</td></tr>
-              <tr><td data-label="Priority">Before ramp</td><td data-label="Action">Emit desired vs actual topic counts.</td><td data-label="Proof">Alert fires when reconciliation leaves a required topic absent.</td></tr>
-              <tr><td data-label="Priority">Verification</td><td data-label="Action">Test abandon → retry → callback → reconcile.</td><td data-label="Proof">Banner disappears only after scope save; webhook exists after recovery.</td></tr>
-            </tbody>
-          </table>
-          <details>
-            <summary>Evidence register and limits</summary>
-            <p>This is a fictional capability example. A real report must include repository, MR/SHA, file lines, AWS resource ARNs or names, inspection time, and any unavailable evidence. The conclusion would change if an uninspected SNS subscription or independent scheduled reconciler owns dispute registration.</p>
-          </details>
-        </section>
-      </article>
-    </div>
-  </main>
+  <p data-claim="observed" data-src="src-topics"><span class="tag">observed</span>
+    Two installers exist in production. The dispute topics belong to
+    <code>disputes-install-webhooks-prod</code>, which no code path in the recovery flow names.</p>
+  <p data-claim="inferred" data-confidence="likely" data-basis="src-consumer src-topics" id="claim-gap">
+    <span class="tag">inferred</span>
+    Permission recovery does not carry subscription recovery: a shop whose scope was restored keeps
+    its order topics and stays without dispute topics <b class="conf">likely (55-80%)</b>.</p>
+  <p data-claim="assumed"><span class="tag">assumed</span>
+    I assumed no reconciler outside these two functions registers dispute topics; I did not verify
+    that against the Terraform state or the EventBridge rules.</p>
+</section>
+
+<section id="s-drift" class="stack">
+  <h2>The shortfall compounds every day the release stays ramped.</h2>
+
+  <figure class="chart" id="fig-drift" role="group" aria-labelledby="cap-drift">
+    <figcaption id="cap-drift">86 shops held the dispute scope with no dispute topic on 11 Aug,
+      against a baseline of 0. One bar per day since the 06 Aug release. Unit: shops, from the
+      <code>shops</code> table joined to the topic registry; 3 of 9 regions scanned, 6 skipped (no
+      dispute traffic recorded in them).</figcaption>
+    <svg class="bars" viewBox="0 0 736 208" aria-hidden="true" focusable="false">
+      <!-- 640 -> 736 adds a 96px right gutter for the two labels that sit outside the plot.
+           Every plotted x and y is unchanged. The three data-annot marks below are the same
+           three rows as the annotation ledger and the same three kinds as the JSON island. -->
+      <g><line x1="44" y1="12" x2="620" y2="12"/><line x1="44" y1="64" x2="620" y2="64"/>
+         <line x1="44" y1="116" x2="620" y2="116"/></g>
+      <g><text x="36" y="16" text-anchor="end">90</text><text x="36" y="68" text-anchor="end">60</text>
+         <text x="36" y="120" text-anchor="end">30</text><text x="36" y="172" text-anchor="end">0</text></g>
+      <!-- reference: the count every bar is judged against. This line was already drawn as the
+           zero axis; the label is what makes it the comparison the figcaption asserts.
+           "expected 0" is 10 chars, so textLength = ceil(10 * 0.6 * 11) = 66, ending at 692. -->
+      <line class="baseline" data-annot="reference" x1="44" y1="168" x2="620" y2="168"/>
+      <text class="a-label" x="626" y="168" font-size="11" textLength="66"
+        lengthAdjust="spacingAndGlyphs" dominant-baseline="middle">expected 0</text>
+      <!-- event: the external fact the accumulation starts from, at its own moment. 06 Aug is
+           the first bar, so the marker sits between the axis and it and the label offsets into
+           the empty upper left rather than rotating. 14 chars -> textLength 93, ending at 155. -->
+      <line class="event" data-annot="event" x1="56" y1="12" x2="56" y2="168"/>
+      <text class="a-label" x="62" y="30" font-size="11" textLength="93"
+        lengthAdjust="spacingAndGlyphs">release 06 Aug</text>
+      <g><rect x="64" y="147.2" width="56" height="20.8"/><rect x="160" y="114.3" width="56" height="53.7"/>
+         <rect x="256" y="91.7" width="56" height="76.3"/><rect x="352" y="67.5" width="56" height="100.5"/>
+         <rect x="448" y="44.9" width="56" height="123.1"/><rect x="544" y="18.9" width="56" height="149.1"/></g>
+      <g class="datum"><text x="92" y="141" text-anchor="middle">12</text><text x="188" y="108" text-anchor="middle">31</text>
+         <text x="284" y="86" text-anchor="middle">44</text><text x="380" y="61" text-anchor="middle">58</text>
+         <text x="476" y="39" text-anchor="middle">71</text><text x="572" y="13" text-anchor="middle">86</text></g>
+      <!-- direct label: the series names itself at its own end, which is the job a legend does
+           at a distance. 15 chars -> textLength = ceil(15 * 0.6 * 11) = 99, ending at 725. -->
+      <text class="s-label" data-annot="direct-label" x="626" y="24" font-size="11" textLength="99"
+        lengthAdjust="spacingAndGlyphs" dominant-baseline="middle">scope, no topic</text>
+      <g><text x="92" y="190" text-anchor="middle">06 Aug</text><text x="188" y="190" text-anchor="middle">07 Aug</text>
+         <text x="284" y="190" text-anchor="middle">08 Aug</text><text x="380" y="190" text-anchor="middle">09 Aug</text>
+         <text x="476" y="190" text-anchor="middle">10 Aug</text><text x="572" y="190" text-anchor="middle">11 Aug</text></g>
+    </svg>
+    <details class="chart-data">
+      <summary>Values behind this chart</summary>
+      <table class="cmp">
+        <caption>One row per day. Baseline 0 on 05 Aug, the day before the release.</caption>
+        <thead><tr><th scope="col">Day</th><th scope="col">Shops</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">2026-08-06</th><td>12</td></tr><tr><th scope="row">2026-08-07</th><td>31</td></tr>
+          <tr><th scope="row">2026-08-08</th><td>44</td></tr><tr><th scope="row">2026-08-09</th><td>58</td></tr>
+          <tr><th scope="row">2026-08-10</th><td>71</td></tr><tr><th scope="row">2026-08-11</th><td>86</td></tr>
+        </tbody>
+      </table>
+      <table class="cmp">
+        <caption>Annotation ledger. Every mark drawn on the chart, as text, because the svg is
+          aria-hidden and a screen reader gets this table instead.</caption>
+        <thead><tr><th scope="col">Annotation</th><th scope="col">Kind</th><th scope="col">Value</th>
+          <th scope="col">Asserts</th></tr></thead>
+        <tbody>
+          <tr data-claim="observed" data-src="fig-drift"><th scope="row">expected 0</th>
+            <td>reference line</td><td>0 shops</td><td>the count on 05 Aug, the day before the release</td></tr>
+          <tr data-claim="observed" data-src="fig-drift"><th scope="row">release 06 Aug</th>
+            <td>event marker</td><td>2026-08-06</td><td>the release that shipped the recovery banner</td></tr>
+          <tr data-claim="observed" data-src="fig-drift"><th scope="row">scope, no topic</th>
+            <td>direct label</td><td>one series</td><td>shops holding the dispute scope with no dispute topic</td></tr>
+        </tbody>
+      </table>
+    </details>
+    <script type="application/json" class="chart-src">
+    {"source":"psql -h analytics-ro atlas -f queries/shops_missing_dispute_topic.sql",
+     "cwd":"~/atlas/analytics","host":"ci-runner-04","exit":0,"ran_at":"2026-08-13T09:31:07Z",
+     "unit":"shops","baseline":0,
+     "scope":{"scanned":3,"total":9,"skipped_reason":"no dispute traffic recorded in region"},
+     "values":[["2026-08-06",12],["2026-08-07",31],["2026-08-08",44],["2026-08-09",58],
+               ["2026-08-10",71],["2026-08-11",86]],
+     "annotations":[
+       {"kind":"reference","label":"expected 0","y":0,"unit":"shops","basis":"same query, 05 Aug"},
+       {"kind":"event","label":"release 06 Aug","x":"2026-08-06","basis":"release calendar"},
+       {"kind":"direct-label","label":"scope, no topic","basis":"series identity"}]}
+    </script>
+  </figure>
+
+  <p data-claim="observed" data-src="fig-drift"><span class="tag">observed</span>
+    86 shops held the scope without the topic on 11 Aug, up from 12 on 06 Aug — a rise on every day
+    of the window, against a baseline of 0 before the release.</p>
+</section>
+
+<section id="s-silent" class="stack">
+  <h2>Every component on the failing path returns success.</h2>
+
+  <ol class="path">
+    <li><div><b>The shop completes the second OAuth attempt.</b> The callback writes the scope and
+      the banner disappears. That is the outcome the release was measured on.</div></li>
+    <li><div><b>The validation message is consumed.</b> The consumer matches the scope condition at
+      line 72 and acknowledges.</div></li>
+    <li><div><b>The Lambda invocation returns 200.</b> <code>orders-install-webhooks-prod</code>
+      registers the order topics it owns and reports success, because from where it stands it did
+      its whole job.</div></li>
+    <li><div><b>The dispute topic is never requested.</b> No call reaches
+      <code>disputes-install-webhooks-prod</code>, so there is no error, no retry, and no
+      dead-letter message to alarm on.</div></li>
+    <li><div><b>The first visible symptom is stale dispute state.</b> A merchant opens a dispute the
+      platform has no record of, days after the scope was restored.</div></li>
+  </ol>
+
+  <p data-claim="observed" data-src="src-queue"><span class="tag">observed</span>
+    The queue reports zero oldest-message age and zero dead-letter messages over the whole window.</p>
+
+  <figure class="src" id="src-queue" data-kind="command" data-cwd="~/atlas/infra" data-exit="0"
+    data-host="ci-runner-04" data-retrieved="2026-08-13T09:27Z"
+    data-cmd="aws cloudwatch get-metric-statistics --namespace AWS/SQS --metric-name ApproximateAgeOfOldestMessage --dimensions Name=QueueName,Value=webhook-validation-prod --period 86400 --statistics Maximum">
+    <figcaption id="cap-queue">aws cloudwatch get-metric-statistics &middot; cwd ~/atlas/infra
+      &middot; exit 0 &middot; host ci-runner-04 &middot; run 2026-08-13T09:27Z</figcaption>
+    <pre tabindex="0" role="region" aria-labelledby="cap-queue"><code>Datapoints (Maximum, seconds), 2026-08-06 .. 2026-08-11:
+  0.0  0.0  0.0  0.0  0.0  0.0
+DeadLetterQueue ApproximateNumberOfMessagesVisible: 0</code></pre>
+  </figure>
+
+  <p data-claim="inferred" data-confidence="likely" data-basis="src-queue" id="claim-silent">
+    <span class="tag">inferred</span>
+    Queue health stays green throughout, so the existing alarms have no signal to fire on and the
+    gap surfaces through merchant reports rather than monitoring <b class="conf">likely (55-80%)</b>.</p>
+
+  <table class="cmp">
+    <caption>Dispute events with no delivery attempt, by cohort, 06-11 Aug. Baseline: the same
+      cohorts before the release, at 0 each. One cell is a gap rather than a number, and it names
+      the run that would fill it.</caption>
+    <thead><tr><th scope="col">Cohort</th><th scope="col">Missed events</th><th scope="col">vs baseline</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Enterprise</th>
+          <td class="num"><span class="bar" style="--v:1"></span><b>214</b></td><td class="delta">+214</td></tr>
+      <tr><th scope="row">Mid-market</th>
+          <td class="num"><span class="bar" style="--v:.45"></span><b>96</b></td><td class="delta">+96</td></tr>
+      <tr><th scope="row">Self-serve</th>
+          <td class="num"><span class="bar" style="--v:.19"></span><b>41</b></td><td class="delta">+41</td></tr>
+      <tr><th scope="row">Trial</th>
+          <td class="unknown" colspan="2">Not measured — needs the LT-204 run against the trial
+            fixture, which has no dispute traffic generator yet</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="s-falsifier" class="falsifier stack" data-falsifier="claim-gap">
+  <h2>Here is what would show this conclusion is wrong.</h2>
+  <ul>
+    <li data-test="aws lambda invoke --function-name disputes-install-webhooks-prod --payload '{&quot;shopId&quot;:&quot;test-4471&quot;}' out.json">
+      Take a shop from the 11 Aug list and re-run the scope-recovery path. A dispute topic that
+      exists before any manual registration means another component registers it, and this fails.</li>
+    <li data-observation="SNS subscription list for the webhook-validation topic">
+      List the SNS subscriptions on the validation topic. A second subscriber pointing at
+      <code>disputes-install-webhooks-prod</code> refutes the one-target reading of line 74.</li>
+    <li data-observation="EventBridge rules in the production account">
+      List EventBridge rules. A scheduled reconciler that registers dispute topics refutes both the
+      daily accumulation and the verdict.</li>
+  </ul>
+  <p>Run them in that order. The re-run is the cheapest and the most decisive: it exercises the
+    whole recovery path on a shop that already carries the scope, so a dispute topic appearing
+    without any manual registration ends this investigation in one command. The SNS listing and the
+    EventBridge listing cost a minute each and cover the two places a second registrar would hide,
+    which is where the standing objection to this verdict comes from. Assumption that would break
+    it: no reconciler outside the two installers registers dispute topics
+    (<a href="#s-owner">assumed, unverified</a>).</p>
+  <details>
+    <summary>Evidence register — every source behind this page</summary>
+    <ul>
+      <li><a href="#src-banner">atlas/web@9f1c2b7 &middot; web/app/disputes/banner.ts:41-46</a> &middot; inspected 2026-08-13T09:12Z</li>
+      <li><a href="#src-consumer">atlas/workers@4b8e1d0 &middot; workers/validate-webhooks.ts:72-80</a> &middot; inspected 2026-08-13T09:18Z</li>
+      <li><a href="#src-topics">aws lambda list-functions</a> &middot; ~/atlas/infra &middot; exit 0 &middot; ci-runner-04 &middot; 2026-08-13T09:24Z</li>
+      <li><a href="#src-queue">aws cloudwatch get-metric-statistics</a> &middot; ~/atlas/infra &middot; exit 0 &middot; ci-runner-04 &middot; 2026-08-13T09:27Z</li>
+      <li><a href="#fig-drift">psql shops_missing_dispute_topic.sql</a> &middot; ~/atlas/analytics &middot; exit 0 &middot; ci-runner-04 &middot; 2026-08-13T09:31Z</li>
+      <li data-url="https://docs.aws.amazon.com/sns/latest/dg/sns-lambda-as-subscriber.html"
+          data-retrieved="2026-08-13T09:36Z" data-locator="section: Fanout to Lambda functions"
+          data-archive="https://web.archive.org/web/20260813093600/https://docs.aws.amazon.com/sns/latest/dg/sns-lambda-as-subscriber.html">
+        <a href="https://docs.aws.amazon.com/sns/latest/dg/sns-lambda-as-subscriber.html">AWS SNS guide,
+        Fanout to Lambda functions</a> &middot; retrieved 2026-08-13T09:36Z &middot;
+        <a href="https://web.archive.org/web/20260813093600/https://docs.aws.amazon.com/sns/latest/dg/sns-lambda-as-subscriber.html">archived copy</a></li>
+    </ul>
+  </details>
+</section>
+
+<section id="s-actions" class="stack">
+  <h2>One component becomes authoritative for dispute reconciliation.</h2>
+  <p data-claim="recommended" data-basis="claim-gap">Route the validation step to a dispute
+    reconciler and make the call idempotent, so a shop that recovers twice registers once.</p>
+  <p data-claim="recommended" data-basis="fig-drift">Emit desired-versus-actual topic counts per
+    shop and alarm on a nonzero gap, so the next instance of this shape has a signal.</p>
+  <p data-claim="recommended" data-basis="claim-silent">Run abandon, retry, callback, reconcile end
+    to end in staging and assert on the topic list rather than on the queue metrics.</p>
+
+  <table class="actions">
+    <caption>Actions that close this investigation, with owner and proof.</caption>
+    <thead><tr><th scope="col">Priority</th><th scope="col">Owner</th><th scope="col">Action</th><th scope="col">Proof of completion</th></tr></thead>
+    <tbody>
+      <tr><td data-label="Priority">Blocker</td><td data-label="Owner">webhooks</td>
+        <td data-label="Action">Validation invokes the dispute reconciler idempotently after the scope is written.</td>
+        <td data-label="Proof">A shop with the scope and no topic gets one registration call; a second run adds none.</td></tr>
+      <tr><td data-label="Priority">Before ramp</td><td data-label="Owner">platform-obs</td>
+        <td data-label="Action">Publish desired-versus-actual topic counts per shop.</td>
+        <td data-label="Proof">The alarm fires within one interval on a shop missing a required topic.</td></tr>
+      <tr><td data-label="Priority">Verification</td><td data-label="Owner">checkout-qa</td>
+        <td data-label="Action">Cover abandon, retry, callback and reconcile in the staging suite.</td>
+        <td data-label="Proof">The banner clears only after the scope is written, and the topic exists after recovery.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="provenance wrap">
+  <h2>Provenance</h2>
+  <dl>
+    <dt>Scope scanned</dt>
+    <dd>3 handlers on the scope-recovery path (banner predicate, OAuth callback, validation
+      consumer), 2 Lambda functions, 1 SQS queue, 3 of 9 analytics regions.</dd>
+    <dt>Scope skipped</dt>
+    <dd>6 analytics regions with no recorded dispute traffic; the Terraform state and the
+      EventBridge rules, both outside the read access available in this session.</dd>
+    <dt>Commands run</dt>
+    <dd><code>aws lambda list-functions</code>, <code>aws cloudwatch get-metric-statistics</code>,
+      <code>psql -f queries/shops_missing_dispute_topic.sql</code> — ci-runner-04, all exit 0.</dd>
+    <dt>Verified against inferred</dt>
+    <dd>Verified: the two code excerpts, the function list, the queue metrics, the daily counts.
+      Inferred: that permission recovery leaves the dispute topic unregistered, and that the absent
+      error is why nothing alarms. Assumed: no external reconciler.</dd>
+    <dt>Generated</dt><dd>2026-08-13T09:42Z &middot; data-revision r3</dd>
+    <dt>Model</dt>
+    <dd>Written by an AI agent under the aio-html-report skill. Every anchor above re-fetches for a
+      reader who was not in the session.</dd>
+  </dl>
+  <p class="coverage">Evidence coverage: 16/16 claims carry a basis (100%), three of them the
+    annotation ledger rows behind the chart.<br>
+    Scanned 3 of 9 analytics regions; 6 skipped (no dispute traffic recorded in them).<br>
+    Scanned 3 of 3 handlers on the failing path; 0 skipped.</p>
+</footer>
+
+<script>
+// MANDATORY whenever the file contains <details>. Closed <details> is NEVER printed
+// and CSS cannot override it. Measured: 120 paragraphs in a closed <details> print as
+// 1 page with a CSS override, 5 pages with this listener.
+(function () {
+  var opened = [];
+  addEventListener('beforeprint', function () {
+    opened = [];
+    document.querySelectorAll('details:not([open])').forEach(function (d) { opened.push(d); d.open = true; });
+  });
+  addEventListener('afterprint', function () { opened.forEach(function (d) { d.open = false; }); opened = []; });
+})();
+</script>
 </body>
 </html>

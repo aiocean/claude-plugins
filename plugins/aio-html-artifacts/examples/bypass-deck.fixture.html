@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-voice="ledger">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A deck whose whole controller is a comment and a string. Built to exit 1 under --kind deck.">
+<title>Latency Budget Deck</title>
+<!--
+  ARTIFACT CONTRACT
+  audience=        an engineer deciding whether the p99 regression blocks the release train this week
+  question=        did the checkout path get slower between build 811 and build 830, and by how much
+  verdict=         p99 rose from 240 ms to 505 ms on the checkout path; the release train holds
+  consequence=     the reader holds the train and reads the flame graph attached to build 830
+  challenge=       "p99 is noise from one slow host" — the rise reproduces on all four hosts in the pool
+  structure=       the measured numbers first, then the one inference they support, then the falsifier
+  spine=           what we measured; what it implies; what would show the inference wrong
+  transition-type= each scene narrows the one above it, from raw samples to a single decision
+  evidence=        the latency figures below, captured from the build-830 load run on 2026-08-12
+  visuals=         magnitude over two builds gets a ruled comparison, because the task is Retrieve Value
+  voice=           ledger — a measurement record reads as a ruled ledger: no rounding, no ornament
+  generic-check=   a three-tile card grid with an icon per metric was the default; it encodes no
+                   magnitude at all, so it became the ruled comparison the reader can read values off
+-->
+<style>
+:root { --ink: #1a1a1a; --paper: #fafafa; --rule: #c9c4bb; --accent: #7a2e1f; --measure: 34em; }
+*, *::before, *::after { box-sizing: border-box; }
+body { color: #1a1a1a; background-color: #fafafa; font-family: "Iowan Old Style", Palatino, serif; line-height: 1.6; margin: 0; padding: 2rem; }
+p, li, figcaption { max-inline-size: var(--measure); }
+h1 { font-size: 2.5rem; font-weight: 800; }
+h2 { font-size: 2rem; font-weight: 200; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 720px) { body { padding: 1rem; } }
+@media print {
+  nav, .no-print, button { display: none; }
+  .slide { break-inside: avoid; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; }
+}
+</style>
+<script>
+// A real listener, so the outer gate opens and the inner greps are the ones on test.
+document.addEventListener('keydown', function () {
+  /*  Navigation — not written yet.
+      Read ArrowRight / ArrowLeft, PageDown / PageUp, Home and End, then move the
+      current index and set classList, and sync location.hash on hashchange, and
+      expand the details on beforeprint.  */
+  const notes = "ArrowRight ArrowLeft PageDown PageUp Home End classList location.hash beforeprint";
+  return notes;
+});
+</script>
+</head>
+<body>
+<main>
+<h1>Latency Budget Deck</h1>
+
+<section class="slide"><h2>What we measured</h2>
+<p data-claim="observed" data-src="fig-lat" id="fig-lat">Checkout p99 rose from 240 ms to 505 ms across all four hosts between build 811 and build 830.</p></section>
+
+<section class="slide"><h2>Why one host does not explain it</h2>
+<p>The rise reproduces on every host in the pool, so a single degraded machine does not account for the change we measured over thirty minutes of steady-state load.</p></section>
+
+<section class="slide"><h2>What holds the train</h2>
+<details><summary>Raw samples</summary><p>Thirty minutes of samples per host, discarded here for length.</p></details>
+<p>The serializer landed in build 826 and is the only change on the hot path between the two builds under comparison here, which is where the flame graph goes next.</p></section>
+
+</main>
+</body>
+</html>

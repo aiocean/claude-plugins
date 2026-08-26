@@ -7,7 +7,7 @@ This is an integration guide, not a bundled runtime. `aio-html-artifacts` owns i
 If `aio-html-interactive` and `aio-message-bridge` are unavailable, tell the user to install them rather than recreating or vendoring them:
 
 ```bash
-claude plugin install aio-message-bridge@aiocean-plugins
+/plugin install aio-message-bridge@aiocean-plugins
 ```
 
 The marketplace plugin contains both skills. After installation, follow `aio-html-interactive` for a Claude-authored browser UI; use the lower-level `aio-message-bridge` when the client is not that scaffold or a custom protocol is needed.

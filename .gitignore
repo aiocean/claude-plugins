@@ -11,3 +11,9 @@ docs/superpowers/
 .claudian/
 .obsidian/
 .wrangler/
+
+# OMC agent operational state — sessions, plans, logs, memory. Machine-local and
+# per-checkout, so committing it hands the next contributor another machine's state.
+# .omc/skills/ is the documented exception: project-scoped skills belong in the repo.
+.omc/*
+!.omc/skills/

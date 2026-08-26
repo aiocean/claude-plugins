@@ -28,7 +28,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | **aio-saas-tools** | 1.0.5 | 4 | SaaS integrations — atlassian (Jira + Confluence), google-workspace, tanca (HR), x (Twitter).<br>`npx skills add aiocean/claude-plugins -s aio-saas-tools` |
 | **aio-research** | 1.0.5 | 2 | Research — research-kit (10-phase framework), rag-kit (Qdrant vector search).<br>`npx skills add aiocean/claude-plugins -s aio-research` |
 | **aio-diagramming** | 1.0.5 | 2 | Diagrams — mermaid (shareable URLs), grafana-diagram (dashboard diagrams from code).<br>`npx skills add aiocean/claude-plugins -s aio-diagramming` |
-| **aio-html-artifacts** | 1.0.0 | 4 | Rich agent-to-human communication in standalone HTML — evidence-led reports with code beside claims, narrative slide/side decks, aligned decision explorers, and purpose-built editors that export changes back to JSON/diff/prompt. Shared five-layer reading grammar, responsive/a11y/print requirements, four original examples, and deterministic validation.<br>`npx skills add aiocean/claude-plugins -s aio-html-artifacts` |
+| **aio-html-artifacts** | 2.4.1 | 4 | Create self-contained HTML artifacts in four genres — report, deck, explorer, editor — routed by what the human does next: read and audit, present, decide, or edit and hand values back. Every artifact is offline (one file, zero remote references), printable (a print stylesheet in every genre), and auditable (claims carry repository, revision, and line anchors, confidence words carry numeric bands, and a parsing validator gates the structure).<br>`npx skills add aiocean/claude-plugins -s aio-html-artifacts` |
 
 ## Standalone Plugins
 
@@ -39,7 +39,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | **aio-epub-translate** | 4.0.3 | EPUB translation via ConnectRPC API — 9 skills: analyze, translate, review, quality, manage, upload, export, setup, vn-style.<br>`npx skills add aiocean/claude-plugins -s aio-epub-translate` |
 | **aio-youtube** | 1.1.7 | YouTube search and transcript extraction via yt-dlp.<br>`npx skills add aiocean/claude-plugins -s aio-youtube` |
 | **aio-gherkin-refine** | 2.0.6 | BDD field guide — Gherkin with Example Mapping, 3 Amigos, anti-patterns.<br>`npx skills add aiocean/claude-plugins -s aio-gherkin-refine` |
-| **aio-anti-slop** | 1.0.1 | Remove AI slop from prose and code — grep-able tell catalog (English + Vietnamese), false-positive triage, re-scan loop, diff-scoped code pass.<br>`npx skills add aiocean/claude-plugins -s aio-anti-slop` |
+| **aio-anti-slop** | 1.1.0 | Remove AI slop from prose and code — grep-able tell catalog (English + Vietnamese), false-positive triage, re-scan loop, diff-scoped code pass.<br>`npx skills add aiocean/claude-plugins -s aio-anti-slop` |
 
 ### Knowledge & Advisory
 

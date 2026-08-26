@@ -1,0 +1,48 @@
+[data-voice="blueprint"] {
+  color-scheme: dark;
+  --paper: #0b2340;                --surface: oklch(30% 0.055 254.9);
+  --raised: oklch(36% 0.06 254.9); --ink: #dce9f7;
+  --muted: oklch(70% 0.04 250);    --rule: oklch(40% 0.05 254.9);
+  --border: var(--rule);           --rule-weight: 1px;
+  --accent: #57c7ff;               --accent-soft: oklch(36% 0.07 233.6);
+  --radius: 0;
+  --shadow-1: none; --shadow-2: none; --shadow-3: none;
+  --field-fine: 8px;               --field-major: 64px;
+
+  --sans:  "IBM Plex Sans Condensed", "IBM Plex Sans", "Helvetica Neue", "Segoe UI", "Liberation Sans", ui-sans-serif, sans-serif;
+  --serif: "IBM Plex Serif", Charter, Georgia, "Liberation Serif", ui-serif, serif;
+  --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+  --text--1: 0.8125rem; --text-0: 1.0625rem; --text-1: 1.375rem; --text-2: 1.9375rem; --text-3: 3.5rem;
+  --lh-body: 1.5; --lh-head: 1.15; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: -0.01em; --tracking-caps: 0.1em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right,  var(--accent-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--accent-soft) 1px, transparent 1px),
+    linear-gradient(to right,  var(--rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+  background-size:
+    var(--field-major) var(--field-major), var(--field-major) var(--field-major),
+    var(--field-fine)  var(--field-fine),  var(--field-fine)  var(--field-fine);
+  color: var(--ink);
+  font-family: var(--sans); font-size: var(--text-0); line-height: var(--lh-body);
+}
+[data-voice="blueprint"] [data-commitment="provisional"] { border: 1px dashed var(--accent); }
+[data-voice="blueprint"] [data-commitment="committed"]   { border: 1px solid  var(--accent); }
+@media print { [data-voice="blueprint"] { background-image: none; } }
+
+/* ---- brutalist-doc — editors, decision records, changelogs. ----
+   Single mode: LIGHT, committed. The one voice permitted untoned #ffffff and
+   #000000, paired with 2px rules, radius 0, hard offset shadows and monospace.
+
+   THE SEVEN-RULE MANIFESTO, applied verbatim by this voice:
+     1. content readable on all reasonable screens
+     2. only hyperlinks and buttons respond to clicks
+     3. hyperlinks underlined and buttons look like buttons
+     4. the back button works
+     5. view content by scrolling
+     6. decoration only when needed
+     7. performance is a feature */

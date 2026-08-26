@@ -1,0 +1,88 @@
+/* voices.css — the rules every voice obeys, plus the chooser. The five token
+   sets live one per file in references/voices/, listed at the bottom of this
+   comment.
+
+   SHARED MECHANICS, NOT SHARED LOOK.
+   The mechanic is shared: every voice exposes the same token names, so the base
+   layer and layout-primitives.css bind to --ink, --paper, --accent, --radius,
+   --shadow-2 without knowing which voice is mounted. The look is not shared:
+   a report, a deck, an explorer and an editor built from these rules look like
+   four different documents.
+
+   Usage: <html data-voice="technical-manual"> plus the whole of
+   references/voices/technical-manual.css pasted into the artifact's <style>.
+   Every colour in the artifact traces to a token from that block; raw hex below
+   the token block is the tell that a colour was invented inline.
+
+   ROTATION RULE. Two artifacts in the same session use two different voices,
+   unless they are explicitly a set — a repeated palette reads as a copy.
+
+   DECLARATION RULE. The contract comment in the file head carries voice= and
+   generic-check=. The validator fails an artifact with no declared voice,
+   because an undeclared voice is a defaulted one.
+
+   SHADOW RULES.
+   Three elevations, --shadow-1|2|3; a fourth means hierarchy is riding on depth
+   instead of on space. One light source page-wide: vertical offset is 2x the
+   horizontal. Layered, minimum three layers, offsets and blur doubling,
+   identical low alpha, spread going more negative outward — a single blur reads
+   as a sticker. Shadow hue is the surface hue, never grey. As elevation rises,
+   offsets scale on --ratio, blur grows, alpha drops. Dark voices ship
+   --shadow-*: none, because depth on dark comes from the surface-lightness steps
+   --surface and --raised. The layered form, for a declared sixth light voice:
+     --shadow-1: 1px 2px 3px -2px oklch(25% 0.02 262/.06),
+                 2px 4px 6px -3px oklch(25% 0.02 262/.06),
+                 4px 8px 12px -5px oklch(25% 0.02 262/.06);
+     --shadow-2/3: the same geometry scaled on --ratio, alpha .05 then .04.
+
+   COLOUR RULES.
+   brutalist-doc is the one voice permitted untoned #ffffff and #000000, and it
+   earns the pairing with 2px rules, radius 0, hard offset shadows and monospace.
+   Three to five hues plus tints; eight or more distinct hues means colours were
+   invented inline. One dominant colour plus one accent under 5% of the pixels.
+   Scales are built in oklch(), inside the sRGB gamut — every oklch() below round
+   trips to an sRGB hex. De-emphasise by moving text toward the background:
+   --muted sits on the line from --ink to --paper, never toward grey. Colour is
+   never the only status signal, so each status token ships a glyph or a rule
+   style beside it. Dual-mode voices set color-scheme: light dark and wrap each
+   token in light-dark(); single-mode voices commit and name the mode.
+
+   TYPE STEPS. Body plus at most three other steps, ratio 1.25 or more between
+   adjacent used steps, 3x or more from body to display. The weight contrast pair
+   is --weight-light 200 against --weight-display 900, never 400 against 600.
+   Letter-spacing: 0 on body and on headings below 2rem, -0.01em above 2rem,
+   0.05em to 0.12em on caps, single line only.
+*/
+
+/* ---- editorial-swiss — report: audits, research synthesis, status. ----
+   Single mode: LIGHT, committed. A Swiss grid on paper white with one red
+   accent is the whole idea; a dark inversion loses it. Hairline rules carry
+   every separation, so all three elevations are none. */
+
+/* ---------------------------------------------------------------------------
+   PICK ONE, THEN PASTE ONE FILE.
+
+   This file holds the rules that hold for every voice. The token blocks live one
+   per file, so an artifact that mounts one voice carries one voice's tokens
+   instead of five. Paste the block from the file whose name matches the voice
+   recorded in the contract's voice= key:
+
+     references/voices/editorial-swiss.css    1,482 B
+     references/voices/technical-manual.css   2,184 B
+     references/voices/console.css            2,110 B
+     references/voices/blueprint.css          2,621 B
+     references/voices/brutalist-doc.css      1,951 B
+
+   | Voice            | Written for                                | color-scheme |
+   |------------------|--------------------------------------------|--------------|
+   | editorial-swiss  | report: audits, research synthesis, status | light        |
+   | technical-manual | report: specs, runbooks, PR writeups       | light dark   |
+   | console          | incidents, traces, diffs, editors          | dark         |
+   | blueprint        | explorer: architecture options, scenarios  | dark         |
+   | brutalist-doc    | editors, decision records, changelogs      | light        |
+
+   The rotation rule above operates on this table: the second artifact of a
+   session takes a different row than the first, so read the five names here and
+   paste the one file. A sixth voice is declared in the contract with its reason,
+   and it is built from the shared rules above — same token names, new values.
+   --------------------------------------------------------------------------- */

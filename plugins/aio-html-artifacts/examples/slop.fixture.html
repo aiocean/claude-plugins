@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" data-voice="editorial-swiss">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Six equal cards under an indigo gradient hero, set in Inter, on the Tailwind default card.">
+<title>Platform Health Overview</title>
+<style>
+:root{--accent:#6366f1}
+body{font-family:Inter,system-ui,sans-serif;background:#ffffff;color:#000000;margin:0}
+.hero{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:64px 24px;text-align:center}
+h1{font-size:44px;font-weight:600;letter-spacing:-0.02em}
+h2,h3{font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;padding:24px}
+.card{border-radius:.5rem;border:1px solid #e5e7eb;box-shadow:0 1px 3px 0 rgb(0 0 0/.1);padding:7px 15px;text-align:center;transition:all .3s}
+.card:hover{transform:translateY(-4px)}
+.card h3{font-size:15px;color:#4f46e5}
+.card p{font-size:13px;color:#818cf8;line-height:1.4}
+.cta{text-align:center;padding:24px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:40rem){.grid{grid-template-columns:1fr}}
+@media print{h1,h2,h3{break-after:avoid}p,figure{break-inside:avoid}nav,button{display:none}a[href^="http"]::after{content:" (" attr(href) ")"}}
+</style>
+</head>
+<body>
+<main>
+<div class="hero"><h1>Platform Health Overview</h1><p>Everything you need to know about the platform this quarter.</p></div>
+<div class="grid">
+  <div class="card"><svg width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/></svg><h3>Reliability</h3><p>Uptime remained strong across every region with minimal customer impact reported.</p></div>
+  <div class="card"><svg width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/></svg><h3>Performance</h3><p>Latency held steady through the quarter and the team continues to monitor closely.</p></div>
+  <div class="card"><svg width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/></svg><h3>Security</h3><p>No critical incidents were observed and patching cadence stayed within the target.</p></div>
+  <div class="card"><svg width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/></svg><h3>Cost</h3><p>Spend tracked close to plan with a small overage in the storage line item.</p></div>
+  <div class="card"><svg width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/></svg><h3>Velocity</h3><p>Delivery throughput improved slightly compared with the previous reporting period.</p></div>
+  <div class="card"><svg width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/></svg><h3>Quality</h3><p>Escaped defects trended down while test coverage across services held flat.</p></div>
+</div>
+<div class="cta"><p>Reach out to the platform team with any questions about this overview.</p></div>
+</main>
+</body>
+</html>

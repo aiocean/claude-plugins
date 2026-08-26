@@ -1,7 +1,7 @@
 {
   "name": "aio-anti-slop",
   "description": "Remove AI slop from prose and code. Mechanical detection via a grep-able catalog of English and Vietnamese tells, per-hit triage with false-positive protection, minimal repairs verified by a re-scan loop, and a diff-scoped code pass that keeps behavior unchanged.",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "author": {
     "name": "aiocean"
   },

@@ -1,0 +1,35 @@
+[data-voice="brutalist-doc"] {
+  color-scheme: light;
+  --paper: #ffffff;                --surface: #ffffff;
+  --raised: #ffffff;               --ink: #000000;
+  --muted: oklch(38% 0 89.9);      --rule: #000000;
+  --border: var(--rule);           --rule-weight: 2px;
+  --accent: #0000ee;               --accent-soft: #ffe600;
+  --link: #0000ee;                 --link-visited: #551a8b;
+  --highlight: #ffe600;
+  --radius: 0;
+  --shadow-1: 2px 2px 0 var(--ink);
+  --shadow-2: 4px 4px 0 var(--ink);
+  --shadow-3: 8px 8px 0 var(--ink);
+
+  --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --sans:  var(--mono);            --serif: var(--mono);
+
+  --text--1: 0.875rem; --text-0: 1.0625rem; --text-1: 1.375rem; --text-2: 1.875rem; --text-3: 3.5rem;
+  --lh-body: 1.5; --lh-head: 1.15; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: -0.02em; --tracking-caps: 0.05em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: var(--text-0); line-height: var(--lh-body);
+}
+[data-voice="brutalist-doc"] h1,
+[data-voice="brutalist-doc"] h2,
+[data-voice="brutalist-doc"] h3 { text-transform: uppercase; letter-spacing: var(--tracking-head); }
+[data-voice="brutalist-doc"] a         { color: var(--link); text-decoration: underline; }
+[data-voice="brutalist-doc"] a:visited { color: var(--link-visited); }
+[data-voice="brutalist-doc"] mark      { background: var(--highlight); color: var(--ink); }
+[data-voice="brutalist-doc"] button    { border: var(--rule-weight) solid var(--ink); background: var(--paper);
+  color: var(--ink); box-shadow: var(--shadow-1); border-radius: var(--radius);
+  font-family: var(--mono); font-size: var(--text-0); padding: 0.5em 1em; }
+[data-voice="brutalist-doc"] button:active { box-shadow: none; translate: 2px 2px; }

@@ -35,6 +35,20 @@ This is a style pass, not a content edit. Meaning, claims, facts, and code behav
 5. **Re-scan after rewriting** (rewrites reintroduce slop). Maximum 3 passes; a pattern surviving 3 passes gets rewritten as a bare claim, not paraphrased again.
 6. **Report**: hits found → fixed → intentionally kept (with the reason), per pattern.
 
+## Structural pass (reports, explainers, write-ups only)
+
+Skip this pass for anything without a throughline — tweets, changelogs, reference docs, single
+paragraphs. Word-level slop and structural slop are independent: a piece can pass every check
+above sentence by sentence and still read as a raw dump if it never opens or never lands.
+
+1. **Extract every heading, in order, with no body text.** Read that list alone. It must read
+   as a rising argument, not a table of contents — a flat topic list means the piece is
+   organized by subject, not by claim.
+2. **Check the bookend.** Does the piece open with the question or tension it answers, and does
+   it close by resolving that same tension — not by restating the opening in different words? A
+   piece that stops after the last data point, with no opening frame and no landing, is
+   structural slop even when every sentence individually passes the prose pass.
+
 ## Code pass (diff-scoped)
 
 1. **Scope is the diff** — branch vs main, or the files just written. Do not expand into general cleanup uninvited.

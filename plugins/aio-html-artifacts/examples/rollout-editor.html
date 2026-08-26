@@ -1,217 +1,576 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-voice="console">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Example purpose-built feature rollout editor with dependency validation and deterministic diff export.">
-  <title>Dispute rollout editor — safe cohort changes</title>
-  <style>
-    :root { --bg:#111716; --panel:#19211f; --panel2:#202a27; --ink:#edf3ef; --muted:#92a19a; --line:#36433e; --mint:#89f0bd; --yellow:#ffd36a; --red:#ff7e73; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; line-height:1.45; }
-    button, input, select, textarea { font:inherit; }
-    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid var(--mint); outline-offset:3px; }
-    header { padding:19px max(20px,calc((100vw - 1180px)/2)); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; align-items:center; }
-    .brand { font-weight:900; letter-spacing:-.03em; }
-    .source { color:var(--muted); font-size:.75rem; }
-    .dirty { padding:5px 9px; border:1px solid var(--line); color:var(--muted); font-size:.72rem; }
-    .dirty.on { color:var(--yellow); border-color:var(--yellow); }
-    main { max-width:1180px; margin:auto; padding:54px 20px 110px; }
-    .intro { display:grid; grid-template-columns:1fr 330px; gap:70px; align-items:end; }
-    h1 { font-family:ui-sans-serif,system-ui,sans-serif; font-size:clamp(2.7rem,6vw,5.8rem); line-height:.94; letter-spacing:-.06em; margin:0; }
-    .contract { border-left:3px solid var(--mint); padding-left:18px; color:var(--muted); }
-    .contract b { color:var(--mint); display:block; margin-bottom:6px; }
-    .workspace { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:28px; margin-top:48px; }
-    .editor, .preview { border:1px solid var(--line); background:var(--panel); }
-    .bar { padding:13px 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; color:var(--muted); }
-    .flag { display:grid; grid-template-columns:minmax(170px,1fr) 120px 180px; gap:18px; padding:22px 18px; border-bottom:1px solid var(--line); align-items:center; }
-    .flag:last-child { border:0; }
-    .name { color:var(--ink); font-weight:800; }
-    .name small { display:block; color:var(--muted); font-weight:400; margin-top:4px; }
-    .toggle { display:flex; align-items:center; gap:8px; cursor:pointer; }
-    .toggle input { width:20px; height:20px; accent-color:var(--mint); }
-    .rollout label { display:flex; justify-content:space-between; color:var(--muted); font-size:.75rem; margin-bottom:7px; }
-    input[type="range"] { width:100%; accent-color:var(--mint); }
-    select { width:100%; color:var(--ink); background:var(--bg); border:1px solid var(--line); padding:9px; }
-    .warning { display:none; margin:16px; border:1px solid var(--red); color:#ffd6d2; background:#33201f; padding:13px 15px; font-size:.82rem; }
-    .warning.show { display:block; }
-    .preview { position:sticky; top:20px; align-self:start; }
-    .shop { padding:22px; }
-    .shop-head { display:flex; align-items:center; justify-content:space-between; gap:15px; }
-    .shop h2 { font-size:1rem; margin:0; }
-    .badge { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; padding:4px 7px; color:var(--mint); border:1px solid var(--mint); }
-    .journey { margin:28px 0; }
-    .journey-step { display:grid; grid-template-columns:24px 1fr; gap:12px; padding-bottom:24px; position:relative; }
-    .journey-step:not(:last-child)::before { content:""; position:absolute; left:11px; top:24px; bottom:0; width:1px; background:var(--line); }
-    .dot { width:24px; height:24px; border-radius:50%; background:var(--panel2); border:1px solid var(--line); display:grid; place-items:center; font-size:.7rem; z-index:1; }
-    .journey-step.active .dot { color:var(--bg); background:var(--mint); border-color:var(--mint); }
-    .journey-step.blocked .dot { color:var(--bg); background:var(--red); border-color:var(--red); }
-    .journey-step strong { display:block; font-size:.82rem; }
-    .journey-step small { color:var(--muted); }
-    .summary { background:var(--panel2); padding:14px; color:var(--muted); font-size:.75rem; }
-    .actions { position:fixed; z-index:5; bottom:0; left:0; right:0; border-top:1px solid var(--line); background:rgba(17,23,22,.96); backdrop-filter:blur(10px); }
-    .actions-inner { max-width:1180px; margin:auto; padding:13px 20px; display:flex; gap:10px; justify-content:flex-end; align-items:center; }
-    .feedback { margin-right:auto; color:var(--muted); font-size:.78rem; }
-    button { min-height:44px; border:1px solid var(--line); background:var(--panel2); color:var(--ink); padding:0 17px; cursor:pointer; }
-    button:hover { border-color:var(--mint); }
-    button.primary { background:var(--mint); color:var(--bg); border-color:var(--mint); font-weight:900; }
-    dialog { width:min(720px,calc(100vw - 32px)); border:1px solid var(--line); background:var(--panel); color:var(--ink); padding:0; }
-    dialog::backdrop { background:rgba(0,0,0,.72); }
-    dialog header { padding:16px 18px; }
-    dialog textarea { display:block; width:calc(100% - 36px); min-height:270px; margin:18px; background:var(--bg); color:var(--ink); border:1px solid var(--line); padding:14px; resize:vertical; }
-    dialog footer { padding:0 18px 18px; display:flex; justify-content:flex-end; }
-    @media (max-width:880px) { .intro, .workspace { grid-template-columns:1fr; gap:28px; } .preview { position:static; } }
-    @media (max-width:620px) {
-      header { align-items:flex-start; flex-direction:column; }
-      main { padding-top:36px; }
-      .flag { grid-template-columns:1fr; gap:15px; }
-      .actions-inner { flex-wrap:wrap; } .feedback { width:100%; }
-      .actions-inner button { flex:1; padding:0 8px; }
-    }
-    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; } }
-    @media print { .actions, dialog { display:none; } body { background:#fff; color:#111; } .editor, .preview { background:#fff; color:#111; border-color:#aaa; } .workspace { grid-template-columns:1fr; } .preview { position:static; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A four-value feature flag editor whose export is the diff against the checked-in baseline, with the cohort dependency enforced while you type.">
+<title>Dispute rollout editor — cohort changes as a reviewable diff</title>
+<!--
+  ARTIFACT CONTRACT  (fill every key before writing markup; the validator requires it)
+  audience=        the owner of the dispute recovery flags, who knows all three by name and has
+                   to hand a change to whoever runs the deploy
+  question=        which cohort values ship without stranding a shop mid-journey, and what
+                   exactly do I hand over?
+  verdict=         the webhook cohort stays at or below the scope cohort; every other value is
+                   free, and what you hand over is the diff against the checked-in file
+  consequence=     a change request naming four values against their baseline, instead of a
+                   sentence in chat that the deploy owner has to re-derive
+  challenge=       "the flag service already gates the webhook on the granted scope, so this
+                   constraint is imaginary" — the falsifier section names the staging run that
+                   settles it in one afternoon
+  structure=       verdict, then the controls, then the evidence the constraint rests on, then
+                   the record you hand over
+  spine=           the constraint; the four values; what they do right now; the evidence; what
+                   would show this is wrong; the change record
+  transition-type= value change to consequence — every section states what a change causes
+  evidence=        flags.prod.json@9f1c2b7 lines 18-27 for the baseline; a consent-rate query
+                   with its host and exit code for the 61.0% figure
+  visuals=         four ruled rows with a mono index, three ruled journey steps, one four-column
+                   record table; no chart, because the state is four values and a table beats
+                   every chart at Retrieve Value
+  voice=           console
+  generic-check=   the generic version is a grid of flag cards with a Save button and a
+                   full-state JSON dump; replaced by ruled rows with no box per row, an export
+                   that is diff(INITIAL, now), and a print sheet that is the record — there is
+                   no Save, because this file never reaches the flag service
+-->
+<style>
+/* 1. LAYOUT PRIMITIVES — pasted from references/layout-primitives.css.
+   Named before typed: the flag list is ladder rule 5 (a sequence), so it is a stack of ruled
+   rows with a mono index and no box per row; controls plus live state are .with-sidebar,
+   mirrored so the content leads; the record table is .scroll-x. */
+:root {
+  --ratio: 1.5;
+  --s-3: calc(var(--s-2)/var(--ratio)); --s-2: calc(var(--s-1)/var(--ratio));
+  --s-1: calc(var(--s0)/var(--ratio));  --s0: 1rem;
+  --s1: calc(var(--s0)*var(--ratio));   --s2: calc(var(--s1)*var(--ratio));
+  --s3: calc(var(--s2)*var(--ratio));
+  --measure: 34em;         /* prose,      ~68 chars */
+  --measure-wide: 45em;    /* tables/code, ~90 chars */
+  --space: var(--s1);
+  scroll-padding-block-start: var(--s3);
+}
+*,*::before,*::after { box-sizing: border-box; }
+p,h1,h2,h3,h4,h5,h6,blockquote,figcaption { max-inline-size: var(--measure); }
+h1,h2,h3 { text-wrap: balance; }
+p,li     { text-wrap: pretty; }
+.stack { display:flex; flex-direction:column; }
+.stack > * { margin-block: 0; }
+.stack > * + * { margin-block-start: var(--space, var(--s1)); }
+.cluster { display:flex; flex-wrap:wrap; gap: var(--space, var(--s0)); align-items:center; }
+.with-sidebar { display:flex; flex-wrap:wrap; gap: var(--space, var(--s1)); }   /* mirrored */
+.with-sidebar > :first-child { flex-basis: 0; flex-grow: 999; min-inline-size: var(--content-min, 55%); }
+.with-sidebar > :last-child  { flex-basis: var(--sidebar-width, 20rem); flex-grow: 1; }
+.region { container-type: inline-size; }
+@container (inline-size < 34rem) { .with-sidebar > :first-child { flex-basis: 100%; } }
+main > *, main section > * { min-width: 0; }
+.scroll-x { overflow-x: auto; border: var(--rule-weight) solid var(--border); border-radius: var(--radius); }
+.scroll-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 2. VOICE — the console block, pasted from references/voices.css. Single mode: DARK,
+   committed; Tokyo Night, verified. Depth comes from the three surface steps, so every
+   elevation is none, and each status carries a glyph prefix so it survives greyscale,
+   forced-colors and paper. The selector is qualified with html so the token block is the
+   document root layer and a contrast checker resolves every var() from one place. */
+html[data-voice="console"] {
+  color-scheme: dark;
+  --paper: #1a1b26;                --surface: #1f2335;
+  --raised: #24283b;               --ink: #c0caf5;
+  --muted: #565f89;                --rule: oklch(34% 0.036 274.7);
+  --border: var(--rule);           --rule-weight: 1px;
+  --accent: #7aa2f7;               --accent-soft: oklch(30% 0.055 264.2);
+  --ok: #9ece6a;   --warn: #e0af68;   --danger: #f7768e;
+  --glyph-ok: "\2713"; --glyph-warn: "\26A0"; --glyph-danger: "\2717"; --glyph-info: "\203A";
+  --radius: 2px;
+  --shadow-1: none; --shadow-2: none; --shadow-3: none;
+  /* One derived token, with its reason: #565f89 renders 2.76:1 on --paper, under the 4.5:1
+     floor of WCAG 1.4.3, so text that carries information de-emphasises to --muted-ink — the
+     same hue moved toward --ink until it clears the floor on all three surfaces (5.90 / 5.37 /
+     5.03). --muted stays on rules and glyph strokes, where it carries no words. */
+  --muted-ink: oklch(68% 0.04 274.7);
+  /* JetBrains Mono throughout: --sans and --serif resolve to the same stack on purpose, so a
+     stray font-family: var(--sans) cannot break the voice. */
+  --mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --sans:  var(--mono);            --serif: var(--mono);
+  --text--1: 0.8125rem; --text-0: 1rem; --text-1: 1.3125rem; --text-2: 1.75rem; --text-3: 3rem;
+  --lh-body: 1.5; --lh-head: 1.2; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: 0; --tracking-caps: 0.1em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: var(--text-0); line-height: var(--lh-body);
+}
+html[data-voice="console"] [data-status="ok"]::before     { content: var(--glyph-ok) " ";     color: var(--ok); }
+html[data-voice="console"] [data-status="warn"]::before   { content: var(--glyph-warn) " ";   color: var(--warn); }
+html[data-voice="console"] [data-status="danger"]::before { content: var(--glyph-danger) " "; color: var(--danger); }
+html[data-voice="console"] [data-status="info"]::before   { content: var(--glyph-info) " ";   color: var(--accent); }
+
+/* 3. THIS ARTIFACT */
+body { margin: 0; }
+a { color: var(--accent); }
+h1 { font-size: clamp(2rem, 7vw, var(--text-3)); line-height: var(--lh-display); font-weight: var(--weight-display); }
+h2 { font-size: var(--text-1); line-height: var(--lh-head); font-weight: var(--weight-strong); }
+h3 { font-size: var(--text--1); text-transform: uppercase; letter-spacing: var(--tracking-caps);
+     color: var(--muted-ink); font-weight: var(--weight-strong); }
+.masthead { justify-content: space-between; padding: var(--s-1) var(--s1); font-size: var(--text--1);
+            border-block-end: var(--rule-weight) solid var(--rule); }
+.brand { color: var(--accent); font-weight: var(--weight-strong); letter-spacing: var(--tracking-caps); }
+.meta, .row-desc, .note { color: var(--muted-ink); }
+.chip { color: var(--ink); background-color: var(--surface); padding: var(--s-3) var(--s-1);
+        border: var(--rule-weight) solid var(--rule); border-radius: var(--radius); }
+main { max-inline-size: 74rem; margin-inline: auto; padding: var(--s2) var(--s1) var(--s3); }
+.verdict { border-inline-start: 3px solid var(--accent); padding-inline-start: var(--s1); }
+.conf { color: var(--warn); font-weight: var(--weight-strong); }
+.callout { color: var(--ink); background-color: var(--surface); padding: var(--s0);
+           border: var(--rule-weight) solid var(--warn); border-radius: var(--radius);
+           max-inline-size: var(--measure-wide); }
+/* ladder rule 5: ruled rows, mono index, no box per row */
+.rows { border: 0; margin: 0; padding: 0; }
+.row { border: 0; border-block-end: var(--rule-weight) solid var(--rule); margin: 0; padding: var(--s0) 0; }
+.row legend { padding-inline: 0; font-weight: var(--weight-strong); }
+.idx { color: var(--muted-ink); margin-inline-end: var(--s-1); }
+.row-body { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,17rem); gap: var(--s0);
+            align-items: start; padding-block-start: var(--s-1); }
+.row-desc { font-size: var(--text--1); margin: 0; }
+.field { display: flex; align-items: center; gap: var(--s-1); flex-wrap: wrap; }
+.field-range { display: grid; gap: var(--s-2); }
+.field-range label { color: var(--muted-ink); font-size: var(--text--1); }
+input[type="checkbox"] { width: 1.5rem; height: 1.5rem; accent-color: var(--accent); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+output { font-weight: var(--weight-strong); font-variant-numeric: tabular-nums; }
+select, button, textarea { font: inherit; color: var(--ink); background-color: var(--raised);
+        padding: var(--s-2) var(--s-1); min-height: 2.75rem;
+        border: var(--rule-weight) solid var(--rule); border-radius: var(--radius); }
+button { cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; }
+button.primary { color: var(--paper); background-color: var(--accent); font-weight: var(--weight-strong); }
+button[disabled] { color: var(--muted-ink); background-color: var(--surface); cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.panel { color: var(--ink); background-color: var(--surface); padding: var(--s1);
+         border: var(--rule-weight) solid var(--rule); border-radius: var(--radius); }
+.constraint { font-weight: var(--weight-strong); }
+.constraint[data-status="ok"] { color: var(--ok); }
+.constraint[data-status="danger"] { color: var(--danger); }
+.journey { list-style: none; margin: 0; padding: 0; }
+.journey li { display: grid; grid-template-columns: 3ch minmax(0,1fr); gap: var(--s-1);
+              padding-block: var(--s-1); border-block-start: var(--rule-weight) solid var(--rule); }
+.journey li[data-state="off"] { color: var(--muted-ink); }
+.journey li[data-state="blocked"] { color: var(--danger); }
+.state { font-style: normal; font-size: var(--text--1); text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+figure.src { margin: 0; border: var(--rule-weight) solid var(--rule); border-radius: var(--radius); }
+figcaption { color: var(--muted-ink); font-size: var(--text--1); padding: var(--s-1);
+             max-inline-size: none; border-block-end: var(--rule-weight) solid var(--rule); }
+pre { margin: 0; padding: var(--s0); font-size: var(--text--1); white-space: pre-wrap; overflow-wrap: anywhere; }
+details summary { cursor: pointer; padding: var(--s-1); }
+table { border-collapse: collapse; inline-size: 100%; font-size: var(--text--1); }
+caption { text-align: start; color: var(--muted-ink); padding: var(--s-1); }
+th, td { text-align: start; padding: var(--s-1); font-variant-numeric: tabular-nums;
+         border-block-end: var(--rule-weight) solid var(--rule); }
+thead th { color: var(--muted-ink); text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+dialog { color: var(--ink); background-color: var(--surface); padding: var(--s1);
+         border: var(--rule-weight) solid var(--rule); border-radius: var(--radius);
+         max-inline-size: min(48rem, 92vw); }
+dialog::backdrop { background-color: var(--paper); opacity: 0.82; }
+dialog textarea { inline-size: 100%; min-block-size: 16rem; resize: vertical; }
+footer { color: var(--muted-ink); font-size: var(--text--1); padding: var(--s1);
+         border-block-start: var(--rule-weight) solid var(--rule); }
+.print-only { display: none; }
+
+@media (max-width: 40rem) {
+  .row-body { grid-template-columns: minmax(0,1fr); }
+  .masthead { flex-direction: column; align-items: start; }
+  main { padding-inline: var(--s0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-delay: -1ms !important; animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important; transition-delay: -1ms !important;
+    transition-duration: 1ms !important; scroll-behavior: auto !important;
+  }
+}
+@media (prefers-contrast: more) { :root { --border: currentColor; --muted: var(--ink); } }
+@media (forced-colors: active) {
+  .card, dialog, [popover], details { border: 1px solid CanvasText; box-shadow: none; }
+  svg[role="img"], figure svg { forced-color-adjust: none; }
+}
+@page { size: A4; margin: 15mm; }
+@media print {
+  h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+  p, pre, code, figure, table, tr { break-inside: avoid; page-break-inside: avoid; }
+  nav, .toc, .no-print, button { display: none !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; word-break: break-all; }
+  body { background: #fff; color: #000; }
+  /* print as record: the sheet that comes out of the printer is the change request */
+  .print-only { display: block; }
+  .panel, .row, figure.src, .scroll-x { border-color: #666; }
+  .scroll-x { overflow-x: visible; }
+  main { max-inline-size: none; padding: 0; }
+}
+</style>
 </head>
 <body>
-  <header>
-    <div><span class="brand">rollout://disputes</span> <span class="source">source evidence: flags.prod.json @ 8f2c1a7</span></div>
-    <span class="dirty" id="dirty">No unsaved export</span>
-  </header>
-  <main>
-    <section class="intro">
-      <h1>Change the cohort.<br>Keep the dependency.</h1>
-      <div class="contract"><b>Editor contract</b>Edit three rollout flags. The dispute webhook may never exceed the scope-consent cohort. Export changed keys only; this file does not save to production.</div>
-    </section>
+<header class="masthead cluster">
+  <span class="brand">rollout://disputes</span>
+  <span class="meta">baseline: flags.prod.json@9f1c2b7 · read 2026-08-13T09:12Z</span>
+  <span class="chip" id="dirty" data-status="info">baseline — nothing changed in this tab</span>
+</header>
 
-    <div class="workspace">
-      <form class="editor" id="flagsForm" aria-labelledby="editor-title">
-        <div class="bar"><span id="editor-title">Flag controls</span><span>original → current</span></div>
-        <div class="warning" id="warning" role="alert">Invalid rollout: <b>dispute_webhook</b> cannot exceed <b>dispute_scope</b>. Lower the webhook cohort or raise scope consent first.</div>
+<main class="stack region">
+  <h1>Change the dispute cohort without stranding a shop mid-journey</h1>
 
-        <div class="flag" data-flag="dispute_banner">
-          <div class="name">dispute_banner<small>Shows the permission recovery banner.</small></div>
-          <label class="toggle"><input type="checkbox" name="dispute_banner_enabled" checked> Enabled</label>
-          <div class="rollout"><label for="bannerPct"><span>Rollout</span><output id="bannerOut">25%</output></label><input id="bannerPct" name="dispute_banner_percent" type="range" min="0" max="100" step="5" value="25"></div>
-        </div>
+  <section class="verdict stack" aria-labelledby="verdict-title">
+    <h2 id="verdict-title">The webhook cohort stays at or below the scope cohort</h2>
+    <p data-claim="observed" data-src="src-flags">In the checked-in file, <code>dispute_scope</code>
+      ships to 20% of shops and <code>dispute_webhook</code> to 10%.</p>
+    <p data-claim="observed" data-src="src-consent">Of the 1,842 shops inside the scope cohort over the
+      last 14 days, 1,124 granted the scope, or 61.0%.</p>
+    <p id="claim-strand" data-claim="inferred" data-confidence="likely" data-basis="src-flags src-consent">
+      Raising <code>dispute_webhook</code> above <code>dispute_scope</code> strands every shop in the
+      gap: the webhook fires for a shop that was never asked for the scope, delivery returns 403, and
+      the reconciliation job retries until someone drains the queue by hand
+      <b class="conf">likely (55-80%)</b>.</p>
+    <p data-claim="recommended" data-basis="claim-strand">Set the webhook cohort at or below the scope
+      cohort in the controls below, export the diff, and paste it into the flag change request.</p>
+    <p class="note" id="claim-salt" data-claim="assumed">I assumed both flags hash the shop id with the
+      same salt, so a shop inside the 10% webhook cohort is inside the 20% scope cohort. I did not
+      verify the salt against the flag service.</p>
+  </section>
 
-        <div class="flag" data-flag="dispute_scope">
-          <div class="name">dispute_scope<small>Requests and persists the required OAuth scope.</small></div>
-          <label class="toggle"><input type="checkbox" name="dispute_scope_enabled" checked> Enabled</label>
-          <div class="rollout"><label for="scopePct"><span>Rollout</span><output id="scopeOut">20%</output></label><input id="scopePct" name="dispute_scope_percent" type="range" min="0" max="100" step="5" value="20"></div>
-        </div>
+  <p class="callout" data-status="warn"><b>Fictional worked example.</b> The flag names, shop counts,
+    repository and commit sha in this file are invented to demonstrate the shape. This page contacts no
+    flag service, writes nothing and stores nothing: the export leaves through your clipboard or the
+    print dialog, and a reload restores the baseline.</p>
 
-        <div class="flag" data-flag="dispute_webhook">
-          <div class="name">dispute_webhook<small>Reconciles the dispute subscription after consent.</small></div>
-          <label class="toggle"><input type="checkbox" name="dispute_webhook_enabled" checked> Enabled</label>
-          <div class="rollout"><label for="webhookPct"><span>Rollout</span><output id="webhookOut">10%</output></label><input id="webhookPct" name="dispute_webhook_percent" type="range" min="0" max="100" step="5" value="10"></div>
-        </div>
+  <section class="stack" aria-labelledby="editor-title">
+    <h2 id="editor-title">Edit the four values</h2>
+    <p>The controls are the state. Nothing stands behind them: the constraint line, the journey, the
+      record table and the export all recompute from these four inputs each time one of them moves.</p>
 
-        <div class="flag">
-          <div class="name">cohort_strategy<small>Stable shop assignment for this export.</small></div>
-          <div></div>
-          <select name="cohort_strategy" aria-label="Cohort strategy"><option value="stable_hash" selected>Stable shop hash</option><option value="staff_only">Staff shops only</option><option value="allowlist">Explicit allowlist</option></select>
-        </div>
+    <div class="with-sidebar">
+      <form class="rows" id="flags" aria-labelledby="editor-title">
+        <fieldset class="row">
+          <legend><span class="idx">01</span> dispute_banner</legend>
+          <div class="row-body">
+            <p class="row-desc">Shows the recovery banner to a shop that lacks the scope. Free of the
+              constraint: a banner without a webhook costs an impression, nothing more.</p>
+            <div class="stack">
+              <span class="field"><input type="checkbox" id="dispute_banner_enabled" name="dispute_banner_enabled" checked>
+                <label for="dispute_banner_enabled">Enable dispute_banner</label></span>
+              <span class="field-range"><label for="dispute_banner_percent">dispute_banner rollout percent</label>
+                <input type="range" id="dispute_banner_percent" name="dispute_banner_percent" min="0" max="100" step="5" value="25">
+                <output id="dispute_banner-out" for="dispute_banner_percent">25%</output></span>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="row">
+          <legend><span class="idx">02</span> dispute_scope</legend>
+          <div class="row-body">
+            <p class="row-desc">Requests the OAuth scope and persists the grant. This value is the
+              ceiling for row 03.</p>
+            <div class="stack">
+              <span class="field"><input type="checkbox" id="dispute_scope_enabled" name="dispute_scope_enabled" checked>
+                <label for="dispute_scope_enabled">Enable dispute_scope</label></span>
+              <span class="field-range"><label for="dispute_scope_percent">dispute_scope rollout percent</label>
+                <input type="range" id="dispute_scope_percent" name="dispute_scope_percent" min="0" max="100" step="5" value="20">
+                <output id="dispute_scope-out" for="dispute_scope_percent">20%</output></span>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="row">
+          <legend><span class="idx">03</span> dispute_webhook</legend>
+          <div class="row-body">
+            <p class="row-desc">Reconciles the dispute subscription after consent. Held at or below row
+              02 by the constraint at the top of this page.</p>
+            <div class="stack">
+              <span class="field"><input type="checkbox" id="dispute_webhook_enabled" name="dispute_webhook_enabled" checked>
+                <label for="dispute_webhook_enabled">Enable dispute_webhook</label></span>
+              <span class="field-range"><label for="dispute_webhook_percent">dispute_webhook rollout percent</label>
+                <input type="range" id="dispute_webhook_percent" name="dispute_webhook_percent" min="0" max="100" step="5" value="10">
+                <output id="dispute_webhook-out" for="dispute_webhook_percent">10%</output></span>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="row">
+          <legend><span class="idx">04</span> cohort_strategy</legend>
+          <div class="row-body">
+            <p class="row-desc">How a shop lands in a cohort. Stable hash keeps a shop in the same
+              bucket across all three flags, which is what makes row 03 fit inside row 02.</p>
+            <div class="field-range"><label for="cohort_strategy">Cohort assignment strategy</label>
+              <select id="cohort_strategy" name="cohort_strategy">
+                <option value="stable_hash" selected>stable_hash — shop id, one salt</option>
+                <option value="staff_only">staff_only — staff shops, ignores percent</option>
+                <option value="allowlist">allowlist — named shops from the ticket</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
       </form>
 
-      <aside class="preview" aria-labelledby="preview-title">
-        <div class="bar"><span id="preview-title">Shop journey preview</span><span id="previewCohort">10% eligible</span></div>
-        <div class="shop">
-          <div class="shop-head"><h2>sample-shop.example</h2><span class="badge">in cohort</span></div>
-          <div class="journey">
-            <div class="journey-step active" id="stepBanner"><span class="dot">1</span><div><strong>Banner visible</strong><small>Shop is flagged and scope is absent.</small></div></div>
-            <div class="journey-step active" id="stepScope"><span class="dot">2</span><div><strong>Scope consent</strong><small>OAuth callback persists the new scope.</small></div></div>
-            <div class="journey-step active" id="stepWebhook"><span class="dot">3</span><div><strong>Webhook reconciliation</strong><small>Runs only inside the authorized cohort.</small></div></div>
-          </div>
-          <div class="summary" id="summary">Valid: 10% of shops can complete the full recovery journey.</div>
-        </div>
+      <aside class="panel stack" aria-labelledby="monitor-title">
+        <h3 id="monitor-title">What these values do</h3>
+        <p class="constraint" id="constraint" data-status="ok">ok — webhook 10% sits inside scope 20%</p>
+        <ol class="journey">
+          <li id="step-dispute_banner" data-state="on"><span class="idx">01</span>
+            <span><b>Banner shown</b> <span id="text-dispute_banner">shown to 25% of shops</span>
+              <i class="state" id="state-dispute_banner">live</i></span></li>
+          <li id="step-dispute_scope" data-state="on"><span class="idx">02</span>
+            <span><b>Scope granted</b> <span id="text-dispute_scope">offered to 20% of shops</span>
+              <i class="state" id="state-dispute_scope">live</i></span></li>
+          <li id="step-dispute_webhook" data-state="on"><span class="idx">03</span>
+            <span><b>Webhook reconciled</b> <span id="text-dispute_webhook">runs for 10% of shops</span>
+              <i class="state" id="state-dispute_webhook">live</i></span></li>
+        </ol>
+        <p>Shops that finish the whole recovery journey at these values: <b id="eligible">10%</b>.</p>
       </aside>
     </div>
-  </main>
+  </section>
 
-  <div class="actions">
-    <div class="actions-inner">
-      <div class="feedback" id="feedback" aria-live="polite">Ready. Changes exist only in this browser tab.</div>
-      <button type="button" id="reset">Reset</button>
-      <button type="button" id="previewExport">Preview diff</button>
-      <button type="button" class="primary" id="copyExport">Copy diff</button>
+  <section class="stack" aria-labelledby="evidence-title">
+    <h2 id="evidence-title">Evidence the constraint rests on</h2>
+    <figure class="src" id="src-flags" data-kind="code" data-repo="atlas/web"
+      data-sha="9f1c2b7a4d5e6f708192a3b4c5d6e7f809a1b2c3" data-path="config/flags.prod.json"
+      data-lines="18-27" data-retrieved="2026-08-13T09:12Z">
+      <figcaption><a href="https://github.com/atlas/web/blob/9f1c2b7a4d5e6f708192a3b4c5d6e7f809a1b2c3/config/flags.prod.json#L18-L27">atlas/web@9f1c2b7
+        · config/flags.prod.json:18-27 · inspected 2026-08-13T09:12Z</a></figcaption>
+      <pre><code>"dispute_banner":  { "enabled": true, "percent": 25 },
+"dispute_scope":   { "enabled": true, "percent": 20 },
+"dispute_webhook": { "enabled": true, "percent": 10 },
+"cohort_strategy": "stable_hash"</code></pre>
+    </figure>
+    <figure class="src" id="src-consent" data-kind="command"
+      data-cmd="atlas-analytics consent-rate --flag dispute_scope --days 14" data-cwd="~/atlas/web"
+      data-exit="0" data-host="analytics-1" data-retrieved="2026-08-13T09:20Z">
+      <figcaption>atlas-analytics consent-rate --flag dispute_scope --days 14 · cwd ~/atlas/web ·
+        host analytics-1 · exit 0 · run 2026-08-13T09:20Z</figcaption>
+      <pre><code>shops_in_cohort        1,842
+scope_granted          1,124   (61.0%)
+webhook_delivered        184
+webhook_403_no_scope       0</code></pre>
+    </figure>
+    <details>
+      <summary>The retry path this constraint protects</summary>
+      <pre><code>disputes/reconcile.go:88   if !shop.Scopes.Has("read_disputes") { return ErrNoScope }
+disputes/queue.go:41       retry(job, backoff.Exponential, maxAttempts: 0)   // drains by hand</code></pre>
+    </details>
+  </section>
+
+  <section class="stack" data-falsifier="claim-strand" aria-labelledby="falsifier-title">
+    <h2 id="falsifier-title">What would show this is wrong</h2>
+    <ul class="stack">
+      <li data-test="atlas-flags set --env staging dispute_webhook=40 dispute_scope=20 &amp;&amp; go run ./cmd/reconcile">
+        Set webhook to 40% and scope to 20% in a staging flag set and run the reconciliation job. Zero
+        403s in the delivery log means the flag service already gates on the granted scope, and this
+        constraint belongs in that service rather than in a human's head.</li>
+      <li data-observation="retry queue depth for dispute.reconcile during the 10% ramp on 2026-07-28">
+        A flat retry queue while webhook exceeded scope refutes the stranding mechanism: the gap costs
+        nothing and the constraint is unnecessary.</li>
+    </ul>
+    <p>The assumption that would break it: both flags hash the shop id with the same salt
+      (<a href="#claim-salt">assumed, unverified</a>).</p>
+  </section>
+
+  <section class="stack" aria-labelledby="record-title">
+    <h2 id="record-title">The change record you hand over</h2>
+    <p>The export is <code>diff(INITIAL, now)</code> — the keys that moved away from the baseline this
+      file loaded with, each carrying its from and to value. A full-state dump makes the reviewer
+      re-derive the change; a diff hands it to them.</p>
+    <div class="scroll-x" role="region" aria-labelledby="record-cap" tabindex="0">
+      <table>
+        <caption id="record-cap">Baseline from flags.prod.json@9f1c2b7 against the values in this tab</caption>
+        <thead><tr><th scope="col">Key</th><th scope="col">Baseline</th><th scope="col">This tab</th><th scope="col">Change</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">dispute_banner</th><td>on · 25%</td><td id="now-dispute_banner">on · 25%</td><td id="chg-dispute_banner">unchanged</td></tr>
+          <tr><th scope="row">dispute_scope</th><td>on · 20%</td><td id="now-dispute_scope">on · 20%</td><td id="chg-dispute_scope">unchanged</td></tr>
+          <tr><th scope="row">dispute_webhook</th><td>on · 10%</td><td id="now-dispute_webhook">on · 10%</td><td id="chg-dispute_webhook">unchanged</td></tr>
+          <tr><th scope="row">cohort_strategy</th><td>stable_hash</td><td id="now-cohort_strategy">stable_hash</td><td id="chg-cohort_strategy">unchanged</td></tr>
+        </tbody>
+      </table>
     </div>
+    <p class="feedback" id="feedback" aria-live="polite">Baseline loaded. Every edit stays in this tab.</p>
+    <div class="cluster no-print" id="actions">
+      <button type="button" class="primary" id="copy">Copy the diff as JSON</button>
+      <button type="button" id="show">Show the diff</button>
+      <button type="button" id="reset">Reset to the baseline</button>
+    </div>
+    <p class="print-only">Printed from an unsaved browser tab. This sheet is the change request: the
+      table above states the baseline, the proposed values and the delta. The flag service was not
+      contacted, and printing changed nothing.</p>
+  </section>
+</main>
+
+<footer class="stack">
+  <h2>Provenance</h2>
+  <p>Scope scanned: the three dispute flags in config/flags.prod.json and the reconciliation path they
+    drive. Scope skipped: the other 41 flags in that file, none of them reachable from
+    disputes/reconcile.go. Commands run: <code>atlas-analytics consent-rate --flag dispute_scope --days
+    14</code> on analytics-1, exit 0. Verified: both figures in the verdict. Inferred: the stranding
+    mechanism. Generated 2026-08-13T09:24Z as an example fixture for aio-html-artifacts.</p>
+  <p>Evidence coverage: 5/5 claims carry a source (100%). Every value in this file is fictional and
+    exists to demonstrate the shape of a rollout editor.</p>
+</footer>
+
+<dialog id="export" aria-labelledby="export-title">
+  <h2 id="export-title">Changed keys, as JSON</h2>
+  <textarea id="export-text" readonly aria-label="The exported diff as JSON"></textarea>
+  <div class="cluster no-print" id="dialog-actions">
+    <button type="button" id="close-export">Close the diff</button>
   </div>
+</dialog>
 
-  <dialog id="exportDialog" aria-labelledby="dialogTitle">
-    <header><b id="dialogTitle">Deterministic changed-keys export</b><span class="source">pasteable JSON</span></header>
-    <textarea id="exportText" readonly aria-label="Exported JSON diff"></textarea>
-    <footer><button type="button" id="closeDialog">Close</button></footer>
-  </dialog>
+<script>
+// Q: "Which shops finish the recovery journey at these four values, and what exactly changes if I
+// hand this to the flag owner?" — 21 x 21 x 21 x 3 coupled states, unrenderable as stills.
+// Three interactions, the ceiling for one artifact: edit a value, export the diff, reset to baseline.
+// The DOM inputs are the state; there is no parallel store.
+(function () {
+  var KEYS = ['dispute_banner', 'dispute_scope', 'dispute_webhook'];
+  var form = document.getElementById('flags');
+  var feedback = document.getElementById('feedback');
+  var dialog = document.getElementById('export');
+  var copyBtn = document.getElementById('copy');
 
-  <script>
-    const original = Object.freeze({
-      dispute_banner: { enabled:true, percent:25 },
-      dispute_scope: { enabled:true, percent:20 },
-      dispute_webhook: { enabled:true, percent:10 },
-      cohort_strategy: 'stable_hash'
+  function field(name) { return form.elements.namedItem(name); }
+  function el(id) { return document.getElementById(id); }
+  function read() {
+    var s = { cohort_strategy: field('cohort_strategy').value };
+    KEYS.forEach(function (k) {
+      s[k] = { enabled: field(k + '_enabled').checked, percent: Number(field(k + '_percent').value) };
     });
-    const form = document.getElementById('flagsForm');
-    const byName = name => form.elements.namedItem(name);
-    const readState = () => ({
-      dispute_banner: { enabled:byName('dispute_banner_enabled').checked, percent:Number(byName('dispute_banner_percent').value) },
-      dispute_scope: { enabled:byName('dispute_scope_enabled').checked, percent:Number(byName('dispute_scope_percent').value) },
-      dispute_webhook: { enabled:byName('dispute_webhook_enabled').checked, percent:Number(byName('dispute_webhook_percent').value) },
-      cohort_strategy: byName('cohort_strategy').value
+    return s;
+  }
+
+  // Frozen at load, so "what changed" stays computable and printable for the whole session.
+  var INITIAL = (function (s) {
+    KEYS.forEach(function (k) { Object.freeze(s[k]); });
+    return Object.freeze(s);
+  })(read());
+
+  function fmt(v) { return typeof v === 'string' ? v : (v.enabled ? 'on' : 'off') + ' · ' + v.percent + '%'; }
+  function same(a, b) { return fmt(a) === fmt(b); }
+  function cap(s, k) { return s[k].enabled ? s[k].percent : 0; }
+  function changedKeys(now) { return Object.keys(now).filter(function (k) { return !same(INITIAL[k], now[k]); }); }
+  function diff(now) {
+    var changed = {};
+    changedKeys(now).forEach(function (k) { changed[k] = { from: INITIAL[k], to: now[k] }; });
+    return { baseline: 'flags.prod.json@9f1c2b7', changed_key_count: changedKeys(now).length, changed: changed };
+  }
+  function payload() { return JSON.stringify(diff(read()), null, 2) + '\n'; }
+  function say(message) { feedback.textContent = message; }
+  function setText(id, text) { el(id).textContent = text; }
+  function setStep(k, state, text, word) {
+    el('step-' + k).setAttribute('data-state', state);
+    setText('text-' + k, text);
+    setText('state-' + k, word);
+  }
+
+  // One idempotent update(): every derived surface recomputes from the DOM.
+  function update() {
+    var s = read();
+    var scope = cap(s, 'dispute_scope');
+    var hook = cap(s, 'dispute_webhook');
+    var valid = hook <= scope;
+    var changed = changedKeys(s);
+
+    KEYS.forEach(function (k) {
+      setText(k + '-out', s[k].percent + '%');
+      setText('now-' + k, fmt(s[k]));
+      setText('chg-' + k, same(INITIAL[k], s[k]) ? 'unchanged' : fmt(INITIAL[k]) + ' → ' + fmt(s[k]));
     });
-    const isEqual = (a,b) => JSON.stringify(a) === JSON.stringify(b);
-    function validate(state) {
-      const scopeCap = state.dispute_scope.enabled ? state.dispute_scope.percent : 0;
-      const webhookCap = state.dispute_webhook.enabled ? state.dispute_webhook.percent : 0;
-      return { valid:webhookCap <= scopeCap, scopeCap, webhookCap };
+    setText('now-cohort_strategy', s.cohort_strategy);
+    setText('chg-cohort_strategy', s.cohort_strategy === INITIAL.cohort_strategy
+      ? 'unchanged' : INITIAL.cohort_strategy + ' → ' + s.cohort_strategy);
+
+    setStep('dispute_banner', s.dispute_banner.enabled ? 'on' : 'off',
+      s.dispute_banner.enabled ? 'shown to ' + s.dispute_banner.percent + '% of shops' : 'not shown',
+      s.dispute_banner.enabled ? 'live' : 'off');
+    setStep('dispute_scope', s.dispute_scope.enabled ? 'on' : 'off',
+      s.dispute_scope.enabled ? 'offered to ' + scope + '% of shops' : 'never requested',
+      s.dispute_scope.enabled ? 'live' : 'off');
+    setStep('dispute_webhook', !s.dispute_webhook.enabled ? 'off' : (valid ? 'on' : 'blocked'),
+      !s.dispute_webhook.enabled ? 'not delivered'
+        : (valid ? 'runs for ' + hook + '% of shops'
+                 : hook - scope + ' points of shops receive a webhook without the scope'),
+      !s.dispute_webhook.enabled ? 'off' : (valid ? 'live' : 'blocked'));
+
+    setText('eligible', (valid ? Math.min(scope, hook) : 0) + '%');
+    var constraint = el('constraint');
+    constraint.setAttribute('data-status', valid ? 'ok' : 'danger');
+    constraint.textContent = valid
+      ? 'ok — webhook ' + hook + '% sits inside scope ' + scope + '%'
+      : 'blocked — webhook ' + hook + '% exceeds scope ' + scope + '%';
+
+    var dirty = el('dirty');
+    dirty.setAttribute('data-status', changed.length ? 'warn' : 'info');
+    dirty.textContent = changed.length
+      ? changed.length + ' key(s) changed in this tab — nothing saved'
+      : 'baseline — nothing changed in this tab';
+    copyBtn.disabled = !valid;
+  }
+
+  function show() {
+    var text = el('export-text');
+    text.value = payload();
+    if (dialog.showModal) { dialog.showModal(); } else { dialog.setAttribute('open', ''); }
+    text.focus();
+    text.select();
+  }
+
+  // Clipboard path, in order: the async API, then execCommand on the selection inside the open
+  // dialog, then the selected textarea plus the keystroke the reader runs.
+  function manualCopy() {
+    show();
+    var worked = false;
+    try { worked = document.execCommand('copy'); } catch (error) { worked = false; }
+    say(worked
+      ? 'Diff copied from the dialog. Nothing was sent to the flag service.'
+      : 'The clipboard is blocked in this context. The diff is selected in the dialog — press Ctrl+C or Cmd+C.');
+  }
+  function copy() {
+    var text = payload();
+    var count = changedKeys(read()).length;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        say('Diff copied as JSON: ' + count + ' changed key(s). Nothing was sent to the flag service.');
+      }, manualCopy);
+    } else {
+      manualCopy();
     }
-    function diff(state) {
-      const changed = {};
-      for (const key of ['dispute_banner','dispute_scope','dispute_webhook']) {
-        if (!isEqual(state[key], original[key])) changed[key] = { from:original[key], to:state[key] };
-      }
-      if (state.cohort_strategy !== original.cohort_strategy) changed.cohort_strategy = { from:original.cohort_strategy, to:state.cohort_strategy };
-      return { source:'flags.prod.json@8f2c1a7', changed };
-    }
-    function exportJSON() { return JSON.stringify(diff(readState()), null, 2) + '\n'; }
-    function render() {
-      const state = readState();
-      const check = validate(state);
-      document.getElementById('bannerOut').value = `${state.dispute_banner.percent}%`;
-      document.getElementById('scopeOut').value = `${state.dispute_scope.percent}%`;
-      document.getElementById('webhookOut').value = `${state.dispute_webhook.percent}%`;
-      document.getElementById('warning').classList.toggle('show', !check.valid);
-      document.getElementById('dirty').classList.toggle('on', !isEqual(state, original));
-      document.getElementById('dirty').textContent = isEqual(state, original) ? 'No unsaved export' : 'Changed · not saved';
-      document.getElementById('previewCohort').textContent = `${Math.min(check.scopeCap, check.webhookCap)}% eligible`;
-      document.getElementById('stepBanner').className = `journey-step ${state.dispute_banner.enabled ? 'active' : ''}`;
-      document.getElementById('stepScope').className = `journey-step ${state.dispute_scope.enabled ? 'active' : ''}`;
-      document.getElementById('stepWebhook').className = `journey-step ${check.valid && state.dispute_webhook.enabled ? 'active' : 'blocked'}`;
-      document.getElementById('summary').textContent = check.valid ? `Valid: ${Math.min(check.scopeCap, check.webhookCap)}% of shops can complete the full recovery journey.` : `Blocked: webhook cohort (${check.webhookCap}%) exceeds authorized scope cohort (${check.scopeCap}%).`;
-      document.getElementById('copyExport').disabled = !check.valid;
-    }
-    function showExport() {
-      const field = document.getElementById('exportText');
-      field.value = exportJSON();
-      document.getElementById('exportDialog').showModal();
-      field.focus(); field.select();
-    }
-    form.addEventListener('input', render);
-    document.getElementById('previewExport').addEventListener('click', showExport);
-    document.getElementById('closeDialog').addEventListener('click', () => document.getElementById('exportDialog').close());
-    document.getElementById('reset').addEventListener('click', () => {
-      if (!isEqual(readState(), original) && !confirm('Discard all changes in this tab?')) return;
-      byName('dispute_banner_enabled').checked = original.dispute_banner.enabled; byName('dispute_banner_percent').value = original.dispute_banner.percent;
-      byName('dispute_scope_enabled').checked = original.dispute_scope.enabled; byName('dispute_scope_percent').value = original.dispute_scope.percent;
-      byName('dispute_webhook_enabled').checked = original.dispute_webhook.enabled; byName('dispute_webhook_percent').value = original.dispute_webhook.percent;
-      byName('cohort_strategy').value = original.cohort_strategy;
-      render(); document.getElementById('feedback').textContent = 'Reset to source revision 8f2c1a7.';
+  }
+  function reset() {
+    if (changedKeys(read()).length && !confirm('Discard every change in this tab and return to the baseline?')) return;
+    KEYS.forEach(function (k) {
+      field(k + '_enabled').checked = INITIAL[k].enabled;
+      field(k + '_percent').value = INITIAL[k].percent;
     });
-    document.getElementById('copyExport').addEventListener('click', async () => {
-      const value = exportJSON();
-      try { await navigator.clipboard.writeText(value); document.getElementById('feedback').textContent = 'Changed keys copied as JSON. Nothing was saved to production.'; }
-      catch { showExport(); document.getElementById('feedback').textContent = 'Clipboard unavailable. Export selected for manual copy.'; }
-    });
-    render();
-  </script>
+    field('cohort_strategy').value = INITIAL.cohort_strategy;
+    update();
+    say('Reset to flags.prod.json@9f1c2b7. The previous edits are gone.');
+  }
+
+  // One delegated listener per container.
+  form.addEventListener('input', update);
+  document.getElementById('actions').addEventListener('click', function (event) {
+    var button = event.target.closest('button');
+    if (!button) return;
+    if (button.id === 'copy') copy();
+    else if (button.id === 'show') show();
+    else if (button.id === 'reset') reset();
+  });
+  document.getElementById('dialog-actions').addEventListener('click', function (event) {
+    if (event.target.closest('#close-export')) dialog.close();
+  });
+  update();
+})();
+
+// MANDATORY whenever the file contains <details>. Closed <details> is NEVER printed
+// and CSS cannot override it. Measured: 120 paragraphs in a closed <details> print as
+// 1 page with a CSS override, 5 pages with this listener.
+(function () {
+  var opened = [];
+  addEventListener('beforeprint', function () {
+    opened = [];
+    document.querySelectorAll('details:not([open])').forEach(function (d) { opened.push(d); d.open = true; });
+  });
+  addEventListener('afterprint', function () { opened.forEach(function (d) { d.open = false; }); opened = []; });
+})();
+</script>
 </body>
 </html>

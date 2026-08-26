@@ -1,184 +1,495 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-voice="blueprint">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Example HTML decision explorer comparing three queue architectures on aligned criteria.">
-  <title>Queue architecture explorer — three honest tradeoffs</title>
-  <style>
-    :root { --canvas:#eef2ef; --ink:#13231d; --muted:#61716a; --line:#aebbb5; --blue:#2e66d2; --violet:#7049b9; --orange:#d36932; --white:#fbfcf8; --soft:#dde5df; }
-    * { box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body { margin:0; background:var(--canvas); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.45; }
-    button:focus-visible, a:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
-    header { padding:24px max(22px,calc((100vw - 1240px)/2)); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; font-size:.76rem; text-transform:uppercase; letter-spacing:.12em; }
-    main { max-width:1240px; margin:auto; padding:56px 22px 100px; }
-    .intro { display:grid; grid-template-columns:minmax(0,1fr) 350px; gap:64px; align-items:end; padding-bottom:48px; }
-    h1 { font-size:clamp(3rem,7vw,6.2rem); line-height:.91; letter-spacing:-.06em; margin:0; max-width:850px; }
-    .question { border-left:5px solid var(--blue); padding-left:20px; font-size:1.05rem; }
-    .question b { display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.13em; margin-bottom:8px; color:var(--blue); }
-    .frame { display:grid; grid-template-columns:190px repeat(3,1fr); border-top:2px solid var(--ink); border-bottom:1px solid var(--ink); }
-    .cell { padding:22px 18px; border-bottom:1px solid var(--line); min-width:0; }
-    .cell:not(:nth-child(4n+1)) { border-left:1px solid var(--line); }
-    .label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.7rem; font-weight:800; }
-    .option-head { min-height:170px; position:relative; padding-top:35px; }
-    .option-head::before { content:attr(data-letter); position:absolute; top:12px; right:14px; font-size:5rem; line-height:1; font-weight:900; opacity:.1; }
-    .option-head h2 { font-size:1.55rem; line-height:1.05; margin:0 0 12px; }
-    .option-head p { color:var(--muted); font-size:.9rem; margin:0; }
-    .a { color:var(--blue); } .b { color:var(--violet); } .c { color:var(--orange); }
-    .constraint { font-weight:750; }
-    .pass::before { content:"✓ "; color:#19724e; } .risk::before { content:"△ "; color:#9d5d13; } .fail::before { content:"× "; color:#a5302f; }
-    .metric { display:flex; align-items:baseline; gap:7px; }
-    .metric strong { font-size:1.65rem; }
-    .meter { height:7px; background:#d5ddd8; margin-top:11px; position:relative; }
-    .meter span { display:block; height:100%; background:currentColor; width:var(--value); }
-    .evidence { color:var(--muted); font-size:.78rem; margin-top:10px; }
-    .scenario { margin:58px 0 26px; display:flex; justify-content:space-between; gap:24px; align-items:end; }
-    .scenario h2 { margin:0; font-size:clamp(1.8rem,4vw,3.2rem); letter-spacing:-.04em; }
-    .switch { display:flex; border:1px solid var(--ink); padding:3px; border-radius:999px; }
-    .switch button { border:0; background:transparent; color:var(--ink); min-height:42px; padding:0 18px; border-radius:999px; cursor:pointer; font-weight:800; }
-    .switch button[aria-pressed="true"] { background:var(--ink); color:var(--white); }
-    .frontier { position:relative; min-height:360px; border:1px solid var(--ink); background:linear-gradient(to right,transparent 49.8%,rgba(19,35,29,.1) 50%,transparent 50.2%),linear-gradient(to bottom,transparent 49.8%,rgba(19,35,29,.1) 50%,transparent 50.2%); }
-    .axis-x, .axis-y { position:absolute; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; }
-    .axis-x { right:18px; bottom:12px; } .axis-y { left:14px; top:12px; }
-    .dot { position:absolute; left:var(--x); bottom:var(--y); transform:translate(-50%,50%); width:86px; height:86px; border-radius:50%; color:white; display:grid; place-items:center; text-align:center; font-weight:850; box-shadow:0 7px 0 rgba(19,35,29,.18); transition:left .25s,bottom .25s; }
-    .dot small { display:block; font-weight:500; font-size:.68rem; }
-    .dot-a { background:var(--blue); } .dot-b { background:var(--violet); } .dot-c { background:var(--orange); }
-    .recommendation { margin-top:58px; background:var(--ink); color:var(--white); display:grid; grid-template-columns:210px 1fr; gap:36px; padding:38px; }
-    .recommendation .label { color:#aebbb5; }
-    .recommendation h2 { margin:0 0 13px; font-size:clamp(2rem,4vw,3.6rem); line-height:1; letter-spacing:-.04em; }
-    .recommendation p { margin:0; max-width:780px; color:#ccd5d0; font-size:1.05rem; }
-    .falsifier { margin-top:18px; color:#fff; padding-top:18px; border-top:1px solid #506159; }
-    details { margin-top:36px; padding:20px 0; border-block:1px solid var(--line); }
-    summary { cursor:pointer; font-weight:850; }
-    @media (max-width:900px) {
-      .intro { grid-template-columns:1fr; gap:28px; }
-      .frame { grid-template-columns:120px repeat(3,minmax(230px,1fr)); overflow-x:auto; }
-      .frame::after { content:"Scroll horizontally to compare all options →"; position:absolute; }
-      .scenario { align-items:flex-start; flex-direction:column; }
-    }
-    @media (max-width:620px) {
-      header { flex-direction:column; }
-      main { padding-top:38px; }
-      .frame { display:block; }
-      .frame::after { display:none; }
-      .cell { border-left:0 !important; }
-      .label { background:var(--ink); color:white; margin-top:20px; }
-      .option-head { min-height:0; padding:24px 18px; }
-      .cell[data-option]::before { content:attr(data-option); display:block; font-size:.66rem; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); margin-bottom:4px; }
-      .frontier { min-height:440px; }
-      .dot { width:72px; height:72px; }
-      .recommendation { grid-template-columns:1fr; padding:28px 22px; }
-      .switch { width:100%; } .switch button { flex:1; padding:0 8px; }
-    }
-    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .dot { transition:none; } }
-    @media print {
-      :root { --canvas:#fff; }
-      header { padding:12px 0; } main { max-width:none; padding:26px 0; }
-      .switch { display:none; } .frame, .recommendation, .frontier { break-inside:avoid; }
-      details > * { display:block; } summary { display:none; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Three queue architectures on one criteria axis: the retry ledger clears the recovery SLO inside the delivery limit; the workflow engine clears it and costs a platform.">
+<title>Queue recovery: the retry ledger wins for a six-person team</title>
+<!--
+  ARTIFACT CONTRACT  (fill every key before writing markup; the validator requires it)
+  audience=        the six engineers who own the payments queue and the platform lead who signs
+                   ADR-042; fluent in broker retries, new to durable-execution engines
+  question=        which recovery architecture clears the 180 s recovery SLO without adding an
+                   operations platform this team has to run?
+  verdict=         the queue-plus-retry-ledger clears it inside the delivery limit; the workflow
+                   engine clears it too and costs a platform the team does not have
+  consequence=     ADR-042 is written against the ledger and the LT-204 rerun for a staged
+                   workflow engine is booked instead of skipped
+  challenge=       "the ledger is a homegrown workflow engine with worse tooling — you are
+                   rebuilding option C badly and you own every bug in it"
+  structure=       three option briefs, one criteria table with options across and criteria down
+                   the left, all three scenarios at once, then the decision
+  spine=           what each option is; what LT-204 measured; what stays unmeasured; which option
+                   leads in which scenario; what would overturn the recommendation
+  transition-type= each section adds one criterion to the same three options; the options never change
+  evidence=        LT-204 command output with host and exit code; the broker config at a pinned
+                   40-hex SHA; the vendor benchmark page with its retrieval date and archive
+  visuals=         alternatives compared -> one table, criteria down the left, options across;
+                   recovery magnitude -> bars in one aligned track on a shared 0-450 s domain
+  voice=           blueprint
+  generic-check=   the default was a three-button scenario switcher that rewrote the verdict on
+                   click; all three scenarios now render at once, because N=3 states fails G2 of
+                   the interaction gate and the median use of an accessory control is zero
+-->
+<style>
+/* === 1. layout-primitives.css — the primitives this file uses, pasted, not re-derived. === */
+:root {
+  --ratio: 1.5;
+  --s-2: calc(var(--s-1)/var(--ratio)); --s-1: calc(var(--s0)/var(--ratio)); --s0: 1rem;
+  --s1: calc(var(--s0)*var(--ratio));   --s2: calc(var(--s1)*var(--ratio));
+  --s3: calc(var(--s2)*var(--ratio));   --s4: calc(var(--s3)*var(--ratio));
+  --measure: 34em; --measure-wide: 45em; --space: var(--s1);
+}
+*,*::before,*::after { box-sizing: border-box; }
+/* MEASURE AXIOM: on the TEXT elements, because max-inline-size does not inherit.
+   Tables and figures stay uncapped on purpose — the comparison needs the width. */
+p,h1,h2,h3,blockquote,figcaption { max-inline-size: var(--measure); }
+h1,h2,h3 { text-wrap: balance; }
+p,li { text-wrap: pretty; }
+.stack { display:flex; flex-direction:column; }
+.stack > * { margin-block: 0; }
+.stack > * + * { margin-block-start: var(--space, var(--s1)); }
+.cluster { display:flex; flex-wrap:wrap; gap: var(--space, var(--s0)); align-items:center; }
+.switcher { display:flex; flex-wrap:wrap; gap: var(--space, var(--s1)); }
+.switcher > * { flex-grow:1; flex-basis: calc((var(--threshold, 34rem) - 100%) * 999); }
+.switcher.lead > :first-child { flex-grow: 2.6; }  /* deliberate asymmetry: the anti-card-soup move */
+/* Grid and flex children default to min-width:auto, so a long token widens the track and the
+   page scrolls sideways. Measured at 485px: 566 vs 485 without this line, 485 vs 485 with it. */
+main > *, main section > * { min-width: 0; }
+
+/* === 2. voices.css — exactly one [data-voice] block: blueprint. ===
+   Single mode DARK, committed: chalk on navy over the ruled 8px/64px field, which reads only
+   dark. Rule style carries commitment: dashed = provisional, solid = committed. The selector is
+   html[data-voice] rather than [data-voice] so the tokens resolve from the document root. */
+html[data-voice="blueprint"] {
+  color-scheme: dark;
+  --paper: #0b2340;                --surface: oklch(30% 0.055 254.9);
+  --raised: oklch(36% 0.06 254.9); --ink: #dce9f7;
+  --muted: oklch(70% 0.04 250);    --rule: oklch(40% 0.05 254.9);
+  --border: var(--rule);           --rule-weight: 1px;
+  --accent: #57c7ff;               --accent-soft: oklch(36% 0.07 233.6);
+  --radius: 0;
+  --shadow-1: none; --shadow-2: none; --shadow-3: none;
+  --field-fine: 8px;               --field-major: 64px;
+  --sans: "IBM Plex Sans Condensed", "IBM Plex Sans", "Helvetica Neue", "Segoe UI", "Liberation Sans", ui-sans-serif, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --text--1: 0.8125rem; --text-0: 1.0625rem; --text-1: 1.375rem; --text-2: 1.9375rem; --text-3: 3.5rem;
+  --lh-body: 1.5; --lh-head: 1.15; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: -0.01em; --tracking-caps: 0.1em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right,  var(--accent-soft) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--accent-soft) 1px, transparent 1px),
+    linear-gradient(to right,  var(--rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+  background-size:
+    var(--field-major) var(--field-major), var(--field-major) var(--field-major),
+    var(--field-fine)  var(--field-fine),  var(--field-fine)  var(--field-fine);
+  color: var(--ink);
+  font-family: var(--sans); font-size: var(--text-0); line-height: var(--lh-body);
+}
+html[data-voice="blueprint"] [data-commitment="provisional"] { border: 1px dashed var(--accent); }
+html[data-voice="blueprint"] [data-commitment="committed"]   { border: 1px solid  var(--accent); }
+
+/* === 3. base-layer.html — what a browser, a printer and a screen reader need. === */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-delay: -1ms !important; animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important; transition-delay: -1ms !important;
+    transition-duration: 1ms !important; scroll-behavior: auto !important;
+  }
+}
+/* the token overrides carry the voice selector: html[data-voice] outranks a bare :root, so a
+   :root override would lose the cascade and change nothing */
+@media (prefers-contrast: more) {
+  html[data-voice="blueprint"] { --border: currentColor; --rule: currentColor; --muted: var(--ink); }
+}
+@media (forced-colors: active) {
+  .opt, .rec, .fiction, figure.src, details { border: 1px solid CanvasText; box-shadow: none; }
+  svg[role="img"], figure svg { forced-color-adjust: none; }
+}
+@page { size: A4; margin: 15mm; }
+@media print {
+  h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+  p, pre, code, figure, table, tr { break-inside: avoid; page-break-inside: avoid; }
+  nav, .toc, .no-print, button { display: none !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; word-break: break-all; }
+  body { background: #fff; color: #000; }
+}
+
+/* === 4. this artifact: masthead, option briefs, criteria table, decision, falsifier. === */
+body { margin: 0; }
+main { --space: var(--s3); max-inline-size: 74rem; margin-inline: auto; padding: var(--s2) var(--s1) var(--s4); }
+h1 { margin: 0; font-size: var(--text-3); line-height: var(--lh-display); max-inline-size: 18ch;
+  letter-spacing: var(--tracking-head); font-weight: var(--weight-display); }
+h2 { margin: 0; font-size: var(--text-2); line-height: var(--lh-head);
+  letter-spacing: var(--tracking-head); font-weight: var(--weight-strong); }
+h3 { margin: 0; font-size: var(--text-1); line-height: var(--lh-head); font-weight: var(--weight-strong); }
+.lede { font-size: var(--text-1); line-height: var(--lh-body); }
+a, .kicker, .conf { color: var(--accent); }
+.note, .cost, .cmp td.unknown, .cmp caption, figure.src figcaption { color: var(--muted); }
+.masthead, .kicker, .cost, .conf, .note, .provenance, figure.src figcaption, figure.src pre,
+.cmp caption, .cmp thead th, .cmp small { font-size: var(--text--1); }
+.masthead, .kicker, .cost, .conf, .provenance, figure.src figcaption, figure.src pre { font-family: var(--mono); }
+.masthead, .kicker, .cmp thead th { text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+.masthead { justify-content: space-between; padding: var(--s0) var(--s1); color: var(--muted);
+  background-color: var(--surface); border-block-end: 1px solid var(--rule); }
+.fiction, .opt, figure.src { background-color: var(--surface); color: var(--ink); }
+.fiction { border-inline-start: 3px solid var(--accent); padding: var(--s-1) var(--s0); max-inline-size: var(--measure-wide); }
+.opt { padding: var(--s1); }  /* the recommended option takes the wide column, on purpose */
+.opt .kicker { display: block; margin-block-end: var(--s-2); }
+.opt p { margin-block: var(--s-1) 0; }
+
+/* comparison table: one aligned track per option, criteria down the left */
+.cmp { border-collapse: collapse; inline-size: 100%; margin: 0;
+  font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1, "lnum" 1; }
+.cmp caption { text-align: left; line-height: var(--lh-small); padding-block-end: var(--s0); max-inline-size: var(--measure-wide); }
+.cmp th, .cmp td { border: 0; border-block-end: 1px solid var(--rule); text-align: left;
+  vertical-align: top; padding: var(--s-1) var(--s0) var(--s-1) 0; }
+.cmp thead th { border-block-end: 2px solid var(--accent); color: var(--accent); }
+.cmp thead .name { display: block; font-size: var(--text-0); color: var(--ink);
+  text-transform: none; letter-spacing: var(--tracking-body); font-weight: var(--weight-strong); }
+.cmp th[scope="row"] { inline-size: 22%; font-weight: var(--weight-strong); }
+.cmp small { display: block; color: var(--muted); font-weight: var(--weight-body); }
+.cmp td.num { position: relative; padding-block: var(--s0); }
+.cmp td.num b, .cmp td.num small { position: relative; z-index: 1; }
+.cmp .bar { position: absolute; inset: var(--s-2) var(--s0) auto 0; block-size: .55rem; z-index: 0;
+  inline-size: calc(var(--v) * 100%); background-color: var(--accent-soft); border-inline-start: 3px solid var(--accent); }
+/* the solid rule at 40% of the 0-450 s domain is the 180 s SLO — the comparator every headline
+   number carries, drawn on the same scale as the bars */
+.cmp td.num::after { content: ""; position: absolute; inset-block: 0; inset-inline-start: 40%; border-inline-start: 1px solid var(--accent); }
+.ok::before   { content: "\2713\00a0"; }  /* glyph plus the status word in the cell text: */
+.risk::before { content: "\25B3\00a0"; }  /* the ink stays one colour, so no status is */
+.stop::before { content: "\00D7\00a0"; }  /* carried by hue alone */
+
+.rec { padding: var(--s2); background-color: var(--raised); color: var(--ink); }
+.conf { white-space: nowrap; }
+.rec .loses { border-block-start: 1px solid var(--rule); padding-block-start: var(--s0); }
+.falsifier li { margin-block-start: var(--s-1); }
+figure.src { margin: 0; padding: var(--s0); }
+figure.src figcaption, .provenance { line-height: var(--lh-small); }
+figure.src figcaption { max-inline-size: var(--measure-wide); }
+figure.src pre { overflow-x: auto; margin-block: var(--s-1) 0; }
+details { border-block-start: 1px solid var(--rule); padding-block: var(--s0); }
+summary { cursor: pointer; font-weight: var(--weight-strong); }
+.provenance { border-block-start: 2px solid var(--accent); padding-block-start: var(--s0); color: var(--muted); }
+.provenance dt { color: var(--ink); margin-block-start: var(--s-1); }
+.provenance dd { margin-inline-start: 0; }
+
+/* Reflow at 48rem: the comparison columns become criterion bands — one band per criterion, each
+   cell labelled with its option. Every table element carries an explicit ARIA role in the markup,
+   so the row/column pairing survives display:block flattening the native table roles. */
+@media (max-width: 48rem) {
+  main { --space: var(--s2); padding-inline: var(--s0); }
+  h1 { font-size: var(--text-2); max-inline-size: none; }
+  .cmp thead { position: absolute; inline-size: 1px; block-size: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .cmp, .cmp tbody, .cmp tr, .cmp th, .cmp td { display: block; }
+  .cmp tr { border-block-start: 2px solid var(--accent); margin-block-start: var(--s1);
+    padding-block-end: var(--s0); }
+  .cmp th[scope="row"] { inline-size: auto; border: 0; padding-inline: 0;
+    font-size: var(--text-1); line-height: var(--lh-head); }
+  .cmp td { border: 0; border-block-start: 1px solid var(--rule); padding-inline: 0; }
+  .cmp td::before { content: attr(data-option); display: block; color: var(--accent);
+    font-family: var(--mono); font-size: var(--text--1);
+    text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+  .cmp td.num::after { display: none; }
+  .cmp .bar { position: relative; inset: auto; display: block; margin-block: var(--s-2); }
+}
+@media print {
+  html[data-voice="blueprint"] { background: #fff; color: #000; background-image: none; }
+  body { --paper: #fff; --surface: #fff; --raised: #fff; --ink: #000; --muted: #3a3a3a;
+    --rule: #000; --accent: #000; --accent-soft: #d8d8d8; }
+  main { max-inline-size: none; padding: 0; }
+  .cmp .bar { border-inline-start-width: 4px; background-color: #d8d8d8; }
+  .rec, .opt, .fiction, figure.src, .masthead { border: 1px solid #000; }
+}
+</style>
 </head>
 <body>
-  <header><span>Architecture decision explorer · ADR-042</span><span>Evidence snapshot · 06 Aug 2026</span></header>
-  <main>
-    <section class="intro">
-      <h1>Three queue architectures. No universal winner.</h1>
-      <div class="question"><b>Decision question</b>Which approach gives a six-person team reliable recovery under bursty workloads without adding an operations platform?</div>
-    </section>
+<header class="masthead cluster">
+  <span>ADR-042 draft · decision explorer</span>
+  <span>Evidence snapshot 06 Aug 2026 · owner: platform lead</span>
+</header>
 
-    <section aria-labelledby="options-title" data-evidence>
-      <h2 id="options-title" style="position:absolute;clip:rect(0 0 0 0)">Aligned option comparison</h2>
-      <div class="frame">
-        <div class="cell label">Alternative</div>
-        <div class="cell option-head a" data-letter="A"><h2>Managed queue</h2><p>Broker retries and dead-letter queue; smallest operating surface.</p></div>
-        <div class="cell option-head b" data-letter="B"><h2>Queue + retry ledger</h2><p>Managed transport with application-owned recovery intent.</p></div>
-        <div class="cell option-head c" data-letter="C"><h2>Workflow engine</h2><p>Durable execution with explicit state, timers, and replay.</p></div>
+<main class="stack">
+  <div class="stack">
+    <p class="kicker">Recovery architecture · three options · one criteria axis</p>
+    <h1>The retry ledger buys recovery the team can afford to run.</h1>
+    <p class="lede">Which recovery architecture clears the 180&nbsp;second recovery SLO for bursty
+      payment retries without adding an operations platform six engineers have to own?</p>
+    <p class="fiction"><strong>Every number, command, repository and vendor page in this file is
+      invented.</strong> It is a shape to copy: the anchors show which fields a real artifact
+      carries, and the table shows an aligned comparison staying honest about what went
+      unmeasured. A real explorer carries output you ran.</p>
+  </div>
 
-        <div class="cell label">Hard constraint<br>≤ 2 FTE-months</div>
-        <div class="cell constraint pass" data-option="Managed queue">3 weeks</div>
-        <div class="cell constraint pass" data-option="Queue + ledger">7 weeks</div>
-        <div class="cell constraint fail" data-option="Workflow engine">14–18 weeks</div>
+  <section class="stack" aria-labelledby="options-h">
+    <h2 id="options-h">Three architectures, three different operating bargains.</h2>
+    <div class="switcher lead" style="--space: var(--s1); --threshold: 22rem;">
+      <article class="opt" data-option="Queue + retry ledger" data-commitment="committed">
+        <span class="kicker">Option B · recommended</span>
+        <h3>Queue + retry ledger</h3>
+        <p>The managed broker keeps transport. A <code>retry_intent</code> table owned by the
+          payments service records why each message exists, which attempt is outstanding, and what
+          outcome it reached; a sweeper re-drives anything past its deadline.</p>
+        <p class="cost">7 weeks · +1 table, +1 sweeper, +1 reconciliation SLO</p>
+      </article>
+      <article class="opt" data-option="Managed queue" data-commitment="committed">
+        <span class="kicker">Option A · today</span>
+        <h3>Managed queue</h3>
+        <p>Broker-native retries with a dead-letter queue. Recovery intent lives in broker
+          metadata, so the smallest operating surface also holds the least business truth.</p>
+        <p class="cost">3 weeks · no new component</p>
+      </article>
+      <article class="opt" data-option="Workflow engine" data-commitment="provisional">
+        <span class="kicker">Option C · provisional</span>
+        <h3>Workflow engine</h3>
+        <p>Durable execution: explicit state machines, timers, and replay of a failed run from its
+          own history. The dashed rule marks it provisional — nothing here was measured on a
+          cluster this team operates.</p>
+        <p class="cost">14–18 weeks · +1 platform to run, patch and page for</p>
+      </article>
+    </div>
+  </section>
 
-        <div class="cell label">p95 recovery</div>
-        <div class="cell a" data-option="Managed queue"><div class="metric"><strong>7m</strong><span>04s</span></div><div class="meter"><span style="--value:82%"></span></div><div class="evidence">120 injected failures · LT-204</div></div>
-        <div class="cell b" data-option="Queue + ledger"><div class="metric"><strong>1m</strong><span>31s</span></div><div class="meter"><span style="--value:28%"></span></div><div class="evidence">120 injected failures · LT-204</div></div>
-        <div class="cell c" data-option="Workflow engine"><div class="metric"><strong>0m</strong><span>44s</span></div><div class="meter"><span style="--value:17%"></span></div><div class="evidence">Vendor benchmark · not reproduced</div></div>
+  <section class="stack" aria-labelledby="matrix-h">
+    <h2 id="matrix-h">One criteria axis. Every option answers the same five questions.</h2>
+    <table class="cmp" role="table">
+      <caption>Three queue architectures against the constraint set for ADR-042. Bars run on a
+        shared 0–450&nbsp;s domain starting at zero; the vertical rule at 180&nbsp;s is the
+        recovery SLO. Baseline for every row: option A, which is what runs today.</caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">Criterion</th>
+          <th scope="col" role="columnheader" data-option="Managed queue"><span class="name">Managed queue</span>Option A</th>
+          <th scope="col" role="columnheader" data-option="Queue + retry ledger"><span class="name">Queue + retry ledger</span>Option B</th>
+          <th scope="col" role="columnheader" data-option="Workflow engine"><span class="name">Workflow engine</span>Option C</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        <tr role="row">
+          <th scope="row" role="rowheader">Delivery cost <small>hard limit: 2 FTE-months</small></th>
+          <td role="cell" class="ok" data-option="Managed queue">Clears — 3 weeks, in production now</td>
+          <td role="cell" class="ok" data-option="Queue + retry ledger">Clears — 7 weeks including the shadow window</td>
+          <td role="cell" class="stop" data-option="Workflow engine">Exceeds — 14–18 weeks to first production run</td>
+        </tr>
+        <tr role="row">
+          <th scope="row" role="rowheader">p95 recovery <small>LT-204, 120 injected failures</small></th>
+          <td role="cell" class="num" data-option="Managed queue">
+            <span class="bar" style="--v:.94"></span><b>424 s</b><small>misses the 180 s SLO</small></td>
+          <td role="cell" class="num" data-option="Queue + retry ledger">
+            <span class="bar" style="--v:.20"></span><b>91 s</b><small>clears the 180 s SLO</small></td>
+          <td role="cell" class="unknown" data-option="Workflow engine">Not measured
+            <small>needs: LT-204 rerun against a staged workflow-engine cluster. The vendor's
+              44 s is a different measurement on different hardware.</small></td>
+        </tr>
+        <tr role="row">
+          <th scope="row" role="rowheader">Failure visibility <small>what a responder queries at 03:00</small></th>
+          <td role="cell" class="risk" data-option="Managed queue">Partial — queue depth shows pressure; one stuck payment is stored nowhere</td>
+          <td role="cell" class="ok" data-option="Queue + retry ledger">Full for intent — one SQL query returns every outstanding intent</td>
+          <td role="cell" class="ok" data-option="Workflow engine">Full for execution — every run keeps its history and replays from it</td>
+        </tr>
+        <tr role="row">
+          <th scope="row" role="rowheader">Operating burden added <small>on a six-engineer rota</small></th>
+          <td role="cell" class="ok" data-option="Managed queue">None — existing alarms and runbooks cover it</td>
+          <td role="cell" class="risk" data-option="Queue + retry ledger">One sweeper and one reconciliation SLO; the table grows with volume</td>
+          <td role="cell" class="stop" data-option="Workflow engine">A platform: upgrades, capacity, its own on-call rotation</td>
+        </tr>
+        <tr role="row">
+          <th scope="row" role="rowheader">Reversibility <small>cost of unwinding in one quarter</small></th>
+          <td role="cell" class="ok" data-option="Managed queue">Free — it is the current state</td>
+          <td role="cell" class="ok" data-option="Queue + retry ledger">Cheap — it shadows the broker two weeks before it is authoritative</td>
+          <td role="cell" class="risk" data-option="Workflow engine">Expensive — domain contracts take the engine's shape and leave it slowly</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
-        <div class="cell label">Failure visibility</div>
-        <div class="cell risk" data-option="Managed queue">Queue depth shows pressure, not business outcome.</div>
-        <div class="cell pass" data-option="Queue + ledger">Intent and terminal outcome are queryable.</div>
-        <div class="cell pass" data-option="Workflow engine">Full execution history and replay.</div>
+  <section class="stack" aria-labelledby="evidence-h">
+    <h2 id="evidence-h">What the run produced, and what it skipped.</h2>
+    <p id="claim-p95" data-claim="observed" data-src="src-lt204">LT-204 recorded p95 recovery of
+      424&nbsp;s for the managed queue and 91&nbsp;s for the queue-plus-ledger across 120 injected
+      broker failures, and skipped the workflow-engine arm for want of a staged cluster.</p>
+    <figure class="src" id="src-lt204" data-kind="command"
+      data-cmd="./bin/faultkit run --plan LT-204 --injections 120 --report p95"
+      data-cwd="/srv/payments/loadtest" data-exit="0" data-host="lt-runner-03"
+      data-retrieved="2026-08-06T14:22Z">
+      <figcaption id="cap-lt204">lt-runner-03 · /srv/payments/loadtest · exit 0 · ran
+        2026-08-06T14:22Z</figcaption>
+      <pre tabindex="0" role="region" aria-labelledby="cap-lt204"><code>$ ./bin/faultkit run --plan LT-204 --injections 120 --report p95
+arm=managed-queue    n=120  recovered=118  p50=96s  p95=424s
+arm=queue+ledger     n=120  recovered=120  p50=38s  p95=91s
+arm=workflow-engine  SKIPPED  reason: no staged cluster in this account</code></pre>
+    </figure>
 
-        <div class="cell label">Operating burden</div>
-        <div class="cell pass" data-option="Managed queue">Lowest; existing alarms and runbooks.</div>
-        <div class="cell risk" data-option="Queue + ledger">One table, sweeper, and reconciliation SLO.</div>
-        <div class="cell fail" data-option="Workflow engine">New platform ownership exceeds team constraint.</div>
+    <p id="claim-dlq" data-claim="observed" data-src="src-broker">The dead-letter queue has no
+      consumer attached, so a payment that exhausts five receives stops where nobody reads it.</p>
+    <figure class="src" id="src-broker" data-kind="code" data-repo="atlas/payments"
+      data-sha="9f1c2b7a4d5e6f708192a3b4c5d6e7f809a1b2c3"
+      data-path="infra/queues/payments.tf" data-lines="18-21" data-retrieved="2026-08-06T09:12Z">
+      <figcaption id="cap-broker"><a href="https://github.com/atlas/payments/blob/9f1c2b7a4d5e6f708192a3b4c5d6e7f809a1b2c3/infra/queues/payments.tf#L18-L21">atlas/payments@9f1c2b7
+        · infra/queues/payments.tf:18-21 · inspected 2026-08-06T09:12Z</a></figcaption>
+      <pre tabindex="0" role="region" aria-labelledby="cap-broker"><code>max_receive_count = 5
+dead_letter_queue = aws_sqs_queue.payments_dlq.arn
+# payments_dlq has no consumer and no alarm on ApproximateNumberOfMessagesVisible</code></pre>
+    </figure>
 
-        <div class="cell label">Reversibility</div>
-        <div class="cell pass" data-option="Managed queue">Current state; no migration.</div>
-        <div class="cell pass" data-option="Queue + ledger">Can shadow before becoming authoritative.</div>
-        <div class="cell risk" data-option="Workflow engine">Domain contracts become engine-shaped.</div>
-      </div>
-    </section>
+    <p id="claim-vendor" data-claim="observed" data-src="src-vendor">The vendor publishes 44&nbsp;s
+      median recovery for the workflow engine, measured on their own cluster and workload.</p>
+    <figure class="src" id="src-vendor" data-kind="web"
+      data-url="https://docs.example-vendor.test/benchmarks/recovery"
+      data-archive="https://web.archive.org/web/20260805114000/https://docs.example-vendor.test/benchmarks/recovery"
+      data-locator="section &quot;Recovery latency&quot;, table 2, row &quot;median&quot;"
+      data-retrieved="2026-08-05T11:40Z">
+      <figcaption>docs.example-vendor.test · Recovery latency, table 2 · retrieved
+        2026-08-05T11:40Z ·
+        <a href="https://docs.example-vendor.test/benchmarks/recovery">live page</a> ·
+        <a href="https://web.archive.org/web/20260805114000/https://docs.example-vendor.test/benchmarks/recovery">archived copy</a></figcaption>
+    </figure>
+  </section>
 
-    <section aria-labelledby="scenario-title">
-      <div class="scenario">
-        <div><span class="label">Sensitivity, not a magic score</span><h2 id="scenario-title">Change the operating scenario.</h2></div>
-        <div class="switch" role="group" aria-label="Operating scenario">
-          <button type="button" data-scenario="small" aria-pressed="true">Small team</button>
-          <button type="button" data-scenario="regulated" aria-pressed="false">Audit-heavy</button>
-          <button type="button" data-scenario="scale" aria-pressed="false">10× scale</button>
-        </div>
-      </div>
-      <div class="frontier" role="img" aria-label="Options positioned by operational cost and recovery control">
-        <span class="axis-y">More recovery control ↑</span><span class="axis-x">More operating cost →</span>
-        <div class="dot dot-a" data-dot="a" style="--x:22%;--y:34%">A<small>managed</small></div>
-        <div class="dot dot-b" data-dot="b" style="--x:49%;--y:72%">B<small>ledger</small></div>
-        <div class="dot dot-c" data-dot="c" style="--x:82%;--y:88%">C<small>workflow</small></div>
-      </div>
-    </section>
+  <section class="stack" aria-labelledby="scen-h">
+    <h2 id="scen-h">All three scenarios at once, so the answer stays comparable.</h2>
+    <table class="cmp" role="table">
+      <caption>Three options under the three operating conditions the platform lead
+        named. Side by side keeps the comparison in one fixation; a control that swapped one
+        scenario for another would hide the other two. What overturns each row is listed once, in
+        "What would show this is wrong" below.</caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">Scenario</th>
+          <th scope="col" role="columnheader">Which option leads</th>
+          <th scope="col" role="columnheader">What carries it</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        <tr role="row">
+          <th scope="row" role="rowheader">Team stays at six <small>the planning case</small></th>
+          <td role="cell" data-option="Queue + retry ledger">Queue + retry ledger</td>
+          <td role="cell" data-option="Queue + retry ledger">91 s against a 180 s SLO, inside the 2 FTE-month limit</td>
+        </tr>
+        <tr role="row">
+          <th scope="row" role="rowheader">Audit-heavy operation <small>every retry explainable</small></th>
+          <td role="cell" data-option="Workflow engine">Workflow engine</td>
+          <td role="cell" data-option="Workflow engine">Execution history and replay answer the auditor with no new tooling, and the 2 FTE-month limit still rules it out this quarter</td>
+        </tr>
+        <tr role="row">
+          <th scope="row" role="rowheader">10× volume <small>the growth case</small></th>
+          <td role="cell" data-option="Queue + retry ledger">Undecided until measured</td>
+          <td role="cell" data-option="Queue + retry ledger">Both clear throughput on paper; operator cost per million recoveries has no evidence on either side</td>
+        </tr>
+      </tbody>
+    </table>
+    <p id="claim-audit" data-claim="inferred" data-confidence="very likely"
+      data-basis="src-vendor claim-dlq">Under audit-heavy operation the workflow engine answers
+      "what happened to payment X" with no new tooling, and the ledger answers it only for the
+      intents the team modelled in advance <b class="conf">very likely (80-95%)</b>.</p>
+  </section>
 
-    <section class="recommendation" aria-labelledby="recommend-title">
-      <div class="label">Recommendation<br><span id="confidence">High confidence</span></div>
-      <div>
-        <h2 id="recommend-title">Choose B for this team and horizon.</h2>
-        <p id="recommend-copy">The retry ledger clears the recovery SLO while staying inside the delivery constraint. Accept one new reconciliation loop; shadow it before authority moves.</p>
-        <p class="falsifier" id="falsifier"><b>Reconsider if:</b> the measured maintenance load exceeds 0.2 FTE or the workflow engine becomes an already-operated shared platform.</p>
-      </div>
-    </section>
+  <section class="rec stack" id="decision" data-recommendation aria-labelledby="rec-h">
+    <p class="kicker">Recommendation for ADR-042</p>
+    <h2 id="rec-h">Build the retry ledger. Keep the managed queue underneath it.</h2>
+    <p id="claim-recovery" data-claim="inferred" data-confidence="likely"
+      data-basis="src-lt204 src-broker">The recovery gap is about where intent is stored rather
+      than how fast the broker redelivers: the ledger closes it because a responder queries
+      outstanding intents directly instead of inferring them from queue depth
+      <b class="conf">likely (55-80%)</b>.</p>
+    <p id="claim-rec" data-claim="recommended" data-basis="claim-recovery">Write ADR-042 against
+      the ledger, shadow it against the broker for two weeks before it becomes authoritative, and
+      book the LT-204 rerun for a staged workflow-engine cluster in the same quarter.</p>
+    <p class="loses"><strong>Where it loses:</strong> the ledger buys recovery with a
+      reconciliation loop this team owns for as long as the service lives, and it answers only the
+      intents someone modelled. Option C answers questions nobody modelled in advance, and its
+      replay tooling stays better than anything shipped here. The ledger wins on the delivery limit
+      and the on-call rota, not on capability.</p>
+  </section>
 
+  <section class="falsifier stack" data-falsifier="claim-recovery" aria-labelledby="fals-h">
+    <h2 id="fals-h">What would show this is wrong</h2>
+    <ul>
+      <li data-test="./bin/faultkit run --plan LT-204 --arm queue+ledger --injections 500">
+        Re-run LT-204 against the ledger at 500 injections. If p95 recovery crosses 180&nbsp;s, the
+        ledger misses the SLO under burst and this recommendation fails.</li>
+      <li data-observation="sweeper hours logged against the on-call rota, weeks 1-8 after cutover">
+        If sweeper maintenance runs above 0.2 FTE for two consecutive months, the operating saving
+        that decided this comparison is gone and option A is the honest answer.</li>
+      <li data-observation="platform roadmap review, next quarter">
+        If another team already runs the workflow engine as a shared platform, option C's operating
+        burden leaves this rota and it wins on visibility.</li>
+      <li data-test="./bin/faultkit run --plan LT-204 --arm all --rate 10x --report operator-cost">
+        At 10× volume, if a reproduced benchmark puts operator cost per million recoveries higher
+        for the ledger than for the engine, the growth row resolves against this recommendation.</li>
+    </ul>
+    <p>Assumption that would break the whole comparison: the team stays at six engineers
+      (<a href="#claim-team">assumed, unverified</a>).</p>
+  </section>
+
+  <section class="stack" aria-labelledby="assume-h">
+    <h2 id="assume-h">What I assumed, in the open</h2>
+    <p id="claim-team" data-claim="assumed">I assumed the payments team stays at six engineers for
+      the next two quarters; I did not verify that against the hiring plan. Every operating-burden
+      row rests on it — at nine engineers, option C's platform cost stops being decisive.</p>
+    <p class="note">The 10× volume row prints no number for either option because none was
+      measured: operator cost per million recoveries has no evidence on either side, and a figure
+      invented to fill the cell would make the table look finished while making it false.</p>
     <details>
-      <summary>Assumptions, unknowns, and evidence limits</summary>
-      <ul>
-        <li><b>Observed:</b> options A and B were load-tested with identical payloads.</li>
-        <li><b>Unknown:</b> option C recovery is a vendor benchmark, not locally reproduced.</li>
-        <li><b>Assumption:</b> the team remains six engineers for the next two quarters.</li>
-        <li><b>Decision owner:</b> Platform lead. Review horizon: six months.</li>
-      </ul>
+      <summary>Two options dropped before this comparison, and why</summary>
+      <p><strong>Cron reconciler over the existing tables.</strong> Cheapest at 1 week, and it
+        recovers on a fixed cycle rather than on a deadline, so p95 recovery inherits the cron
+        interval: 15 minutes against a 180&nbsp;s SLO.</p>
+      <p><strong>Event log with an outbox pattern.</strong> Answers the audit question as well as
+        option C, and it spreads the delivery cost across every producing service; the 2
+        FTE-month limit applies to the whole change, not to the queue team's share of it.</p>
     </details>
-  </main>
-  <script>
-    const scenarios = {
-      small: { title:'Choose B for this team and horizon.', copy:'The retry ledger clears the recovery SLO while staying inside the delivery constraint. Accept one new reconciliation loop; shadow it before authority moves.', falsifier:'Reconsider if: the measured maintenance load exceeds 0.2 FTE or the workflow engine becomes an already-operated shared platform.', confidence:'High confidence', dots:[[22,34],[49,72],[82,88]] },
-      regulated: { title:'Choose C only if the delivery constraint changes.', copy:'Execution history and replay become decisive under audit-heavy operation, but the current two FTE-month limit disqualifies the option.', falsifier:'Reconsider B if: evidence retention and replay cannot satisfy the audit control without bespoke tooling.', confidence:'Medium confidence', dots:[[20,22],[52,61],[76,94]] },
-      scale: { title:'Run a B-versus-C benchmark before committing.', copy:'At 10× scale, both can meet throughput. The unknown is operator cost per million recoveries, so a reversible benchmark is more honest than a winner.', falsifier:'Decision flips when: reproduced cost and recovery evidence separates the options by the agreed threshold.', confidence:'Low confidence', dots:[[18,18],[48,70],[72,83]] }
-    };
-    const buttons = [...document.querySelectorAll('[data-scenario]')];
-    buttons.forEach(button => button.addEventListener('click', () => {
-      const value = scenarios[button.dataset.scenario];
-      buttons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-      document.getElementById('recommend-title').textContent = value.title;
-      document.getElementById('recommend-copy').textContent = value.copy;
-      document.getElementById('falsifier').innerHTML = `<b>${value.falsifier.split(':')[0]}:</b>${value.falsifier.split(':').slice(1).join(':')}`;
-      document.getElementById('confidence').textContent = value.confidence;
-      ['a','b','c'].forEach((key,index) => {
-        const dot = document.querySelector(`[data-dot="${key}"]`);
-        dot.style.setProperty('--x', `${value.dots[index][0]}%`);
-        dot.style.setProperty('--y', `${value.dots[index][1]}%`);
-      });
-    }));
-  </script>
+  </section>
+
+  <footer class="provenance stack">
+    <p>Provenance</p>
+    <dl>
+      <dt>Scope scanned</dt>
+      <dd>3 architectures, 5 criteria, 1 load-test plan (LT-204), 1 broker config file.</dd>
+      <dt>Scope skipped, and why</dt>
+      <dd>Workflow-engine recovery latency: no staged cluster in this account, so the arm was
+        skipped rather than estimated. Operator cost per million recoveries at 10× volume: not
+        measured for any option.</dd>
+      <dt>Commands run</dt>
+      <dd><code>./bin/faultkit run --plan LT-204 --injections 120 --report p95</code> — exit 0,
+        lt-runner-03, 2026-08-06T14:22Z.</dd>
+      <dt>Verified against inferred</dt>
+      <dd>Verified: both p95 figures, the broker config, the vendor's published number. Inferred:
+        where the recovery gap comes from, and the audit ranking. Assumed: team size. Fictional:
+        all of it — this file is a plugin example.</dd>
+      <dt>Evidence coverage</dt>
+      <dd>7/7 claims carry a basis (100%). Scanned 3 of 5 architectures raised in the design
+        review; 2 dropped for the reasons above.</dd>
+      <dt>Generated</dt>
+      <dd>2026-08-13 · aio-html-artifacts example fixture · kind=explorer · voice=blueprint.</dd>
+    </dl>
+    <div class="evidence-legend">
+      <p>Claim tags above: <code>observed</code> carries <code>data-src</code> pointing at the
+        figure holding the bytes; <code>inferred</code> carries <code>data-basis</code> and a
+        <code>data-confidence</code> term with its band printed as text; <code>assumed</code> is a
+        linchpin and stays outside any <code>details</code>; <code>recommended</code> names the
+        claim it follows from.</p>
+    </div>
+  </footer>
+</main>
+
+<script>
+// MANDATORY whenever the file contains <details>. Closed <details> is NEVER printed
+// and CSS cannot override it. Measured: 120 paragraphs in a closed <details> print as
+// 1 page with a CSS override, 5 pages with this listener.
+(function () {
+  var opened = [];
+  addEventListener('beforeprint', function () {
+    opened = [];
+    document.querySelectorAll('details:not([open])').forEach(function (d) { opened.push(d); d.open = true; });
+  });
+  addEventListener('afterprint', function () { opened.forEach(function (d) { d.open = false; }); opened = []; });
+})();
+</script>
 </body>
 </html>

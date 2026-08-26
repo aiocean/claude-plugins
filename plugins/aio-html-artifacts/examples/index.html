@@ -1,42 +1,314 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-voice="brutalist-doc">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Gallery of four distinct HTML communication genres from aio-html-artifacts.">
-  <title>aio-html-artifacts — example gallery</title>
-  <style>
-    :root { --paper:#f7f4eb; --ink:#19201d; --muted:#65706b; --rule:#bfc5bf; --blue:#275dcc; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--paper); color:var(--ink); font-family:ui-sans-serif,system-ui,sans-serif; }
-    header, main { max-width:1120px; margin:auto; padding-inline:22px; }
-    header { padding-top:70px; padding-bottom:48px; border-bottom:2px solid var(--ink); }
-    h1 { font-size:clamp(3rem,8vw,7rem); line-height:.9; letter-spacing:-.065em; margin:0 0 28px; }
-    header p { max-width:720px; color:var(--muted); font-size:1.15rem; line-height:1.55; }
-    main { padding-top:40px; padding-bottom:80px; }
-    article { display:grid; grid-template-columns:80px 1fr 180px; gap:22px; padding:30px 0; border-bottom:1px solid var(--rule); align-items:start; }
-    .n { font-size:2.8rem; font-weight:900; color:var(--rule); }
-    h2 { margin:2px 0 8px; font-size:1.8rem; }
-    p { margin:0; color:var(--muted); line-height:1.5; }
-    a { display:inline-flex; justify-content:center; align-items:center; min-height:44px; border:1px solid var(--ink); color:var(--ink); text-decoration:none; font-weight:800; }
-    a:hover { background:var(--ink); color:var(--paper); }
-    a:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
-    footer { max-width:1120px; margin:auto; padding:0 22px 50px; color:var(--muted); font-size:.8rem; }
-    @media (max-width:680px) { article { grid-template-columns:50px 1fr; } article a { grid-column:2; width:max-content; padding:0 18px; } }
-    @media print { a::after { content:" · " attr(href); } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Five HTML artifacts across four genres, with the string that finds each mechanic.">
+<title>One medium, four human jobs — the example corpus</title>
+<!--
+  ARTIFACT CONTRACT  (fill every key before writing markup; the validator requires it)
+  audience=        a reader choosing which of the five artifacts to open, and a model about to write a sixth
+  question=        which file demonstrates the mechanic I need, and what do I search it for?
+  verdict=         four genres, five artifacts — the report genre twice, at full tier and at tier= brief —
+                   one grep string each; this index is the map and the sixth file
+  consequence=     the reader opens one file and searches it, instead of reading five end to end
+  challenge=       "a gallery is a link list, the map is overhead" — a link list names no mechanic, so the
+                   reader opens all five and reads the visual style instead of the structure
+  structure=       the corpus as a ruled table, then the validator lines that table answers to, then the
+                   reuse/regenerate partition, then the motion budget
+  spine=           what each file is for; what the validator requires of each genre; what to reuse and what
+                   to regenerate; the only motion in this file
+  transition-type= each section narrows the one above it: the corpus, then the rule behind the corpus,
+                   then how to spend the corpus
+  evidence=        scripts/lib/checks-genre.mjs lines 22, 39, 47, 67, 83 and 115, quoted in the second figure
+  visuals=         corpus -> ruled table with a grep column; genre rules -> quoted source lines;
+                   motion budget -> the CSS rule itself, quoted
+  voice=           brutalist-doc — a corpus map is a directory and a directory reads as a manifest:
+                   monospace, 2px rules, radius 0, hard offset shadows
+  generic-check=   a four-tile card grid, icon and two-line blurb per example, was the default here; it
+                   encodes nothing and hides the mechanic, so it became a ruled table whose last column is
+                   the literal string to search for
+-->
+<style>
+/* 1. layout-primitives.css — the primitives this file uses.
+      Every Layout primitives via AVivero/every-layout-skill, MIT. */
+:root {
+  --ratio: 1.5;
+  --s-1: calc(var(--s0)/var(--ratio));  --s0: 1rem;
+  --s1: calc(var(--s0)*var(--ratio));   --s2: calc(var(--s1)*var(--ratio));
+  --s3: calc(var(--s2)*var(--ratio));   --s4: calc(var(--s3)*var(--ratio));
+  --measure: 34em;         /* prose,      ~68 chars */
+  --measure-wide: 45em;    /* tables/code, ~90 chars */
+  --space: var(--s1);
+}
+*,*::before,*::after { box-sizing: border-box; }
+
+/* MEASURE AXIOM: on the TEXT elements, because max-inline-size does not inherit. */
+p,h1,h2,h3,h4,h5,h6,blockquote,figcaption { max-inline-size: var(--measure); }
+h1,h2,h3 { text-wrap: balance; }
+p,li     { text-wrap: pretty; }
+
+.stack { display:flex; flex-direction:column; }
+.stack > * { margin-block: 0; }
+.stack > * + * { margin-block-start: var(--space, var(--s1)); }
+.cluster { display:flex; flex-wrap:wrap; gap: var(--space, var(--s0)); align-items:center; }
+
+/* Grid and flex children default to min-width:auto, so one long token scrolls the
+   page sideways. Measured at 485px: scrollWidth 566 vs clientWidth 485 without it. */
+main > *, main section > * { min-width: 0; }
+.scroll-x { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.scroll-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 2. voices.css — one [data-voice] block, pasted whole.
+      brutalist-doc — editors, decision records, changelogs.
+      Single mode: LIGHT, committed. The one voice permitted untoned #ffffff and
+      #000000, paired with 2px rules, radius 0, hard offset shadows and monospace.
+
+      THE SEVEN-RULE MANIFESTO, applied verbatim by this voice:
+        1. content readable on all reasonable screens
+        2. only hyperlinks and buttons respond to clicks
+        3. hyperlinks underlined and buttons look like buttons
+        4. the back button works
+        5. view content by scrolling
+        6. decoration only when needed
+        7. performance is a feature */
+[data-voice="brutalist-doc"] {
+  color-scheme: light;
+  --paper: #ffffff;                --surface: #ffffff;
+  --raised: #ffffff;               --ink: #000000;
+  --muted: oklch(38% 0 89.9);      --rule: #000000;
+  --border: var(--rule);           --rule-weight: 2px;
+  --accent: #0000ee;               --accent-soft: #ffe600;
+  --link: #0000ee;                 --link-visited: #551a8b;
+  --highlight: #ffe600;
+  --radius: 0;
+  --shadow-1: 2px 2px 0 var(--ink);
+  --shadow-2: 4px 4px 0 var(--ink);
+  --shadow-3: 8px 8px 0 var(--ink);
+
+  --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --sans:  var(--mono);            --serif: var(--mono);
+
+  --text--1: 0.875rem; --text-0: 1.0625rem; --text-1: 1.375rem; --text-2: 1.875rem; --text-3: 3.5rem;
+  --lh-body: 1.5; --lh-head: 1.15; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: -0.02em; --tracking-caps: 0.05em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+  background: var(--paper); color: var(--ink);
+  font-family: var(--mono); font-size: var(--text-0); line-height: var(--lh-body);
+}
+[data-voice="brutalist-doc"] h1,
+[data-voice="brutalist-doc"] h2,
+[data-voice="brutalist-doc"] h3 { text-transform: uppercase; letter-spacing: var(--tracking-head); }
+[data-voice="brutalist-doc"] a         { color: var(--link); text-decoration: underline; }
+[data-voice="brutalist-doc"] a:visited { color: var(--link-visited); }
+[data-voice="brutalist-doc"] mark      { background: var(--highlight); color: var(--ink); }
+[data-voice="brutalist-doc"] button    { border: var(--rule-weight) solid var(--ink); background: var(--paper);
+  color: var(--ink); box-shadow: var(--shadow-1); border-radius: var(--radius);
+  font-family: var(--mono); font-size: var(--text-0); padding: 0.5em 1em; }
+[data-voice="brutalist-doc"] button:active { box-shadow: none; translate: 2px 2px; }
+
+/* 3. base-layer.html — the constructs a browser, a printer and a screen reader need. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 40rem) {   /* reflow structure; never shrink type */
+  h1 { font-size: var(--text-2); }
+  .page-head { padding-block: var(--s2) var(--s1); }
+  th, td { padding-inline: var(--s-1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-delay: -1ms !important; animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important; transition-delay: -1ms !important;
+    transition-duration: 1ms !important; scroll-behavior: auto !important;
+  }
+}
+@media (prefers-contrast: more) { :root { --border: currentColor; --muted: var(--ink); } }
+@media (forced-colors: active) {
+  .card, dialog, [popover], details { border: 1px solid CanvasText; box-shadow: none; }
+  svg[role="img"], figure svg { forced-color-adjust: none; }
+}
+@page { size: A4; margin: 15mm; }
+@media print {
+  h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+  p, pre, code, figure, table, tr { break-inside: avoid; page-break-inside: avoid; }
+  nav, .toc, .no-print, button { display: none !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; word-break: break-all; }
+  body { background: #fff; color: #000; }
+}
+
+/* 4. this file: a directory listing. A masthead rule, a ruled table, a quoted
+      source block, and one transition that starts off. */
+body { margin: 0; }
+.page-head, main, .page-foot { margin-inline: auto; max-inline-size: var(--measure-wide); padding-inline: var(--s1); }
+.page-head { padding-block: var(--s4) var(--s2); border-block-end: var(--rule-weight) solid var(--rule); }
+main { padding-block: var(--s2); }
+/* Asymmetric rhythm: --space resolves on the child, so the major gap between
+   sections is set here rather than by a --space override on main. */
+main.stack > * + * { margin-block-start: var(--s4); }
+h1 { font-size: var(--text-3); line-height: var(--lh-display); font-weight: var(--weight-display); }
+h2 { font-size: var(--text-1); line-height: var(--lh-head); font-weight: var(--weight-strong); }
+.lede { font-size: var(--text-1); line-height: var(--lh-head); font-weight: var(--weight-light); }
+table   { border-collapse: collapse; inline-size: 100%; font-variant-numeric: tabular-nums; }
+caption { text-align: start; font-weight: var(--weight-strong); padding-block-end: var(--s-1); }
+th, td  { text-align: start; vertical-align: top; padding: var(--s-1) var(--s0); border-block-end: 1px solid var(--rule); }
+thead th { border-block-end: var(--rule-weight) solid var(--rule); text-transform: uppercase;
+  letter-spacing: var(--tracking-caps); font-size: var(--text--1); }
+tbody th { font-weight: var(--weight-body); }
+th a:hover, td a:hover, th a:focus-visible, td a:focus-visible { background: var(--highlight); }
+pre { margin: 0; padding: var(--s0); border: var(--rule-weight) solid var(--rule); box-shadow: var(--shadow-1);
+  white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text--1); line-height: var(--lh-small); }
+figcaption { padding-block-start: var(--s-1); color: var(--muted); font-size: var(--text--1); }
+/* The disclaimer prints and reads at full body size, because a fictional-data
+   notice set in fine print is a notice the reader skips. */
+.page-foot { padding-block: var(--s2) var(--s4); border-block-start: var(--rule-weight) solid var(--rule); }
+
+/* The whole motion budget of this file: named properties, one duration, state
+   changes only, and it starts off. The control is a checkbox and the gate is
+   :has(), so the file carries zero JavaScript and the control works anyway. */
+#motion-toggle { inline-size: 1.75rem; block-size: 1.75rem; accent-color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) {
+  body:has(#motion-toggle:checked) th a,
+  body:has(#motion-toggle:checked) td a {
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+}
+</style>
 </head>
 <body>
-  <header>
-    <h1>One medium.<br>Four human jobs.</h1>
-    <p>These examples share an information grammar, not a visual template. Open them to compare an auditable report, a paced deck, an aligned decision surface, and a stateful editor with an export loop.</p>
-  </header>
-  <main>
-    <article><span class="n">01</span><div><h2>Evidence-led report</h2><p>Verdict first, causal system path, actual code beside each claim, and concrete actions.</p></div><a href="engineering-investigation-report.html">Open report →</a></article>
-    <article><span class="n">02</span><div><h2>Narrative deck</h2><p>One claim per scene, keyboard navigation, mobile reading flow, and print-to-PDF behavior.</p></div><a href="migration-briefing-deck.html">Open deck →</a></article>
-    <article><span class="n">03</span><div><h2>Decision explorer</h2><p>Alternatives on a shared baseline, scenario sensitivity, evidence limits, and falsifiable recommendation.</p></div><a href="queue-architecture-explorer.html">Open explorer →</a></article>
-    <article><span class="n">04</span><div><h2>Purpose-built editor</h2><p>Domain constraints, live journey preview, dirty state, reset, and deterministic changed-key export.</p></div><a href="rollout-editor.html">Open editor →</a></article>
-  </main>
-  <footer>All scenarios and data are fictional. Examples are original work created for the aio-html-artifacts plugin.</footer>
+<header class="page-head stack">
+  <h1>One medium. Four human jobs.</h1>
+  <p class="lede">These five files share an information grammar, not a visual template. Each one starts from the
+  same base layer, then commits to a different voice, a different spine, and a different set of primitives.</p>
+  <p>Choose the file whose job matches yours, and search it for the string in the last column. Reading one file
+  end to end teaches its visual style; searching it teaches the mechanic.</p>
+</header>
+
+<main class="stack">
+  <section class="stack">
+    <h2>What each file is for</h2>
+    <p data-claim="observed" data-src="corpus">The corpus is six files: four artifacts at full tier, one per
+    genre, a fifth in the report genre at <code>tier= brief</code>, and this index. The kind column is the
+    value <code>--kind</code> accepts for that file; the grep column is the structure the validator fails
+    that kind without.</p>
+    <figure id="corpus">
+      <div class="scroll-x" role="region" aria-labelledby="corpus-cap" tabindex="0">
+        <table>
+          <caption id="corpus-cap">The corpus, and the string that finds each mechanic</caption>
+          <thead>
+            <tr><th scope="col">File</th><th scope="col">Kind</th><th scope="col">What it demonstrates</th><th scope="col">Grep for</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><a href="engineering-investigation-report.html">engineering-investigation-report.html</a></th>
+              <td>report</td>
+              <td>The verdict on the first screen, then the exact bytes each claim rests on, inside the section that asserts it.</td>
+              <td><code>data-src=</code></td>
+            </tr>
+            <tr>
+              <th scope="row"><a href="weekly-status-brief.html">weekly-status-brief.html</a></th>
+              <td>report</td>
+              <td>The brief tier: a 282-word status carrying five contract keys instead of twelve, with the falsifier and the confidence band stood down and the claim heading held.</td>
+              <td><code>tier=</code></td>
+            </tr>
+            <tr>
+              <th scope="row"><a href="migration-briefing-deck.html">migration-briefing-deck.html</a></th>
+              <td>deck</td>
+              <td>One claim per scene, arrow-key and hash navigation, and a reading order that survives deleting the script.</td>
+              <td><code>location.hash</code></td>
+            </tr>
+            <tr>
+              <th scope="row"><a href="queue-architecture-explorer.html">queue-architecture-explorer.html</a></th>
+              <td>explorer</td>
+              <td>Genuinely different options on one shared criteria axis, every unknown left visible, one recommendation.</td>
+              <td><code>data-option</code></td>
+            </tr>
+            <tr>
+              <th scope="row"><a href="rollout-editor.html">rollout-editor.html</a></th>
+              <td>editor</td>
+              <td>Domain constraints in the controls, dirty state, and an export that serialises what the reader edited.</td>
+              <td><code>JSON.stringify(</code></td>
+            </tr>
+            <tr>
+              <th scope="row">index.html — this file</th>
+              <td>gallery</td>
+              <td>The corpus map, the reuse partition, and the one motion recipe the corpus sanctions.</td>
+              <td><code>data-motion-toggle</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </figure>
+  </section>
+
+  <section class="stack">
+    <h2>What the validator requires of each genre</h2>
+    <p data-claim="observed" data-src="genre-rules">A genre here is structure the gate can fail on, so each
+    row above traces to a line of the gate rather than to a house style.</p>
+    <figure id="genre-rules">
+      <pre>scripts/lib/checks-genre.mjs — one line per row of the table above
+
+:22  report    the first two sections carry the artifact itself — a &lt;pre&gt;,
+               &lt;code&gt;, &lt;table&gt; or &lt;figure&gt;, so the reader meets
+               evidence before scrolling
+:39  deck      a keydown listener drives the deck
+:47  deck      the current scene syncs to location.hash so a slide is
+               linkable and reload keeps your place
+:67  explorer  an explorer places at least two genuinely different options
+               side by side, aligned on shared criteria
+:83  editor    the export serialises live state — JSON.stringify(state),
+               reading from the controls
+:115 gallery   an explicit play/pause control — a gallery is the one genre
+               where motion is the content</pre>
+      <figcaption>Six lines from the validator these six files run through. A row in the table above is a
+      file; a line here is the reason that file exists.</figcaption>
+    </figure>
+  </section>
+
+  <section class="stack">
+    <h2>What to reuse, and what to regenerate</h2>
+    <p>Reuse from these examples: the five-layer placement, the claim-to-evidence adjacency pattern, the
+    observed/inferred tagging, and the mobile table-to-list transform.</p>
+    <p>Regenerate for your subject: palette, type pairing, masthead treatment, section rhythm, and the
+    signature layout device.</p>
+    <p>If your <code>:root</code> values or grid skeleton match an example's, you recolored it. Start over.</p>
+  </section>
+
+  <section class="stack">
+    <h2>The only motion in this file</h2>
+    <p data-claim="observed" data-src="motion-demo">One transition, 150ms, on two named properties, on state
+    changes only, and it starts off. A gallery is the one genre where motion is the content, so the control
+    that starts it sits under the reader's hand — a checkbox and a <code>:has()</code> selector, which is why
+    this file ships zero JavaScript and the control still works. 150ms is long enough to read as a change and
+    short enough to stay out of the way, and naming the two properties keeps the work off layout and paint,
+    which <code>transition: all</code> cannot promise on a table of links.</p>
+    <div class="cluster no-print">
+      <input type="checkbox" id="motion-toggle">
+      <label for="motion-toggle" data-motion-toggle>Play the link transition</label>
+      <span>Then hover or tab through the file names above.</span>
+    </div>
+    <figure id="motion-demo">
+      <pre>@media (prefers-reduced-motion: no-preference) {
+  body:has(#motion-toggle:checked) th a,
+  body:has(#motion-toggle:checked) td a {
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+}</pre>
+      <figcaption>The checkbox holds the state and the print block hides the control. The media query holds
+      the rule back from a reader who asked the operating system for stillness.</figcaption>
+    </figure>
+  </section>
+</main>
+
+<footer class="page-foot">
+  <p data-claim="assumed">Every system, incident, vendor and number inside the five artifacts is fictional,
+  written for this plugin. Nothing here reports on a real repository, and the examples are original work
+  created for aio-html-artifacts.</p>
+</footer>
+
+<!--
+  Zero JavaScript: the reading order, the corpus table, the quoted gate lines and the
+  motion control all work with scripting off. base-layer.html carries a beforeprint
+  listener for the `details` element; this file holds none, so it holds no script.
+-->
 </body>
 </html>

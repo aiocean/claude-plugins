@@ -259,8 +259,8 @@
     {
       "name": "aio-html-artifacts",
       "source": "./plugins/aio-html-artifacts",
-      "description": "Create self-contained HTML artifacts that keep humans in the loop: evidence-rich reports, narrative decks, side-by-side decision surfaces, and purpose-built editors with export loops. Uses a researched information grammar, layered detail, responsive design, accessibility, print support, and deterministic validation.",
-      "version": "1.0.0",
+      "description": "Create self-contained HTML artifacts in four genres — report, deck, explorer, editor — routed by what the human does next: read and audit, present, decide, or edit and hand values back. Every artifact is offline (one file, zero remote references), printable (a print stylesheet in every genre), and auditable (claims carry repository, revision, and line anchors, confidence words carry numeric bands, and a parsing validator gates the structure).",
+      "version": "2.4.1",
       "author": {
         "name": "aiocean"
       }
@@ -269,7 +269,7 @@
       "name": "aio-anti-slop",
       "source": "./plugins/aio-anti-slop",
       "description": "Remove AI slop from prose and code. Mechanical detection via a grep-able catalog of English and Vietnamese tells, per-hit triage with false-positive protection, minimal repairs verified by a re-scan loop, and a diff-scoped code pass that keeps behavior unchanged.",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "author": {
         "name": "aiocean"
       }

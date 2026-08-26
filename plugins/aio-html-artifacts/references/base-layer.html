@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" data-voice="editorial-swiss">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The paste-first skeleton every artifact starts from.">
+<title>The base layer every artifact starts from</title>
+<!--
+  SHARED MECHANICS, NOT SHARED LOOK.
+  This file carries the constructs a browser, a printer and a screen reader need:
+  doctype, lang, viewport, title, one main, one h1, visible focus, reduced motion,
+  contrast and forced-colors, print pagination, and the details print listener.
+  It carries no palette, no type pairing, no section rhythm, no signature device.
+  A report, a deck, an explorer and an editor built on this file look like four
+  different documents, because the look arrives from voices.css and from the
+  subject — never from here.
+-->
+<!--
+  ARTIFACT CONTRACT  (fill every key before writing markup; the validator requires it)
+  An artifact under 600 body words, outside the incident and decision-record spines, adds the
+  line `tier= brief` and fills five of these keys: audience, question, verdict, spine, evidence.
+  audience=        engineers pasting a new artifact skeleton, fluent in HTML, new to this plugin
+  question=        what does an artifact need before the first div is typed?
+  verdict=         these twelve constructs, pasted, not re-derived
+  consequence=     the first render passes the validator instead of failing and being patched
+  challenge=       "my artifact is simple, I can write a head block from memory"
+  structure=       skeleton, then the capability matrix, then the byte budgets
+  spine=           head constructs; body constructs; print behaviour; file:// limits; budgets
+  transition-type= each block is required by the block above it
+  evidence=        measured details print test, 1 page vs 5 pages, below
+  visuals=         none; this file is a fixture, not a deliverable
+  voice=           editorial-swiss
+  generic-check=   a generic skeleton stops at charset and viewport; this one carries the
+                   print, contrast, forced-colors and details behaviour that generic ones omit
+-->
+<style>
+  /* 1. paste layout-primitives.css   2. paste references/voices/<the voice you named>.css */
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 40rem) { /* reflow structure; never shrink type */ }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-delay: -1ms !important; animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important; transition-delay: -1ms !important;
+      transition-duration: 1ms !important; scroll-behavior: auto !important;
+    }
+  }
+  @media (prefers-contrast: more) { :root { --border: currentColor; --muted: var(--ink); } }
+  @media (forced-colors: active) {
+    .card, dialog, [popover], details { border: 1px solid CanvasText; box-shadow: none; }
+    svg[role="img"], figure svg { forced-color-adjust: none; }
+  }
+  @page { size: A4; margin: 15mm; }
+  @media print {
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+    p, pre, code, figure, table, tr { break-inside: avoid; page-break-inside: avoid; }
+    nav, .toc, .no-print, button { display: none !important; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; word-break: break-all; }
+    body { background: #fff; color: #000; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Exactly one h1 in the document</h1>
+  <!-- every subsequent heading is h2+; no level skips -->
+</main>
+
+<!--
+  Every construct above is a hard error in the validator if absent.
+  Start from this file; do not re-derive it.
+-->
+
+<!--
+  file:// CAPABILITY MATRIX  (measured in Chrome over file://, self-reported probe)
+
+  ALLOWED
+    inline `script type="module"` element
+    crypto.randomUUID()            (isSecureContext === true)
+    localStorage                   namespace keys aio:<artifact-id>:<key> —
+                                   every file:// document shares ONE origin
+    URL.createObjectURL + <a download>
+    structuredClone
+    :has()
+    container queries
+    native nesting
+    color-mix(in oklch)
+    text-wrap: balance
+    transition-behavior: allow-discrete
+    <dialog>.showModal()
+    popover
+    document.startViewTransition()
+
+  BANNED                                     TAKE INSTEAD
+    fetch()/XMLHttpRequest of any URL,       inline the data as a `script type="application/json"`
+    including a sibling file — rejects       data island in this same file
+    with TypeError; MDN: local files get
+    opaque origins, CVE-2019-11730
+    a bare `import x from '...'` inside      write the function inline in the same module; a bare
+    an inline module silently voids the      import voids the entire script with no console error
+    entire script
+    `script src`, `link rel=stylesheet`,     one inline `style` element, one inline `script`
+    remote @font-face                        element, system font stacks from voices.css
+    htmx — 51,238 B, premise is server       DOM-as-state plus one event listener
+    round-trips
+    Alpine — 47,465 B, Function-constructor  the same listener; no expression evaluation
+    evaluation trips CSP unsafe-eval
+    any runtime diagram renderer             CSS grid flow, CSS timeline, or hand-authored
+                                             inline <svg role="img">
+-->
+
+<!--
+  BYTE BUDGETS  (measured from the 20-example reference corpus)
+
+    report / explainer    JS <=  1 KB    CSS 4-9 KB    total 12-27 KB
+    slide deck            JS <= 1.5 KB   CSS ~8 KB     total ~17 KB
+    interactive diagram   JS <= 4.5 KB   CSS ~4.5 KB   total ~15 KB
+    editor (most complex) JS <=  12 KB   CSS ~7 KB     total ~19 KB
+
+    Structural invariants: exactly ONE inline `style` element, at most ONE
+    inline `script` element, ZERO external references.
+    JS required for CORE function: 0 lines. JS may only enhance.
+    Total JS ceiling before the design is wrong: 40 lines for report/deck/explorer.
+-->
+
+<script>
+// A file containing <details> ships this listener: a closed <details> is not printed
+// and CSS cannot override it. Measured: 120 paragraphs in a closed <details> print as
+// 1 page with a CSS override, 5 pages with this listener.
+(function () {
+  var opened = [];
+  addEventListener('beforeprint', function () {
+    opened = [];
+    document.querySelectorAll('details:not([open])').forEach(function (d) { opened.push(d); d.open = true; });
+  });
+  addEventListener('afterprint', function () { opened.forEach(function (d) { d.open = false; }); opened = []; });
+})();
+</script>
+</body>
+</html>

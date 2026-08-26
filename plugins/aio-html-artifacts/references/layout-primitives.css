@@ -1,0 +1,130 @@
+/* layout-primitives.css
+   Every Layout primitives via AVivero/every-layout-skill, MIT.
+
+   SHARED MECHANICS, NOT SHARED LOOK.
+   This file names layouts. It sets no colour, no font, no radius, no shadow —
+   those arrive from one file in references/voices/. A report, a deck, an
+   explorer and an editor all built on these primitives look like four different
+   documents, because they select different primitives, different proportions,
+   and different voices.
+
+   Name the primitive you are using before you type it. If you cannot name it,
+   you are about to produce card soup — run the ladder at the bottom of this file.
+*/
+
+:root {
+  --ratio: 1.5;
+  --s-3: calc(var(--s-2)/var(--ratio)); --s-2: calc(var(--s-1)/var(--ratio));
+  --s-1: calc(var(--s0)/var(--ratio));  --s0: 1rem;
+  --s1: calc(var(--s0)*var(--ratio));   --s2: calc(var(--s1)*var(--ratio));
+  --s3: calc(var(--s2)*var(--ratio));   --s4: calc(var(--s3)*var(--ratio));
+  --s5: calc(var(--s4)*var(--ratio));
+  --measure: 34em;         /* prose,      ~68 chars */
+  --measure-wide: 45em;    /* tables/code, ~90 chars */
+  --space: var(--s1);
+}
+*,*::before,*::after { box-sizing: border-box; }
+
+/* MEASURE AXIOM: on the TEXT elements, because max-inline-size does not inherit.
+   Images, tables, form controls and layout containers stay uncapped on purpose. */
+p,h1,h2,h3,h4,h5,h6,blockquote,figcaption { max-inline-size: var(--measure); }
+h1,h2,h3 { text-wrap: balance; }
+p,li     { text-wrap: pretty; }
+
+.stack { display:flex; flex-direction:column; }
+.stack > * { margin-block: 0; }
+.stack > * + * { margin-block-start: var(--space, var(--s1)); }
+.stack-exception, .stack-exception + * { --space: var(--s3); }
+
+.box { padding: var(--s1); border: 1px solid; outline: 1px solid transparent; outline-offset: -1px;
+       color: var(--ink); background: var(--surface, var(--paper)); }
+
+.center { box-sizing: content-box; margin-inline: auto; max-inline-size: var(--measure); padding-inline: var(--s1); }
+
+.cluster { display:flex; flex-wrap:wrap; gap: var(--space, var(--s0)); align-items:center; }
+
+.with-sidebar { display:flex; flex-wrap:wrap; gap: var(--space, var(--s1)); }
+.with-sidebar > :first-child { flex-basis: var(--sidebar-width, 20rem); flex-grow: 1; }
+.with-sidebar > :last-child  { flex-basis: 0; flex-grow: 999; min-inline-size: var(--content-min, 50%); }
+
+.switcher { display:flex; flex-wrap:wrap; gap: var(--space, var(--s1)); }
+.switcher > * { flex-grow:1; flex-basis: calc((var(--threshold, 34rem) - 100%) * 999); }
+.switcher > :nth-last-child(n+5), .switcher > :nth-last-child(n+5) ~ * { flex-basis: 100%; }
+.switcher.lead > :first-child { flex-grow: 2.6; }   /* deliberate asymmetry: the anti-card-soup move */
+
+.grid { display:grid; gap: var(--space, var(--s1));
+        grid-template-columns: repeat(auto-fit, minmax(min(var(--grid-min, 16rem), 100%), 1fr)); }
+
+.reel { display:flex; gap: var(--space, var(--s1)); overflow-x:auto;
+        scroll-snap-type: inline mandatory; overscroll-behavior-inline: contain; }
+/* markup: <div class="reel" role="region" aria-labelledby="cap-id" tabindex="0"> unless every
+   item already holds a link or button — WCAG 2.1.1 / ACT 0ssw9k, validator id a11y.scroll */
+.reel > * { flex: 0 0 var(--reel-item, min(22rem, 80%)); scroll-snap-align: start; }
+
+.frame { aspect-ratio: var(--n,16)/var(--d,9); overflow:hidden; display:flex; place-content:center; }
+.frame > img, .frame > video { inline-size:100%; block-size:100%; object-fit:cover; }
+
+/* SWISS BAND: place children by COLUMN LINE, never by eyeball */
+.gridfield { display:grid; grid-template-columns: repeat(var(--cols,12), 1fr); column-gap: var(--gutter, var(--s1)); }
+.band { grid-column: 1/-1; display:grid; grid-template-columns: subgrid; column-gap: var(--gutter, var(--s1)); align-items:start; }
+@supports not (grid-template-columns: subgrid) { .band { grid-template-columns: repeat(var(--cols,12), 1fr); } }
+
+/* CONTAINER-QUERY LAYER: primitives respond to their SLOT, not the viewport.
+   Required because an artifact renders in a 380px panel, a 1600px tab, and A4. */
+.region { container-type: inline-size; }
+@container (inline-size < 34rem) {
+  .with-sidebar > :first-child { flex-basis: 100%; }
+  .reel > * { flex-basis: 88%; }
+  .band > * { grid-column: 1 / -1 !important; }
+}
+
+/* LAYOUT HYGIENE.
+   Grid and flex children default to min-width:auto, so a long token pushes the
+   track wider than its container and the whole page scrolls sideways.
+   Measured at a 485px viewport: scrollWidth 566 vs clientWidth 485 without the
+   min-width:0 line, 485 vs 485 with it. */
+main > *, main section > * { min-width: 0; }
+.scroll-x { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.scroll-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* markup: <div class="scroll-x" role="region" aria-labelledby="cap-id" tabindex="0"> — WCAG 2.1.1 / ACT 0ssw9k */
+
+/* ===================================================================
+   CARD-GRID REPLACEMENT LADDER
+
+   Run this before writing display:grid with equal children.
+   Answer in order; the first YES wins and routes you to a primitive above.
+
+   1. True peers, no ranking, each links to a detail view, nothing truncated
+      -> .grid, cap 6.  Else continue.
+
+   2. One item matters more
+      -> .switcher.lead (first child flex-grow: 2.6)
+         or a .band at grid-column: 1/8 plus 8/13.
+
+   3. Items differ mainly by comparable fields
+      -> a real <table> with tabular-nums, header rule, hairline row rules.
+
+   4. Controlling item plus dependent detail
+      -> .with-sidebar.
+
+   5. A sequence (steps, timeline, log, changelog)
+      -> .stack of ruled rows, mono index in a fixed first column,
+         no box per row.
+
+   6. Lateral browse of overflow items
+      -> .reel with scroll-snap.
+
+   7. Alternatives being compared
+      -> .band columns with a shared criteria axis down the left.
+
+   Reaching the end and still wanting cards means a hierarchy problem rather
+   than a layout problem — go to rule 2.
+
+   Three shapes stay off the page regardless, and here is what each becomes:
+     equal heights achieved by truncation      -> let rows size to content,
+                                                  or move the fields into a <table>
+     icon + h3 + two lines of filler repeated  -> rule 5, a .stack of ruled rows
+       3x or 6x                                  carrying the actual data
+     a card containing its own menu/tabs/       -> rule 4, .with-sidebar: the
+       action bar                                 controls live in the sidebar
+   =================================================================== */

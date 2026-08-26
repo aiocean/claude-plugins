@@ -1,15 +1,15 @@
 {
   "name": "aio-html-artifacts",
-  "version": "1.0.0",
-  "description": "Create self-contained HTML reports, decks, decision surfaces, and purpose-built editors with layered information, evidence proximity, accessibility, and export loops.",
+  "version": "2.4.1",
+  "description": "Create self-contained HTML artifacts in four genres — report, deck, explorer, editor — routed by what the human does next: read and audit, present, decide, or edit and hand values back. Every artifact is offline (one file, zero remote references), printable (a print stylesheet in every genre), and auditable (claims carry repository, revision, and line anchors, confidence words carry numeric bands, and a parsing validator gates the structure).",
   "author": {
     "name": "aiocean"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "AIO HTML Artifacts",
-    "shortDescription": "Rich HTML communication for reports, decks, decisions, and editors.",
-    "longDescription": "Build standalone HTML artifacts that keep humans in the loop through strong narrative structure, multiple levels of detail, evidence beside claims, responsive accessibility, print support, and deterministic exports.",
+    "shortDescription": "Offline, printable, auditable HTML: report, deck, explorer, editor.",
+    "longDescription": "Four skills that turn a piece of work into one HTML file a human can read, print, audit, and act on. Routing is by the human's next action — read and audit (report), present (deck), decide between options (explorer), edit and hand values back (editor). Each artifact is one file with zero remote references, prints as a first-class output, keeps sendable state in location.hash, anchors every claim to repository, revision, and line range, and passes a zero-dependency validator that asserts against the parsed tree.",
     "developerName": "aiocean",
     "category": "Productivity",
     "capabilities": ["skills"],

@@ -1,0 +1,37 @@
+[data-voice="technical-manual"] {
+  color-scheme: light dark;
+  --paper:  light-dark(#f4f4f4, #161616);
+  --surface: light-dark(oklch(100% 0 89.9), oklch(24% 0 89.9));
+  --raised:  light-dark(oklch(100% 0 89.9), oklch(26% 0 89.9));
+  --ink:    light-dark(#161616, #f4f4f4);
+  --muted:  light-dark(oklch(48% 0 89.9), oklch(70% 0 89.9));
+  --rule:   light-dark(oklch(86% 0 89.9), oklch(32% 0 89.9));
+  --border: var(--rule);           --rule-weight: 1px;
+  --accent: light-dark(#0f62fe, #78a9ff);
+  --accent-soft: light-dark(oklch(93% 0.03 262), oklch(30% 0.05 262));
+  --radius: 0;
+  --shadow-1: none; --shadow-2: none; --shadow-3: none;
+
+  --sans:  "IBM Plex Sans", "Helvetica Neue", "Segoe UI", "Liberation Sans", ui-sans-serif, sans-serif;
+  --serif: "IBM Plex Serif", Charter, Georgia, "Liberation Serif", ui-serif, serif;
+  --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+  --text--1: 0.8125rem; --text-0: 1rem; --text-1: 1.25rem; --text-2: 1.75rem; --text-3: 3.25rem;
+  --lh-body: 1.55; --lh-head: 1.2; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: 0; --tracking-caps: 0.08em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+  background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: var(--text-0); line-height: var(--lh-body);
+  counter-reset: h2;
+}
+[data-voice="technical-manual"] main h2 { counter-increment: h2; counter-reset: h3; }
+[data-voice="technical-manual"] main h3 { counter-increment: h3; }
+[data-voice="technical-manual"] main h2::before { content: counter(h2) "  "; color: var(--muted); font-family: var(--mono); }
+[data-voice="technical-manual"] main h3::before { content: counter(h2) "." counter(h3) "  "; color: var(--muted); font-family: var(--mono); }
+
+/* ---- console — incidents, traces, diffs, editors. ----
+   Single mode: DARK, committed. The palette is Tokyo Night, verified; a light
+   inversion of it is a different palette. Depth comes from the three surface
+   steps, so all elevations are none. Every status carries a glyph prefix, so
+   status survives greyscale, forced-colors and print. */

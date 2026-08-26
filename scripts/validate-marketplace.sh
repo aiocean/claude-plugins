@@ -7,6 +7,8 @@
 #   1. plugin.json has required fields: name, description, version, author
 #   2. Plugin folder name matches "name" in plugin.json
 #   3. Every SKILL.md has YAML frontmatter with "name" and "description"
+#      (plus "when_to_use" and "effort" — warning only; these drive skill routing
+#       and thinking budget, and nothing else in CI observes them)
 #   4. Scripts referenced in skills actually exist
 #   5. Plugin is registered in root .claude-plugin/marketplace.json
 #   6. Version in marketplace.json matches version in plugin.json
@@ -225,6 +227,23 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
       pass "SKILL.md '$skill_name' has frontmatter 'description'"
     else
       fail "SKILL.md '$skill_name' missing frontmatter 'description' field"
+    fi
+
+    # Check frontmatter has "when_to_use" field — raw trigger keywords the model
+    # matches on. Warning, not failure: it is recommended, not required.
+    fm_when="$(echo "$frontmatter" | grep -E '^when_to_use:\s*' || true)"
+    if [ -n "$fm_when" ]; then
+      pass "SKILL.md '$skill_name' has frontmatter 'when_to_use'"
+    else
+      warn "SKILL.md '$skill_name' missing frontmatter 'when_to_use' — add trigger keywords so the skill is discoverable"
+    fi
+
+    # Check frontmatter has "effort" field — thinking budget for the skill.
+    fm_effort="$(echo "$frontmatter" | grep -E '^effort:\s*' | sed 's/^effort:\s*//' | tr -d '[:space:]' || true)"
+    if [ -n "$fm_effort" ]; then
+      pass "SKILL.md '$skill_name' has frontmatter 'effort': $fm_effort"
+    else
+      warn "SKILL.md '$skill_name' missing frontmatter 'effort' — add low|medium|high|max"
     fi
 
     # -------------------------------------------------------

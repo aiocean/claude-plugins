@@ -23,5 +23,67 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # The HTML validator is ESM with node: builtins and .flatMap, so it needs Node 16+.
+      # Pinning to the active LTS keeps the runner image free to move its default major
+      # without changing what this gate actually ran.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Run marketplace validation
         run: bash scripts/validate-marketplace.sh
+
+      - name: Validate HTML artifact examples
+        working-directory: plugins/aio-html-artifacts
+        run: |
+          status=0
+          for f in examples/*.html; do
+            case "$(basename "$f")" in
+              engineering-investigation-report.html) kind=report ;;
+              weekly-status-brief.html)              kind=report ;;
+              migration-briefing-deck.html)          kind=deck ;;
+              queue-architecture-explorer.html)      kind=explorer ;;
+              rollout-editor.html)                   kind=editor ;;
+              index.html)                            kind=gallery ;;
+              *.fixture.html)                        continue ;;
+              *) echo "::error file=$f::no kind declared for this example in validate.yml"; status=1; continue ;;
+            esac
+            echo "--- $f as $kind"
+            node scripts/validate-html-artifact.mjs --kind "$kind" "$f" || status=1
+          done
+          # The fixtures are the corpus that proves the checks still fire. bypass.* carry
+          # the gaming attempts that spell around a check rather than skipping it, so a
+          # refactor that reopens one of those holes turns this job red instead of silent.
+          for pair in slop.fixture.html:report gaming.fixture.html:report \
+                      bypass.fixture.html:report bypass-deck.fixture.html:deck; do
+            f="examples/${pair%%:*}"; kind="${pair##*:}"
+            echo "--- $f as $kind expecting exit 1"
+            if node scripts/validate-html-artifact.mjs --kind "$kind" "$f"; then
+              echo "::error file=$f::fixture exited 0; it is built to exit 1"
+              status=1
+            fi
+          done
+          # The brief tier is a branch, so it gets a branch test. Strip `tier= brief` from the
+          # shipped weekly status and the same bytes have to fail: seven contract keys, the
+          # confidence band and the falsifier all come back. A refactor that leaves brief tier
+          # switched on for every artifact turns this job red instead of passing quietly.
+          echo "--- weekly-status-brief.html with tier= brief removed, expecting exit 1"
+          grep -v '^  tier= *brief$' examples/weekly-status-brief.html > /tmp/no-tier.html
+          if node scripts/validate-html-artifact.mjs --kind report --quiet /tmp/no-tier.html; then
+            echo "::error file=examples/weekly-status-brief.html::passes with tier= brief removed, so the tier gates nothing"
+            status=1
+          fi
+          # And the guard: the same file over the word ceiling has to be refused the tier.
+          echo "--- weekly status padded past the 600-word ceiling, expecting exit 1"
+          node -e '
+            const fs = require("fs");
+            const pad = "<p>" + "word ".repeat(700).trim() + "</p>";
+            fs.writeFileSync("/tmp/over-ceiling.html",
+              fs.readFileSync("examples/weekly-status-brief.html", "utf8").replace("</main>", pad + "\n</main>"));
+          '
+          if node scripts/validate-html-artifact.mjs --kind report --quiet /tmp/over-ceiling.html; then
+            echo "::error file=examples/weekly-status-brief.html::tier= brief survived past the word ceiling"
+            status=1
+          fi
+          exit $status

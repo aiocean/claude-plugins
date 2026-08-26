@@ -1,5 +1,5 @@
 {
   "enabledPlugins": {
-    "aio-design-system@aiocean-plugins": true
+    "aio-design-system@aiocean-plugins": false
   }
 }

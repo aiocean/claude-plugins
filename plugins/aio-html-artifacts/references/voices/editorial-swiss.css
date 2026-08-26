@@ -1,0 +1,27 @@
+[data-voice="editorial-swiss"] {
+  color-scheme: light;
+  --paper: #ffffff;                --surface: oklch(97.5% 0 89.9);
+  --raised: oklch(97.5% 0 89.9);   --ink: #111111;
+  --muted: oklch(45% 0 89.9);      --rule: oklch(88% 0 89.9);
+  --border: var(--rule);           --rule-weight: 1px;
+  --accent: #e4002b;               --accent-soft: oklch(94% 0.03 23.9);
+  --radius: 0;
+  --shadow-1: none; --shadow-2: none; --shadow-3: none;
+
+  --sans:  Archivo, "Helvetica Neue", Helvetica, "Segoe UI", "Liberation Sans", ui-sans-serif, sans-serif;
+  --serif: Charter, "Iowan Old Style", Georgia, "Liberation Serif", ui-serif, serif;
+  --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+  --text--1: 0.875rem; --text-0: 1.125rem; --text-1: 1.5rem; --text-2: 2rem; --text-3: 3.75rem;
+  --lh-body: 1.5; --lh-head: 1.15; --lh-small: 1.5; --lh-display: 1.08;
+  --tracking-body: 0; --tracking-head: -0.01em; --tracking-caps: 0.12em;
+  --weight-light: 200; --weight-body: 400; --weight-strong: 800; --weight-display: 900;
+
+  background: var(--paper); color: var(--ink);
+  font-family: var(--sans); font-size: var(--text-0); line-height: var(--lh-body);
+}
+
+/* ---- technical-manual — report: specs, runbooks, PR writeups. ----
+   Dual mode via light-dark(). Sections are numbered by CSS counter, so a reader
+   cites "3.2" and the author maintains no numbers. Rules and steps carry
+   separation; all three elevations are none. */
