@@ -44,7 +44,7 @@
       "name": "aio-monitoring-observability",
       "source": "./plugins/aio-monitoring-observability",
       "description": "Monitoring and observability strategy, implementation, and troubleshooting. Metrics design (Golden Signals, RED/USE), distributed tracing (OpenTelemetry), alerting, SLOs, dashboards, log aggregation, and tool selection. Includes 7 automation scripts and production-ready templates.",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "author": {
         "name": "aiocean"
       }
@@ -62,7 +62,7 @@
       "name": "aio-xstate",
       "source": "./plugins/aio-xstate",
       "description": "Build XState v5 state machines the right way — design-first planning, params-first typing, and canonical actor patterns for TypeScript and React, with anti-god-machine enforcement.",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "author": {
         "name": "aiocean"
       }
@@ -80,7 +80,7 @@
       "name": "aio-tui",
       "source": "./plugins/aio-tui",
       "description": "Build production-grade Go TUIs on the charmbracelet v2 stack (bubbletea/v2 + lipgloss/v2) — Elm architecture, restrained styling, and elite patterns for async rendering, layout geometry, keymaps and mode machines, mouse drag and resizable panes, floating modals and command palettes, and test design with visual verdicts.",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "author": {
         "name": "aiocean"
       }
@@ -98,7 +98,7 @@
       "name": "aio-claude-toolkit",
       "source": "./plugins/aio-claude-toolkit",
       "description": "Sharpen Claude Code — patch and recompile Claude's binary for custom use cases (control channels, agent-as-a-service, custom tooling), capture this session's workflow as a reusable skill, consolidate memory, and ship feedback to the marketplace.",
-      "version": "3.0.2",
+      "version": "3.0.3",
       "author": {
         "name": "aiocean"
       }
@@ -107,7 +107,7 @@
       "name": "aio-devops",
       "source": "./plugins/aio-devops",
       "description": "GitHub, GitLab, and git worktree workflows in one toolkit — manage repos, PRs, MRs, pipelines, and parallel branches without juggling CLIs.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "author": {
         "name": "aiocean"
       }
@@ -116,7 +116,7 @@
       "name": "aio-design-system",
       "source": "./plugins/aio-design-system",
       "description": "Design and ship UI with confidence — UI/UX guidance, neobrutalism design system bootstrapping, and SaaS analytics dashboard design (chart selection, anti-pattern checks, a11y, storytelling).",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "author": {
         "name": "aiocean"
       }
@@ -125,7 +125,7 @@
       "name": "aio-diagramming",
       "source": "./plugins/aio-diagramming",
       "description": "Generate shareable Mermaid URLs and auto-build Grafana dashboard diagrams from your codebase — diagrams that travel well, without leaving the terminal.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "author": {
         "name": "aiocean"
       }
@@ -134,7 +134,7 @@
       "name": "aio-research",
       "source": "./plugins/aio-research",
       "description": "Run structured 10-phase research workflows and stand up RAG pipelines on Qdrant — go from a topic to a queryable knowledge base.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "author": {
         "name": "aiocean"
       }
@@ -143,7 +143,7 @@
       "name": "aio-codeflow",
       "source": "./plugins/aio-codeflow",
       "description": "Understand, plan, debug, and review code as one coordinated workflow — codebase discovery, dependency mapping, implementation planning, root-cause debugging, and pre-merge review.",
-      "version": "2.0.2",
+      "version": "2.0.3",
       "author": {
         "name": "aiocean"
       }
@@ -152,7 +152,7 @@
       "name": "aio-saas-tools",
       "source": "./plugins/aio-saas-tools",
       "description": "Drive Jira, Confluence, Google Workspace (Drive/Gmail/Calendar/Sheets/Docs), Tanca HR, and X/Twitter from your terminal — one CLI per service, no context switching.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "author": {
         "name": "aiocean"
       }
@@ -161,7 +161,7 @@
       "name": "aio-watermill-kit",
       "source": "./plugins/aio-watermill-kit",
       "description": "Build event-driven Go apps with Watermill — Router, middleware, Pub/Sub, CQRS, and integrations for Kafka, AMQP, NATS, Redis Streams, and SQL.",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "author": {
         "name": "aiocean"
       }
@@ -170,7 +170,7 @@
       "name": "aio-kanban",
       "source": "./plugins/aio-kanban",
       "description": "Track AI-agent work in a markdown kanban board committed to the repo — index board with per-task files, an auto-dispatch monitor that spawns sub-agents for matching tasks, and an optional Go terminal UI (aiokan) for vim/mouse board steering.",
-      "version": "3.2.2",
+      "version": "3.2.3",
       "author": {
         "name": "aiocean"
       }
@@ -179,7 +179,7 @@
       "name": "aio-starrocks",
       "source": "./plugins/aio-starrocks",
       "description": "Design StarRocks tables and tune slow queries — partitioning, bucketing, sort keys, and PK tuning, plus EXPLAIN/Query Profile reading and concrete tuning recipes.",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "author": {
         "name": "aiocean"
       }
@@ -251,7 +251,7 @@
       "name": "aio-boox",
       "source": "./plugins/aio-boox",
       "description": "Push books/docs to an Onyx BOOX e-reader and manage its cloud account (push list, library, notes) API-direct via a self-contained zero-dependency Node CLI — no web UI, no email, no BooxDrop.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "aiocean"
       }
@@ -269,7 +269,7 @@
       "name": "aio-anti-slop",
       "source": "./plugins/aio-anti-slop",
       "description": "Remove AI slop from prose and code. Mechanical detection via a grep-able catalog of English and Vietnamese tells, per-hit triage with false-positive protection, minimal repairs verified by a re-scan loop, and a diff-scoped code pass that keeps behavior unchanged.",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "aiocean"
       }

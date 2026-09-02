@@ -1,8 +1,9 @@
 {
   "name": "aio-xstate",
   "description": "Build XState v5 state machines the right way — design-first planning, params-first typing, and canonical actor patterns for TypeScript and React, with anti-god-machine enforcement.",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "author": {
     "name": "aiocean"
-  }
+  },
+  "license": "MIT"
 }

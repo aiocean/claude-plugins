@@ -1,8 +1,9 @@
 {
   "name": "aio-design-system",
   "description": "Design and ship UI with confidence — UI/UX guidance, neobrutalism design system bootstrapping, and SaaS analytics dashboard design (chart selection, anti-pattern checks, a11y, storytelling).",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "author": {
     "name": "aiocean"
-  }
+  },
+  "license": "MIT"
 }

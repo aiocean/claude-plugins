@@ -1,8 +1,9 @@
 {
   "name": "aio-starrocks",
   "description": "Design StarRocks tables and tune slow queries — partitioning, bucketing, sort keys, and PK tuning, plus EXPLAIN/Query Profile reading and concrete tuning recipes.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": {
     "name": "aiocean"
-  }
+  },
+  "license": "MIT"
 }

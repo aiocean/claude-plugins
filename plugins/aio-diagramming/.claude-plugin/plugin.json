@@ -1,8 +1,9 @@
 {
   "name": "aio-diagramming",
   "description": "Generate shareable Mermaid URLs and auto-build Grafana dashboard diagrams from your codebase — diagrams that travel well, without leaving the terminal.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": {
     "name": "aiocean"
-  }
+  },
+  "license": "MIT"
 }

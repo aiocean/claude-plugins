@@ -1,8 +1,9 @@
 {
   "name": "aio-tui",
   "description": "Build production-grade Go TUIs on the charmbracelet v2 stack (bubbletea/v2 + lipgloss/v2) — Elm architecture, restrained styling, and elite patterns for async rendering, layout geometry, keymaps and mode machines, mouse drag and resizable panes, floating modals and command palettes, and test design with visual verdicts.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "aiocean"
-  }
+  },
+  "license": "MIT"
 }
