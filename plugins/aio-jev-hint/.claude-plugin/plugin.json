@@ -1,7 +1,7 @@
 {
   "name": "aio-jev-hint",
   "description": "Author a UserPromptSubmit hook + `.jev-hint` catalog file that classifies every user prompt against a JSON catalog of {name, useWhen, context} entries via a batched LLM boolean-question call (Vercel AI SDK experimental_evaluate, model typesafe-ai/jev), then injects matched entries as additionalContext when confidence clears a threshold. Covers hook mechanics (fail-open, stdin payload, catalog resolution, batching, debug logging) and .jev-hint field-writing best practices distilled from real production tuning.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "aiocean"
   },

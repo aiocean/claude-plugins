@@ -86,7 +86,7 @@ Grouped plugins bundling multiple related skills into a single install.
 |--------|---------|-------------|
 | **aio-monitoring-observability** | 1.0.11 | Full monitoring stack: Golden Signals, RED/USE, OpenTelemetry, SLOs.<br>`npx skills add aiocean/claude-plugins -s aio-monitoring-observability` |
 | **aio-image** | 1.0.3 | Remove image backgrounds with RMBG-2.0 alpha matting + despill. Engine-agnostic; pairs with flat-magenta chroma-key prompts.<br>`npx skills add aiocean/claude-plugins -s aio-image` |
-| **aio-jev-hint** | 1.0.0 | Author a UserPromptSubmit hook + `.jev-hint` catalog file that classifies user prompts against a JSON catalog via a batched LLM boolean-question call, injecting matched entries (skill suggestions, MCP hints, project rules) as additionalContext above a confidence threshold. Covers hook mechanics and `useWhen`/`context` field-writing best practices distilled from real production tuning.<br>`npx skills add aiocean/claude-plugins -s aio-jev-hint` |
+| **aio-jev-hint** | 1.0.1 | Author a UserPromptSubmit hook + `.jev-hint` catalog file that classifies user prompts against a JSON catalog via a batched LLM boolean-question call, injecting matched entries (skill suggestions, MCP hints, project rules) as additionalContext above a confidence threshold. Covers hook mechanics and `useWhen`/`context` field-writing best practices distilled from real production tuning.<br>`npx skills add aiocean/claude-plugins -s aio-jev-hint` |
 
 ## Workflows
 

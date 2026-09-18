@@ -127,7 +127,7 @@ async function main() {
     JSON.stringify({
       hookSpecificOutput: {
         hookEventName: 'UserPromptSubmit',
-        additionalContext: `[skill-hint]: ${list}`,
+        additionalContext: `Context Hint: ${list}`,
       },
     })
   );
