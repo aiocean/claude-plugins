@@ -1,0 +1,17 @@
+[
+  {
+    "name": "deploy-cloudflare-page",
+    "useWhen": "User wants to deploy a static site directory to Cloudflare Pages or set up a custom pages.dev subdomain — e.g. \"deploy to cloudflare pages\", \"ship to cf pages\", \"publish to pages.dev\".",
+    "context": "/deploy-cloudflare-page"
+  },
+  {
+    "name": "clean-slate",
+    "useWhen": "User is replacing, removing, or cleaning up something with a prior version — code, config, docs, infra, or the assistant's own response — and the result should read as if born in its current form, with no leftover trace of the old version.",
+    "context": "/clean-slate"
+  },
+  {
+    "name": "oncall-latency-dashboard",
+    "useWhen": "User is debugging a slow or timing-out request path and hasn't mentioned checking metrics yet.",
+    "context": "Reminder: check the latency dashboard at grafana.internal/d/api-latency before guessing at the bottleneck."
+  }
+]
