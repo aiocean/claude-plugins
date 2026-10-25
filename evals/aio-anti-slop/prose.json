@@ -1,0 +1,33 @@
+{
+  "plugin": "aio-anti-slop",
+  "skill": "aio-anti-slop",
+  "cases": [
+    {
+      "id": "readme-robotic",
+      "prompt": "Our README.md sounds robotic, like an AI wrote it. Make it read like a person wrote it. Edit the file in place.",
+      "files": {
+        "README.md": "# tinyq\n\nIn today's fast-paced world of software development, managing background jobs has never been more critical. tinyq is not just a queue — it's a seamless, robust, and powerful solution that empowers developers to delve into asynchronous workflows with confidence.\n\n## Why tinyq?\n\n- **Blazing fast** — tinyq processes jobs with unparalleled efficiency.\n- **Developer-friendly** — An intuitive API that just works.\n- **Battle-tested** — Trusted by teams who demand reliability.\n\n## Installation\n\n```bash\nbun add tinyq\n```\n\ntinyq requires Node 20 or later.\n\n## Conclusion\n\nWhether you're a seasoned engineer or just getting started, tinyq is here to elevate your workflow and unlock new possibilities. Happy coding! 🚀\n\n## License\n\nMIT\n"
+      },
+      "trigger": true,
+      "checks": [
+        {"desc": "stock AI phrases removed", "file": "README.md", "not_regex": "(?i)fast-paced world|seamless|delve|empowers|elevate your workflow|unlock new possibilities|unparalleled"},
+        {"desc": "install command kept", "file": "README.md", "regex": "bun add tinyq"},
+        {"desc": "Node 20 requirement kept", "file": "README.md", "regex": "Node(\\.js)? 20"},
+        {"desc": "MIT license kept", "file": "README.md", "regex": "MIT"}
+      ],
+      "rubric": [
+        "README.md contains no em dashes used as sentence punctuation",
+        "README.md has no generic closing section (such as a 'Conclusion' or 'Happy coding') that adds no information",
+        "README.md adds no new factual claims about tinyq that were not in the original"
+      ]
+    },
+    {
+      "id": "unrelated-question",
+      "prompt": "What is the time complexity of binary search on a sorted array? Answer in one line.",
+      "trigger": false,
+      "checks": [
+        {"desc": "answers O(log n)", "output": true, "regex": "(?i)log"}
+      ]
+    }
+  ]
+}

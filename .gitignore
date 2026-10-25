@@ -17,3 +17,9 @@ docs/superpowers/
 # .omc/skills/ is the documented exception: project-scoped skills belong in the repo.
 .omc/*
 !.omc/skills/
+
+# skill-eval run output — transcripts, workdirs, grading. Regenerate with .claude/skills/skill-eval.
+evals/*/runs/
+
+# Python bytecode (skill-eval.py)
+__pycache__/
