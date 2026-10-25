@@ -1,0 +1,10 @@
+{
+  "name": "aio-agent-threats",
+  "description": "Attack-first reference for AI-agent security with local semantic search \u2014 how current AI agents (LLM apps, tool-calling agents, MCP servers, RAG/memory agents, multi-agent systems, coding agents) are manipulated and attacked, each vector paired with detection + mitigation. 46 articles in 8 volumes: prompt injection (direct/indirect/cross-modal), tool & MCP poisoning (TPA, rug-pull, shadowing, MCP CVEs), memory & context poisoning (MINJA, AgentPoison, RAG poisoning), multi-agent attacks (ARCJ, worms, orchestrator hijack), jailbreaks (Crescendo, Echo Chamber, many-shot, policy puppetry, GCG), coding-agent supply-chain (Nx s1ngularity, repo poisoning, exfiltration, real incidents), and defense-in-depth (spotlighting, dual-LLM, CaMeL, least-privilege). Every claim carries a source URL and a HIGH/MEDIUM/LOW confidence label. 2 skills: aio-agent-threats (advisor workflow), aio-agent-threats-reference (encyclopedia lookup).",
+  "version": "1.0.0",
+  "author": {
+    "name": "aiocean"
+  },
+  "repository": "https://github.com/aiocean/claude-plugins",
+  "license": "MIT"
+}

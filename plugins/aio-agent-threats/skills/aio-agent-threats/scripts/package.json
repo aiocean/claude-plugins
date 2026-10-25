@@ -1,0 +1,8 @@
+{
+  "name": "agent-threats-search",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@huggingface/transformers": "^3.4.1"
+  }
+}

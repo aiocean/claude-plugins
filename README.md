@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-A curated collection of 32 plugins for Claude Code — from codebase analysis to iOS debugging to rich HTML communication artifacts.
+A curated collection of 33 plugins for Claude Code — from codebase analysis to iOS debugging to rich HTML communication artifacts.
 
 ## Quick Start
 
@@ -46,6 +46,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | Plugin | Version | Description |
 |--------|---------|-------------|
 | **aio-advisor** | 1.0.0 | Curated decision-support reference with semantic search across three domains — 54 general-reasoning mental models, 27 threat-modeling frameworks (STRIDE, LINDDUN, PASTA, MITRE ATT&CK/ATLAS, Kill Chain, NIST AI RMF, OWASP LLM Top 10, K8s Threat Matrix), and 137 software-architecture patterns (cloud design, resilience, data, DDD, distributed systems). Each domain routes a problem to the relevant entries, applies each, synthesizes, and stress-tests with a counter-frame. 4 skills: aio-mental-models, aio-threat-models, aio-architect-advisor, aio-architect-reference.<br>`npx skills add aiocean/claude-plugins -s aio-advisor` |
+| **aio-agent-threats** | 1.0.0 | Attack-first reference for AI-agent security with local semantic search — how AI agents (LLM apps, tool-calling agents, MCP servers, RAG/memory agents, multi-agent systems, coding agents) are manipulated and attacked, each vector paired with detection + mitigation. 46 articles in 8 volumes: prompt injection, tool & MCP poisoning (TPA, rug-pull, MCP CVEs), memory poisoning (MINJA, AgentPoison), multi-agent attacks (ARCJ, worms), jailbreaks (Crescendo, Echo Chamber, many-shot, policy puppetry, GCG), coding-agent supply-chain (Nx s1ngularity, real incidents), and defense-in-depth (spotlighting, dual-LLM, CaMeL). Every claim carries a source URL + HIGH/MEDIUM/LOW label. 2 skills: aio-agent-threats (advisor), aio-agent-threats-reference (lookup).<br>`npx skills add aiocean/claude-plugins -s aio-agent-threats` |
 
 ### Language & Framework
 
