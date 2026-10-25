@@ -296,7 +296,7 @@
       "name": "aio-perfectize",
       "source": "./plugins/aio-perfectize",
       "description": "Take finished, already-good work (code, prose, plans, analysis, UI) toward its best achievable form. Deletion test first, every edit a challenger the incumbent must lose to, an exemplar-derived bar that rises each cycle, and a fixed-point report that lists what could not be verified.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "aiocean"
       }
