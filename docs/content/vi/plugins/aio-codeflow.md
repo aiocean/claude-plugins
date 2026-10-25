@@ -2,14 +2,14 @@
 title: "aio-codeflow"
 description: "Hiểu, lập kế hoạch, debug và review code thành một workflow phối hợp — codebase discovery, dependency mapping, implementation planning, root-cause debugging và pre-merge review."
 document_type: "plugin"
-version: "3.0.0"
+version: "3.0.1"
 install: "/plugin install aio-codeflow@aiocean-plugins"
 skills_count: 9
 ---
 
 # aio-codeflow
 
-`v3.0.0`
+`v3.0.1`
 
 Hiểu, lập kế hoạch, debug và review code thành một workflow phối hợp — codebase discovery, dependency mapping, implementation planning, root-cause debugging và pre-merge review.
 

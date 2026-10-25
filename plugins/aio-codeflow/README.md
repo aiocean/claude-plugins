@@ -170,6 +170,64 @@ You: /aio-doc-writer
 ## Prerequisites
 
 - **Node.js >= 18** — required by GitNexus
-- **GitNexus** — installed automatically via `npx gitnexus analyze` on first use; MCP server configured via `npx gitnexus setup`
+- **GitNexus** — installed automatically via `npx gitnexus analyze` on first use; MCP server configured via `npx gitnexus setup` (details in [GitNexus setup](#gitnexus-setup))
 - **LSP servers** — configure language servers for your project's language stack for aio-map, aio-review-quick, and aio-doc-writer to use LSP-precision analysis
 - **oh-my-claudecode** — aio-debug and aio-review-deep dispatch OMC agents (explorer, planner, debugger, critic, security-reviewer, verifier); install OMC to unlock the full parallel pipelines
+
+## GitNexus setup
+
+GitNexus indexes a codebase into a knowledge graph (symbols, imports, calls, functional clusters, execution flows) with hybrid BM25 + semantic search. It runs locally: no database, Docker, or API key. aio-discover, aio-map, aio-plan, aio-snapshot, aio-review-quick, aio-review-deep, and aio-doc-writer read this graph.
+
+```bash
+npx gitnexus --version                      # installed? (npx fetches it on first use)
+npx gitnexus status                         # index status for this repo
+npx gitnexus list                           # every indexed repo
+npx gitnexus analyze --embeddings           # index; skips when the git commit is unchanged
+npx gitnexus analyze --embeddings --force   # full rebuild
+npx gitnexus clean                          # delete this repo's index (add --all --force for every index)
+```
+
+Always pass `--embeddings`: semantic search is the main value, and the vectors (snowflake-arctic-embed-xs) are generated locally. Add `--skills` to also generate per-area skill files into `.claude/skills/generated/`.
+
+**Expose it over MCP** with `npx gitnexus setup`, or by hand:
+
+```bash
+claude mcp add gitnexus -- npx -y gitnexus@latest mcp
+```
+
+The index lives in `.gitnexus/` (GitNexus adds it to `.gitignore`; add it yourself if it does not) and `~/.gitnexus/registry.json` maps repo names to index paths, so one MCP server serves every indexed repo.
+
+### Refresh the index from git hooks
+
+Optional. Use git hooks only, refresh only on `master`, and run in the background behind a lock so git stays responsive. Install the snippet as `post-commit`, `post-merge`, and `post-checkout` in `.git/hooks/` and `chmod +x` each:
+
+```bash
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ "$branch" = "master" ] && [ -n "$repo_root" ] && command -v npx >/dev/null 2>&1; then
+    nohup sh -c '
+        cd "$1" || exit 1
+        lockdir=".git/gitnexus-refresh.lock"
+        if mkdir "$lockdir" 2>/dev/null; then
+            trap "rmdir \"$lockdir\"" EXIT
+            npx gitnexus analyze --embeddings >> .git/gitnexus-hooks.log 2>&1
+        fi
+    ' sh "$repo_root" >/dev/null 2>&1 &
+fi
+```
+
+Check it: on a non-`master` branch no `.git/gitnexus-hooks.log` appears; on `master` the log is created or appended. Hooks live in `.git/hooks/` and are not shared by commit.
+
+### Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `npx gitnexus: command not found` | Install Node.js >= 18 |
+| Analysis looks stuck | Large codebases take time; add `--verbose` to watch progress |
+| `status` shows stale | Re-run `npx gitnexus analyze --embeddings` |
+| Index exists but queries come back empty | The git commit is unchanged; rebuild with `--force` |
+| MCP tools missing | Re-run `npx gitnexus setup` or add the server by hand |
+| Embeddings slow | Normal on the first run; keep them on |
+| Start fresh | `npx gitnexus clean`, then `npx gitnexus analyze --embeddings` |
+| Hook refresh not running | Confirm you are on `master`, the hook is executable, and read `.git/gitnexus-hooks.log` |
