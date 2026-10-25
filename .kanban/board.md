@@ -1,7 +1,8 @@
 # Kanban Board
-<!-- Updated: 2026-08-06 -->
+<!-- Updated: 2026-10-25 -->
 
 ## Doing
+- [T-003](tasks/T-003-post-task-perfectize-skill.md) Build post-task perfectize skill — medium/L
 
 ## Todo
 
