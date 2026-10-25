@@ -108,10 +108,6 @@ SKILLS = {
         "arg": None,
         "effort": "medium",
     },
-    "aio-gitnexus": {
-        "arg": '"[status | analyze | rebuild | troubleshoot]"',
-        "effort": "medium",
-    },
     "aio-map": {
         "arg": '"File, function, or module to map dependencies for"',
         "effort": "medium",

@@ -32,19 +32,19 @@ Four problems motivated this plugin.
 
 ## Workflow
 
-The 10 skills form two primary pipelines that share infrastructure (GitNexus for semantic search, LSP for type-precise analysis):
+The 9 skills form two primary pipelines that share infrastructure (GitNexus for semantic search, LSP for type-precise analysis):
 
 ```
 FEATURE DEVELOPMENT PIPELINE
 ─────────────────────────────
-aio-gitnexus  ──► aio-discover ──► aio-map ──► aio-plan ──► aio-snapshot
-(index once)      (find code)   (structure)   (write plan)  (baseline)
-                                                                  │
-                                                            [ implement ]
-                                                                  │
-                                             aio-review-quick ◄──┘
-                                                  │
-                                          aio-review-deep  ──► merge
+npx gitnexus analyze ──► aio-discover ──► aio-map ──► aio-plan ──► aio-snapshot
+(index once)             (find code)   (structure)   (write plan)  (baseline)
+                                                                         │
+                                                                   [ implement ]
+                                                                         │
+                                                    aio-review-quick ◄──┘
+                                                         │
+                                                 aio-review-deep  ──► merge
 
 
 BUG / STUCK PIPELINE
@@ -55,19 +55,11 @@ aio-rubber-duck ──► aio-debug ──► aio-review-deep ──► merge
 
 DOCUMENTATION PIPELINE
 ───────────────────────
-aio-gitnexus ──► aio-doc-writer
-(index)          (write all docs from knowledge graph)
+npx gitnexus analyze ──► aio-doc-writer
+(index)                  (write all docs from knowledge graph)
 ```
 
 ## Skills
-
-### aio-gitnexus
-
-> "setup gitnexus", "index codebase", "gitnexus status", "rebuild index"
-
-The foundation skill. GitNexus turns your codebase into a knowledge graph — nodes (functions, classes, interfaces), edges (imports, calls, inheritance), functional clusters, and execution flows — via a six-phase pipeline using tree-sitter parsing, Leiden clustering, and hybrid BM25 + semantic search. Run this once per project before any other skill; it is what gives aio-discover, aio-map, aio-plan, and aio-review-* their structural intelligence.
-
-Covers install, MCP server setup (`claude mcp add gitnexus`), full re-index, status check, and local git hooks for automatic index refresh on merge to master.
 
 ### aio-discover
 
@@ -128,7 +120,7 @@ Architecture documentation powered by the GitNexus knowledge graph and LSP. Orac
 ### Adding a new feature
 
 ```
-You: /aio-gitnexus analyze
+You: ! npx gitnexus analyze
      → indexes codebase, builds knowledge graph
 
 You: /aio-discover "how does authentication work"
@@ -167,7 +159,7 @@ You: /aio-debug "currency converter called before locale initialization"
 ### Onboarding to a new codebase
 
 ```
-You: /aio-gitnexus analyze --embeddings
+You: ! npx gitnexus analyze --embeddings
      → indexes 13-language codebase, generates cluster files
 
 You: /aio-doc-writer
