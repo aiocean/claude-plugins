@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // UserPromptSubmit hook template: classify the user's prompt against a
-// declared hint catalog (.jev-hint) via Jev (typesafe-ai/jev, an evaluation
-// model reachable through Vercel AI Gateway), inject the matched entries'
+// declared hint catalog (.jev-hint) via Jev (typesafe/jev-1.14, a decision
+// model on the OpenRouter Decisions API), inject the matched entries'
 // `context` as additionalContext when confidence clears a threshold.
 // Catalog entries are arbitrary — skills, MCP servers, project rules, or any
 // other reminder worth surfacing on-topic.
@@ -11,6 +11,11 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 
 const GLOBAL_HINT_FILE = join(process.env.HOME, '.claude', '.jev-hint');
+// https://openrouter.ai/docs/guides/community/jev-tutorial.md
+const DECISIONS_URL = 'https://openrouter.ai/api/alpha/decisions';
+// Pin a release: the threshold below is calibrated against one model version.
+const MODEL = 'typesafe/jev-1.14';
+const REQUEST_TIMEOUT_MS = 8000;
 const CONFIDENCE_THRESHOLD = 0.8;
 
 // Each entry: { name, useWhen, context }. `useWhen` is what gets classified
@@ -85,37 +90,44 @@ async function main() {
   // in one day fired on this pattern instead of an actual user prompt.
   if (state.trimStart().startsWith('<task-notification>')) return;
 
-  const apiKey = process.env.AI_GATEWAY_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return;
 
   const catalog = buildCatalog(cwd);
   if (catalog.size === 0) return;
 
-  // One boolean question per catalog entry, sent as ONE evaluate() call.
-  // Batching ~150-230 questions in a single request costs ~1.3-2.4s in
-  // production — cheap compared to N sequential calls.
+  // One yes/no (`noul`) question per catalog entry, sent as ONE Decisions
+  // request — cheap compared to N sequential calls. A 16-entry catalog
+  // answers in ~0.6s (p50) for ~$0.00006.
   const questions = {};
   let i = 0;
   for (const [name, entry] of catalog) {
     // Prefix with an index: names alone aren't guaranteed unique-as-keys
     // once split back out, and the index keeps ordering stable for debugging.
     questions[`q${i++}__${name}`] = {
-      type: 'boolean',
+      type: 'noul',
       instructions: `Does this apply to the user's request? "${name}": ${entry.useWhen}`,
     };
   }
 
-  const { experimental_evaluate: evaluate } = await import('ai');
-
-  let result;
+  let answers;
   try {
-    result = await evaluate({ model: 'typesafe-ai/jev', state, questions });
+    const res = await fetch(DECISIONS_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: MODEL, state, questions }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+    if (!res.ok) return;
+    ({ answers } = await res.json());
   } catch {
     return;
   }
+  if (!answers) return;
 
-  const scored = Object.entries(result.answers)
-    .map(([key, ans]) => ({ name: key.split('__').slice(1).join('__'), prob: ans.probability }))
+  // Each answer is { type: 'noul', noul: <probability of yes, 0..1> }.
+  const scored = Object.entries(answers)
+    .map(([key, ans]) => ({ name: key.split('__').slice(1).join('__'), prob: ans?.noul ?? 0 }))
     .filter((s) => s.prob > CONFIDENCE_THRESHOLD)
     .sort((a, b) => b.prob - a.prob);
 

@@ -3,8 +3,8 @@ name: aio-jev-hint
 description: |
   Author a UserPromptSubmit hook + `.jev-hint` catalog file — a hook that
   classifies every user prompt against a JSON catalog of
-  {name, useWhen, context} entries via a batched LLM boolean-question call
-  (Vercel AI SDK's experimental_evaluate, model typesafe-ai/jev), then
+  {name, useWhen, context} entries via one batched yes/no decision call
+  (OpenRouter Decisions API, model typesafe/jev-1.14), then
   injects the matched entries' `context` as additionalContext when
   confidence clears a threshold. The catalog is generic — entries can point
   at a relevant skill, an MCP server, a project rule, a dashboard to check,
@@ -15,7 +15,7 @@ description: |
   `useWhen` wording, its confidence threshold. "context hint hook", "prompt
   classifier hook", ".jev-hint file", "UserPromptSubmit LLM classification",
   "surface a reminder on-topic", "viết hook gợi ý ngữ cảnh", "file .jev-hint".
-when_to_use: jev-hint, .jev-hint, context hint hook, UserPromptSubmit hook, prompt classifier hook, experimental_evaluate, typesafe-ai/jev, boolean question batch classification, hint catalog file, useWhen field, additionalContext injection, fail-open hook, confidence threshold context routing, viết hook gợi ý ngữ cảnh
+when_to_use: jev-hint, .jev-hint, context hint hook, UserPromptSubmit hook, prompt classifier hook, OpenRouter Decisions API, typesafe/jev-1.14, noul question batch classification, hint catalog file, useWhen field, additionalContext injection, fail-open hook, confidence threshold context routing, viết hook gợi ý ngữ cảnh
 argument-hint: "[what you're building: 'hook' or 'catalog entry']"
 effort: medium
 ---
@@ -27,7 +27,7 @@ effort: medium
 Two pieces, one job: surface the right hint at the right moment without the user asking. The catalog is a generic hint list — nothing ties it to any one kind of target. An entry can point at a skill, an MCP server, a project rule, a dashboard, or a plain reminder; the hook doesn't know or care which.
 
 1. **`.jev-hint`** — a JSON array of `{name, useWhen, context}` entries. Global at `~/.claude/.jev-hint`, optionally overridden per-project by a `.jev-hint` at the repo root (nearest-ancestor lookup, same resolution rule as `.git`). Project entries win name collisions.
-2. **A `UserPromptSubmit` hook** — on every prompt, batches all catalog entries into **one** LLM call (`experimental_evaluate` from the `ai` SDK, model `typesafe-ai/jev`) asking "does this apply?" per entry, then injects the `context` of every entry that clears a confidence threshold as `additionalContext`.
+2. **A `UserPromptSubmit` hook** — on every prompt, batches all catalog entries into **one** call to the OpenRouter Decisions API (`POST https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.14`) asking a yes/no (`noul`) "does this apply?" question per entry, then injects the `context` of every entry that clears a confidence threshold as `additionalContext`.
 
 Full runnable template: `${CLAUDE_PLUGIN_ROOT}/skills/aio-jev-hint/reference/hook-template.mjs`. Example catalog: `${CLAUDE_PLUGIN_ROOT}/skills/aio-jev-hint/reference/example.jev-hint.json`.
 
@@ -78,13 +78,13 @@ mentioned checking metrics yet."
 Checklist, in the order a request flows through `hook-template.mjs`:
 
 - **Event type: `UserPromptSubmit`.** Read `user_input`/`prompt`/`message` + `cwd` from the JSON stdin payload.
-- **Fail open, always.** Any parse error, missing API key, empty catalog, or failed LLM call → return with no output, exit 0. This hook must never block or visibly break the user's prompt.
+- **Fail open, always.** Any parse error, missing `OPENROUTER_API_KEY`, empty catalog, non-2xx response, or timeout → return with no output, exit 0. This hook must never block or visibly break the user's prompt.
 - **Filter synthetic turns.** Background-task completions arrive as a "user" turn whose entire text is a `<task-notification>` block — not something the human typed. Classifying it produced measured noise in production (13 of 38 real hint emissions in one day fired on this pattern instead of an actual request). Skip any prompt starting with it.
 - **Resolve the catalog before calling out.** Walk up from `cwd` for the nearest project `.jev-hint`, merge with the global one, project wins name collisions. Skip the LLM call entirely if the merged catalog is empty.
-- **Batch, don't loop.** One `evaluate()` call with one boolean question per catalog entry — not N sequential calls. In production this batches ~150-230 questions in a single request at ~1.3-2.4s total latency; that's the real budget to design around.
-- **Threshold and sort.** Filter `result.answers` by `probability > threshold` (0.8 in production), sort descending. No matches → emit nothing.
+- **Batch, don't loop.** One Decisions request with one `noul` question per catalog entry — not N sequential calls. Measured with a 16-entry catalog: p50 0.56s, max 1.4s, ~$0.00006 per prompt. Put an `AbortSignal.timeout` on the request so a slow answer degrades to no hint, not a stalled prompt.
+- **Threshold and sort.** Each answer is `{ type: "noul", noul: <probability of yes> }`. Keep entries with `noul > threshold` (0.8 in production), sort descending. No matches → emit nothing.
 - **Output shape.** `stdout` gets exactly one JSON object: `{ hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: "..." } }`. Prefix the joined list with a plain label (`Context Hint: ...`) so it's recognizable in the transcript without implying the hint is always a skill.
-- **Log for yourself, not the user.** Append timing (`stdin parse`, `catalog build`, `import`, `eval call`) and the scored result to a local debug log on every run. This is the only way to tune the threshold or diagnose "why didn't it fire" later — there's no other visibility into a hook that fails open.
+- **Log for yourself, not the user.** Append timing (`stdin parse`, `catalog build`, `decision call`), the serving model (the response's dated snapshot, e.g. `typesafe/jev-1.14-20261014`), and every entry's score to a local debug log on every run. This is the only way to tune the threshold or diagnose "why didn't it fire" later — there's no other visibility into a hook that fails open.
 - **Never hardcode secrets.** Read the API key from an env var first; if you need a fallback file, keep the path out of anything that gets published (this catalog is user-local, but the hook *code* may end up in a shared repo).
 
 ## Wiring it up
@@ -103,7 +103,7 @@ Register the hook once in `settings.json`:
 
 ## Known unexplored lever
 
-`experimental_evaluate` accepts an optional `criteria: { true: "...", false: "..." }` per question alongside `instructions`. Isolated testing suggested explicit criteria changes match behavior versus plain `instructions` alone, both standalone and batched — but the production hook above ships with plain `instructions` only; this was never folded in and re-validated at catalog scale. If a catalog's match quality is off and `useWhen` wording alone doesn't fix it, this is the next thing to try — not a confirmed win.
+A `noul` question accepts an optional `criteria: { true: "...", false: "..." }` alongside `instructions`. Isolated testing suggested explicit criteria changes match behavior versus plain `instructions` alone, both standalone and batched — but the production hook above ships with plain `instructions` only; this was never folded in and re-validated at catalog scale. If a catalog's match quality is off and `useWhen` wording alone doesn't fix it, this is the next thing to try — not a confirmed win.
 
 ## Common mistakes
 
@@ -113,6 +113,8 @@ Register the hook once in `settings.json`:
 | Catalog / output labels assume every entry is a skill (`[skill-hint]:`, "which skill applies?") | Use target-agnostic wording — a generic label like `Context Hint:` and "does this apply?" — the catalog also carries MCP servers, project rules, plain reminders |
 | Hook throws or writes to stderr on error | Wrap every step in try/catch that returns silently; a hint hook that breaks the prompt is worse than no hint |
 | Classifying `<task-notification>` turns | Check `state.trimStart().startsWith('<task-notification>')` before calling out |
-| One `evaluate()` call per catalog entry | Batch all entries into one call — this is what keeps latency in the ~1-2.5s range instead of minutes |
+| One Decisions request per catalog entry | Batch all entries into one request — latency stays near one call instead of growing with the catalog |
+| Using `typesafe/jev-router` over `chat/completions` and reading booleans from its JSON | Use the Decisions API. The router sends each request to a different underlying model; some return no logprobs, so there is no calibrated probability to threshold |
+| Switching model version without re-checking the threshold | Replay a sample of logged prompts against the new version and compare scores per entry before switching; the threshold belongs to one version |
 | `context` field repeats the whole `useWhen` text | Keep `context` to what should actually appear inline — a slash command or one short reminder line |
 | Threshold left unset or at 0.5 | Start at 0.8; lower only after checking the debug log shows real misses, not noise |

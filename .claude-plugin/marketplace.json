@@ -286,8 +286,8 @@
     {
       "name": "aio-jev-hint",
       "source": "./plugins/aio-jev-hint",
-      "description": "Author a UserPromptSubmit hook + .jev-hint catalog file that classifies every user prompt against a JSON catalog of {name, useWhen, context} entries via a batched LLM boolean-question call (Vercel AI SDK experimental_evaluate, model typesafe-ai/jev), then injects matched entries as additionalContext when confidence clears a threshold. Covers hook mechanics and .jev-hint field-writing best practices from real production tuning.",
-      "version": "1.0.1",
+      "description": "Author a UserPromptSubmit hook + .jev-hint catalog file that classifies every user prompt against a JSON catalog of {name, useWhen, context} entries via one batched yes/no decision call (OpenRouter Decisions API, model typesafe/jev-1.14), then injects matched entries as additionalContext when confidence clears a threshold. Covers hook mechanics and .jev-hint field-writing best practices from real production tuning.",
+      "version": "2.0.0",
       "author": {
         "name": "aiocean"
       }
