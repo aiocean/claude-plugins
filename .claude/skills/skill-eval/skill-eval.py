@@ -41,6 +41,8 @@ PLUGINS_DIR = REPO_ROOT / "plugins"
 ISOLATION_FLAGS = ["--setting-sources", "project,local", "--strict-mcp-config"]
 JUDGE_FILE_LIMIT = 20
 JUDGE_FILE_BYTES = 50_000
+# Build output the judge must not spend its file slots on (cargo target/, npm, git).
+BUILD_OUTPUT_DIRS = {"target", "node_modules", ".git"}
 
 GRADING_SCHEMA = {
     "type": "object",
@@ -277,7 +279,12 @@ def read_workdir_file(run_dir):
 
 
 def judge(run_dir, case, meta, judge_model):
-    files = sorted(p for p in (run_dir / "work").rglob("*") if p.is_file())
+    work = run_dir / "work"
+    files = sorted(
+        p
+        for p in work.rglob("*")
+        if p.is_file() and not BUILD_OUTPUT_DIRS & set(p.relative_to(work).parts)
+    )
     shown = files[:JUDGE_FILE_LIMIT]
     blocks = []
     for path in shown:
@@ -317,7 +324,10 @@ def judge(run_dir, case, meta, judge_model):
         cmd, cwd=tempfile.gettempdir(), capture_output=True, text=True, timeout=600
     )
     try:
-        result = next(e for e in json.loads(proc.stdout) if e.get("type") == "result")
+        parsed = json.loads(proc.stdout)
+        # `--output-format json` prints one result object; older CLIs printed an event list.
+        events = parsed if isinstance(parsed, list) else [parsed]
+        result = next(e for e in events if e.get("type") == "result")
         return result["structured_output"]["items"]
     except (json.JSONDecodeError, StopIteration, KeyError, TypeError):
         return [
