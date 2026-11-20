@@ -53,6 +53,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | Plugin | Version | Description |
 |--------|---------|-------------|
 | **aio-golang-mastery** | 1.2.3 | Go development with 7-step lint chain. Google/Uber style guides.<br>`npx skills add aiocean/claude-plugins -s aio-golang-mastery` |
+| **aio-rust** | 1.0.0 | Panic-free Rust for AI agents: a strict clippy profile (unwrap, expect, panic, indexing, overflowing arithmetic, truncating casts; unsafe forbidden) applied by script, a replacement table for every rejected panic site, and a check gate (profile-enforced clippy, no lint escapes, tests) before done. 2 skills: aio-rust (panic-free code) and aio-rust-build (fast builds with bounded disk: debuginfo, per-workspace build-dir, sccache, incremental kept on, cleanup, safe for parallel agents).<br>`npx skills add aiocean/claude-plugins -s aio-rust` |
 | **aio-xstate** | 1.0.11 | XState v5 strict ruleset for TypeScript state machines.<br>`npx skills add aiocean/claude-plugins -s aio-xstate` |
 | **aio-tui** | 1.1.1 | Go TUI guide on the charmbracelet v2 stack (bubbletea/v2 + lipgloss/v2): Elm architecture, restrained styling, async rendering, layout geometry, mouse hit-testing.<br>`npx skills add aiocean/claude-plugins -s aio-tui` |
 | **aio-bun-fullstack-setup** | 1.1.6 | Scaffold Bun fullstack apps with smart detection.<br>`npx skills add aiocean/claude-plugins -s aio-bun-fullstack-setup` |

@@ -300,6 +300,15 @@
       "author": {
         "name": "aiocean"
       }
+    },
+    {
+      "name": "aio-rust",
+      "source": "./plugins/aio-rust",
+      "description": "Panic-free Rust for AI agents: a strict clippy profile (unwrap, expect, panic, indexing, overflowing arithmetic, truncating casts; unsafe forbidden) applied by script, a replacement table for every rejected panic site, and a check gate (profile-enforced clippy, no lint escapes, tests) before done. 2 skills: aio-rust (panic-free code) and aio-rust-build (fast builds with bounded disk: debuginfo, per-workspace build-dir, sccache, incremental kept on, cleanup, safe for parallel agents).",
+      "version": "1.0.0",
+      "author": {
+        "name": "aiocean"
+      }
     }
   ]
 }

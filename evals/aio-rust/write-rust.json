@@ -1,0 +1,150 @@
+{
+  "plugin": "aio-rust",
+  "skill": "aio-rust",
+  "permission_mode": "acceptEdits",
+  "allowed_tools": [
+    "Bash"
+  ],
+  "cases": [
+    {
+      "id": "borrow-fix",
+      "prompt": "cargo build fails on this crate. Fix it so it builds and the tests pass.",
+      "files": {
+        "Cargo.toml": "[package]\nname = \"inventory\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n",
+        "src/lib.rs": "pub struct Item {\n    pub name: String,\n    pub qty: u32,\n}\n\n#[derive(Default)]\npub struct Inventory {\n    items: Vec<Item>,\n    log: Vec<String>,\n}\n\nimpl Inventory {\n    pub fn new() -> Self {\n        Self::default()\n    }\n\n    pub fn add(&mut self, name: &str, qty: u32) {\n        self.items.push(Item { name: name.to_string(), qty });\n        self.record(format!(\"added {name}\"));\n    }\n\n    fn record(&mut self, msg: String) {\n        self.log.push(msg);\n    }\n\n    /// Tops up every item below `threshold` by `amount` and logs each restock.\n    pub fn restock_low(&mut self, threshold: u32, amount: u32) {\n        for item in self.items.iter_mut() {\n            if item.qty < threshold {\n                item.qty += amount;\n                self.record(format!(\"restocked {}\", item.name));\n            }\n        }\n    }\n\n    pub fn qty(&self, name: &str) -> Option<u32> {\n        self.items.iter().find(|i| i.name == name).map(|i| i.qty)\n    }\n\n    pub fn log(&self) -> &[String] {\n        &self.log\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn restocks_only_low_items() {\n        let mut inv = Inventory::new();\n        inv.add(\"bolt\", 2);\n        inv.add(\"nut\", 50);\n        inv.restock_low(10, 20);\n        assert_eq!(inv.qty(\"bolt\"), Some(22));\n        assert_eq!(inv.qty(\"nut\"), Some(50));\n        assert_eq!(inv.log().last().map(String::as_str), Some(\"restocked bolt\"));\n    }\n}\n"
+      },
+      "trigger": true,
+      "checks": [
+        {
+          "desc": "no .clone() added to lib.rs",
+          "file": "src/lib.rs",
+          "not_regex": "\\.clone\\(\\)"
+        },
+        {
+          "desc": "no Rc/RefCell/Mutex workaround",
+          "file": "src/lib.rs",
+          "not_regex": "RefCell|Rc<|Mutex<"
+        },
+        {
+          "desc": "test kept",
+          "file": "src/lib.rs",
+          "regex": "fn restocks_only_low_items"
+        }
+      ],
+      "rubric": [
+        "restock_low fixes the borrow error by restructuring the borrows (for example borrowing the log field directly, collecting messages first, or iterating by index) rather than cloning data or adding interior mutability",
+        "The quantity top-up in restock_low cannot panic on u32 overflow: it uses checked or saturating arithmetic, or returns an error on overflow"
+      ]
+    },
+    {
+      "id": "thread-count",
+      "prompt": "count_words doesn't compile. Make it work, keeping one worker thread per chunk.",
+      "files": {
+        "Cargo.toml": "[package]\nname = \"wordcount\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n",
+        "src/lib.rs": "use std::collections::HashMap;\nuse std::thread;\n\n/// Counts words across all `chunks`, one worker thread per chunk.\npub fn count_words(chunks: Vec<String>) -> HashMap<String, usize> {\n    let mut counts: HashMap<String, usize> = HashMap::new();\n    let mut handles = Vec::new();\n    for chunk in chunks {\n        handles.push(thread::spawn(|| {\n            for word in chunk.split_whitespace() {\n                *counts.entry(word.to_lowercase()).or_insert(0) += 1;\n            }\n        }));\n    }\n    for h in handles {\n        h.join();\n    }\n    counts\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn counts_across_chunks() {\n        let counts = count_words(vec![\"a b A\".into(), \"b c\".into()]);\n        assert_eq!(counts.get(\"a\"), Some(&2));\n        assert_eq!(counts.get(\"b\"), Some(&2));\n        assert_eq!(counts.get(\"c\"), Some(&1));\n    }\n}\n"
+      },
+      "trigger": true,
+      "checks": [
+        {
+          "desc": "no Arc<Mutex>/Mutex shared map",
+          "file": "src/lib.rs",
+          "not_regex": "Mutex"
+        },
+        {
+          "desc": "no unwrap/expect/panic in lib.rs outside tests",
+          "file": "src/lib.rs",
+          "not_regex": "(?s)\\A(?:(?!#\\[cfg\\(test\\)\\]).)*(\\.unwrap\\(\\)|\\.expect\\(|panic!\\()"
+        }
+      ],
+      "rubric": [
+        "Each worker builds its own local count and the results are merged after joining (or an equivalent design without a shared lock), instead of all threads writing to one shared map behind a lock",
+        "A panicked worker thread is surfaced to the caller (e.g. returned as an error) rather than unwrapped, expected, or silently ignored"
+      ]
+    },
+    {
+      "id": "config-toml",
+      "prompt": "Load the config from a TOML file whose path is passed as --config <path>; keys missing from the file keep their defaults. Use the usual crates for this.",
+      "files": {
+        "Cargo.toml": "[package]\nname = \"svc\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n",
+        "src/main.rs": "use std::env;\n\n#[derive(Debug)]\nstruct Config {\n    listen_addr: String,\n    workers: usize,\n    log_level: String,\n}\n\nimpl Default for Config {\n    fn default() -> Self {\n        Self {\n            listen_addr: \"127.0.0.1:8080\".to_string(),\n            workers: 4,\n            log_level: \"info\".to_string(),\n        }\n    }\n}\n\nfn main() {\n    let config = Config::default();\n    let verbose = env::args().any(|a| a == \"-v\");\n    if verbose {\n        println!(\"{config:?}\");\n    }\n    println!(\"listening on {} with {} workers\", config.listen_addr, config.workers);\n}\n"
+      },
+      "trigger": true,
+      "checks": [
+        {
+          "desc": "toml dependency added",
+          "file": "Cargo.toml",
+          "regex": "(?m)^toml\\s*="
+        },
+        {
+          "desc": "dependencies resolved (Cargo.lock has toml)",
+          "file": "Cargo.lock",
+          "regex": "name = \\\"toml\\\""
+        },
+        {
+          "desc": "no unwrap/expect/panic in main.rs outside tests",
+          "file": "src/main.rs",
+          "not_regex": "(?s)\\A(?:(?!#\\[cfg\\(test\\)\\]).)*(\\.unwrap\\(\\)|\\.expect\\(|panic!\\()"
+        },
+        {
+          "desc": "main returns Result or ExitCode",
+          "file": "src/main.rs",
+          "regex": "fn main\\(\\)\\s*->"
+        }
+      ],
+      "rubric": [
+        "A missing or malformed config file produces an error message that names the file path, not a panic",
+        "Cargo.toml turns on strict lints for the crate: clippy unwrap_used, expect_used and panic at deny or forbid, and unsafe_code forbidden"
+      ]
+    },
+    {
+      "id": "new-cli",
+      "prompt": "Create a Rust CLI crate in this directory called wordfreq that prints the 10 most frequent words in the text file given as its first argument. We'll maintain it for years, so set it up properly.",
+      "files": {},
+      "trigger": true,
+      "checks": [
+        {
+          "desc": "unwrap_used denied",
+          "file": "Cargo.toml",
+          "regex": "unwrap_used\\s*=\\s*\\\"(deny|forbid)\\\""
+        },
+        {
+          "desc": "expect_used denied",
+          "file": "Cargo.toml",
+          "regex": "expect_used\\s*=\\s*\\\"(deny|forbid)\\\""
+        },
+        {
+          "desc": "unsafe_code forbidden",
+          "file": "Cargo.toml",
+          "regex": "unsafe_code\\s*=\\s*\\\"forbid\\\""
+        },
+        {
+          "desc": "no unwrap/expect/panic in main.rs",
+          "file": "src/main.rs",
+          "not_regex": "(?s)\\A(?:(?!#\\[cfg\\(test\\)\\]).)*(\\.unwrap\\(\\)|\\.expect\\(|panic!\\()"
+        },
+        {
+          "desc": "built (Cargo.lock exists)",
+          "file": "Cargo.lock",
+          "regex": "name = \\\"wordfreq\\\""
+        }
+      ],
+      "rubric": [
+        "Running wordfreq with a missing file or no argument prints a usage or error message and exits non-zero without a panic",
+        "The project was checked with cargo clippy (the agent ran clippy, per its transcript or reply) and left no clippy warnings it knew about"
+      ]
+    },
+    {
+      "id": "python-slug",
+      "prompt": "Write slugify.py with a function slugify(title) that turns a blog post title into a URL slug.",
+      "files": {},
+      "trigger": false,
+      "checks": [
+        {
+          "desc": "slugify defined",
+          "file": "slugify.py",
+          "regex": "def slugify"
+        }
+      ]
+    }
+  ]
+}
