@@ -114,7 +114,7 @@ function cmdInit(args: string[], ctx: Ctx): number {
     return 0;
   }
   if (Date.parse(contract.deadline) <= ctx.now.getTime()) throw new Refusal(`the contract's deadline ${contract.deadline} is in the past`);
-  if (contract.waker === "cloud") throw new Refusal("waker cloud needs remote mode, which this version does not have");
+  if (contract.waker === "cloud") throw new Refusal("waker cloud is not supported: a Claude cloud routine's session does not load plugins");
   const pluginDir = values["plugin-dir"] === undefined ? undefined : realpathSync(resolve(values["plugin-dir"]));
 
   mkdirSync(p.out, { recursive: true });

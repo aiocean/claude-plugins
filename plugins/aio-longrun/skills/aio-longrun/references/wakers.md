@@ -15,7 +15,7 @@ it themselves.
 | cron | a crontab line that calls `longrun-wake.sh` | remove that line | not checked end to end |
 | Paseo | `paseo schedule create --every …` | `paseo schedule delete <id>` | not checked end to end |
 | Temporal | a workflow per run | `temporal workflow terminate` | not checked end to end |
-| Claude cloud routine | needs remote mode, which this version does not have; `init` refuses `waker: "cloud"` | | |
+| Claude cloud routine | not supported: a routine's session does not load plugins; `init` refuses `waker: "cloud"` | | checked 2026-11-21 with a one-off routine run |
 
 ## launchd
 
@@ -121,8 +121,11 @@ Disarm: `temporal workflow terminate --workflow-id longrun-<run-id> --reason '<s
 
 ## Claude cloud routine
 
-Remote mode, which this version does not have. In remote mode the record is a pushed branch, because a cloud clone
-cannot reach this machine. `init` refuses `waker: "cloud"`.
+Not supported. Every tick runs this plugin's skill, and a routine's cloud session does not load plugins: a one-off
+run of a routine whose prompt was `/aio-longrun:aio-longrun status`, on a fresh clone of this marketplace with
+aio-longrun in it, answered that the command "isn't installed as a command in this session, so it didn't run"
+(2026-11-21). The routine API accepts `enabled_plugins` and `extra_marketplaces` but stores neither. `init` refuses
+`waker: "cloud"`.
 
 ## Session-only timers cannot carry a run
 

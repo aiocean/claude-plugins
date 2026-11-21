@@ -71,7 +71,7 @@ The fenced block in `contract.md`, with the sample values from this plugin's own
 | `allowedTools` | yes | the tick's allowlist: tool names and rules such as `Bash(<prefix>:*)` or `WebFetch(domain:<host>)` | |
 | `denied` | no | rules passed as `--disallowedTools` | none |
 | `checks` | no | named checks `{"<name>": {"argv": [...], "timeoutSeconds": 30}}`; the name uses a-z, 0-9 and `-` | none |
-| `waker` | yes | `launchd`, `cron`, `paseo` or `temporal`; `init` refuses `cloud`, which needs remote mode | |
+| `waker` | yes | `launchd`, `cron`, `paseo` or `temporal`; `init` refuses `cloud`: a cloud routine's session does not load plugins (`wakers.md`) | |
 | `cadenceMinutes` | no | minutes between wakes | 30 |
 | `deadline` | no | when the run ends Not done, listing what is left | `approvedAt` + 7 days |
 | `notify` | yes | the argv run on Waiting on the human, Done and Not done; exactly one whole element is `{message}` | |

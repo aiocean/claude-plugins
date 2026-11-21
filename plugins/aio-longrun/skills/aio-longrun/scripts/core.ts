@@ -1090,7 +1090,7 @@ export function wakerCommand(c: Contract, s: State, recordDir: string, action: "
       if (action === "disarm") return `temporal workflow terminate --workflow-id ${name} --reason ${shellQuote(s.status)}`;
       return `start the Temporal workflow ${name} for ${recordDir}, as references/wakers.md shows`;
     case "cloud":
-      return "waker cloud needs remote mode, which this version does not have";
+      return "waker cloud is not supported: a Claude cloud routine's session does not load plugins";
   }
 }
 

@@ -224,7 +224,7 @@
       "name": "aio-longrun",
       "source": "./plugins/aio-longrun",
       "description": "Carry one large task to a verified result over days and many sessions: a human-approved contract of checkable criteria, one bounded multi-agent step per wake-up, a separate skeptical judge for every verdict, and a record folder in the repo that any waker (launchd, cron, Paseo, Temporal) drives.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "aiocean"
       }
