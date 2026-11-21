@@ -45,7 +45,7 @@ When there's actual code to review, don't eyeball it — run the adaptive review
 
 **Skip the workflow** for a trivial one-file diff — a single reviewer agent (or reviewing it yourself against the checklist below) is enough; the multi-agent machinery is dead weight on a change with one obvious answer.
 
-The full harness, its schemas, and the tuning knobs live in `references/review-workflow.md`. Workflow mechanics (pure-literal `meta`, barrier vs pipeline, budget guard, cache-safe resume) live in the `aio-workflow-creator` skill.
+The full harness, its schemas, and the tuning knobs live in `references/review-workflow.md`. Workflow mechanics (pure-literal `meta`, barrier vs pipeline, budget guard, cache-safe resume) live in Claude Code's built-in `workflow-authoring` skill.
 
 ## The Standard (the senior principle — memorize)
 

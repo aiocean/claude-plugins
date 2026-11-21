@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-A curated collection of 33 plugins for Claude Code — from codebase analysis to iOS debugging to rich HTML communication artifacts.
+A curated collection of 34 plugins for Claude Code — from codebase analysis to iOS debugging to rich HTML communication artifacts.
 
 ## Quick Start
 
@@ -79,7 +79,7 @@ Grouped plugins bundling multiple related skills into a single install.
 | Plugin | Version | Description |
 |--------|---------|-------------|
 | **aio-code-review** | 1.0.3 | Google's engineering code-review playbook — the LGTM threshold ("improves code health, not perfection"), 8-point reviewer checklist (design/functionality/complexity/tests/naming/comments/style/docs), severity-labeled comments (Nit/Optional/FYI), pushback handling, and CL-author guidance (good descriptions, small CLs, handling reviews). Distilled verbatim from [google/eng-practices](https://github.com/google/eng-practices) (CC-BY 3.0).<br>`npx skills add aiocean/claude-plugins -s aio-code-review` |
-| **aio-workflow** | 1.1.1 | Author Workflow-tool scripts that spend effort like it's free and waste none of it — a maximal-effort playbook for multi-agent orchestration. Pick an effort tier (quick check → thorough audit → maximize), then scale fan-out width, verify votes, and discovery rounds; compose named amplifiers (multi-modal sweep, adversarial + perspective-diverse verify, loop-until-dry, completeness critic, synthesis) into one canonical harness, with the correctness rules (literal meta, determinism ban, pipeline-by-default, budget guard, caps) that keep it runnable and resumable. 1 skill: aio-workflow-creator.<br>`npx skills add aiocean/claude-plugins -s aio-workflow` |
+| **aio-longrun** | 1.0.0 | Carry one large task to a verified result over days and many sessions: a human-approved contract of checkable criteria, one bounded multi-agent step per wake-up, a separate skeptical judge for every verdict, and a record folder in the repo that any waker (launchd, cron, Paseo, Temporal) drives.<br>`/plugin install aio-longrun@aiocean-plugins` |
 | **aio-catch-me-up** | 2.0.0 | Don't let the AI leave you behind — turns Claude into a wise, mastery-gated teacher that makes sure YOU deeply understand the work an AI agent just did before you merge it. Grounds in the real `git diff`, builds a running checklist across three pillars (the Problem & why it existed, the Solution & why it beat the alternatives + edge cases, the Broader impact), elicits your restatement *first*, explains the gap at your depth (eli5 / eli14 / intern), and quizzes you with `AskUserQuestion` — answers never leaked, correct option never telegraphed — refusing to conclude until you've demonstrated mastery and survived the *why* follow-ups. 1 skill: aio-catch-me-up.<br>`npx skills add aiocean/claude-plugins -s aio-catch-me-up` |
 
 ### Observability & Utilities

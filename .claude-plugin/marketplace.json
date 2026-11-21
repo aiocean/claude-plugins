@@ -215,16 +215,16 @@
       "name": "aio-code-review",
       "source": "./plugins/aio-code-review",
       "description": "Runs an adaptive, project-aware code-review workflow and carries Google's engineering code-review playbook it applies. The workflow profiles the project, detects its real lint/type-check/test tooling and house conventions, reviews on two tracks (mechanical + semantic 8-dimension rubric), adversarially verifies each finding, and emits an LGTM verdict against The Standard (\"improves code health, not perfection\"). Also coaches the reviewer and CL-author roles. Source: github.com/google/eng-practices (CC-BY 3.0).",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "aiocean"
       }
     },
     {
-      "name": "aio-workflow",
-      "source": "./plugins/aio-workflow",
-      "description": "Author Workflow-tool scripts that spend effort like it's free and waste none of it. A maximal-effort playbook for multi-agent orchestration: pick an effort tier (quick check → thorough audit → maximize), then scale fan-out width, verification votes, and discovery rounds off it. Composes named amplifiers — multi-modal sweep, adversarial + perspective-diverse verify, judge panels, loop-until-dry discovery, completeness critic, synthesis, classify-and-act routing, tournament/pairwise ranking, and untrusted-content quarantine — plus a task→harness recipe catalog, with the correctness rules (literal meta, determinism ban, pipeline-by-default, budget guard, concurrency caps) that keep the script runnable and resumable.",
-      "version": "1.1.1",
+      "name": "aio-longrun",
+      "source": "./plugins/aio-longrun",
+      "description": "Carry one large task to a verified result over days and many sessions: a human-approved contract of checkable criteria, one bounded multi-agent step per wake-up, a separate skeptical judge for every verdict, and a record folder in the repo that any waker (launchd, cron, Paseo, Temporal) drives.",
+      "version": "1.0.0",
       "author": {
         "name": "aiocean"
       }

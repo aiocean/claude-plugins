@@ -49,7 +49,7 @@ args = {
 }
 ```
 
-Pick the tier from the user's signal (see `aio-workflow-creator` §0):
+Pick the tier from the user's signal:
 `lean` for a quick spot-check, `standard` by default, `maximal` for "thorough / audit / spare no cost."
 For a trivial one-file diff, skip the workflow entirely and use a single reviewer agent — the
 multi-agent machinery is dead weight on a change with one obvious answer.
@@ -258,4 +258,4 @@ return {
   Raise the dry target if you want more insistence on the long tail.
 
 The mechanics behind every rule above (pure-literal `meta`, barrier vs pipeline, cache-safe resume,
-the budget guard) live in the `aio-workflow-creator` skill's `reference.md`.
+the budget guard) are documented in Claude Code's built-in `workflow-authoring` skill.
